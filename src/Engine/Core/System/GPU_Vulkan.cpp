@@ -1,6 +1,7 @@
 #include <Engine/EngineDefines.h>
 #if GPU_BACKEND == GPU_VULKAN
 
+#include <complex>
 #include <memory>
 
 #include "GPU.h"
@@ -62,6 +63,19 @@ struct QueueFamily
     wtl::vector<VkQueue> queues;
 };
 
+enum class BufferType
+{
+    Uniform,
+    Storage
+};
+
+enum class ImageBufferType
+{
+    Storage,
+    Sampled,
+    Input
+};
+
 
 // --------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------------ [GPU API VARIABLES] -----------------------------------------------
@@ -103,20 +117,6 @@ bool ParseVkResult(VkResult result)
     return false;
 }
 
-void SetupAllocator()
-{
-    if constexpr (!GPUSettingsVulkan::useWAllocator)
-        return;
-
-    allocatorInternal.pfnAllocation = VulkanAllocate;
-    allocatorInternal.pfnReallocation = VulkanReallocate;
-    allocatorInternal.pfnFree = VulkanFree;
-    allocatorInternal.pfnInternalAllocation = VulkanInternalAllocation;
-    allocatorInternal.pfnInternalFree = VulkanInternalFree;
-
-    allocator = &allocatorInternal;
-}
-
 VkBool32 ValidationCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes,
     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void*)
 {
@@ -148,6 +148,22 @@ VkBool32 ValidationCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeveri
 
 
     return VK_FALSE;
+}
+
+// --------------------------------------------------- [API SETUP] ----------------------------------------------------
+
+void SetupAllocator()
+{
+    if constexpr (!GPUSettingsVulkan::useWAllocator)
+        return;
+
+    allocatorInternal.pfnAllocation = VulkanAllocate;
+    allocatorInternal.pfnReallocation = VulkanReallocate;
+    allocatorInternal.pfnFree = VulkanFree;
+    allocatorInternal.pfnInternalAllocation = VulkanInternalAllocation;
+    allocatorInternal.pfnInternalFree = VulkanInternalFree;
+
+    allocator = &allocatorInternal;
 }
 
 bool SetupValidation()
@@ -381,6 +397,7 @@ bool SetupSwapchain()
 
     VkFenceCreateInfo fenceInfo{};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
     vkCreateFence(gpuDevice, &fenceInfo, allocator, &endOfFrameFence);
 
     uint32 swapchainImageCount;
@@ -389,6 +406,173 @@ bool SetupSwapchain()
     vkGetSwapchainImagesKHR(gpuDevice, swapchain, &swapchainImageCount, swapchainImages.data());
 
     return ParseVkResult(res);
+}
+
+// ------------------------------------------------- [MEM FUNCTIONS] --------------------------------------------------
+
+// This function does not always allocate the exact amount of video memory as passed in, as Vulkan
+// imposes memory size requirements. The memory size may at any time be bigger than the value passed,
+// but never smaller.
+VkDeviceMemory AllocateVideoMemory(const uint64 minSize, VkBuffer buffer)
+{
+    VkMemoryRequirements req;
+    vkGetBufferMemoryRequirements(gpuDevice, buffer, &req);
+
+    uint64 size = minSize;
+    if (minSize < req.size)
+        size = req.size;
+
+    VkDeviceMemory memory;
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = size;
+    allocInfo.memoryTypeIndex = 0;
+    auto memRes = vkAllocateMemory(gpuDevice, &allocInfo, allocator, &memory);
+
+    if (!ParseVkResult(memRes))
+    {
+        WEngine::WLog::SetConsoleWarning();
+        WEngine::WLog::ConsoleLog("Unable to allocate memory buffer on GPU!");
+        return VK_NULL_HANDLE;
+    }
+    return memory;
+}
+VkDeviceMemory AllocateVideoMemory(const uint64 minSize, VkImage image)
+{
+    VkMemoryRequirements req;
+    vkGetImageMemoryRequirements(gpuDevice, image, &req);
+
+    uint64 size = minSize;
+    if (minSize < req.size)
+        size = req.size;
+
+    VkDeviceMemory memory;
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = size;
+    allocInfo.memoryTypeIndex = 0;
+    auto memRes = vkAllocateMemory(gpuDevice, &allocInfo, allocator, &memory);
+
+    if (!ParseVkResult(memRes))
+    {
+        WEngine::WLog::SetConsoleWarning();
+        WEngine::WLog::ConsoleLog("Unable to allocate memory buffer on GPU!");
+        return VK_NULL_HANDLE;
+    }
+    return memory;
+}
+
+VkBuffer CreateBuffer(const uint64 size, BufferType bufferType)
+{
+    VkBuffer buffer;
+
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = size;
+    switch (bufferType)
+    {
+        case BufferType::Uniform:
+            bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+            break;
+        case BufferType::Storage:
+            bufferInfo.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+            break;
+    }
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    auto bufRes = vkCreateBuffer(gpuDevice, &bufferInfo, allocator, &buffer);
+
+    if (!ParseVkResult(bufRes))
+    {
+        WEngine::WLog::SetConsoleWarning();
+        WEngine::WLog::ConsoleLog("Unable to create buffer on GPU!");
+        return VK_NULL_HANDLE;
+    }
+
+    return buffer;
+}
+
+VkImage CreateImage(ImageBufferType imageType, WEngine::Vector2 imageSize)
+{
+    VkImage image;
+
+    VkImageCreateInfo imageInfo{};
+    imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    imageInfo.imageType = VK_IMAGE_TYPE_2D; // what kinda question is that???
+    imageInfo.extent = { (uint32)imageSize.x, (uint32)imageSize.y, 1 };
+    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.mipLevels = 1;
+    imageInfo.arrayLayers = 1;
+    imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+    switch (imageType)
+    {
+        case ImageBufferType::Storage:
+            imageInfo.usage = VK_IMAGE_USAGE_STORAGE_BIT;
+            imageInfo.format = VK_FORMAT_R8G8B8A8_UINT; // and he decided it all to be uint from now on!
+            break;
+        case ImageBufferType::Sampled:
+            imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
+            imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+            break;
+        case ImageBufferType::Input:
+            imageInfo.usage = VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+            imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+            break;
+    }
+
+    auto res = vkCreateImage(gpuDevice, &imageInfo, allocator, &image);
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleWarning();
+        WEngine::WLog::ConsoleLog("Unable to create image buffer!");
+        return VK_NULL_HANDLE;
+    }
+
+    return image;
+}
+
+VkImageView CreateImageView(VkImage image, ImageBufferType imageType)
+{
+    VkImageView imageView;
+
+    VkImageViewCreateInfo viewInfo{};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = image;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    if (imageType == ImageBufferType::Storage)
+        viewInfo.format = VK_FORMAT_R8G8B8A8_UINT;
+    else
+        viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+
+
+    viewInfo.components.r = VK_COMPONENT_SWIZZLE_R;
+    viewInfo.components.g = VK_COMPONENT_SWIZZLE_G;
+    viewInfo.components.b = VK_COMPONENT_SWIZZLE_B;
+    viewInfo.components.a = VK_COMPONENT_SWIZZLE_A;
+
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+
+    auto res = vkCreateImageView(gpuDevice, &viewInfo, allocator, &imageView);
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleWarning();
+        WEngine::WLog::ConsoleLog("Unable to create image view!");
+        return VK_NULL_HANDLE;
+    }
+
+    return imageView;
+}
+
+// ------------------------------------------------ [HELPER FUNCTIONS] ------------------------------------------------
+
+uint64 GetSizeOfImageInBytes(WEngine::Vector2 imageSize, uint8 channelCount)
+{
+    return (uint64)imageSize.x * (uint64)imageSize.y * channelCount;
 }
 
 // --------------------------------------------------------------------------------------------------------------------
@@ -422,6 +606,15 @@ bool GPU::SETTING_InitGPUApi(SDL_Window *window)
     if (!SetupSwapchain())
         return false;
 
+    //auto buffer = CreateBuffer(64, BufferType::Uniform);
+    //auto memory = AllocateVideoMemory(64, buffer);
+    //vkBindBufferMemory(gpuDevice, buffer, memory, 0);
+
+    auto image = CreateImage(ImageBufferType::Storage, {1024, 1024});
+    auto memory = AllocateVideoMemory(GetSizeOfImageInBytes({1024, 1024}, 4), image);
+    vkBindImageMemory(gpuDevice, image, memory, 0);
+    auto imageView = CreateImageView(image, ImageBufferType::Storage);
+
     return true;
 }
 
@@ -434,6 +627,7 @@ void GPU::SETTING_ConfigureImGui(SDL_Window *window)
     initInfo.PhysicalDevice = gpuPhysicalDevice;
     initInfo.Device = gpuDevice;
     initInfo.Allocator = allocator;
+    initInfo.Queue = primaryDrawQueue;
 
     //ImGui_ImplVulkan_Init(&initInfo);
 }
@@ -515,6 +709,9 @@ WEngine::Nullable<WEngine::Vector2> GPU::GetTextureSize(WEngine::Texture texture
 
 void GPU::DRAWCALL_ClearScreen(WEngine::Color clearColor)
 {
+    WEngine::WLog::ConsoleLog("New frame, yay!");
+    vkWaitForFences(gpuDevice, 1, &endOfFrameFence, VK_TRUE, UINT64_MAX);
+    vkResetFences(gpuDevice, 1, &endOfFrameFence);
     WEngine::WLog::ConsoleLog("About to get some new images!");
     vkAcquireNextImageKHR(gpuDevice, swapchain, max_uint64, imageAvailableSem, VK_NULL_HANDLE, &swapchainCurrentImage);
     WEngine::WLog::ConsoleLog(std::format("Got some: {}!", swapchainCurrentImage));
@@ -556,9 +753,7 @@ void GPU::DRAWCALL_SwapBuffers(SDL_Window *window)
 
     vkQueueSubmit(primaryDrawQueue, 1, &submitInfo, endOfFrameFence);
 
-    vkWaitForFences(gpuDevice, 1, &endOfFrameFence, VK_TRUE, UINT64_MAX);
-    vkResetFences(gpuDevice, 1, &endOfFrameFence);
-
+    VkResult renderRes;
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
@@ -566,9 +761,12 @@ void GPU::DRAWCALL_SwapBuffers(SDL_Window *window)
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = &swapchain;
     presentInfo.pImageIndices = &swapchainCurrentImage;
-    presentInfo.pResults = nullptr;
+    presentInfo.pResults = &renderRes;
 
     vkQueuePresentKHR(primaryDrawQueue, &presentInfo);
+
+    if (!ParseVkResult(renderRes))
+        WEngine::WLog::ConsoleLog("Something went wrong during rendering!");
 }
 
 uint64 GPU::GetVramUsage()
