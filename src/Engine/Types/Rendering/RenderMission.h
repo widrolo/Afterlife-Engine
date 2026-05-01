@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Engine/Types/Rendering/Sprite.h>
-#include <Engine/Types/Rendering/Atlas.h>
 #include <Engine/Types/Rendering/Color.h>
 #include <Engine/Math/Shapes.h>
 #include <Engine/Types/CommonTypes.h>

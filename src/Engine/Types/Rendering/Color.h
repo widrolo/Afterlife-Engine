@@ -53,4 +53,15 @@ namespace WEngine
 		const static Color Green;
 		const static Color Blue;
 	};
+
+	struct Colorf
+	{
+		Colorf(Color color) :
+			red((float32)color.red / 255.0f),
+			green((float32)color.green / 255.0f),
+			blue((float32)color.blue / 255.0f),
+			alpha((float32)color.alpha / 255.0f) {}
+
+		float32 red, green, blue, alpha;
+	};
 }

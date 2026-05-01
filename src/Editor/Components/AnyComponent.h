@@ -7,8 +7,7 @@
 
 #include "Engine/Core/Physics/SimulatableObject.h"
 #include "Engine/Types/Nullable.h"
-#include "Engine/Types/Rendering/Atlas.h"
-#include "Engine/Types/Rendering/Sprite.h"
+
 
 namespace WEditor
 {
@@ -37,16 +36,11 @@ namespace WEditor
 
     private:
         bool m_isInitializedDraw = false;
-        WEngine::Sprite sprite;
-        WEngine::Atlas atlas;
         WEngine::SimulatableObject simulatableObject;
 
         void TryDrawGameGraphics();
         void TryDrawDebugGraphics();
         void DrawOnSelected();
-
-        void GFX_Game_DrawSprite();
-        void GFX_Game_DrawAnim();
 
         void GFX_Dbg_CircleArea();
         void GFX_Dbg_RectArea();

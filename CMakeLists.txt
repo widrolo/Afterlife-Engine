@@ -84,10 +84,7 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Core/System/OS.h
         src/Engine/Stores/Steam/SteamStore.cpp
         src/Engine/Stores/Steam/SteamStore.h
-        src/Engine/Types/Rendering/Animation.h
         src/Engine/Types/AssetMission.h
-        src/Engine/Types/Rendering/Atlas.cpp
-        src/Engine/Types/Rendering/Atlas.h
         src/Engine/Types/Audio.h
         src/Engine/Types/Rendering/Color.h
         src/Engine/Types/CommonTypes.h
@@ -100,8 +97,6 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/Rendering/GPU/Shader.h
         src/Engine/Types/SpawnArgs.cpp
         src/Engine/Types/SpawnArgs.h
-        src/Engine/Types/Rendering/Sprite.cpp
-        src/Engine/Types/Rendering/Sprite.h
         src/Engine/Math/Transform.cpp
         src/Engine/Math/Transform.h
         src/Engine/Types/Version.cpp
@@ -260,11 +255,8 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/DebugFlags.h
         src/Engine/EngineWidgets/DebugFlagsWidget.cpp
         src/Engine/EngineWidgets/DebugFlagsWidget.h
-        src/Editor/EditorWidgets/Tools/AnimationEditorWidget.cpp
-        src/Editor/EditorWidgets/Tools/AnimationEditorWidget.h
         src/Editor/MenubarItems/Tools/Menubar_AnimEditor.cpp
         src/Editor/MenubarItems/Tools/Menubar_AnimEditor.h
-        src/Engine/Types/Rendering/Animation.cpp
         src/Engine/Types/Rendering/PostProcessShader.h
         src/Engine/imgui/crude_json.cpp
         src/Engine/imgui/imgui_bezier_math.h

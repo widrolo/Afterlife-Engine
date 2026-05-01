@@ -9,8 +9,6 @@
 #include <string>
 #include <Engine/Types/CommonTypes.h>
 
-#include "Engine/Types/Rendering/Sprite.h"
-
 namespace WEngine
 {
 	/**
@@ -45,12 +43,7 @@ namespace WEngine
 
 	private:
 
-		// Sprite Stuff
-		Sprite GetSprite(const std::string& name);
-		Texture LoadSprite(const std::string& name);
-
 		AudioClip* LoadAudioWAV(const std::string& name);
-
 		std::string LoadTextFile(const std::string& path);
 	};
 };

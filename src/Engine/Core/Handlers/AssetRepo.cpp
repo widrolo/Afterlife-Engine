@@ -39,12 +39,6 @@ AssetRepo::AssetRepo()
 }
 
 template<>
-void AssetRepo::GetAsset<SpriteAssetMission>(SpriteAssetMission& mission) 
-{
-	mission.sprite = GetSprite(mission.name);
-}
-
-template<>
 void AssetRepo::GetAsset<ShaderAssetMission>(ShaderAssetMission& mission) 
 {
 	mission.vertexShaderSource = LoadTextFile(GetDataPath() + EngineSettings::shaderPath + mission.name + "Vertex.glsl");
@@ -101,52 +95,6 @@ void AssetRepo::GetAsset<UISheetAssetMission>(UISheetAssetMission& mission)
 		WLog::SetConsoleError();
 		WLog::ConsoleLog(std::format("Error while reading UI Sheet document, Line {}:\n{}", mission.document.ErrorLineNum(), mission.document.ErrorStr()));
 	}
-}
-
-Sprite AssetRepo::GetSprite(const std::string &name)
-{
-	auto textureNullable = GPU::GetTexture(name);
-	if (textureNullable.HasValue())
-	{
-		Texture texture = textureNullable.GetValue();
-		auto textureSize = GPU::GetTextureSize(texture);
-
-		Vector2 size = { PixelToMetre(textureSize.GetValue().x), PixelToMetre(textureSize.GetValue().y) };
-		Sprite sprite = Sprite(texture, size);
-		return sprite;
-	}
-
-	Texture texture = LoadSprite(name);
-	auto textureSize = GPU::GetTextureSize(texture);
-
-	Vector2 size = { PixelToMetre(textureSize.GetValue().x), PixelToMetre(textureSize.GetValue().y) };
-	Sprite sprite = Sprite(texture, size);
-	return sprite;
-}
-Texture AssetRepo::LoadSprite(const std::string &name)
-{
-	const std::string path = m_dataPath + EngineSettings::spritePath + name + ".png";
-	int width, height, channels;
-	uint8* data = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-	if (!data)
-	{
-		WLog::SetConsoleError();
-		WLog::ConsoleLog(std::format("Sprite {} could not be found in:\n\t{}", name, path));
-		return 0;
-	}
-	TextureInfo textureInfo;
-	textureInfo.name = name;
-	textureInfo.width = width;
-	textureInfo.height = height;
-	textureInfo.data = data;
-
-	auto textureNullable = GPU::ALLOC_CreateTexture(textureInfo);
-	Texture texture = 0; // whatever
-	if (textureNullable.HasValue())
-		texture = textureNullable.GetValue();
-
-	stbi_image_free(data);
-	return texture;
 }
 
 AudioClip* AssetRepo::LoadAudioWAV(const std::string& name)

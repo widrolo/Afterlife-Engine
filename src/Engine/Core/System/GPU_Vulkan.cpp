@@ -92,10 +92,14 @@ VkDevice gpuDevice = VK_NULL_HANDLE;
 VkSurfaceKHR screen = VK_NULL_HANDLE;
 VkSwapchainKHR swapchain = VK_NULL_HANDLE;
 wtl::vector<VkImage> swapchainImages;
+wtl::vector<VkImageView> swapchainImageViews;
+wtl::vector<VkFramebuffer> swapchainFramebuffers;
 uint32 swapchainCurrentImage = 0;
-VkSemaphore imageAvailableSem = VK_NULL_HANDLE;
-VkSemaphore renderFinishedSem = VK_NULL_HANDLE;
-VkFence endOfFrameFence = VK_NULL_HANDLE;
+
+wtl::vector<VkSemaphore> imageAvailableSems;
+wtl::vector<VkSemaphore> renderFinishedSems;
+wtl::vector<VkFence> endOfFrameFences;
+uint32 currentFrame = 0;
 
 uint32 queueFamilyCount = 0;
 wtl::vector<QueueFamily> queueFamilies;
@@ -105,7 +109,8 @@ VkQueue primaryDrawQueue = VK_NULL_HANDLE;
 // These are just for prototyping
 
 VkCommandPool testPool;
-VkCommandBuffer testBuf;
+wtl::vector<VkCommandBuffer> testBufs;
+VkRenderPass testPass;
 
 // --------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------------ [GPU API HELPERS] -------------------------------------------------
@@ -367,6 +372,40 @@ bool SetupGraphicsDevice()
     return true;
 }
 
+void SetupSwapchainFramebuffers()
+{
+    swapchainImageViews.resize(swapchainImages.size());
+    swapchainFramebuffers.resize(swapchainImages.size());
+
+
+    for (int i = 0; i < swapchainImages.size(); i++)
+    {
+        VkImageViewCreateInfo viewInfo{};
+        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        viewInfo.image = swapchainImages[i];
+        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.format = VK_FORMAT_B8G8R8A8_SRGB;
+        viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        viewInfo.subresourceRange.baseMipLevel = 0;
+        viewInfo.subresourceRange.levelCount = 1;
+        viewInfo.subresourceRange.baseArrayLayer = 0;
+        viewInfo.subresourceRange.layerCount = 1;
+
+        vkCreateImageView(gpuDevice, &viewInfo, allocator, &swapchainImageViews[i]);
+
+        VkFramebufferCreateInfo fbInfo{};
+        fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        fbInfo.renderPass = testPass;
+        fbInfo.attachmentCount = 1;
+        fbInfo.pAttachments = &swapchainImageViews[i];
+        fbInfo.width = EngineSettings::resolution.x;
+        fbInfo.height = EngineSettings::resolution.y;
+        fbInfo.layers = 1;
+
+        vkCreateFramebuffer(gpuDevice, &fbInfo, allocator, &swapchainFramebuffers[i]);
+    }
+}
+
 bool SetupSwapchain()
 {
     VkSurfaceCapabilitiesKHR capabilities{};
@@ -396,20 +435,29 @@ bool SetupSwapchain()
 
     auto res = vkCreateSwapchainKHR(gpuDevice, &info, allocator, &swapchain);
 
-    VkSemaphoreCreateInfo semInfo{};
-    semInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    vkCreateSemaphore(gpuDevice, &semInfo, allocator, &imageAvailableSem);
-    vkCreateSemaphore(gpuDevice, &semInfo, allocator, &renderFinishedSem);
-
-    VkFenceCreateInfo fenceInfo{};
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-    vkCreateFence(gpuDevice, &fenceInfo, allocator, &endOfFrameFence);
-
     uint32 swapchainImageCount;
     vkGetSwapchainImagesKHR(gpuDevice, swapchain, &swapchainImageCount, nullptr);
     swapchainImages.resize(swapchainImageCount);
     vkGetSwapchainImagesKHR(gpuDevice, swapchain, &swapchainImageCount, swapchainImages.data());
+
+    imageAvailableSems.resize(swapchainImageCount);
+    renderFinishedSems.resize(swapchainImageCount);
+    endOfFrameFences.resize(swapchainImageCount);
+
+
+    VkSemaphoreCreateInfo semInfo{};
+    semInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    for (uint32 i = 0; i < swapchainImageCount; i++)
+        vkCreateSemaphore(gpuDevice, &semInfo, allocator, &imageAvailableSems[i]);
+    for (uint32 i = 0; i < swapchainImageCount; i++)
+        vkCreateSemaphore(gpuDevice, &semInfo, allocator, &renderFinishedSems[i]);
+
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    for (uint32 i = 0; i < swapchainImageCount; i++)
+        vkCreateFence(gpuDevice, &fenceInfo, allocator, &endOfFrameFences[i]);
+
 
     return ParseVkResult(res);
 }
@@ -581,6 +629,7 @@ VkCommandPool CreateCommandPool()
     VkCommandPoolCreateInfo commandPoolInfo{};
     commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     commandPoolInfo.queueFamilyIndex = primaryDrawQueueFamilyIndex;
+    commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
     auto res = vkCreateCommandPool(gpuDevice, &commandPoolInfo, allocator, &commandPool);
 
@@ -615,6 +664,55 @@ VkCommandBuffer CreateCommandBuffer(VkCommandPool cmdPool)
     return cmdBuff;
 }
 
+VkRenderPass CreateBasicRenderPass()
+{
+    VkRenderPass renderPass;
+
+    VkAttachmentDescription colorAttachment{};
+    colorAttachment.format = VK_FORMAT_B8G8R8A8_SRGB;
+    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    colorAttachment.loadOp  = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    VkAttachmentReference colorAttachmentRef{};
+    colorAttachmentRef.attachment = 0;
+    colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkSubpassDescription subpass{};
+    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &colorAttachmentRef;
+
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.srcAccessMask = 0;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    VkRenderPassCreateInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.attachmentCount = 1;
+    renderPassInfo.pAttachments = &colorAttachment;
+    renderPassInfo.subpassCount = 1;
+    renderPassInfo.pSubpasses = &subpass;
+    renderPassInfo.dependencyCount = 1;
+    renderPassInfo.pDependencies = &dependency;
+    auto res = vkCreateRenderPass(gpuDevice, &renderPassInfo, allocator, &renderPass);
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleWarning();
+        WEngine::WLog::ConsoleLog("Unable to create command buffer!");
+        return VK_NULL_HANDLE;
+    }
+    return renderPass;
+}
+
 // ------------------------------------------------ [HELPER FUNCTIONS] ------------------------------------------------
 
 uint64 GetSizeOfImageInBytes(WEngine::Vector2 imageSize, uint8 channelCount)
@@ -625,11 +723,6 @@ uint64 GetSizeOfImageInBytes(WEngine::Vector2 imageSize, uint8 channelCount)
 // --------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------ [GPU INTERFACE IMPLEMENTATION] ------------------------------------------
 // --------------------------------------------------------------------------------------------------------------------
-
-void GPU::SETTING_ConfigureSDL()
-{
-
-}
 
 bool GPU::SETTING_InitGPUApi(SDL_Window *window)
 {
@@ -653,8 +746,13 @@ bool GPU::SETTING_InitGPUApi(SDL_Window *window)
     if (!SetupSwapchain())
         return false;
 
+    testBufs.resize(swapchainImages.size());
     testPool = CreateCommandPool();
-    testBuf = CreateCommandBuffer(testPool);
+    for (uint32 i = 0; i < swapchainImages.size(); i++)
+        testBufs[i] = CreateCommandBuffer(testPool);
+    testPass = CreateBasicRenderPass();
+
+    SetupSwapchainFramebuffers();
 
     return true;
 }
@@ -673,103 +771,44 @@ void GPU::SETTING_ConfigureImGui(SDL_Window *window)
     //ImGui_ImplVulkan_Init(&initInfo);
 }
 
-void GPU::SETTING_SetViewport(WEngine::Vector2 topLeft, WEngine::Vector2 bottomRight)
-{
 
+void GPU::SETTING_BeginNewFrame(WEngine::Color clearColor)
+{
+    vkWaitForFences(gpuDevice, 1, &endOfFrameFences[currentFrame], VK_TRUE, UINT64_MAX);
+    vkResetFences(gpuDevice, 1, &endOfFrameFences[currentFrame]);
+    vkAcquireNextImageKHR(gpuDevice, swapchain, max_uint64, imageAvailableSems[currentFrame], VK_NULL_HANDLE, &swapchainCurrentImage);
+
+    // Testing cmd buffer
+
+    vkResetCommandBuffer(testBufs[currentFrame], 0);
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    vkBeginCommandBuffer(testBufs[currentFrame], &beginInfo);
+
+    VkClearValue clearCol{};
+    WEngine::Colorf col(clearColor);
+    clearCol = { col.red, col.green, col.blue, col.alpha };
+
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = testPass;
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clearCol;
+    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.extent = {(uint32)EngineSettings::resolution.x, (uint32)EngineSettings::resolution.y};
+    renderPassInfo.framebuffer = swapchainFramebuffers[swapchainCurrentImage];
+
+    vkCmdBeginRenderPass(testBufs[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    vkCmdEndRenderPass(testBufs[currentFrame]);
+    vkEndCommandBuffer(testBufs[currentFrame]);
 }
 
-void GPU::SETTING_ToggleBlending(bool enabled)
-{
-
-}
-
-void GPU::SETTING_ToggleDepthTest(bool enabled)
-{
-
-}
-
-void GPU::SETTING_ToggleWireFrame(bool enabled)
-{
-
-}
-
-void GPU::SETTING_BeginNewFrame()
-{
-    WEngine::WLog::ConsoleLog("New frame, yay!");
-    vkWaitForFences(gpuDevice, 1, &endOfFrameFence, VK_TRUE, UINT64_MAX);
-    vkResetFences(gpuDevice, 1, &endOfFrameFence);
-    WEngine::WLog::ConsoleLog("About to get some new images!");
-    vkAcquireNextImageKHR(gpuDevice, swapchain, max_uint64, imageAvailableSem, VK_NULL_HANDLE, &swapchainCurrentImage);
-    WEngine::WLog::ConsoleLog(std::format("Got some: {}!", swapchainCurrentImage));
-}
-
-WEngine::Nullable<WEngine::Shader> GPU::ALLOC_CompileShader(const std::string &name)
-{
-    return WEngine::Nullable<WEngine::Shader>();
-}
-
-WEngine::Nullable<WEngine::Shader> GPU::GetShader(const std::string &name)
-{
-    return WEngine::Nullable<WEngine::Shader>();
-}
-
-WEngine::Nullable<WEngine::Framebuffer> GPU::ALLOC_CreateFramebuffer(const WEngine::Vector2 &resolution)
-{
-    return WEngine::Nullable<WEngine::Framebuffer>();
-}
-
-void GPU::SETTING_SelectFramebuffer(WEngine::Framebuffer framebuffer)
-{
-
-}
-
-void GPU::SETTING_SelectFramebufferScreen()
-{
-
-}
-
-WEngine::Nullable<WEngine::Texture> GPU::GetFramebufferTexture(WEngine::Framebuffer framebuffer)
-{
-    return WEngine::Nullable<WEngine::Texture>();
-}
-
-WEngine::Nullable<WEngine::Model> GPU::ALLOC_CreateModel(const WEngine::ModelInfo &model)
-{
-    return WEngine::Nullable<WEngine::Model>();
-}
-
-WEngine::Nullable<WEngine::Line> GPU::ALLOC_CreateLine()
-{
-    return WEngine::Nullable<WEngine::Line>();
-}
-
-WEngine::Nullable<WEngine::Texture> GPU::ALLOC_CreateTexture(const WEngine::TextureInfo &textureData)
-{
-    return WEngine::Nullable<WEngine::Texture>();
-}
-
-WEngine::Nullable<WEngine::Texture> GPU::GetTexture(const std::string &name)
-{
-    return WEngine::Nullable<WEngine::Texture>();
-}
-
-WEngine::Nullable<WEngine::Vector2> GPU::GetTextureSize(WEngine::Texture texture)
-{
-    return WEngine::Nullable<WEngine::Vector2>();
-}
-
-void GPU::DRAWCALL_ClearScreen(WEngine::Color clearColor)
-{
-
-}
 
 void GPU::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Shader shader, const WEngine::ShaderSettings &settings)
-{
-
-}
-
-void GPU::DRAWCALL_DrawLine(WEngine::Line line, WEngine::Shader shader, const WEngine::ShaderSettings &settings,
-    const WEngine::LineInfo &newModel)
 {
 
 }
@@ -792,25 +831,28 @@ void GPU::DRAWCALL_SwapBuffers(SDL_Window *window)
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &imageAvailableSem;
+    submitInfo.pWaitSemaphores = &imageAvailableSems[currentFrame];
     submitInfo.pWaitDstStageMask = &waitStage;
     submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &renderFinishedSem;
-    submitInfo.commandBufferCount = 0;
+    submitInfo.pSignalSemaphores = &renderFinishedSems[currentFrame];
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &testBufs[currentFrame];
 
-    vkQueueSubmit(primaryDrawQueue, 1, &submitInfo, endOfFrameFence);
+    vkQueueSubmit(primaryDrawQueue, 1, &submitInfo, endOfFrameFences[currentFrame]);
 
     VkResult renderRes;
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &renderFinishedSem;
+    presentInfo.pWaitSemaphores = &renderFinishedSems[currentFrame];
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = &swapchain;
     presentInfo.pImageIndices = &swapchainCurrentImage;
     presentInfo.pResults = &renderRes;
 
     vkQueuePresentKHR(primaryDrawQueue, &presentInfo);
+
+    currentFrame = (currentFrame + 1) % swapchainImages.size();
 
     if (!ParseVkResult(renderRes))
         WEngine::WLog::ConsoleLog("Something went wrong during rendering!");

@@ -38,7 +38,7 @@ RenderHandler::RenderHandler()
 void RenderHandler::BeginFrame()
 {
 	GPU::DRAWCALL_ResetImGui();
-	GPU::SETTING_BeginNewFrame();
+	GPU::SETTING_BeginNewFrame(Color::White);
 }
 
 void RenderHandler::RenderFrame()
@@ -57,8 +57,6 @@ void RenderHandler::InitSDL()
 		WLog::ConsoleLog(std::format("SDL Initialisation failed: {}", SDL_GetError()));
 		return;
 	}
-
-	GPU::SETTING_ConfigureSDL();
 
 	SDL_DisplayID display = SDL_GetPrimaryDisplay();
 	m_displayMode = const_cast<SDL_DisplayMode*>(SDL_GetCurrentDisplayMode(display));

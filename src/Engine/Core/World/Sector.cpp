@@ -206,18 +206,6 @@ void Sector::LoadArgsFromFile(const std::string& sectorName)
 
 	CoreSystems::GetAssetRepo()->GetAsset(mission);
 
-	if (mission.root["preload_hints_sprites"])
-	{
-		const YAML::Node preloadNode = mission.root["preload_hints_sprites"];
-
-		SpriteAssetMission spriteMission;
-
-		for (const auto item : preloadNode) {
-			spriteMission.name = item.as<std::string>();
-			CoreSystems::GetAssetRepo()->GetAsset(spriteMission);
-		}
-	}
-
 	wtl::vector<SpawnArgs> args;
 	if (mission.root["entities"])
 	{

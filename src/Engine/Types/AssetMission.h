@@ -7,8 +7,6 @@
 #include <tinyxml2/tinyxml2.h>
 #include <Engine/Types/Audio.h>
 
-#include "Rendering/Sprite.h"
-
 namespace WEngine
 {
 	/**
@@ -17,14 +15,6 @@ namespace WEngine
 	struct AssetMissionBase
 	{
 		std::string name;
-	};
-
-	/**
-	 * Represents a mission to retrieve or load a sprite asset.
-	 */
-	struct SpriteAssetMission : public AssetMissionBase
-	{
-		Sprite sprite;
 	};
 
 	/**

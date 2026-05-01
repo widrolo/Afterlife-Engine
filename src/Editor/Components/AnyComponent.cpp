@@ -13,8 +13,6 @@
 #include "Engine/Math/Shapes/Shapes2D.h"
 #include "Engine/Types/AssetMission.h"
 #include "Engine/Types/CoreSystems.h"
-#include "Engine/Types/Rendering/Atlas.h"
-#include "Engine/Types/Rendering/Sprite.h"
 #include "Engine/Util/Log.h"
 
 namespace WEngine {
@@ -163,12 +161,6 @@ void AnyComponent::TryDrawGameGraphics()
 {
     switch (m_ID)
     {
-        case 2: // SpriteRendererComponent
-            GFX_Game_DrawSprite();
-            break;
-        case 8: // AnimationRendererComponent
-            GFX_Game_DrawAnim();
-            break;
         default: break;
     }
 }
@@ -190,143 +182,6 @@ void AnyComponent::TryDrawDebugGraphics()
 void AnyComponent::DrawOnSelected()
 {
 
-}
-
-void AnyComponent::GFX_Game_DrawSprite()
-{
-    std::string spriteName;
-    float32 scale;
-    bool isAtlas;
-    int32 atlasFrame;
-
-    auto spriteNameNullable = FindDataByName("spriteName");
-    auto scaleNullable = FindDataByName("scale");
-    auto isAtlasNullable = FindDataByName("isAtlas");
-    auto atlasFrameNullable = FindDataByName("atlasFrame");
-
-    if (spriteNameNullable.HasValue())
-        spriteName = std::get<std::string>(spriteNameNullable.GetValue());
-    else
-        return; // No sprite thats why
-
-    if (scaleNullable.HasValue())
-        scale = std::get<float>(scaleNullable.GetValue());
-    else
-        scale = 1.0f;
-
-    if (isAtlasNullable.HasValue())
-        isAtlas = std::get<bool>(isAtlasNullable.GetValue());
-    else
-        isAtlas = false;
-
-    if (atlasFrameNullable.HasValue())
-        atlasFrame = std::get<int>(atlasFrameNullable.GetValue());
-    else
-        atlasFrame = 0;
-
-    WEngine::SpriteAssetMission mission{};
-    mission.name = spriteName;
-
-    if (!isAtlas)
-    {
-        if (!m_isInitializedDraw)
-        {
-            WEngine::CoreSystems::GetAssetRepo()->GetAsset(mission);
-            sprite = mission.sprite;
-            m_isInitializedDraw = true;
-        }
-        WEngine::Rectangle rect{};
-        rect.p1 = entity->transform.position;
-        rect.p2 = sprite.GetSize() * scale;
-
-        WEngine::RenderMission mission{};
-        mission.layer = (uint8) WEngine::RenderLayer::Default;
-        mission.quadBounds = rect;
-        mission.shaderSettings.push_back({WEngine::ShaderSettingType::Color, WEngine::Color::White, "u_Color"});
-        mission.shaderSettings.push_back({WEngine::ShaderSettingType::Vec2, WEngine::Vector2(-1, -1), "u_flip"});
-        mission.shaderSettings.push_back({WEngine::ShaderSettingType::Texture, sprite.GetTexture(), "u_texture"});
-
-        //WEngine::CoreSystems::GetRenderHandler()->AddToRenderQueue(mission);
-    }
-    else
-    {
-        if (!m_isInitializedDraw)
-        {
-            WEngine::CoreSystems::GetAssetRepo()->GetAsset(mission);
-            atlas.LoadAtlas(mission.sprite, spriteName);
-            m_isInitializedDraw = true;
-        }
-        WEngine::Rectangle rect{};
-        rect.p1 = entity->transform.position;
-        rect.p2 = atlas.GetSizeSingle() * scale;
-
-        auto uvs = atlas.GetFrameUVCoords(atlasFrame);
-        WEngine::Vector4 uvCoords{uvs[0].x, uvs[0].y, uvs[1].x, uvs[1].y};
-
-        WEngine::RenderMission mission{};
-        mission.layer = (uint8)WEngine::RenderLayer::Default;
-        mission.shader = "atlas";
-        mission.quadBounds = rect;
-        mission.shaderSettings.push_back({WEngine::ShaderSettingType::Color, WEngine::Color::White, "u_Color"});
-        mission.shaderSettings.push_back({WEngine::ShaderSettingType::Vec2, WEngine::Vector2(-1, -1), "u_flip"});
-        mission.shaderSettings.push_back({WEngine::ShaderSettingType::Vec4, uvCoords, "u_AtlasUV"});
-        mission.shaderSettings.push_back({WEngine::ShaderSettingType::Texture, atlas.GetTexture(), "u_texture"});
-
-        //WEngine::CoreSystems::GetRenderHandler()->AddToRenderQueue(mission);
-    }
-}
-
-void AnyComponent::GFX_Game_DrawAnim()
-{
-    std::string spriteName;
-    float32 scale;
-    WEngine::Vector2 offset;
-    int32 atlasFrame = 1; // Sometimes, the zero sprite may be the missing one.
-
-    auto spriteNameNullable = FindDataByName("atlasName");
-    auto scaleNullable = FindDataByName("scale");
-    auto offsetNullable = FindDataByName("offset");
-
-    if (spriteNameNullable.HasValue())
-        spriteName = std::get<std::string>(spriteNameNullable.GetValue());
-    else
-        return; // No sprite thats why
-
-    if (scaleNullable.HasValue())
-        scale = std::get<float32>(scaleNullable.GetValue());
-    else
-        scale = 1.0f;
-
-    if (offsetNullable.HasValue())
-        offset = std::get<WEngine::Vector2>(offsetNullable.GetValue());
-    else
-        offset = WEngine::Vector2::Zero;
-
-    WEngine::SpriteAssetMission mission{};
-    mission.name = spriteName;
-    if (!m_isInitializedDraw)
-    {
-        WEngine::CoreSystems::GetAssetRepo()->GetAsset(mission);
-        atlas.LoadAtlas(mission.sprite, spriteName);
-        m_isInitializedDraw = true;
-    }
-    WEngine::Rectangle rect{};
-    rect.p1 = entity->transform.position + offset;
-    rect.p2 = atlas.GetSizeSingle() * scale;
-
-    auto uvs = atlas.GetFrameUVCoords(atlasFrame);
-    WEngine::Vector4 uvCoords{uvs[0].x, uvs[0].y, uvs[1].x, uvs[1].y};
-
-    WEngine::RenderMission animMission{};
-    animMission.layer = (uint8)WEngine::RenderLayer::Default;
-    animMission.shader = "atlas";
-    animMission.quadBounds = rect;
-    animMission.shaderSettings.push_back({WEngine::ShaderSettingType::Color, WEngine::Color::White, "u_Color"});
-    animMission.shaderSettings.push_back({WEngine::ShaderSettingType::Vec2, WEngine::Vector2(-1, -1), "u_flip"});
-    animMission.shaderSettings.push_back({WEngine::ShaderSettingType::Vec4, uvCoords, "u_AtlasUV"});
-    animMission.shaderSettings.push_back({WEngine::ShaderSettingType::Texture, atlas.GetTexture(), "u_texture"});
-
-    //WEngine::CoreSystems::GetRenderHandler()->AddToRenderQueue(animMission);
 }
 
 void AnyComponent::GFX_Dbg_CircleArea()
