@@ -56,15 +56,18 @@ RenderHandler::RenderHandler()
 void RenderHandler::BeginFrame()
 {
 	GPU::SETTING_BeginNewFrame();
-	GPU::DRAWCALL_ClearFrame(Color{2, 2, 2, 255});
+	GPU::DRAWCALL_ResetImGui();
+	GPU::DRAWCALL_ClearFrame(Color{30, 30, 30, 255});
 	GPU::SETTING_SetViewportSize(EngineSettings::resolution);
 }
 
 void RenderHandler::RenderFrame()
 {
+
 	ShaderSettings shaderSettings{};
 	GPU::DRAWCALL_DrawModel(testModel, 0, shaderSettings);
 
+	GPU::DRAWCALL_DrawImGui();
 	GPU::DRAWCALL_SwapBuffers(m_window);
 }
 

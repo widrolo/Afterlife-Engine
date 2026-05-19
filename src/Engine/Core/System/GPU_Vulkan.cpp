@@ -9,8 +9,9 @@
 #include <vulkan/vulkan.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
-#include "Engine/imgui/backends/imgui_impl_vulkan.h"
+#include "Engine/imgui/imgui.h"
 #include "Engine/imgui/backends/imgui_impl_sdl3.h"
+#include "Engine/imgui/backends/imgui_impl_vulkan.h"
 
 #include "GPUSettings.h"
 #include "Engine/Util/BitwiseMacros.h"
@@ -135,9 +136,10 @@ VkPipelineLayout pipelineLayout;
 // These are just for prototyping
 
 VkCommandPool testPool;
-wtl::vector<VkCommandBuffer> testBufs;
+wtl::vector<VkCommandBuffer> cmdBufs;
 VkRenderPass testPass;
 VkPipeline testPipeline;
+VkDescriptorPool descriptorPool;
 
 wtl::vector<Vulkan_Shader> loadedShaders;
 std::unordered_map<std::string, WEngine::Shader> loadedShadersHandles;
@@ -441,7 +443,7 @@ void SetupSwapchainFramebuffers()
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = swapchainImages[i];
         viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        viewInfo.format = VK_FORMAT_B8G8R8A8_SRGB;
+        viewInfo.format = VK_FORMAT_B8G8R8A8_UNORM;
         viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         viewInfo.subresourceRange.baseMipLevel = 0;
         viewInfo.subresourceRange.levelCount = 1;
@@ -479,7 +481,7 @@ bool SetupSwapchain()
     info.surface = screen;
     info.minImageCount = capabilities.minImageCount;
 
-    info.imageFormat = VK_FORMAT_B8G8R8A8_SRGB;
+    info.imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
     info.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
     info.imageExtent = capabilities.currentExtent;
     info.imageArrayLayers = 1;
@@ -528,6 +530,35 @@ bool SetupPipelineLayout()
     {
         WEngine::WLog::SetConsoleError();
         WEngine::WLog::ConsoleLog("Unable to create pipeline layout!");
+        return false;
+    }
+    return true;
+}
+
+bool SetupDescriptorPool()
+{
+    // So far im only using this for imgui, so please adjust when needed.
+
+    wtl::vector<VkDescriptorPoolSize> poolSizes =
+    {
+        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE},
+        { VK_DESCRIPTOR_TYPE_SAMPLER, IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE },
+    };
+    VkDescriptorPoolCreateInfo descInfo{};
+    descInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    descInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    descInfo.maxSets = 0;
+    for (VkDescriptorPoolSize& pool_size : poolSizes)
+        descInfo.maxSets += pool_size.descriptorCount;
+    descInfo.poolSizeCount = poolSizes.size();
+    descInfo.pPoolSizes = poolSizes.data();
+
+    auto res = vkCreateDescriptorPool(gpuDevice, &descInfo, allocator, &descriptorPool);
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Unable to create descriptor pool!");
         return false;
     }
     return true;
@@ -745,7 +776,7 @@ VkRenderPass CreateBasicRenderPass()
     VkRenderPass renderPass;
 
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = VK_FORMAT_B8G8R8A8_SRGB;
+    colorAttachment.format = VK_FORMAT_B8G8R8A8_UNORM;
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp  = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -972,10 +1003,13 @@ bool GPU::SETTING_InitGPUApi(SDL_Window *window)
     if (!SetupPipelineLayout())
         return false;
 
-    testBufs.resize(swapchainImages.size());
+    if (!SetupDescriptorPool())
+        return false;
+
+    cmdBufs.resize(swapchainImages.size());
     testPool = CreateCommandPool();
     for (uint32 i = 0; i < swapchainImages.size(); i++)
-        testBufs[i] = CreateCommandBuffer(testPool);
+        cmdBufs[i] = CreateCommandBuffer(testPool);
     testPass = CreateBasicRenderPass();
     testPipeline = CreateBasicPipeline(testPass);
 
@@ -995,8 +1029,14 @@ void GPU::SETTING_ConfigureImGui(SDL_Window *window)
     initInfo.Allocator = allocator;
     initInfo.QueueFamily = primaryDrawQueueFamilyIndex;
     initInfo.Queue = primaryDrawQueue;
+    initInfo.ImageCount = swapchainImages.size();
+    initInfo.MinImageCount = swapchainImages.size();
+    initInfo.DescriptorPoolSize = 8;
+    initInfo.PipelineInfoMain.RenderPass = testPass;
+    initInfo.PipelineInfoMain.Subpass = 0;
+    initInfo.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
-    //ImGui_ImplVulkan_Init(&initInfo);
+    ImGui_ImplVulkan_Init(&initInfo);
 }
 
 
@@ -1008,12 +1048,12 @@ void GPU::SETTING_BeginNewFrame()
 
     // Testing cmd buffer
 
-    vkResetCommandBuffer(testBufs[currentFrame], 0);
+    vkResetCommandBuffer(cmdBufs[currentFrame], 0);
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    vkBeginCommandBuffer(testBufs[currentFrame], &beginInfo);
+    vkBeginCommandBuffer(cmdBufs[currentFrame], &beginInfo);
 }
 
 void GPU::SETTING_SetViewportSize(WEngine::Vector2 size)
@@ -1023,12 +1063,12 @@ void GPU::SETTING_SetViewportSize(WEngine::Vector2 size)
     viewport.height = size.y;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(testBufs[currentFrame], 0, 1, &viewport);
+    vkCmdSetViewport(cmdBufs[currentFrame], 0, 1, &viewport);
 
     VkRect2D scissor{};
     scissor.extent.width = size.x;
     scissor.extent.height = size.y;
-    vkCmdSetScissor(testBufs[currentFrame], 0, 1, &scissor);
+    vkCmdSetScissor(cmdBufs[currentFrame], 0, 1, &scissor);
 }
 
 WEngine::Nullable<WEngine::Shader> GPU::GetShader(const std::string &shaderName)
@@ -1109,35 +1149,38 @@ void GPU::DRAWCALL_ClearFrame(WEngine::Color clearColor)
     renderPassInfo.renderArea.extent = {(uint32)EngineSettings::resolution.x, (uint32)EngineSettings::resolution.y};
     renderPassInfo.framebuffer = swapchainFramebuffers[swapchainCurrentImage];
 
-    vkCmdBeginRenderPass(testBufs[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(cmdBufs[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void GPU::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Shader shader, const WEngine::ShaderSettings &settings)
 {
-    vkCmdBindPipeline(testBufs[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, testPipeline);
+    vkCmdBindPipeline(cmdBufs[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, testPipeline);
 
     Vulkan_Model vkModel = loadedModels[model - 1];
     VkDeviceSize offset = 0;
-    vkCmdBindVertexBuffers(testBufs[currentFrame], 0, 1, &vkModel.vertexBuffer, &offset);
+    vkCmdBindVertexBuffers(cmdBufs[currentFrame], 0, 1, &vkModel.vertexBuffer, &offset);
 
-    vkCmdDraw(testBufs[currentFrame], 3, 1, 0, 0);
+    vkCmdDraw(cmdBufs[currentFrame], 3, 1, 0, 0);
 
 }
 
 void GPU::DRAWCALL_ResetImGui()
 {
     ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
 }
 
 void GPU::DRAWCALL_DrawImGui()
 {
-
+    ImGui::Render();
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdBufs[currentFrame]);
 }
 
 void GPU::DRAWCALL_SwapBuffers(SDL_Window *window)
 {
-    vkCmdEndRenderPass(testBufs[currentFrame]);
-    auto res = vkEndCommandBuffer(testBufs[currentFrame]);
+    vkCmdEndRenderPass(cmdBufs[currentFrame]);
+    auto res = vkEndCommandBuffer(cmdBufs[currentFrame]);
     if (!ParseVkResult(res))
         WEngine::WLog::ConsoleLog("Something went wrong after ending the command buffer!");
 
@@ -1152,7 +1195,7 @@ void GPU::DRAWCALL_SwapBuffers(SDL_Window *window)
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = &renderFinishedSems[currentFrame];
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &testBufs[currentFrame];
+    submitInfo.pCommandBuffers = &cmdBufs[currentFrame];
 
     vkQueueSubmit(primaryDrawQueue, 1, &submitInfo, endOfFrameFences[currentFrame]);
 

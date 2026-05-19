@@ -361,7 +361,7 @@ else() # really should be elseif(linux), but it doesnt work...
             #${CURL_PATH}/lib/libcurl.a
             ${YAMLCPP_PATH}/lib/libyaml-cpp.a
             ${TINYXML2_PATH}/lib/libtinyxml2.a
-            ${STEAMWORKS_PATH}/lib/libsteam_api.so
+            #${STEAMWORKS_PATH}/lib/libsteam_api.so
             GL
             dl
             pthread
