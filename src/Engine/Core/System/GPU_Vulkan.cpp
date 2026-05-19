@@ -95,9 +95,17 @@ struct Vulkan_Core
     VkDevice gpuDevice = VK_NULL_HANDLE;
 };
 
+struct Vulkan_Queues
+{
+    uint32 queueFamilyCount = 0;
+    wtl::vector<QueueFamily> queueFamilies;
+    uint32 primaryDrawQueueFamilyIndex = 0;
+    VkQueue primaryDrawQueue = VK_NULL_HANDLE;
+};
+
 struct Vulkan_Shader
 {
-
+    VkPipeline pipeline;
 };
 
 struct Vulkan_Model
@@ -114,25 +122,22 @@ struct Vulkan_Model
 
 Vulkan_Core vcore;
 Vulkan_Screen screen;
+Vulkan_Queues queues;
 
-uint32 queueFamilyCount = 0;
-wtl::vector<QueueFamily> queueFamilies;
-uint32 primaryDrawQueueFamilyIndex = 0;
-VkQueue primaryDrawQueue = VK_NULL_HANDLE;
 
 VkPipelineLayout pipelineLayout;
-
-// These are just for prototyping
-
-VkCommandPool testPool;
-wtl::vector<VkCommandBuffer> cmdBufs;
-VkRenderPass testPass;
-VkPipeline testPipeline;
 VkDescriptorPool descriptorPool;
+VkCommandPool commandPool;
+
+wtl::vector<VkCommandBuffer> cmdBufs;
+VkRenderPass renderPass;
 
 wtl::vector<Vulkan_Shader> loadedShaders;
 std::unordered_map<std::string, WEngine::Shader> loadedShadersHandles;
 wtl::vector<Vulkan_Model> loadedModels;
+
+static uint32 drawCallsThisFrame = 0;
+static uint32 drawCallsLastFrame = 0;
 
 // --------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------------ [GPU API HELPERS] -------------------------------------------------
@@ -303,21 +308,21 @@ bool SetupVkInstance()
 
 wtl::vector<VkDeviceQueueCreateInfo> FindDeviceQueues()
 {
-    vkGetPhysicalDeviceQueueFamilyProperties2(vcore.gpuPhysicalDevice, &queueFamilyCount, nullptr);
-    wtl::vector<VkQueueFamilyProperties2> families(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties2(vcore.gpuPhysicalDevice, &queues.queueFamilyCount, nullptr);
+    wtl::vector<VkQueueFamilyProperties2> families(queues.queueFamilyCount);
     for (auto& family : families)
         family.sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2;
-    vkGetPhysicalDeviceQueueFamilyProperties2(vcore.gpuPhysicalDevice, &queueFamilyCount, families.data());
+    vkGetPhysicalDeviceQueueFamilyProperties2(vcore.gpuPhysicalDevice, &queues.queueFamilyCount, families.data());
 
-    queueFamilies.resize(queueFamilyCount);
-    wtl::vector<VkDeviceQueueCreateInfo> infos(queueFamilyCount);
+    queues.queueFamilies.resize(queues.queueFamilyCount);
+    wtl::vector<VkDeviceQueueCreateInfo> infos(queues.queueFamilyCount);
 
-    for (int i = 0; i < queueFamilyCount; i++)
+    for (int i = 0; i < queues.queueFamilyCount; i++)
     {
         const auto& properties = families[i].queueFamilyProperties;
-        queueFamilies[i].familyIndex = i;
-        queueFamilies[i].queues.resize(properties.queueCount);
-        queueFamilies[i].purpose = properties.queueFlags;
+        queues.queueFamilies[i].familyIndex = i;
+        queues.queueFamilies[i].queues.resize(properties.queueCount);
+        queues.queueFamilies[i].purpose = properties.queueFlags;
 
         // yes its leaking, but its so little that it wouldnt even matter on a snes.
         float32* queuePriorities = (float32*)WAllocator::Allocate(properties.queueCount * sizeof(float32));
@@ -335,12 +340,12 @@ wtl::vector<VkDeviceQueueCreateInfo> FindDeviceQueues()
     }
 
     uint32 count = 0; // piss and shit code
-    for (auto& familiy : queueFamilies)
+    for (auto& familiy : queues.queueFamilies)
     {
         if (familiy.purpose & (uint8)QueuePurpose::Drawing)
         {
-            primaryDrawQueue = familiy.queues[0];
-            primaryDrawQueueFamilyIndex = count;
+            queues.primaryDrawQueue = familiy.queues[0];
+            queues.primaryDrawQueueFamilyIndex = count;
             break;
         }
         count++;
@@ -351,12 +356,12 @@ wtl::vector<VkDeviceQueueCreateInfo> FindDeviceQueues()
 
 void SetupDeviceQueues()
 {
-    for (int i = 0; i < queueFamilyCount; i++)
+    for (int i = 0; i < queues.queueFamilyCount; i++)
     {
-        if (queueFamilies[i].purpose & (uint8)QueuePurpose::Drawing)
+        if (queues.queueFamilies[i].purpose & (uint8)QueuePurpose::Drawing)
         {
-            vkGetDeviceQueue(vcore.gpuDevice, i, 0, &queueFamilies[i].queues[0]);
-            primaryDrawQueue = queueFamilies[i].queues[0];
+            vkGetDeviceQueue(vcore.gpuDevice, i, 0, &queues.queueFamilies[i].queues[0]);
+            queues.primaryDrawQueue = queues.queueFamilies[i].queues[0];
             break;
         }
     }
@@ -445,7 +450,7 @@ void SetupSwapchainFramebuffers()
 
         VkFramebufferCreateInfo fbInfo{};
         fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        fbInfo.renderPass = testPass;
+        fbInfo.renderPass = renderPass;
         fbInfo.attachmentCount = 1;
         fbInfo.pAttachments = &screen.swapchainImageViews[i];
         fbInfo.width = EngineSettings::resolution.x;
@@ -555,15 +560,11 @@ bool SetupDescriptorPool()
     return true;
 }
 
-// ------------------------------------------------- [MEM FUNCTIONS] --------------------------------------------------
-
-VkCommandPool CreateCommandPool()
+bool SetupCommandPool()
 {
-    VkCommandPool commandPool;
-
     VkCommandPoolCreateInfo commandPoolInfo{};
     commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    commandPoolInfo.queueFamilyIndex = primaryDrawQueueFamilyIndex;
+    commandPoolInfo.queueFamilyIndex = queues.primaryDrawQueueFamilyIndex;
     commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
     auto res = vkCreateCommandPool(vcore.gpuDevice, &commandPoolInfo, vcore.allocator, &commandPool);
@@ -572,10 +573,14 @@ VkCommandPool CreateCommandPool()
     {
         WEngine::WLog::SetConsoleWarning();
         WEngine::WLog::ConsoleLog("Unable to create command buffer!");
-        return VK_NULL_HANDLE;
+        return false;
     }
-    return commandPool;
+    return true;
 }
+
+// ------------------------------------------------- [MEM FUNCTIONS] --------------------------------------------------
+
+
 
 // -------------------------------------------------- [RENDER SETUP] --------------------------------------------------
 
@@ -668,7 +673,7 @@ VkShaderModule CompileShader(const WEngine::SpirVAssetMission& spirvAssetMission
     return module;
 }
 
-VkPipeline CreateBasicPipeline(VkRenderPass renderPass)
+VkPipeline CreatePipeline(VkRenderPass renderPass, std::string shaderName)
 {
     VkPipeline pipeline;
 
@@ -754,10 +759,10 @@ VkPipeline CreateBasicPipeline(VkRenderPass renderPass)
     // Sperm Vee
     WEngine::SpirVAssetMission vertexShaderCode{};
     vertexShaderCode.shaderType = WEngine::SpirVAssetMission::VertexShader;
-    vertexShaderCode.name = "triangle";
+    vertexShaderCode.name = shaderName;
     WEngine::SpirVAssetMission fragmentShaderCode{};
     fragmentShaderCode.shaderType = WEngine::SpirVAssetMission::FragmentShader;
-    fragmentShaderCode.name = "triangle";
+    fragmentShaderCode.name = shaderName;
     WEngine::CoreSystems::GetAssetRepo()->GetAsset(vertexShaderCode);
     WEngine::CoreSystems::GetAssetRepo()->GetAsset(fragmentShaderCode);
 
@@ -793,6 +798,7 @@ VkPipeline CreateBasicPipeline(VkRenderPass renderPass)
     {
         WEngine::WLog::SetConsoleError();
         WEngine::WLog::ConsoleLog("Failed to create graphics pipeline.");
+        return VK_NULL_HANDLE;
     }
 
     vkDestroyShaderModule(vcore.gpuDevice, shaderStages[0].module, vcore.allocator);
@@ -846,12 +852,14 @@ bool Iris::SETTING_InitGPUApi(SDL_Window *window)
     if (!SetupDescriptorPool())
         return false;
 
+    if (!SetupCommandPool())
+        return false;
+
+
     cmdBufs.resize(screen.swapchainImages.size());
-    testPool = CreateCommandPool();
     for (uint32 i = 0; i < screen.swapchainImages.size(); i++)
-        cmdBufs[i] = CreateCommandBuffer(testPool);
-    testPass = CreateBasicRenderPass();
-    testPipeline = CreateBasicPipeline(testPass);
+        cmdBufs[i] = CreateCommandBuffer(commandPool);
+    renderPass = CreateBasicRenderPass();
 
     SetupSwapchainFramebuffers();
 
@@ -867,12 +875,12 @@ void Iris::SETTING_ConfigureImGui(SDL_Window *window)
     initInfo.PhysicalDevice = vcore.gpuPhysicalDevice;
     initInfo.Device = vcore.gpuDevice;
     initInfo.Allocator = vcore.allocator;
-    initInfo.QueueFamily = primaryDrawQueueFamilyIndex;
-    initInfo.Queue = primaryDrawQueue;
+    initInfo.QueueFamily = queues.primaryDrawQueueFamilyIndex;
+    initInfo.Queue = queues.primaryDrawQueue;
     initInfo.ImageCount = screen.swapchainImages.size();
     initInfo.MinImageCount = screen.swapchainImages.size();
     initInfo.DescriptorPoolSize = 8;
-    initInfo.PipelineInfoMain.RenderPass = testPass;
+    initInfo.PipelineInfoMain.RenderPass = renderPass;
     initInfo.PipelineInfoMain.Subpass = 0;
     initInfo.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
@@ -930,7 +938,13 @@ WEngine::Nullable<WEngine::Shader> Iris::ALLOC_CompileShader(const std::string& 
         return WEngine::Nullable<WEngine::Shader>();
     }
 
-    return WEngine::Nullable<WEngine::Shader>();
+    auto pipeline = CreatePipeline(renderPass, shaderName);
+
+    loadedShaders.push_back({pipeline});
+    WEngine::Shader shaderHandle = loadedShaders.size();
+    loadedShadersHandles[shaderName] = shaderHandle;
+
+    return WEngine::Nullable<WEngine::Shader>(shaderHandle);
 }
 
 WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::ModelInfo &model)
@@ -986,7 +1000,7 @@ void Iris::DRAWCALL_ClearFrame(WEngine::Color clearColor)
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = testPass;
+    renderPassInfo.renderPass = renderPass;
     renderPassInfo.clearValueCount = 1;
     renderPassInfo.pClearValues = &clearCol;
     renderPassInfo.renderArea.offset = {0, 0};
@@ -998,14 +1012,16 @@ void Iris::DRAWCALL_ClearFrame(WEngine::Color clearColor)
 
 void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Shader shader, const WEngine::ShaderSettings &settings)
 {
-    vkCmdBindPipeline(cmdBufs[screen.currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, testPipeline);
+    Vulkan_Shader vkShader = loadedShaders[shader - 1];
+
+    vkCmdBindPipeline(cmdBufs[screen.currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
 
     Vulkan_Model vkModel = loadedModels[model - 1];
     VkDeviceSize offset = 0;
     vkCmdBindVertexBuffers(cmdBufs[screen.currentFrame], 0, 1, &vkModel.vertexBuffer, &offset);
 
-    vkCmdDraw(cmdBufs[screen.currentFrame], 3, 1, 0, 0);
-
+    vkCmdDraw(cmdBufs[screen.currentFrame], vkModel.vertexCount, 1, 0, 0);
+    drawCallsThisFrame++;
 }
 
 void Iris::DRAWCALL_ResetImGui()
@@ -1041,7 +1057,7 @@ void Iris::DRAWCALL_SwapBuffers(SDL_Window *window)
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmdBufs[screen.currentFrame];
 
-    vkQueueSubmit(primaryDrawQueue, 1, &submitInfo, screen.endOfFrameFences[screen.currentFrame]);
+    vkQueueSubmit(queues.primaryDrawQueue, 1, &submitInfo, screen.endOfFrameFences[screen.currentFrame]);
 
     VkResult renderRes;
     VkPresentInfoKHR presentInfo{};
@@ -1053,12 +1069,15 @@ void Iris::DRAWCALL_SwapBuffers(SDL_Window *window)
     presentInfo.pImageIndices = &screen.swapchainCurrentImage;
     presentInfo.pResults = &renderRes;
 
-    vkQueuePresentKHR(primaryDrawQueue, &presentInfo);
+    vkQueuePresentKHR(queues.primaryDrawQueue, &presentInfo);
 
     screen.currentFrame = (screen.currentFrame + 1) % screen.swapchainImages.size();
 
     if (!ParseVkResult(renderRes))
         WEngine::WLog::ConsoleLog("Something went wrong during rendering!");
+
+    drawCallsLastFrame = drawCallsThisFrame;
+    drawCallsThisFrame = 0;
 }
 
 uint64 Iris::GetVramUsage()
@@ -1068,7 +1087,7 @@ uint64 Iris::GetVramUsage()
 
 uint32 Iris::GetDrawCallCountLastFrame()
 {
-    return 0;
+    return drawCallsLastFrame;
 }
 
 WEngine::Nullable<ImTextureID> Iris::FramebufferToImGui(WEngine::Framebuffer framebuffer)

@@ -22,6 +22,7 @@
 using namespace WEngine;
 
 Model testModel;
+Shader triShader;
 
 RenderHandler::RenderHandler()
 {
@@ -50,6 +51,15 @@ RenderHandler::RenderHandler()
 		WLog::ConsoleLog("DAMMIT!!!");
 	}
 
+	auto shaderN = Iris::ALLOC_CompileShader("triangle");
+
+	if (shaderN.HasValue())
+		triShader = shaderN.GetValue();
+	else
+	{
+		WLog::SetConsoleError();
+		WLog::ConsoleLog("DAMMIT AGAIN!!!");
+	}
 
 }
 
@@ -63,9 +73,8 @@ void RenderHandler::BeginFrame()
 
 void RenderHandler::RenderFrame()
 {
-
 	ShaderSettings shaderSettings{};
-	Iris::DRAWCALL_DrawModel(testModel, 0, shaderSettings);
+	Iris::DRAWCALL_DrawModel(testModel, triShader, shaderSettings);
 
 	Iris::DRAWCALL_DrawImGui();
 	Iris::DRAWCALL_SwapBuffers(m_window);
