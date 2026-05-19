@@ -242,7 +242,7 @@ add_executable(Widrolo_Engine_3D
         src/Editor/MenubarItems/Tools/Menubar_ResFind.cpp
         src/Editor/MenubarItems/Tools/Menubar_ResFind.h
         src/Engine/Core/System/GPU_OpenGL.cpp
-        src/Engine/Core/System/GPU.h
+        src/Engine/Core/System/Iris.h
         src/Engine/Types/Rendering/GPU/Framebuffer.h
         src/Engine/Types/Rendering/ShaderSettings.h
         src/Engine/Types/Rendering/GPU/Texture.h
@@ -295,6 +295,7 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Core/System/GPUSettings.h
         src/Engine/imgui/backends/imgui_impl_vulkan.cpp
         src/Engine/Types/Rendering/VertextData.h
+        src/Engine/Types/Rendering/ShaderInfo.h
 )
 
 set_target_properties(Widrolo_Engine_3D PROPERTIES

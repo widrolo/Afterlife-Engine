@@ -22,7 +22,7 @@
  * @note All types used are strictly API independent.
  * @see EngineDefines.h
  */
-class GPU
+class Iris
 {
 public:
     static bool SETTING_InitGPUApi(SDL_Window* window);

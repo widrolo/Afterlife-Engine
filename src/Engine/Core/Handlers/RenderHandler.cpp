@@ -12,7 +12,7 @@
 #include <Engine/imgui/imgui.h>
 #include <Engine/imgui/implot.h>
 
-#include <Engine/Core/System/GPU.h>
+#include <Engine/Core/System/Iris.h>
 
 #include "Engine/imgui/imgui_node_editor_internal.h"
 #include "Engine/Types/DebugFlags.h"
@@ -26,7 +26,7 @@ Model testModel;
 RenderHandler::RenderHandler()
 {
 	InitSDL();
-	if (!GPU::SETTING_InitGPUApi(m_window))
+	if (!Iris::SETTING_InitGPUApi(m_window))
 	{
 		WLog::SetConsoleError();
 		WLog::ConsoleLog("FATAL ERROR! GPU failed to initialize, aborting!");
@@ -36,11 +36,11 @@ RenderHandler::RenderHandler()
 
 	ModelInfo info;
 	info.vertices.resize(3);
-	info.vertices[0] = {{0.0f, -0.5f, 0.5f}, {0.0f, 0.0f}};
-	info.vertices[1] = {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f}};
-	info.vertices[2] = {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f}};
+	info.vertices[0] = {{0.0f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}};
+	info.vertices[1] = {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}};
+	info.vertices[2] = {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
 
-	auto modelN = GPU::ALLOC_CreateModel(info);
+	auto modelN = Iris::ALLOC_CreateModel(info);
 
 	if (modelN.HasValue())
 		testModel = modelN.GetValue();
@@ -55,20 +55,20 @@ RenderHandler::RenderHandler()
 
 void RenderHandler::BeginFrame()
 {
-	GPU::SETTING_BeginNewFrame();
-	GPU::DRAWCALL_ResetImGui();
-	GPU::DRAWCALL_ClearFrame(Color{30, 30, 30, 255});
-	GPU::SETTING_SetViewportSize(EngineSettings::resolution);
+	Iris::SETTING_BeginNewFrame();
+	Iris::DRAWCALL_ResetImGui();
+	Iris::DRAWCALL_ClearFrame(Color{30, 30, 30, 255});
+	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
 }
 
 void RenderHandler::RenderFrame()
 {
 
 	ShaderSettings shaderSettings{};
-	GPU::DRAWCALL_DrawModel(testModel, 0, shaderSettings);
+	Iris::DRAWCALL_DrawModel(testModel, 0, shaderSettings);
 
-	GPU::DRAWCALL_DrawImGui();
-	GPU::DRAWCALL_SwapBuffers(m_window);
+	Iris::DRAWCALL_DrawImGui();
+	Iris::DRAWCALL_SwapBuffers(m_window);
 }
 
 void RenderHandler::InitSDL()
@@ -135,7 +135,7 @@ void RenderHandler::InitImGui()
 
 	ImGui::StyleColorsDark();
 
-	GPU::SETTING_ConfigureImGui(m_window);
+	Iris::SETTING_ConfigureImGui(m_window);
 
 	ImGuiStyle& style = ImGui::GetStyle();
 

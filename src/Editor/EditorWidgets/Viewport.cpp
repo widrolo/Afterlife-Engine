@@ -4,7 +4,7 @@
 
 #include "Editor/Types/EditorState.h"
 #include "Engine/Core/Handlers/RenderHandler.h"
-#include "Engine/Core/System/GPU.h"
+#include "Engine/Core/System/Iris.h"
 #include "Engine/Types/CoreSystems.h"
 #include <Engine/Components/Rendering/CameraComponent.h>
 #include <Engine/Core/World/Entity.h>

@@ -2,7 +2,7 @@
 #include <Engine/Core/Engine.h>
 #include <Engine/Core/System/Memory.h>
 
-#include "Engine/Core/System/GPU.h"
+#include "Engine/Core/System/Iris.h"
 
 
 using namespace WEngine;
@@ -48,9 +48,9 @@ void StatisticsWidgets::BottomRow()
 	ImGui::TableNextColumn();
 	ImGui::Text("Frame Time: %.3fms", Engine::GetDeltaTime());
 	ImGui::TableNextColumn();
-	ImGui::Text("Vram Usage: %.2fMB", (float64)GPU::GetVramUsage() / MB);
+	ImGui::Text("Vram Usage: %.2fMB", (float64)Iris::GetVramUsage() / MB);
 	ImGui::TableNextColumn();
-	ImGui::Text("Draw calls: %u", GPU::GetDrawCallCountLastFrame());
+	ImGui::Text("Draw calls: %u", Iris::GetDrawCallCountLastFrame());
 }
 
 std::string StatisticsWidgets::UptimeToString(uint64 uptime)

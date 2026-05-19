@@ -10,7 +10,7 @@
 #include <yaml-cpp/yaml.h>
 #include <tinyxml2/tinyxml2.h>
 
-#include "Engine/Core/System/GPU.h"
+#include "Engine/Core/System/Iris.h"
 #include "Engine/imgui/imgui.h"
 #include "Engine/Util/Conversions.h"
 
