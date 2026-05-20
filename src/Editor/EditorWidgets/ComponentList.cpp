@@ -28,7 +28,7 @@ void ComponentList::RenderInternal()
 
 	auto entity = EditorState::SelectedEntity;
 
-    WEngine::Vector2 vec;
+    WEngine::Vector3 vec;
 
 	m_entityName = entity->entityName.c_str();
 	m_entityPos[0] = entity->transform.position.x;
@@ -47,16 +47,16 @@ void ComponentList::RenderInternal()
 	}
 	ImGui::PopStyleVar();
 
-	if (ImGui::DragFloat2("Position", m_entityPos, 0.1f))
+	if (ImGui::DragFloat3("Position", m_entityPos, 0.1f))
 	{
-		vec = WEngine::Vector2(m_entityPos[0], m_entityPos[1]);
+		vec = WEngine::Vector3(m_entityPos[0], m_entityPos[1], m_entityPos[2]);
 		entity->transform.position = vec;
 		EditorState::SelectedSector->m_changedInEditor = true;
 	}
 
-	if (ImGui::DragFloat2("Size", m_entitySize, 0.1f))
+	if (ImGui::DragFloat3("Size", m_entitySize, 0.1f))
 	{
-		vec = WEngine::Vector2(m_entitySize[0], m_entitySize[1]);
+		vec = WEngine::Vector3(m_entitySize[0], m_entitySize[1], m_entitySize[2]);
 		entity->transform.size = vec;
 		EditorState::SelectedSector->m_changedInEditor = true;
 	}

@@ -5,6 +5,7 @@
 #include <Engine/Types/CommonTypes.h>
 
 #include "ShaderSettings.h"
+#include "Engine/Math/Transform.h"
 
 namespace WEngine
 {
@@ -23,7 +24,7 @@ namespace WEngine
 		uint32 layer;
 		std::string shader;
 		ShaderSettings shaderSettings;
-		Rectangle quadBounds;
+		Transform transform;
 	};
 
 	struct RenderVisualizationMission

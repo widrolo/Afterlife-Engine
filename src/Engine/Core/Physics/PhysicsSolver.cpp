@@ -120,7 +120,8 @@ OverlapResult PhysicsSolver::TestOverlap(SimulatableObject &o1, SimulatableObjec
 
 Vector2 PhysicsSolver::GetWorldPosition(const SimulatableObject &object)
 {
-    return object.m_owner->transform.position + object.m_physicsArea->GetOffset();
+    //return object.m_owner->transform.position + object.m_physicsArea->GetOffset();
+    return Vector2::Zero;
 }
 
 OverlapResult PhysicsSolver::TestOverlap_Circle_Circle(const SimulatableObject &o1, const SimulatableObject &o2)

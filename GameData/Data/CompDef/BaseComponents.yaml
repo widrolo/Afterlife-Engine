@@ -225,6 +225,10 @@
                 Description: "Offsets the cylinder."
                 Type: "Vector2"
                 Internal: offset
+    MeshRendererComponent:
+        ID: 14
+        Name: "Mesh Renderer"
+        Description: "Render a mesh."
 
     EditorTester:
         ID: 512
@@ -261,160 +265,11 @@
                 Description: ""
                 Type: "Color"
                 Internal: ctest
+        
 
 #### Game Components ####
-    WorldSelector:
+    Freecam:
         ID: 1024
-        Name: "World Selector"
-        Description: "Provides a widget to open any world in the game"
-    PlayerMovement:
-        ID: 1025
-        Name: "Player Movement"
-        Description: "Central Component for all things movement."
-        Settings:
-            WalkSpeed:
-                Name: "Walk Speed"
-                Description: "Speed while walking."
-                Type: "Float"
-                Internal: walkspeed
-            RunSpeed:
-                Name: "Running Speed"
-                Description: "Speed while running."
-                Type: "Float"
-                Internal: runspeed
-            WalkBegin:
-                Name: "Walk Begin"
-                Description: "Time to go from standstill to walking."
-                Type: "Float"
-                Internal: walkbegin
-            WalkDecay:
-                Name: "Walk Decay"
-                Description: "Time to go from walking to a standstill."
-                Type: "Float"
-                Internal: walkdecay
-            WalkToRun:
-                Name: "Walk to Run"
-                Description: "Time to go from walking to running."
-                Type: "Float"
-                Internal: walktorun
-            RunBegin:
-                Name: "Running Begin"
-                Description: "Time to go from standstill to running."
-                Type: "Float"
-                Internal: runbegin
-            RunDecay:
-                Name: "Running Decay"
-                Description: "Time to go from running to a standstill."
-                Type: "Float"
-                Internal: rundecay
-            RunToWalk:
-                Name: "Run to Walk"
-                Description: "Time to go from running to walking."
-                Type: "Float"
-                Internal: runtowalk
-    CameraMover:
-        ID: 1026
-        Name: "Camera Mover"
-        Description: "Moves the camera in respect to the hotspots."
-        Settings:
-            StopRadius:
-                Name: "Stop Radius"
-                Description: "If inside the radius of the mean point, the camera will stop moving."
-                Type: "Float"
-                Internal: stopradius
-    CameraHotspot:
-        ID: 1027
-        Name: "Camera Hotspot"
-        Description: "Hotspot for the camera to follow."
-        Settings:
-            Strength:
-                Name: "Hotspot Strength"
-                Description: "How strongly is the camera attracted to the hotspot."
-                Type: "Float"
-                Internal: strength
-            SuperSpot:
-                Name: "Super Hotspot"
-                Description: "If true, the camera will only follow this hotspot."
-                Type: "Bool"
-                Internal: super
-    PlayerMovementAnimator:
-        ID: 1028
-        Name: "Player Animator"
-        Description: "Responsible for selecting the proper player animation."
-        Settings:
-            ChangeOfEvent:
-                Name: "Change of Event"
-                Description: "Change that a random event occurs during a loop animation."
-                Type: "Float"
-                Internal: chance
-    PlayerAttack:
-        ID: 1029
-        Name: "Player Attack"
-        Description: "Responsible for player attack logic."
-    EnemyCore:
-        ID: 1030
-        Name: "Enemy Core"
-        Description: "Deprecated, do not use!"
-    PlayerCore:
-        ID: 1031
-        Name: "Player Core"
-        Description: "Core component of the player, foreign entities/systems should interface this instead of other components."
-        Settings:
-            Offset:
-                Name: "Center Offset"
-                Description: "By default, the center is top left, this shifts it to the center."
-                Type: "Vector2"
-                Internal: offset
-    PlayerDebugDrawer:
-        ID: 1032
-        Name: "Player Debug Drawer"
-        Description: "Draws debug info for the player."
-    Health:
-        ID: 1033
-        Name: "Health"
-        Description: "Give any Entity health."
-        Settings:
-            MaxHealth:
-                Name: "Max Health"
-                Description: "Maximum health of the entity."
-                Type: "Number"
-                Internal: "maxhealth"
-            StartingHealth:
-                Name: "Starting Health"
-                Description: "Staring health health of the entity, cannot be higher than Max Health or zero."
-                Type: "Number"
-                Internal: "starthealth"
-    NPCSpawner:
-        ID: 1034
-        Name: "NPCSpawner"
-        Description: "Component for managing the NPC Spawner widget for debugging"
-    NPCCore:
-        ID: 1035
-        Name: "NPC Core"
-        Description: "Core component for making anything an NPC."
-        Settings:
-            Name:
-                Name: "Name"
-                Description: "Name of the NPC"
-                Type: "String"
-                Internal: name
-            Alignment:
-                Name: "Alignment"
-                Description: "Alignment of the NPC"
-                Type: "Number"
-                Internal: alignment
-            NPCType:
-                Name: "NPCType"
-                Description: "Type of the NPC"
-                Type: "Number"
-                Internal: type
-            NPCType:
-                Name: "Variant"
-                Description: "Variant"
-                Type: "Number"
-                Internal: variant
-            Offset:
-                Name: "Center Offset"
-                Description: "By default, the center is top left, this shifts it to the center."
-                Type: "Vector2"
-                Internal: offset
+        Name: "Freecam"
+        Description: "Movement for a free cam."
+    

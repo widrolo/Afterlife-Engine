@@ -296,6 +296,10 @@ add_executable(Widrolo_Engine_3D
         src/Engine/imgui/backends/imgui_impl_vulkan.cpp
         src/Engine/Types/Rendering/VertextData.h
         src/Engine/Types/Rendering/ShaderInfo.h
+        src/Game/Components/Freecam.cpp
+        src/Game/Components/Freecam.h
+        src/Engine/Components/Rendering/MeshRendererComponent.cpp
+        src/Engine/Components/Rendering/MeshRendererComponent.h
 )
 
 set_target_properties(Widrolo_Engine_3D PROPERTIES

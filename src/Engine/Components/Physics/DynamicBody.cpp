@@ -31,7 +31,7 @@ void DynamicBody::UpdateEntity() const
 	if (m_simulatableObject == nullptr)
 		return;
 
-	entity->transform.position = m_simulatableObject->GetPosition();
+	//entity->transform.position = m_simulatableObject->GetPosition();
 }
 
 void DynamicBody::SetPosition(const Vector2 position) const
@@ -126,7 +126,7 @@ void DynamicBody::Init()
 		return;
 	}
 	m_simulatableObject->SetOwner(entity);
-	m_simulatableObject->SetPosition(entity->transform.position);
+	//m_simulatableObject->SetPosition(entity->transform.position);
 }
 
 void DynamicBody::Awake(ComponentArgs ca)

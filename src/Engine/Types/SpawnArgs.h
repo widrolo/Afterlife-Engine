@@ -51,6 +51,12 @@ namespace WEngine
 	 	 */
 		Nullable<Vector2> GetVector2FromParams(std::string varName);
 		/**
+		  * Fetches a Vector2 value from the component arguments using a specified variable name.
+		  * @param varName Name of the variable to fetch.
+		  * @return Nullable wrapper around the Vector2 value fetched, or null if not found or invalid type.
+		  */
+		Nullable<Vector3> GetVector3FromParams(std::string varName);
+		/**
 	 	 * Fetches a Color value from the component arguments using a specified variable name.
 	 	 * @param varName Name of the variable to fetch.
 	 	 * @return Nullable wrapper around the Color value fetched, or null if not found or invalid type.

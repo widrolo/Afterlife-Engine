@@ -1,8 +1,11 @@
 #pragma once
 
+#include <queue>
 #include <SDL3/SDL.h>
 
 #include "Engine/Math/Vector.h"
+#include "Engine/Types/Rendering/RenderMission.h"
+#include "Engine/WTL/deque.h"
 
 namespace WEngine
 {
@@ -17,11 +20,20 @@ namespace WEngine
 		SDL_DisplayMode* m_displayMode = nullptr;
 		SDL_Window* m_window = nullptr;
 
+		CameraComponent* m_camera = nullptr;
+
+		wtl::deque<RenderMission> m_renderQueue;
+
 	public:
 		void BeginFrame();
 		void RenderFrame();
 
+		void RegisterCamera(CameraComponent* camera);
+
+		void AddToRenderQueue(RenderMission& mission);
+
 	private:
+		void RenderSingleMission(RenderMission& mission);
 
 		void InitSDL();
 		void InitImGui();

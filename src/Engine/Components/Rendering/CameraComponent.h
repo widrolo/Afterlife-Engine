@@ -12,7 +12,7 @@ namespace WEngine
 	private:
 		Transform m_cameraTransform;
 		Color m_backColor;
-		Vector2 m_offset;
+		Vector3 m_offset;
 	public:
 		const Transform GetCameraTransform() const;
 		void SetCameraTransform(const Transform& newTranform);

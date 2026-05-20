@@ -24,6 +24,9 @@ using namespace WEngine;
 Model testModel;
 Shader triShader;
 
+glm::mat4 projection;
+glm::mat4 viewMatrix;
+
 RenderHandler::RenderHandler()
 {
 	InitSDL();
@@ -36,10 +39,13 @@ RenderHandler::RenderHandler()
 	InitImGui();
 
 	ModelInfo info;
-	info.vertices.resize(3);
-	info.vertices[0] = {{0.0f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}};
-	info.vertices[1] = {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}};
-	info.vertices[2] = {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+	info.vertices.resize(4);
+	info.vertices[0] = {{ 0.1f, -0.1f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}};
+	info.vertices[1] = {{ 0.1f,	 0.1f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}};
+	info.vertices[2] = {{-0.1f,  0.1f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}};
+	info.vertices[3] = {{-0.1f, -0.1f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}};
+
+	info.indices = {0, 1, 2, 0, 2, 3};
 
 	auto modelN = Iris::ALLOC_CreateModel(info);
 
@@ -61,6 +67,12 @@ RenderHandler::RenderHandler()
 		WLog::ConsoleLog("DAMMIT AGAIN!!!");
 	}
 
+	projection = glm::perspective(
+		glm::radians(60.0f),
+		m_windowResolution.x / m_windowResolution.y,
+		0.1f,
+		100.0f
+		);
 }
 
 void RenderHandler::BeginFrame()
@@ -69,15 +81,70 @@ void RenderHandler::BeginFrame()
 	Iris::DRAWCALL_ResetImGui();
 	Iris::DRAWCALL_ClearFrame(Color{30, 30, 30, 255});
 	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
+
+
+
+	if (m_camera == nullptr)
+		viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	else
+	{
+		Vector3 camPos = m_camera->GetPosition();
+		Vector3 camRot = m_camera->GetRotation();
+
+		viewMatrix = glm::mat4(1.0f);
+
+		viewMatrix = glm::rotate(viewMatrix, glm::radians(camRot.x), glm::vec3(1, 0, 0));
+		viewMatrix = glm::rotate(viewMatrix, glm::radians(camRot.y), glm::vec3(0, 1, 0));
+		viewMatrix = glm::rotate(viewMatrix, glm::radians(camRot.z), glm::vec3(0, 0, 1));
+
+		viewMatrix = glm::translate(viewMatrix, -glm::vec3(camPos.x, camPos.y, camPos.z));
+	}
 }
 
 void RenderHandler::RenderFrame()
 {
-	ShaderSettings shaderSettings{};
-	Iris::DRAWCALL_DrawModel(testModel, triShader, shaderSettings);
+	for (auto& mission : m_renderQueue)
+	{
+		RenderSingleMission(mission);
+	}
 
 	Iris::DRAWCALL_DrawImGui();
 	Iris::DRAWCALL_SwapBuffers(m_window);
+	m_renderQueue.clear();
+}
+
+void RenderHandler::RegisterCamera(CameraComponent *camera)
+{
+	m_camera = camera;
+}
+
+void RenderHandler::AddToRenderQueue(RenderMission& mission)
+{
+	m_renderQueue.push_back(mission);
+}
+
+void RenderHandler::RenderSingleMission(RenderMission &mission)
+{
+	Vector3 modPos = mission.transform.position;
+	Vector3 modRot = mission.transform.rotation;
+	Vector3 modSca = mission.transform.size;
+
+	glm::mat4 modelMatrix = glm::mat4(1.0f);
+
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(modPos.x, modPos.y, modPos.z));
+
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.x), glm::vec3(1.0f, 0.0f, 0.0f));
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(modSca.x, modSca.y, modSca.z));
+
+	glm::mat4 mvpG = projection * viewMatrix * modelMatrix;
+
+	Mat4x4 mvp = Glm4x4ToMat4x4(mvpG);
+	ShaderSettings shaderSettings{};
+	shaderSettings.push_back({ShaderSettingType::Matrix4, mvp, "mvp"});
+	Iris::DRAWCALL_DrawModel(testModel, triShader, shaderSettings);
 }
 
 void RenderHandler::InitSDL()

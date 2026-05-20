@@ -205,7 +205,7 @@ void AnyComponent::GFX_Dbg_CircleArea()
     simulatableObject.SetAreaCircle(radius);
     simulatableObject.SetAreaOffset(offset);
     simulatableObject.SetOwner(entity);
-    simulatableObject.SetPosition(entity->transform.position);
+    //simulatableObject.SetPosition(entity->transform.position);
     simulatableObject.SetFreezeState(true);
     auto lines = WEngine::PhysicsVisualizer::GetCircleVisual(simulatableObject);
 
@@ -237,7 +237,7 @@ void AnyComponent::GFX_Dbg_RectArea()
     simulatableObject.SetAreaRect(size);
     simulatableObject.SetAreaOffset(offset);
     simulatableObject.SetOwner(entity);
-    simulatableObject.SetPosition(entity->transform.position);
+    //simulatableObject.SetPosition(entity->transform.position);
     simulatableObject.SetFreezeState(true);
     auto lines = WEngine::PhysicsVisualizer::GetRectVisual(simulatableObject);
 

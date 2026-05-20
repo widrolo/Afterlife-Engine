@@ -2,6 +2,7 @@
 
 #include <Engine/Types/CommonTypes.h>
 #include <Engine/Math/Math.h>
+#include <format>
 
 namespace WEngine
 {
@@ -102,3 +103,19 @@ namespace WEngine
 	};
 
 }
+
+template<>
+struct std::formatter<WEngine::Vector3>
+{
+	template<typename ParseContext>
+	constexpr auto parse(ParseContext& ctx)
+	{
+		return ctx.begin();
+	}
+
+	template<typename FormatContext>
+	auto format(const WEngine::Vector3& v, FormatContext& ctx) const
+	{
+		return format_to(ctx.out(), "[{} | {} | {}]", v.x, v.y, v.z);
+	}
+};

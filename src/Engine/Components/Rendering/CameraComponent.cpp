@@ -20,7 +20,7 @@ CameraComponent::CameraComponent(Entity* e)
 const Transform CameraComponent::GetCameraTransform() const
 {
 	Transform t = m_cameraTransform;
-	t.position = t.position + m_offset; // += not yet implemented for vec2
+	t.position = t.position + m_offset;
 	return t;
 }
 
@@ -32,7 +32,7 @@ void CameraComponent::SetCameraTransform(const Transform& newTranform)
 void CameraComponent::Awake(ComponentArgs ca)
 {
 	auto color = ca.GetColorFromParams("backColor");
-	auto offset = ca.GetVector2FromParams("offset");
+	auto offset = ca.GetVector3FromParams("offset");
 
 	if (color.HasValue())
 		m_backColor = color.GetValue();
@@ -42,12 +42,12 @@ void CameraComponent::Awake(ComponentArgs ca)
 	if (offset.HasValue())
 		m_offset = offset.GetValue();
 	else
-		m_offset = Vector2::Zero; // Fallback to no offset
+		m_offset = Vector3::Zero; // Fallback to no offset
 }
 
 void CameraComponent::Start()
 {
-	//CoreSystems::GetRenderHandler()->SetNewCamera(this);
+	CoreSystems::GetRenderHandler()->RegisterCamera(this);
 }
 
 void CameraComponent::Tick(float32 dt)

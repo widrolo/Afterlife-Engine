@@ -37,7 +37,8 @@ namespace WEngine
 		[[nodiscard]] virtual uint64 GetHash() const = 0;
 		[[nodiscard]] std::string GetName() const;
 
-		[[nodiscard]] Vector2 GetPosition() const;
+		[[nodiscard]] Vector3 GetPosition() const;
+		[[nodiscard]] Vector3 GetRotation() const;
 	protected:
 		[[deprecated]]
 		void MakeErrorMsg(int line, std::string reason);

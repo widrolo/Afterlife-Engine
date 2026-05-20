@@ -8,5 +8,6 @@ namespace WEngine
     struct ModelInfo
     {
         wtl::vector<VertexData> vertices;
+        wtl::vector<uint32> indices;
     };
 }

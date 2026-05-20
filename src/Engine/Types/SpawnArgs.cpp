@@ -42,6 +42,16 @@ Nullable<Vector2> ComponentArgs::GetVector2FromParams(std::string varName)
     return v;
 }
 
+Nullable<Vector3> ComponentArgs::GetVector3FromParams(std::string varName)
+{
+    if (!componentRoot[varName])
+        return Nullable<Vector3>();
+    const YAML::Node pos = componentRoot[varName];
+    Vector3 v = { pos[0].as<float32>(), pos[1].as<float32>(), pos[2].as<float32>() };
+
+    return v;
+}
+
 Nullable<Color> ComponentArgs::GetColorFromParams(std::string varName)
 {
     if (!componentRoot[varName])

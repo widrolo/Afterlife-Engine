@@ -14,11 +14,16 @@ namespace WEngine
 
 	struct Transform
 	{
-		Transform(): position(Vector2::Zero), size(Vector2::Zero) {}
-		Transform(Vector2 pos, Vector2 size) : position(pos), size(size) {}
+		Transform(): position(Vector3::Zero), size(Vector3::Zero) {}
+		Transform(Vector3 pos, Vector3 rot, Vector3 size) : position(pos), rotation(rot), size(size) {}
 
-		Vector2 position;
-		Vector2 size;
+		Vector3 position;
+		Vector3 rotation;
+		Vector3 size;
+
+		Vector3 Forward();
+		Vector3 Right();
+		Vector3 Up();
 
 		const static Transform Zero;
 	};

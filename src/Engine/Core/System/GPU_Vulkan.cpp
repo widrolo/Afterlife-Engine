@@ -112,7 +112,10 @@ struct Vulkan_Model
 {
     VkBuffer vertexBuffer;
     VmaAllocation vertexAllocation;
-    uint64 vertexCount;
+    VkBuffer indexBuffer;
+    VmaAllocation indexAllocation;
+    uint32 vertexCount;
+    uint32 indexCount;
 };
 
 
@@ -138,6 +141,8 @@ wtl::vector<Vulkan_Model> loadedModels;
 
 static uint32 drawCallsThisFrame = 0;
 static uint32 drawCallsLastFrame = 0;
+
+static uint32 currentBoundShader = 999999999;
 
 // --------------------------------------------------------------------------------------------------------------------
 // ------------------------------------------------ [GPU API HELPERS] -------------------------------------------------
@@ -519,8 +524,16 @@ bool SetupSwapchain()
 
 bool SetupPipelineLayout()
 {
+    VkPushConstantRange pushConstant{};
+    pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pushConstant.offset = 0;
+    pushConstant.size = sizeof(WEngine::Mat4x4);
+
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
+    pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
+
     auto resLayout = vkCreatePipelineLayout(vcore.gpuDevice, &pipelineLayoutInfo, vcore.allocator, &pipelineLayout);
     if (!ParseVkResult(resLayout))
     {
@@ -810,6 +823,87 @@ VkPipeline CreatePipeline(VkRenderPass renderPass, std::string shaderName)
     return pipeline;
 }
 
+std::pair<VkBuffer, VmaAllocation> CreateVertexBuffer(const wtl::vector<WEngine::VertexData>& vertData)
+{
+    VkBuffer vertBuf;
+    VmaAllocation vertAlloc;
+    VkDeviceSize vertBufferSize = vertData.size() * sizeof(WEngine::VertexData);
+
+    VkBufferCreateInfo bufferCreateInfo{};
+    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferCreateInfo.size = vertBufferSize;
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+
+    VmaAllocationCreateInfo allocationCreateInfo{};
+    allocationCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+    allocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+    allocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+    VmaAllocationInfo bufferAllocInfo{};
+
+    auto res = vmaCreateBuffer(vcore.vmaAllocator, &bufferCreateInfo, &allocationCreateInfo,
+        &vertBuf, &vertAlloc, &bufferAllocInfo);
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Failed to allocate vertex buffer");
+        return {VK_NULL_HANDLE, VK_NULL_HANDLE};
+    }
+
+    if (bufferAllocInfo.pMappedData)
+    {
+        memcpy(bufferAllocInfo.pMappedData, vertData.data(), vertBufferSize);
+    }
+    else
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Failed to allocate vertex buffer");
+        return {VK_NULL_HANDLE, VK_NULL_HANDLE};
+    }
+    return {vertBuf, vertAlloc};
+}
+
+std::pair<VkBuffer, VmaAllocation> CreateIndexBuffer(const wtl::vector<uint32>& indData)
+{
+    VkBuffer indBuf;
+    VmaAllocation indAlloc;
+    VkDeviceSize indBufferSize = indData.size() * sizeof(uint32);
+
+    VkBufferCreateInfo bufferCreateInfo{};
+    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferCreateInfo.size = indBufferSize;
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+
+    VmaAllocationCreateInfo allocationCreateInfo{};
+    allocationCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+    allocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+    allocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+    VmaAllocationInfo bufferAllocInfo{};
+
+    auto res = vmaCreateBuffer(vcore.vmaAllocator, &bufferCreateInfo, &allocationCreateInfo,
+        &indBuf, &indAlloc, &bufferAllocInfo);
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Failed to allocate index buffer");
+        return {VK_NULL_HANDLE, VK_NULL_HANDLE};
+    }
+
+    if (bufferAllocInfo.pMappedData)
+    {
+        memcpy(bufferAllocInfo.pMappedData, indData.data(), indBufferSize);
+    }
+    else
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Failed to allocate index buffer");
+        return {VK_NULL_HANDLE, VK_NULL_HANDLE};
+    }
+    return {indBuf, indAlloc};
+}
 
 // ------------------------------------------------ [HELPER FUNCTIONS] ------------------------------------------------
 
@@ -951,40 +1045,22 @@ WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::ModelIn
 {
     Vulkan_Model vkModel{};
     vkModel.vertexCount = model.vertices.size();
-    VkDeviceSize vertBufferSize = model.vertices.size() * sizeof(WEngine::VertexData);
+    vkModel.indexCount = model.indices.size();
 
-    VkBufferCreateInfo bufferCreateInfo{};
-    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferCreateInfo.size = vertBufferSize;
-    bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    auto vertBuf = CreateVertexBuffer(model.vertices);
+    auto indBuf = CreateIndexBuffer(model.indices);
 
-    VmaAllocationCreateInfo allocationCreateInfo{};
-    allocationCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
-    allocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
-    allocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-    VmaAllocationInfo bufferAllocInfo{};
-
-    auto res = vmaCreateBuffer(vcore.vmaAllocator, &bufferCreateInfo, &allocationCreateInfo,
-        &vkModel.vertexBuffer, &vkModel.vertexAllocation, &bufferAllocInfo);
-
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleError();
-        WEngine::WLog::ConsoleLog("Failed to allocate vertex buffer");
+    // creation funcs already gave an error message
+    if (vertBuf.first == VK_NULL_HANDLE)
         return WEngine::Nullable<WEngine::Model>();
-    }
-
-    if (bufferAllocInfo.pMappedData)
-    {
-        memcpy(bufferAllocInfo.pMappedData, model.vertices.data(), vertBufferSize);
-    }
-    else
-    {
-        WEngine::WLog::SetConsoleError();
-        WEngine::WLog::ConsoleLog("Failed to allocate vertex buffer");
+    if (indBuf.first == VK_NULL_HANDLE)
         return WEngine::Nullable<WEngine::Model>();
-    }
+
+    vkModel.vertexBuffer = vertBuf.first;
+    vkModel.vertexAllocation = vertBuf.second;
+    vkModel.indexBuffer = indBuf.first;
+    vkModel.indexAllocation = indBuf.second;
+
 
     loadedModels.push_back(vkModel);
     return WEngine::Nullable<WEngine::Model>(loadedModels.size());
@@ -1006,21 +1082,30 @@ void Iris::DRAWCALL_ClearFrame(WEngine::Color clearColor)
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = {(uint32)EngineSettings::resolution.x, (uint32)EngineSettings::resolution.y};
     renderPassInfo.framebuffer = screen.swapchainFramebuffers[screen.swapchainCurrentImage];
-
+    currentBoundShader = 99999999;
     vkCmdBeginRenderPass(cmdBufs[screen.currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Shader shader, const WEngine::ShaderSettings &settings)
 {
-    Vulkan_Shader vkShader = loadedShaders[shader - 1];
+    if (currentBoundShader != shader)
+    {
+        Vulkan_Shader vkShader = loadedShaders[shader - 1];
+        vkCmdBindPipeline(cmdBufs[screen.currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
+        currentBoundShader = shader;
+    }
 
-    vkCmdBindPipeline(cmdBufs[screen.currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
+    WEngine::Mat4x4 mvp = std::get<WEngine::Mat4x4>(settings[0].option);
+    auto mvpRaw = mvp.GetRawData();
 
     Vulkan_Model vkModel = loadedModels[model - 1];
     VkDeviceSize offset = 0;
     vkCmdBindVertexBuffers(cmdBufs[screen.currentFrame], 0, 1, &vkModel.vertexBuffer, &offset);
+    vkCmdBindIndexBuffer(cmdBufs[screen.currentFrame], vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdPushConstants(cmdBufs[screen.currentFrame], pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
+        sizeof(WEngine::Mat4x4), &mvpRaw);
+    vkCmdDrawIndexed(cmdBufs[screen.currentFrame], vkModel.indexCount, 1, 0, 0, 0);
 
-    vkCmdDraw(cmdBufs[screen.currentFrame], vkModel.vertexCount, 1, 0, 0);
     drawCallsThisFrame++;
 }
 

@@ -16,7 +16,7 @@ void Viewport::Setup()
     m_widgetName = "Viewport";
 
     m_viewportEntity =  WAllocator::Construct<WEngine::Entity>();
-    m_viewportEntity->transform.size = WEngine::Vector2::One;
+    m_viewportEntity->transform.size = WEngine::Vector3::One;
     viewportCam = WAllocator::Construct<WEngine::CameraComponent>(m_viewportEntity);
     viewportCam->Start();
     //WEngine::CoreSystems::GetRenderHandler()->SetNewCamera(viewportCam);

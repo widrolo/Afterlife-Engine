@@ -21,9 +21,14 @@ std::string Component::GetName() const
 	return m_nameOfComponent;
 }
 
-Vector2 Component::GetPosition() const
+Vector3 Component::GetPosition() const
 {
 	return entity->transform.position;
+}
+
+Vector3 Component::GetRotation() const
+{
+	return entity->transform.rotation;
 }
 
 void Component::MakeErrorMsg(int line, std::string reason)

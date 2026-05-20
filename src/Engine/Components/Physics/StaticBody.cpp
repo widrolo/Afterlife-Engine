@@ -48,7 +48,7 @@ void StaticBody::Init()
 	}
 
 	m_simulatableObject->SetOwner(entity);
-	m_simulatableObject->SetPosition(entity->transform.position);
+	//m_simulatableObject->SetPosition(entity->transform.position);
 	m_simulatableObject->SetFreezeState(true);
 }
 
