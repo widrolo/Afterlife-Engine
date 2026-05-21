@@ -14,7 +14,6 @@ REGISTER_COMPONENT(MeshRendererComponent)
 MeshRendererComponent::MeshRendererComponent(Entity *e)
 {
     COMP_SETUP("MeshRendererComponent")
-    WLog::ConsoleLog("Cheers love");
 }
 
 void MeshRendererComponent::Awake(ComponentArgs ca)

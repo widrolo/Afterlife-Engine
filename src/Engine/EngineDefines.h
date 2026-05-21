@@ -94,6 +94,8 @@ struct EngineSettings
 	_GLOBAL_CONST_ std::string uiSheetPath = "UISheets/";
 	/** This sets the Behaviour Tree path. */
 	_GLOBAL_CONST_ std::string behaviourTreePath = "Behaviours/";
+	/** This sets the Behaviour Tree path. */
+	_GLOBAL_CONST_ std::string meshPath = "Meshes/";
 
 	/**
 	 *	This sets the tick rate for the physics engine. The lower the tick rate (and

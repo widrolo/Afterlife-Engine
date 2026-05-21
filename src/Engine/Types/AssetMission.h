@@ -7,6 +7,8 @@
 #include <tinyxml2/tinyxml2.h>
 #include <Engine/Types/Audio.h>
 
+#include "Rendering/ModelInfo.h"
+
 namespace WEngine
 {
 	/**
@@ -70,5 +72,10 @@ namespace WEngine
 	struct UISheetAssetMission : public AssetMissionBase
 	{
 		tinyxml2::XMLDocument document;
+	};
+
+	struct MeshAssetMission : public AssetMissionBase
+	{
+		ModelInfo model;
 	};
 }

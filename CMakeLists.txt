@@ -300,6 +300,9 @@ add_executable(Widrolo_Engine_3D
         src/Game/Components/Freecam.h
         src/Engine/Components/Rendering/MeshRendererComponent.cpp
         src/Engine/Components/Rendering/MeshRendererComponent.h
+        src/Engine/gl/gltf/tiny_gltf_v3.c
+        src/Game/Core/PerfTester.cpp
+        src/Game/Core/PerfTester.h
 )
 
 set_target_properties(Widrolo_Engine_3D PROPERTIES
@@ -323,6 +326,7 @@ target_include_directories(Widrolo_Engine_3D PRIVATE
 target_compile_definitions(Widrolo_Engine_3D PRIVATE
         _CRT_SECURE_NO_WARNINGS
         YAML_CPP_STATIC_DEFINE
+        TINYGLTF3_ENABLE_FS
 )
 
 #add_compile_options(-fsized-deallocation)

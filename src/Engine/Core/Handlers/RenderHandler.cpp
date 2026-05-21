@@ -67,7 +67,12 @@ RenderHandler::RenderHandler()
 		 4, 6, 5,
 		 4, 7, 6};
 
-	auto modelN = Iris::ALLOC_CreateModel(info);
+	MeshAssetMission mission;
+	mission.name = "Monkey";
+	ModelInfo monkey;
+	CoreSystems::GetAssetRepo()->GetAsset(mission);
+
+	auto modelN = Iris::ALLOC_CreateModel(mission.model);
 
 	if (modelN.HasValue())
 		testModel = modelN.GetValue();
@@ -152,6 +157,8 @@ void RenderHandler::RenderSingleMission(RenderMission &mission)
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
 
 	modelMatrix = glm::translate(modelMatrix, glm::vec3(modPos.x, modPos.y, modPos.z));
+
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.x), glm::vec3(1.0f, 0.0f, 0.0f));
 	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.y), glm::vec3(0.0f, 1.0f, 0.0f));

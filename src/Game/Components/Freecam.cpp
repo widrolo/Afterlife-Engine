@@ -11,14 +11,14 @@ Freecam::Freecam(WEngine::Entity *e)
 
 void Freecam::Awake(WEngine::ComponentArgs ca)
 {
-    m_speed = 0.4f;
+    m_speed = 3.0f;
 }
 
 void Freecam::Start()
 {
     m_oldMousePos = input->GetMousePosition();
-    WEngine::CoreSystems::GetInputHandler()->SetMouseRelativeMode(true);
-    m_focused = true;
+    WEngine::CoreSystems::GetInputHandler()->SetMouseRelativeMode(false);
+    m_focused = false;
 }
 
 void Freecam::Tick(float32 dt)

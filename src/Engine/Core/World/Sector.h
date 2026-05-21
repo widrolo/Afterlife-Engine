@@ -13,6 +13,7 @@ namespace WEditor
 	class ComponentSettings;
 }
 
+class Game;
 namespace WEngine
 {
 	class Entity;
@@ -23,6 +24,7 @@ namespace WEngine
 	struct SectorLogicBound
 	{
 		SectorLogic* logic;
+
 	};
 	class Sector
 	{
@@ -34,6 +36,7 @@ namespace WEngine
 		friend WEditor::EntityList;
 		friend WEditor::ComponentList;
 		friend WEditor::ComponentSettings;
+		friend Game; // temp
 	public:
 		Sector(const std::string& sectorName);
 	private:
