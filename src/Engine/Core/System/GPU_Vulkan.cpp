@@ -154,6 +154,7 @@ std::unordered_map<std::string, WEngine::Model> loadedModelHandles;
 
 static uint32 drawCallsThisFrame = 0;
 static uint32 drawCallsLastFrame = 0;
+static uint64 vramUsage = 0;
 
 static uint32 currentBoundShader = 999999999;
 
@@ -215,6 +216,16 @@ VkBool32 ValidationCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeveri
 
 
     return VK_FALSE;
+}
+
+uint64 CalcTextureSize(uint8 bytesPerPixel, uint32 width, uint32 height)
+{
+    return width * height * bytesPerPixel;
+}
+
+uint64 CalcModelSize(uint8 bytesPerVertex, uint32 vertexCount)
+{
+    return bytesPerVertex * vertexCount;
 }
 
 // --------------------------------------------------- [API SETUP] ----------------------------------------------------
@@ -483,6 +494,7 @@ void SetupSwapchainFramebuffers()
         fbInfo.layers = 1;
 
         vkCreateFramebuffer(vcore.gpuDevice, &fbInfo, vcore.allocator, &screen.swapchainFramebuffers[i]);
+        vramUsage += CalcTextureSize(4, EngineSettings::resolution.x, EngineSettings::resolution.y);
     }
 }
 
@@ -525,6 +537,7 @@ bool SetupSwapchain()
     screen.endOfFrameFences.resize(swapchainImageCount);
     bufferGraveyard.resize(swapchainImageCount);
 
+    vramUsage += CalcTextureSize(4, EngineSettings::resolution.x, EngineSettings::resolution.y) * swapchainImageCount;
 
     VkSemaphoreCreateInfo semInfo{};
     semInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -651,7 +664,12 @@ bool SetupDepthImage()
     allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
     allocInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
-    auto res = vmaCreateImage(vcore.vmaAllocator, &info, &allocInfo, &screen.depthImage, &screen.depthAllocation, nullptr);
+    VmaAllocationInfo allocationInfo{};
+
+    auto res = vmaCreateImage(vcore.vmaAllocator, &info, &allocInfo, &screen.depthImage, &screen.depthAllocation,
+        &allocationInfo);
+
+    vramUsage += allocationInfo.size;
 
     if (!ParseVkResult(res))
     {
@@ -960,6 +978,8 @@ std::pair<VkBuffer, VmaAllocation> CreateVertexBuffer(const wtl::vector<WEngine:
     auto res = vmaCreateBuffer(vcore.vmaAllocator, &bufferCreateInfo, &allocationCreateInfo,
         &vertBuf, &vertAlloc, &bufferAllocInfo);
 
+    vramUsage += bufferAllocInfo.size;
+
     if (!ParseVkResult(res))
     {
         WEngine::WLog::SetConsoleError();
@@ -1000,6 +1020,8 @@ std::pair<VkBuffer, VmaAllocation> CreateIndexBuffer(const wtl::vector<uint32>& 
 
     auto res = vmaCreateBuffer(vcore.vmaAllocator, &bufferCreateInfo, &allocationCreateInfo,
         &indBuf, &indAlloc, &bufferAllocInfo);
+
+    vramUsage += bufferAllocInfo.size;
 
     if (!ParseVkResult(res))
     {
@@ -1042,6 +1064,8 @@ std::pair<VkBuffer, VmaAllocation> InitInstanceBuffer()
     auto res = vmaCreateBuffer(vcore.vmaAllocator, &bufferCreateInfo, &allocationCreateInfo,
         &instBuf, &instAlloc, &bufferAllocInfo);
 
+    vramUsage += bufferAllocInfo.size;
+
     if (!ParseVkResult(res))
     {
         WEngine::WLog::SetConsoleError();
@@ -1061,6 +1085,8 @@ void ExpandInstanceBuffer(Vulkan_Model& model, uint64 minSize)
     vmaGetAllocationInfo(vcore.vmaAllocator, model.instanceAllocation, &bufferAllocInfo);
     uint64 oldSize = bufferAllocInfo.size / sizeof(WEngine::InstanceData);
 
+    vramUsage -= bufferAllocInfo.size;
+
     VkBuffer instBuf;
     VmaAllocation instAlloc;
     VkDeviceSize newSize = minSize * 2 * sizeof(WEngine::InstanceData);
@@ -1077,6 +1103,8 @@ void ExpandInstanceBuffer(Vulkan_Model& model, uint64 minSize)
 
     auto res = vmaCreateBuffer(vcore.vmaAllocator, &bufferCreateInfo, &allocationCreateInfo,
         &instBuf, &instAlloc, &bufferAllocInfo);
+
+    vramUsage += bufferAllocInfo.size;
 
     if (!ParseVkResult(res))
     {
@@ -1427,7 +1455,7 @@ void Iris::DRAWCALL_SwapBuffers(SDL_Window *window)
 
 uint64 Iris::GetVramUsage()
 {
-    return 0;
+    return vramUsage;
 }
 
 uint32 Iris::GetDrawCallCountLastFrame()
