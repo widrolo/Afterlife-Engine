@@ -8,8 +8,8 @@ InstThreadedList::InstThreadedList()
 {
     MemListNode* node = wNewArr(MemListNode, 1);
     node->next = nullptr;
-    node->nextOfKind = nullptr;
     node->prev = nullptr;
+    node->nextOfKind = nullptr;
     node->prevOfKind = nullptr;
     node->model = 0;
     node->shader = 0;
@@ -17,11 +17,19 @@ InstThreadedList::InstThreadedList()
     node->size = GPUSettings::stationaryInstBufferSize;
     head = node;
     emptyHead = node;
+    occupiedHead = nullptr;
 }
 
 InstThreadedList::~InstThreadedList()
 {
-
+    MemListNode* cursor = head;
+    MemListNode* temp;
+    while (cursor != nullptr)
+    {
+        temp = cursor->next;
+        wFree(cursor);
+        cursor = temp;
+    }
 }
 
 std::pair<uint64, uint64> InstThreadedList::FindNode(WEngine::Model model, WEngine::Shader shader) const
@@ -32,7 +40,7 @@ std::pair<uint64, uint64> InstThreadedList::FindNode(WEngine::Model model, WEngi
     {
         if (cursor->model == model && cursor->shader == shader)
             return {cursor->offset, cursor->size};
-        cursor = cursor->next;
+        cursor = cursor->nextOfKind;
     }
 
     return {0,0};
@@ -44,14 +52,38 @@ std::pair<uint64, uint64> InstThreadedList::InsertData(WEngine::Model model, WEn
     {
         MemListNode* node = wNewArr(MemListNode, 1);
         node->next = emptyHead;
+        node->prev = nullptr;
         node->nextOfKind = nullptr;
+        node->prevOfKind = nullptr;
         node->model = model;
         node->shader = shader;
         node->size = size;
         node->offset = 0;
 
+        if (size > emptyHead->size)
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog("Could not fit new Stationary Instance Data, please increase it in GPUSettings.h");
+            abort();
+        }
+
+        // if you hit this, you're dangerously close to a crash
+        if (size == emptyHead->size)
+        {
+            MemListNode* freeNode = emptyHead;
+
+            head = node;
+            occupiedHead = node;
+            emptyHead = nullptr;
+
+            wFree(freeNode);
+            return {0, size};
+        }
         emptyHead->size -= size;
         emptyHead->offset = size;
+        emptyHead->prev = node;
+
+        occupiedHead = node;
 
         head = node;
         return {0, size};
@@ -67,7 +99,7 @@ std::pair<uint64, uint64> InstThreadedList::InsertData(WEngine::Model model, WEn
             found = true;
             break;
         }
-        cursor = cursor->next;
+        cursor = cursor->nextOfKind;
     }
 
     // case 1: we have the model
@@ -80,32 +112,84 @@ std::pair<uint64, uint64> InstThreadedList::InsertData(WEngine::Model model, WEn
             {
                 cursor->size += size;
                 cursor->next->offset += size;
+                cursor->next->size -= size;
+
+                MemListNode* freeNode = cursor->next;
+
+                cursor->size += size;
+                cursor->next = freeNode->next;
+                if (freeNode->next != nullptr)
+                    freeNode->next->prev = cursor;
+
+                // unlink freeNode from free list
+                if (freeNode->prevOfKind != nullptr)
+                    freeNode->prevOfKind->nextOfKind = freeNode->nextOfKind;
+                else
+                    emptyHead = freeNode->nextOfKind;
+
+                if (freeNode->nextOfKind != nullptr)
+                    freeNode->nextOfKind->prevOfKind = freeNode->prevOfKind;
+
+                wFree(freeNode);
             }
             // case 1.2: we cannot expand
             else
             {
+                uint64 newSize = cursor->size + size;
                 DecoupleOccupiedEntry(cursor);
-                auto freeBlock = FindBestFit(size);
+                cursor->size = newSize;
+                auto freeBlock = FindBestFit(cursor->size + size);
                 SqueezeEntry(cursor, freeBlock);
             }
-
+        }
+        // case 1.3: same as 1.2, but now there is an out of memory risk.
+        else
+        {
+            uint64 newSize = cursor->size + size;
+            DecoupleOccupiedEntry(cursor);
+            cursor->size = newSize;
+            auto freeBlock = FindBestFit(cursor->size + size);
+            SqueezeEntry(cursor, freeBlock);
         }
     }
     // case 2: we have to add a new entry.
     else
     {
-
+        MemListNode* node = wNewArr(MemListNode, 1);
+        node->next = nullptr;
+        node->prev = nullptr;
+        node->nextOfKind = nullptr;
+        node->prevOfKind = nullptr;
+        node->model = model;
+        node->shader = shader;
+        node->size = size;
+        cursor = node;
+        auto freeBlock = FindBestFit(size);
+        SqueezeEntry(cursor, freeBlock);
     }
+
+    return {cursor->offset, cursor->size};
 }
 
 void InstThreadedList::ClearNode(WEngine::Model model, WEngine::Shader shader)
 {
+    MemListNode* cursor = occupiedHead;
+    while (cursor != nullptr)
+    {
+        if (cursor->model == model && cursor->shader == shader)
+        {
+            DecoupleOccupiedEntry(cursor);
 
+            wFree(cursor);
+            return;
+        }
+        cursor = cursor->nextOfKind;
+    }
 }
 
 void InstThreadedList::Defragment()
 {
-    WEngine::WLog::SetConsoleError();
+    WEngine::WLog::SetConsoleWarning();
     WEngine::WLog::ConsoleLog("Call to defragment Instance Buffer while its not yet implemented!");
 }
 
@@ -134,12 +218,13 @@ MemListNode* InstThreadedList::FindBestFit(uint64 size) const
 
     while (cursor != nullptr)
     {
-        if (cursor->size >= size)
+        // not best fit yet, but its good enough for now.
+        if (cursor->model == 0 && cursor->size >= size)
             return cursor;
-        cursor = cursor->next;
+        cursor = cursor->nextOfKind;
     }
 
-    WEngine::WLog::SetConsoleWarning();
+    WEngine::WLog::SetConsoleError();
     WEngine::WLog::ConsoleLog("Could not fit new Stationary Instance Data, please increase it in GPUSettings.h");
     abort();
 }
@@ -160,34 +245,108 @@ void InstThreadedList::DecoupleOccupiedEntry(MemListNode *entry)
             freeBehind = true;
     }
 
-
     // case 1: no free blocks around
     if (!freeBehind && !freeInFront)
     {
+        MemListNode* node = wNewArr(MemListNode, 1);
+        node->next = entry->next;
+        node->prev = entry->prev;
+        node->nextOfKind = nullptr;
+        node->prevOfKind = nullptr;
+        node->model = 0;
+        node->shader = 0;
+        node->offset = entry->offset;
+        node->size = entry->size;
 
+        if (entry->next != nullptr)
+            entry->next->prev = node;
+        if (entry->prev != nullptr)
+            entry->prev->next = node;
+
+        MemListNode* cursor = emptyHead;
+        while (cursor != nullptr)
+        {
+            if (cursor->offset > node->offset)
+                break;
+            cursor = cursor->nextOfKind;
+        }
+        // FIXME: What if cursor ends up being last?
+        MemListNode* back = cursor->prevOfKind;
+        if (back == nullptr)
+            emptyHead = node;
+        else
+            back->nextOfKind = node;
+        cursor->prevOfKind = node;
+        node->nextOfKind = cursor;
+        node->prevOfKind = back;
+
+        if (entry == head)
+            head = node;
     }
     // case 2: surrounded by free blocks
     if (freeBehind && freeInFront)
     {
+        MemListNode* back = entry->prev;
+        MemListNode* front = entry->next;
 
+        // back one will consume the front one.
+        back->size += entry->size + front->size;
+        back->next = front->next;
+        if (back->next != nullptr)
+            back->next->prev = back;
+        back->nextOfKind = front->nextOfKind;
+        if (back->nextOfKind != nullptr)
+            back->nextOfKind->prevOfKind = back;
+
+
+        wFree(front);
     }
     // case 3: free block behind
     if (freeBehind && !freeInFront)
     {
-
+        MemListNode* back = entry->prev;
+        back->size += entry->size;
+        back->next = entry->next;
+        if (entry->next != nullptr)
+            entry->next->prev = back;
     }
     // case 4: free block in front
     if (!freeBehind && freeInFront)
     {
+        MemListNode* front = entry->next;
+        front->size += entry->size;
+        front->offset = entry->offset;
+        front->prev = entry->prev;
+        if (entry->prev != nullptr)
+            entry->prev->next = front;
 
+        if (entry == head)
+            head = front;
     }
 
-    // decouple cursor from list and kind list
-    // account for freeing block, handle offset
+    if (entry->prevOfKind != nullptr)
+        entry->prevOfKind->nextOfKind = entry->nextOfKind;
+    if (entry->nextOfKind != nullptr)
+        entry->nextOfKind->prevOfKind = entry->prevOfKind;
+
+    if (entry == occupiedHead)
+        occupiedHead = entry->nextOfKind;
+
+    entry->next = nullptr;
+    entry->prev = nullptr;
+    entry->nextOfKind = nullptr;
+    entry->prevOfKind = nullptr;
 }
 
 void InstThreadedList::SqueezeEntry(MemListNode *entry, MemListNode *freeBlock)
 {
+    if (freeBlock->size < entry->size)
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Unable to squeeze memory entry, please fix InstThreadedList::FindBestFit()!");
+        abort();
+    }
+
     // move there
     // inform the free block.
     // couple into list, connect kind pointer.

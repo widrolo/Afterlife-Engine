@@ -1,6 +1,5 @@
 #pragma once
 
-#include <utility>
 #include <Engine/Types/CommonTypes.h>
 #include <Engine/Types/Rendering/GPU/Model.h>
 #include <Engine/Types/Rendering/GPU/Shader.h>
@@ -8,11 +7,23 @@
 #include "Engine/WTL/vector.h"
 
 // by the way, terrible cache efficiency! This is one whole ass cache line long.
+/**
+ * Node that holds the information for a single block of memory.
+ * @param next pointer to the next node
+ * @param prev pointer to the previous node
+ * @param nextOfKind pointer to the next node of the same kind (Free/Occupied)
+ * @param prevOfKind pointer to the previous node of the same kind (Free/Occupied)
+ * @param model model handle
+ * @param shader shader handle
+ * @param offset offset in the buffer in bytes
+ * @param size size in the buffer in bytes
+ * @note the kind of node is mostly determined by the model handle. If the handle is 0, its a free block; occupied otherise.
+ */
 struct MemListNode
 {
     MemListNode* next;
-    MemListNode* nextOfKind;
     MemListNode* prev;
+    MemListNode* nextOfKind;
     MemListNode* prevOfKind;
     WEngine::Model model;
     WEngine::Shader shader;
@@ -50,7 +61,7 @@ public:
      * Inserts instance data into the buffer.
      * @param model model to be inserted.
      * @param shader shader to be inserted.
-     * @param size size to allocate in bytes.
+     * @param size size to either allocate, or add into an existing entry.
      * @return [0] offset in the buffer in bytes; [1] reach in the buffer in bytes.
      * @note if a place cannot be found, then it returns 0,0.
      * @note this may decide to reallocate the block, please make sure to check up with FindNode first!
