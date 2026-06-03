@@ -251,7 +251,7 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/Rendering/GPU/Line.h
         src/Engine/Types/Rendering/LineInfo.h
         src/Engine/Types/Rendering/TextureInfo.h
-        src/Engine/Core/System/GPU_Vulkan.cpp
+        src/Engine/Core/System/IrisVulkan.cpp
         src/Engine/Types/DebugFlags.h
         src/Engine/EngineWidgets/DebugFlagsWidget.cpp
         src/Engine/EngineWidgets/DebugFlagsWidget.h
@@ -308,6 +308,25 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/Rendering/Iris/InstThreadedList.h
         src/Engine/EngineWidgets/RenderWatchWidget.cpp
         src/Engine/EngineWidgets/RenderWatchWidget.h
+        src/Engine/Core/System/Vulkan/VulkanTypes.h
+        src/Engine/Core/System/Vulkan/VulkanContext.h
+        src/Engine/Core/System/Vulkan/VulkanStatistics.h
+        src/Engine/Core/System/Vulkan/VulkanCore.cpp
+        src/Engine/Core/System/Vulkan/VulkanCore.h
+        src/Engine/Core/System/Vulkan/VulkanHelpers.cpp
+        src/Engine/Core/System/Vulkan/VulkanHelpers.h
+        src/Engine/Core/System/Vulkan/VulkanQueues.cpp
+        src/Engine/Core/System/Vulkan/VulkanQueues.h
+        src/Engine/Core/System/Vulkan/VulkanSwapchain.cpp
+        src/Engine/Core/System/Vulkan/VulkanSwapchain.h
+        src/Engine/Core/System/Vulkan/VulkanPipeline.cpp
+        src/Engine/Core/System/Vulkan/VulkanPipeline.h
+        src/Engine/Core/System/Vulkan/VulkanShaders.cpp
+        src/Engine/Core/System/Vulkan/VulkanShaders.h
+        src/Engine/Core/System/Vulkan/VulkanBuffers.cpp
+        src/Engine/Core/System/Vulkan/VulkanBuffers.h
+        src/Engine/Core/System/Vulkan/VulkanImages.cpp
+        src/Engine/Core/System/Vulkan/VulkanImages.h
 )
 
 set_target_properties(Widrolo_Engine_3D PROPERTIES

@@ -119,7 +119,6 @@ void RenderHandler::RecordStationaryAdd(Model model, Shader shader, const Transf
 		}
 	}
 
-	WLog::ConsoleLog(std::format("Stationary stage for m{} and s{} not found, creating new one...", model, shader));
 	StationaryObjStaged obj;
 	obj.model = model;
 	obj.shader = shader;

@@ -26,5 +26,5 @@ struct GPUSettingsVulkan
     _GLOBAL_CEX_ bool enableValidation = false;
 #endif
     _GLOBAL_CEX_ InvalidResultAction invalidResultAction = InvalidResultAction::Abort;
-    _GLOBAL_CEX_ uint64 maxInstanceBufferSize = 1024;
+    _GLOBAL_CEX_ uint64 maxInstanceBufferSize = 4;
 };

@@ -256,8 +256,7 @@ void AssetRepo::GetAsset<MeshAssetMission>(MeshAssetMission& mission)
 	tg3_model_free(&model);
 	tg3_error_stack_free(&errors);
 
-	WLog::ConsoleLog(std::format("Loaded '{}': {} verts, {} indices",
-		mission.name, out.vertices.size(), out.indices.size()));
+	WLog::ConsoleLog(std::format("Loaded model \"{}\"", mission.name));
 }
 
 template<>
