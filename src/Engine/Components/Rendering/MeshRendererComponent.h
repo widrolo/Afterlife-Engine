@@ -12,6 +12,7 @@ namespace WEngine
 
     public:
         void Awake(ComponentArgs ca) override;
+        void LateAwake() override;
         void Draw() override;
 
     private:

@@ -4,6 +4,7 @@
 #include <SDL3/SDL.h>
 
 #include "Engine/Math/Vector.h"
+#include "Engine/Types/Rendering/InstanceData.h"
 #include "Engine/Types/Rendering/RenderMission.h"
 #include "Engine/WTL/deque.h"
 #include "Engine/WTL/list.h"
@@ -30,11 +31,11 @@ namespace WEngine
 			wtl::vector<ModelGroup> models;
 		};
 
-		struct StatinaryObjStaged
+		struct StationaryObjStaged
 		{
 			Model model;
 			Shader shader;
-			Transform transform;
+			wtl::vector<InstanceData> instData;
 		};
 
 		Vector2 m_windowResolution;
@@ -44,7 +45,7 @@ namespace WEngine
 		CameraComponent* m_camera = nullptr;
 
 		wtl::deque<RenderMission> m_renderQueue;
-		wtl::deque<StatinaryObjStaged> m_stationaryAddQueue;
+		wtl::deque<StationaryObjStaged> m_stationaryAddQueue;
 
 		// first vector is sorted by shader, second sorts missions by model.
 		wtl::vector<ShaderGroup> m_sortedMissions;
@@ -61,7 +62,7 @@ namespace WEngine
 		void AddToRenderQueue(RenderMission& mission);
 
 		void RecordStationaryAdd(Model model, Shader shader, const Transform& transform);
-
+		void PushStationaryData();
 	private:
 		Mat4x4 CalcModelMatrix(const Transform& transform);
 		Mat4x4 CalcMVPMatrix(const Transform& transform);

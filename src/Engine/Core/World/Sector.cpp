@@ -93,6 +93,7 @@ void Sector::AddEntityPost(const SpawnArgs& args)
 	Entity* e = (Entity*)WAllocator::Construct<Entity>();
 	e->Internal_ParentSector(this),
 	e->Awake(args);
+	e->LateAwake();
 	m_entities.push_back(e);
 }
 
@@ -245,6 +246,7 @@ void Sector::LoadArgsFromFile(const std::string& sectorName)
 		Entity* e = (Entity*)WAllocator::Construct<Entity>();
 		e->Internal_ParentSector(this);
 		e->Awake(arg);
+		e->LateAwake();
 		m_entities.push_back(e);
 	}
 

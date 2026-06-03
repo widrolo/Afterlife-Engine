@@ -18,6 +18,14 @@ void Entity::Awake(const SpawnArgs& args)
 	EntityStart(args);
 }
 
+void Entity::LateAwake()
+{
+	for (const auto& comp : m_components)
+	{
+		comp->LateAwake();
+	}
+}
+
 void Entity::Start()
 {
 	m_hasEverStarted = true;

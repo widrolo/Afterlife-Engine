@@ -40,12 +40,23 @@ namespace WEngine
 
 	private:
 		wtl::vector<Component*> m_components;
-		bool m_hasEverStarted = false;
+		bool m_hasEverStarted : 1 = false;
+		bool m_isStationary : 1 = true;
+
 	public:
 
 		void EntityDestroy();
 
+		/**
+		 * Called right after creating an entity.
+		 * @param args arguments containing
+		 */
 		virtual void Awake(const SpawnArgs& args);
+
+		/**
+		 * Called right after Awake. Used if a component needs to initialize after all other components.
+		 */
+		virtual void LateAwake();
 
 		virtual void Start();
 		virtual void Stop();
@@ -69,6 +80,8 @@ namespace WEngine
 		virtual void PhysicsTick(float32 tr);
 		virtual void Draw();
 		virtual void DrawDebug();
+
+		bool IsStationary() const { return m_isStationary; }
 	private:
 		void EntityStart(const SpawnArgs& args);
 		void Internal_ParentSector(Sector* parentSector);

@@ -266,6 +266,8 @@ void Engine::Loop_Audio()
 
 void Engine::Loop_Draw()
 {
+	CoreSystems::renderHandler->PushStationaryData();
+
 	StopWatch timings;
 	m_game->GameLoopWidgetEarly();
 	CoreSystems::widgetHandler->DrawWidgets();

@@ -65,6 +65,12 @@ void MeshRendererComponent::Awake(ComponentArgs ca)
 
 }
 
+void MeshRendererComponent::LateAwake()
+{
+    if (entity->IsStationary() && m_model != 0 && m_shader != 0)
+        CoreSystems::GetRenderHandler()->RecordStationaryAdd(m_model, m_shader, entity->transform);
+}
+
 void MeshRendererComponent::Draw()
 {
     RenderMission mission;

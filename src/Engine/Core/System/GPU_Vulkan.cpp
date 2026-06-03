@@ -1517,7 +1517,8 @@ wtl::vector<MemListDebugInfo> Iris::GetStatInstBufAllocInfo()
 void Iris::AddStationaryObjects(WEngine::Model model, WEngine::Shader shader,
     wtl::vector<WEngine::InstanceData> instanceMats)
 {
-
+    uint64 size = instanceMats.size() * sizeof(WEngine::InstanceData);
+    statBuf.statBookkeep.InsertData(model, shader, size);
 }
 
 #endif

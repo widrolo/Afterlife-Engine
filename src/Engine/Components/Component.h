@@ -25,6 +25,7 @@ namespace WEngine
 
 	public:
 		virtual void Awake(ComponentArgs ca);
+		virtual void LateAwake() {}
 		virtual void Start() {}
 		virtual void Stop() {}
 		virtual void Tick(float32 dt) {}

@@ -409,3 +409,10 @@ set_target_properties(Widrolo_Engine_3D PROPERTIES
         WIN32_EXECUTABLE $<$<CONFIG:Packaging>:TRUE>
         OUTPUT_NAME "$<$<CONFIG:Debug>:Widrolo_Engine_3D-Dev>$<$<CONFIG:Release>:Widrolo_Engine_3D-RC>$<$<CONFIG:Packaging>:Widrolo_Engine_3D-Package>"
 )
+
+set(CMAKE_CXX_FLAGS_PACKAGING "-O3 -DNDEBUG" CACHE STRING "" FORCE)
+set(CMAKE_C_FLAGS_PACKAGING "-O3 -DNDEBUG" CACHE STRING "" FORCE)
+
+if(MSVC)
+    set(CMAKE_CXX_FLAGS_PACKAGING "/O2 /DNDEBUG" CACHE STRING "" FORCE)
+endif()

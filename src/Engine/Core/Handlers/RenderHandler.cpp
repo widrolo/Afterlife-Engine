@@ -101,11 +101,30 @@ void RenderHandler::AddToRenderQueue(RenderMission& mission)
 
 void RenderHandler::RecordStationaryAdd(Model model, Shader shader, const Transform& transform)
 {
-	StatinaryObjStaged obj;
+	for (auto& objects : m_stationaryAddQueue)
+	{
+		if (objects.model == model && objects.shader == shader)
+		{
+			objects.instData.push_back({CalcModelMatrix(transform)});
+			return;
+		}
+	}
+
+	WLog::ConsoleLog(std::format("Stationary stage for m{} and s{} not found, creating new one...", model, shader));
+	StationaryObjStaged obj;
 	obj.model = model;
 	obj.shader = shader;
-	obj.transform = transform;
+	obj.instData.push_back({CalcModelMatrix(transform)});
 	m_stationaryAddQueue.push_back(obj);
+}
+
+void RenderHandler::PushStationaryData()
+{
+	for (auto& object : m_stationaryAddQueue)
+	{
+		Iris::AddStationaryObjects(object.model, object.shader, object.instData);
+	}
+	m_stationaryAddQueue.clear();
 }
 
 Mat4x4 RenderHandler::CalcModelMatrix(const Transform &transform)
