@@ -90,6 +90,26 @@ VkFormat FindBestDepthFormat(const VulkanContext& ctx)
     return VK_FORMAT_UNDEFINED;
 }
 
+VkFormat FindBestColorFormat(const VulkanContext &ctx)
+{
+    wtl::vector<VkFormat> candidates =
+    {
+        VK_FORMAT_B8G8R8A8_UNORM,
+        VK_FORMAT_R8G8B8A8_UNORM
+    };
+
+    for (VkFormat format : candidates)
+    {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(ctx.vcore.gpuPhysicalDevice, format, &props);
+
+        if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT)
+            return format;
+    }
+
+    return VK_FORMAT_UNDEFINED;
+}
+
 uint64 GetSizeOfImageInBytes(WEngine::Vector2 imageSize, uint8 channelCount)
 {
     return (uint64)imageSize.x * (uint64)imageSize.y * channelCount;

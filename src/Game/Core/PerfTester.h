@@ -6,4 +6,8 @@ class PerfTester
 {
 public:
     PerfTester(WEngine::Sector* testworld);
+
+private:
+    void LotsOfCubesMonkey(WEngine::Sector* testworld);
+    void Dragon(WEngine::Sector* testworld);
 };

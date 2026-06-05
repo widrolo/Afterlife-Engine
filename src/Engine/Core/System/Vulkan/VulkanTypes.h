@@ -50,8 +50,8 @@ struct Vulkan_Core
 {
     VkDebugUtilsMessengerEXT validationMessenger = VK_NULL_HANDLE;
     VkAllocationCallbacks* allocator = nullptr;
-    VkAllocationCallbacks allocatorInternal;
-    VmaAllocator vmaAllocator;
+    VkAllocationCallbacks allocatorInternal{};
+    VmaAllocator vmaAllocator = VK_NULL_HANDLE;
 
     VkInstance instance = VK_NULL_HANDLE;
     VkPhysicalDevice gpuPhysicalDevice = VK_NULL_HANDLE;

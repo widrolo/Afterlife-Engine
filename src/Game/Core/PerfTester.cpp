@@ -5,6 +5,11 @@
 
 PerfTester::PerfTester(WEngine::Sector* testworld)
 {
+    LotsOfCubesMonkey(testworld);
+}
+
+void PerfTester::LotsOfCubesMonkey(WEngine::Sector* testworld)
+{
     WEngine::Transform t = WEngine::Transform();
     t.position = WEngine::Vector3::Zero;
     t.rotation = WEngine::Vector3::Zero;
@@ -24,7 +29,7 @@ PerfTester::PerfTester(WEngine::Sector* testworld)
     args.transform = t;
     args.ca = {ca};
 
-    const uint32 sideLen = 20;
+    const uint32 sideLen = 45;
     const float32 stride = 3.0f;
     uint32 counterModel = 0;
     uint32 counterShader = 0;
@@ -64,6 +69,28 @@ PerfTester::PerfTester(WEngine::Sector* testworld)
         t.position.z += stride;
         t.position.y = 0.0f;
     }
+}
 
+void PerfTester::Dragon(WEngine::Sector* testworld)
+{
+    WEngine::Transform t = WEngine::Transform();
+    t.position = WEngine::Vector3::Zero;
+    t.rotation = WEngine::Vector3::Zero;
+    t.size = WEngine::Vector3::One;
 
+    YAML::Node settings = YAML::Node();
+
+    settings["meshName"] = "Dragon";
+    settings["shaderName"] = "triangleReg";
+
+    WEngine::ComponentArgs ca;
+    ca.componentTypeId = 14;
+    ca.componentRoot = settings;
+
+    WEngine::SpawnArgs args;
+    args.name = "e";
+    args.transform = t;
+    args.ca = {ca};
+
+    testworld->AddEntityPost(args);
 }

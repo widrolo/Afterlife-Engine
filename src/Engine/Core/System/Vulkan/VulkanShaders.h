@@ -8,6 +8,12 @@
 #include "Engine/Types/AssetMission.h"
 
 VkShaderModule CompileShader(const VulkanContext& ctx, const WEngine::SpirVAssetMission& spirvAssetMission);
-VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, std::string shaderName);
+
+VkPipelineInputAssemblyStateCreateInfo CreatePipeline_InputAssembly();
+VkPipelineVertexInputStateCreateInfo CreatePipeline_VertexDefinition();
+VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Vertex(const VulkanContext& ctx, const std::string &shaderName);
+VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Fragment(const VulkanContext& ctx, const std::string &shaderName);
+
+VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, const std::string& shaderName);
 
 #endif

@@ -21,11 +21,12 @@ wtl::vector<VkDeviceQueueCreateInfo> FindDeviceQueues(VulkanContext& ctx)
         ctx.queues.queueFamilies[i].queues.resize(properties.queueCount);
         ctx.queues.queueFamilies[i].purpose = properties.queueFlags;
 
-        // yes its leaking, but its so little that it wouldnt even matter on a snes.
-        float32* queuePriorities = (float32*)WAllocator::Allocate(properties.queueCount * sizeof(float32));
+
+        float32* queuePriorities = wNewArr(float32, properties.queueCount);
+
         // ooga booga first has high priority
-        for (int i = 0; i < properties.queueCount; i++)
-            queuePriorities[i] = 0.0f;
+        for (int j = 0; j < properties.queueCount; j++)
+            queuePriorities[j] = 0.0f;
         queuePriorities[0] = 1.0f;
 
         VkDeviceQueueCreateInfo queueInfo{};

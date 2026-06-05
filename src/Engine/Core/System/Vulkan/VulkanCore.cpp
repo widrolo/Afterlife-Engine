@@ -194,6 +194,10 @@ bool SetupGraphicsDevice(VulkanContext& ctx)
 
     SetupDeviceQueues(ctx);
 
+    for (auto queue : queues)
+        wFree((void*)queue.pQueuePriorities);
+
+
     if (!ParseVkResult(resDev))
         return false;
 

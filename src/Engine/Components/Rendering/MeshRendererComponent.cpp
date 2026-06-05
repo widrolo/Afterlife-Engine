@@ -24,7 +24,6 @@ void MeshRendererComponent::Awake(ComponentArgs ca)
 {
     auto modelN = ca.GetStringFromParams("meshName");
     auto shaderN = ca.GetStringFromParams("shaderName");
-    auto instN = ca.GetBoolFromParams("instance");
 
     if (modelN.HasValue())
     {

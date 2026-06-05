@@ -29,19 +29,21 @@ VkShaderModule CompileShader(const VulkanContext& ctx, const WEngine::SpirVAsset
     return module;
 }
 
-VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, std::string shaderName)
+VkPipelineInputAssemblyStateCreateInfo CreatePipeline_InputAssembly()
 {
-    VkPipeline pipeline;
-
-    // ----------------------------------------------- [INPUT ASSEMBLY] -----------------------------------------------
-
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
     inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    return inputAssemblyInfo;
+}
 
-    // --------------------------------------------- [VERTEX DEFINITION] ----------------------------------------------
+VkPipelineVertexInputStateCreateInfo CreatePipeline_VertexDefinition()
+{
+    // it remains like this for now, but consider making this changeable pretty please
+    const uint8 bindings = 2;
+    const uint8 attributes = 8;
 
-    std::array<VkVertexInputBindingDescription, 2> bindDesc{};
+    auto bindDesc = wNewArr(VkVertexInputBindingDescription, bindings);
     bindDesc[0].binding = 0;
     bindDesc[0].stride = sizeof(WEngine::VertexData);
     bindDesc[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
@@ -51,7 +53,7 @@ VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, std::stri
 
     // [0] = Position (Vector3)   |   [1] = Color (Vector3)   |   [2] = Color UV (Vector2)   |   [3] = Shadow UV (Vector2)
     // [4-7] = Model (Mat4x4)     |
-    std::array<VkVertexInputAttributeDescription, 8> attributeDescriptions{};
+    auto attributeDescriptions = wNewArr(VkVertexInputAttributeDescription, attributes);
     attributeDescriptions[0].binding = 0;
     attributeDescriptions[0].location = 0;
     attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT; // Khronos had a meth party while making this one
@@ -76,13 +78,53 @@ VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, std::stri
 
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = bindDesc.size();
-    vertexInputInfo.pVertexBindingDescriptions = bindDesc.data();
-    vertexInputInfo.vertexAttributeDescriptionCount = attributeDescriptions.size();
-    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+    vertexInputInfo.vertexBindingDescriptionCount = bindings;
+    vertexInputInfo.pVertexBindingDescriptions = bindDesc;
+    vertexInputInfo.vertexAttributeDescriptionCount = attributes;
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
 
-    // ------------------------------------------ [RASTERIZER AND RENDERING] ------------------------------------------
+    return vertexInputInfo;
+}
 
+VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Vertex(const VulkanContext& ctx, const std::string& shaderName)
+{
+    // Sperm Vee
+    WEngine::SpirVAssetMission vertexShaderCode{};
+    vertexShaderCode.shaderType = WEngine::SpirVAssetMission::VertexShader;
+    vertexShaderCode.name = shaderName;
+    WEngine::CoreSystems::GetAssetRepo()->GetAsset(vertexShaderCode);
+
+    VkPipelineShaderStageCreateInfo shaderStage{};
+
+    shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    shaderStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
+    shaderStage.pName = "main";
+    shaderStage.module = CompileShader(ctx, vertexShaderCode);
+    wFree(vertexShaderCode.shaderCode);
+
+    return shaderStage;
+}
+
+VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Fragment(const VulkanContext& ctx, const std::string& shaderName)
+{
+    WEngine::SpirVAssetMission fragmentShaderCode{};
+    fragmentShaderCode.shaderType = WEngine::SpirVAssetMission::FragmentShader;
+    fragmentShaderCode.name = shaderName;
+    WEngine::CoreSystems::GetAssetRepo()->GetAsset(fragmentShaderCode);
+
+    VkPipelineShaderStageCreateInfo shaderStage{};
+
+    shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    shaderStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    shaderStage.pName = "main";
+    shaderStage.module = CompileShader(ctx, fragmentShaderCode);
+    wFree(fragmentShaderCode.shaderCode);
+
+    return shaderStage;
+}
+
+VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, const std::string& shaderName)
+{
     VkPipelineRasterizationStateCreateInfo rasterInfo{};
     rasterInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterInfo.cullMode = VK_CULL_MODE_BACK_BIT;
@@ -124,33 +166,17 @@ VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, std::stri
     dynamicInfo.dynamicStateCount = dynamics.size();
     dynamicInfo.pDynamicStates = dynamics.data();
 
-    // -------------------------------------------------- [SHADERS] ---------------------------------------------------
-
-    // Sperm Vee
-    WEngine::SpirVAssetMission vertexShaderCode{};
-    vertexShaderCode.shaderType = WEngine::SpirVAssetMission::VertexShader;
-    vertexShaderCode.name = shaderName;
-    WEngine::SpirVAssetMission fragmentShaderCode{};
-    fragmentShaderCode.shaderType = WEngine::SpirVAssetMission::FragmentShader;
-    fragmentShaderCode.name = shaderName;
-    WEngine::CoreSystems::GetAssetRepo()->GetAsset(vertexShaderCode);
-    WEngine::CoreSystems::GetAssetRepo()->GetAsset(fragmentShaderCode);
-
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
+    shaderStages[0] = CreatePipeline_ShaderStange_Vertex(ctx, shaderName);
+    shaderStages[1] = CreatePipeline_ShaderStange_Fragment(ctx, shaderName);
 
-    shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-    shaderStages[0].pName = "main";
-    shaderStages[0].module = CompileShader(ctx, vertexShaderCode);
-    shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    shaderStages[1].pName = "main";
-    shaderStages[1].module = CompileShader(ctx, fragmentShaderCode);
+    auto inputAssembly = CreatePipeline_InputAssembly();
+    auto vertexDefinition = CreatePipeline_VertexDefinition();
 
     VkGraphicsPipelineCreateInfo pipeInfo{};
     pipeInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipeInfo.pInputAssemblyState = &inputAssemblyInfo;
-    pipeInfo.pVertexInputState = &vertexInputInfo;
+    pipeInfo.pInputAssemblyState = &inputAssembly;
+    pipeInfo.pVertexInputState = &vertexDefinition;
     pipeInfo.pRasterizationState = &rasterInfo;
     pipeInfo.pColorBlendState = &blendInfo;
     pipeInfo.pViewportState = &viewInfo;
@@ -162,6 +188,7 @@ VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, std::stri
     pipeInfo.renderPass = renderPass;
     pipeInfo.layout = ctx.pipelineLayout;
 
+    VkPipeline pipeline;
     auto res = vkCreateGraphicsPipelines(ctx.vcore.gpuDevice, VK_NULL_HANDLE, 1, &pipeInfo, ctx.vcore.allocator, &pipeline);
 
     if (!ParseVkResult(res))
@@ -174,8 +201,10 @@ VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, std::stri
     vkDestroyShaderModule(ctx.vcore.gpuDevice, shaderStages[0].module, ctx.vcore.allocator);
     vkDestroyShaderModule(ctx.vcore.gpuDevice, shaderStages[1].module, ctx.vcore.allocator);
 
-    wFree(vertexShaderCode.shaderCode);
-    wFree(fragmentShaderCode.shaderCode);
+
+
+    wFree((void*)vertexDefinition.pVertexBindingDescriptions);
+    wFree((void*)vertexDefinition.pVertexAttributeDescriptions);
 
     return pipeline;
 }

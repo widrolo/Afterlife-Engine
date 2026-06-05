@@ -17,7 +17,7 @@ void SetupSwapchainFramebuffers(VulkanContext& ctx, VulkanStatistics& stats)
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = ctx.screen.swapchainImages[i];
         viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        viewInfo.format = VK_FORMAT_B8G8R8A8_UNORM;
+        viewInfo.format = FindBestColorFormat(ctx);
         viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         viewInfo.subresourceRange.baseMipLevel = 0;
         viewInfo.subresourceRange.levelCount = 1;
@@ -61,7 +61,7 @@ bool SetupSwapchain(VulkanContext& ctx, VulkanStatistics& stats)
     info.surface = ctx.screen.screen;
     info.minImageCount = capabilities.minImageCount + 1;
 
-    info.imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
+    info.imageFormat = FindBestColorFormat(ctx);
     info.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
     info.imageExtent = capabilities.currentExtent;
     info.imageArrayLayers = 1;
