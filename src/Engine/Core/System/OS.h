@@ -17,6 +17,7 @@ public:
     static void SetConsoleColor(unsigned char color);
     static void CreateProcess(const std::string& executable, const wtl::vector<std::string>& arguments);
     static int GetRandomNumber(int min, int max);
+    static wtl::vector<std::string> GetAllFileNamesInDir(const std::string& dir);
 };
 
 #undef min

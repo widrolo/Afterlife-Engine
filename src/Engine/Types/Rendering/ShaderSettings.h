@@ -10,18 +10,15 @@
 
 namespace WEngine
 {
-    using ShaderSettingData = std::variant<float32, bool, uint32, int32, Vector2, Vector4, Color, Mat4x4, Texture>;
+    using ShaderSettingData = std::variant<float32, int32, Vector2, Vector3, Vector4, Mat4x4>;
     enum class ShaderSettingType : uint8
     {
         Float,
-        Bool,
-        UInt,
         Int,
         Vec2,
+        Vec3,
         Vec4,
-        Color,
         Matrix4,
-        Texture
     };
     struct ShaderSetting
     {

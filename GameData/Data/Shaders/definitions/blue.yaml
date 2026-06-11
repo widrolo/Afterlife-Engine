@@ -1,0 +1,11 @@
+shader:
+    isCompute: false
+
+    shaderName: blue
+
+    vertexCode: basic
+    fragmentCode: blue
+
+    fragmentInfo:
+        expectTextureCount: 0
+        expectParams: ~

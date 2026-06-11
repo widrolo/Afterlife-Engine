@@ -44,6 +44,8 @@ void MeshRendererComponent::Awake(ComponentArgs ca)
         }
     }
 
+    return;
+
     if (shaderN.HasValue())
     {
         auto shaderNN = Iris::GetMaterial(shaderN.GetValue());
@@ -71,6 +73,7 @@ void MeshRendererComponent::LateAwake()
 
 void MeshRendererComponent::Draw()
 {
+    return;
     RenderMission mission;
     mission.transform = entity->transform;
     mission.model = m_model;

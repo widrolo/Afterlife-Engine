@@ -18,6 +18,7 @@
 
 #include <Engine/Types/CommonTypes.h>
 #include <Engine/Util/Log.h>
+#include <filesystem>
 
 
 #ifdef WE_Windows
@@ -97,6 +98,19 @@ void OS::CreateProcess(const std::string& executable, const wtl::vector<std::str
             exit(-1);
         }
     }
+}
+
+wtl::vector<std::string> OS::GetAllFileNamesInDir(const std::string &dir)
+{
+    const std::filesystem::path path = dir;
+
+    wtl::vector<std::string> files;
+    for (const auto& entry : std::filesystem::directory_iterator(path))
+    {
+        if (std::filesystem::is_regular_file(entry.path()))
+            files.push_back(entry.path().string());
+    }
+    return files;
 }
 
 #endif

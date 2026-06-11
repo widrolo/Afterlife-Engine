@@ -3,9 +3,12 @@
 #include <Engine/EngineDefines.h>
 #if GPU_BACKEND == GPU_VULKAN
 
+#include <filesystem>
+
 #include "VulkanHelpers.h"
 #include "VulkanPipeline.h"
 #include "Engine/Core/Handlers/AssetRepo.h"
+#include "Engine/Core/System/OS.h"
 #include "Engine/Types/AssetMission.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Types/Rendering/InstanceData.h"
@@ -124,7 +127,7 @@ VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Fragment(const Vulka
     return shaderStage;
 }
 
-VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, const std::string& shaderName)
+VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, const WEngine::ShaderDefinition& shaderDef)
 {
     VkPipelineRasterizationStateCreateInfo rasterInfo{};
     rasterInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -168,8 +171,8 @@ VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, const std
     dynamicInfo.pDynamicStates = dynamics.data();
 
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
-    shaderStages[0] = CreatePipeline_ShaderStange_Vertex(ctx, shaderName);
-    shaderStages[1] = CreatePipeline_ShaderStange_Fragment(ctx, shaderName);
+    shaderStages[0] = CreatePipeline_ShaderStange_Vertex(ctx, shaderDef.vertexCodeName);
+    shaderStages[1] = CreatePipeline_ShaderStange_Fragment(ctx, shaderDef.fragmentCodeName);
 
     auto inputAssembly = CreatePipeline_InputAssembly();
     auto vertexDefinition = CreatePipeline_VertexDefinition();
@@ -227,6 +230,156 @@ void SaturateDescriptorSet(VulkanContext& ctx, Vulkan_Material& material)
     write.pImageInfo = &imageInfo;
 
     vkUpdateDescriptorSets(ctx.vcore.gpuDevice, 1, &write, 0, nullptr);
+}
+
+WEngine::ShaderDefinition ParseShaderDefinition(const YAML::Node& root)
+{
+    // tessellation and geometry shading isnt supported by the renderer, therefore its skipped for now.
+
+    WEngine::ShaderDefinition def{};
+
+    if (!root["shader"])
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Failed to load shader definition!");
+        return def;
+    }
+
+    const YAML::Node shader = root["shader"];
+
+    // we need to at least have the name to give a better error is something is missing later.
+    if (!shader["shaderName"])
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Shader definition name not present!");
+        return def;
+    }
+
+    def.name = shader["shaderName"].as<std::string>();
+
+    // some checks to see if the crucial stuff is present.
+    if (!shader["vertexCode"] || !shader["fragmentCode"] || !shader["fragmentInfo"])
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog(std::format("Shader \"{}\" is missing one of the following fields:\n"
+                                              "\t vertexCode, fragmentCode, fragmentInfo.", def.name));
+        return def;
+    }
+
+    def.vertexCodeName = shader["vertexCode"].as<std::string>();
+    def.fragmentCodeName = shader["fragmentCode"].as<std::string>();
+
+    const YAML::Node fragInfo = shader["fragmentInfo"];
+
+    // some checks to see if the crucial stuff is present. We don't check for texture presence yet, as it may take zero.
+    if (!fragInfo["expectTextureCount"] || !fragInfo["expectParams"])
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog(std::format("Shader fragment info \"{}\" is missing one of the following fields:\n"
+                                              "\t expectTextureCount, expectParams.", def.name));
+        return def;
+    }
+
+    def.fragInfo.expectTextureCount = fragInfo["expectTextureCount"].as<uint8>();
+
+    if (def.fragInfo.expectTextureCount != 0)
+    {
+        // since we have textures now, we have to ensure proper sanity checks.
+        if (!fragInfo["colorTextures"] || !fragInfo["pbrTextures"] || !fragInfo["expectChannelNames"])
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog(std::format("Shader fragment info \"{}\" is missing one of the following fields:\n"
+                                                  "\t colorTextures, pbrTextures, expectChannelNames.", def.name));
+            return def;
+        }
+
+        uint8 sanityTextureCount = 0;
+        for (const auto& texture : fragInfo["colorTextures"])
+        {
+            def.fragInfo.colorTextures.push_back(texture.as<std::string>());
+            sanityTextureCount++;
+        }
+
+        for (const auto& texture : fragInfo["pbrTextures"])
+        {
+            def.fragInfo.pbrTextures.push_back(texture.as<std::string>());
+            sanityTextureCount++;
+        }
+
+        for (const auto& chanName : fragInfo["expectChannelNames"])
+        {
+            def.fragInfo.expectChannelNames.push_back(chanName.as<std::string>());
+        }
+
+        if (def.fragInfo.expectTextureCount != sanityTextureCount)
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog(std::format("Shader sanity test tripped in \"{}\":\n"
+                "\t texture name count not equal to expected texture count!", def.name));
+            return def;
+        }
+    }
+
+    for (const auto& param : fragInfo["expectParams"])
+    {
+        const YAML::Node name = param.first;
+        const YAML::Node data = param.second;
+
+        WEngine::ShaderSettingType type;
+        const std::string typeStr = data.as<std::string>();
+        if (typeStr == "float") type = WEngine::ShaderSettingType::Float;
+        else if (typeStr == "int") type = WEngine::ShaderSettingType::Int;
+        else if (typeStr == "vec2") type = WEngine::ShaderSettingType::Vec2;
+        else if (typeStr == "vec3") type = WEngine::ShaderSettingType::Vec3;
+        else if (typeStr == "vec4") type = WEngine::ShaderSettingType::Vec4;
+        else if (typeStr == "mat4") type = WEngine::ShaderSettingType::Matrix4;
+        else
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog(std::format("Shader \"{}\" definition parsing failed:\n"
+                "\t Unexpected type \"{}\" in expectParams at \"{}\"!", def.name, typeStr, name.as<std::string>()));
+            return def;
+        }
+
+        def.fragInfo.expectedParams.push_back({name.as<std::string>(), type});
+    }
+
+    def.valid = true;
+    return def;
+}
+
+void TryCompileAllShaders(VulkanContext &ctx)
+{
+    std::string dir = WEngine::CoreSystems::GetAssetRepo()->GetDataPath() + EngineSettings::shaderPath + "definitions";
+    auto files = OS::GetAllFileNamesInDir(dir);
+
+    for (auto& file : files)
+    {
+        std::filesystem::path p(file);
+        file = p.stem().string();
+    }
+
+    for (const auto& file : files)
+    {
+        if (file == "$Sample")
+            continue;
+
+        WEngine::YamlAssetMission mission;
+        mission.name = "../" + EngineSettings::shaderPath + "definitions/" + file;
+        WEngine::CoreSystems::GetAssetRepo()->GetAsset(mission);
+        auto def = ParseShaderDefinition(mission.root);
+        if (!def.valid)
+            continue;
+
+        auto pipeline = CreatePipeline(ctx, ctx.renderPass, def);
+
+        ctx.loadedShaders.push_back({pipeline});
+        WEngine::Shader shaderHandle = ctx.loadedShaders.size();
+        ctx.loadedShadersHandles[def.name] = shaderHandle;
+
+        WEngine::WLog::SetConsoleSuccess();
+        WEngine::WLog::ConsoleLog(std::format("Shader \"{}\" successfully compiled!", def.name));
+    }
 }
 
 #endif

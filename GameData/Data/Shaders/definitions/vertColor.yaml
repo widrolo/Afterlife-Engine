@@ -1,0 +1,11 @@
+shader:
+    isCompute: false
+
+    shaderName: vertColor
+
+    vertexCode: basic
+    fragmentCode: vertColor
+
+    fragmentInfo:
+        expectTextureCount: 0
+        expectParams: ~

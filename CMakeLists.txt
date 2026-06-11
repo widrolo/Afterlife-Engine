@@ -328,6 +328,7 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Core/System/Vulkan/VulkanImages.cpp
         src/Engine/Core/System/Vulkan/VulkanImages.h
         src/Engine/Types/Rendering/GPU/Material.h
+        src/Engine/Types/Rendering/ShaderDefinition.h
 )
 
 set_target_properties(Widrolo_Engine_3D PROPERTIES

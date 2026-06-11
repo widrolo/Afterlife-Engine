@@ -94,6 +94,8 @@ bool Iris::SETTING_InitGPUApi(SDL_Window *window)
 
     SetupSwapchainFramebuffers(ctx, stats);
 
+    TryCompileAllShaders(ctx);
+
     return true;
 }
 
@@ -176,13 +178,13 @@ WEngine::Nullable<WEngine::Material> Iris::ALLOC_CompileMaterial(const std::stri
         return WEngine::Nullable<WEngine::Material>();
     }
 
-    auto pipeline = CreatePipeline(ctx, ctx.renderPass, matName);
-
-    ctx.loadedShaders.push_back({pipeline});
-    WEngine::Shader shaderHandle = ctx.loadedShaders.size();
-    ctx.loadedShadersHandles[matName] = shaderHandle;
-
-    return WEngine::Nullable<WEngine::Material>(shaderHandle);
+    //auto pipeline = CreatePipeline(ctx, ctx.renderPass, matName);
+//
+    //ctx.loadedShaders.push_back({pipeline});
+    //WEngine::Shader shaderHandle = ctx.loadedShaders.size();
+    //ctx.loadedShadersHandles[matName] = shaderHandle;
+//
+    //return WEngine::Nullable<WEngine::Material>(shaderHandle);
 }
 
 WEngine::Nullable<WEngine::Model> Iris::GetModel(const std::string &modelName)

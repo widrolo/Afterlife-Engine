@@ -6,11 +6,13 @@ material:
     name: m_protoPBR # Name used by components
 
     # During devel this will load the GLSL, in packaging this will use the compiled Spir-V shaders.
-    vertexshader: regularPBRVertex
-    fragmentshader: regularPBRFragment
+    shader: regularPBR
 
     # The following two use a temporary name system. The first key is the temporary name which points 
     # to the file on the disk. Its only used for material construction, its discarded afterwards.
+    # texturesDevel names are also used for sanity checks, please use the names provided in your 
+    # shader definition. Since the development pipeline can be flexible, a failed sanity check wont 
+    # lead to a crash, but will throw a warning.
 
     # This is loaded by the development version of the game.
     texturesDevel:
@@ -20,8 +22,15 @@ material:
         metal:      Proto/proto1024_m.png
         ao:         Proto/proto1024_ao.png
 
+    # Optional, if true this will disable the warning message for the above check.
+    disableStrictCheck: true
+
     # This is loaded by the packaged version of the game. (packed channels, dual channel normals)
-    # The pbr extention isnt custom, its just a renamed PNG
+    # The pbr extension isnt custom, its just a renamed PNG. It use used by the engine in combination
+    # with the shader definition to check if something is a color or a pbr texture. Color textures typically
+    # consist of color, while pbr consists of material properties. The engine will treat both the same, but 
+    # its used for another layer of error checking. The temporary names will also be used for error checking,
+    # this one cannot be disabled.
     texturesPackaging:
         base: Proto/proto1024.png # rgb=colors | a=normal X
         pbr: Proto/proto1024.pbr # r=AO map | g=roughness | b=metal | a=normal Y
@@ -44,6 +53,16 @@ material:
     # With that, the engine/packer will use the blue channel of the color texture when constructing 
     # the red channel for the base.
     # You can use the GLSL style rgba accessor. Channel count must match in the end, otherwise the engine aborts.
+    # Dont go overboard with swizziling, this isnt glsl; consider this more of a mix-and-match game. base.gggg 
+    # isnt supported, base.r = (float) isnt supported. 
     develTransform:
         base.rgba: [color.rgb, normal.r]
         pbr.rgba: [ao.r, roughness.r, metal.r, normal.g]
+
+    # These are parameters that the shader expects. Please consult your shader definition to know which to use.
+    # Failure to provide one or wrong type will result in a crash. Additional non required params will be dropped
+    # with a warning in the console.
+    params:
+        colorTint: [1.0, 1.0, 1.0, 1.0]
+        roughnessScale: 1.0
+        metalnessScale: 1.0
