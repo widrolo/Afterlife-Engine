@@ -1,13 +1,8 @@
 #pragma once
 #include <Engine/Types/AssetMission.h>
 
-#include <SDL3/SDL.h>
-
-#include <WGL.h>
-
 #include <unordered_map>
 #include <string>
-#include <Engine/Types/CommonTypes.h>
 #include <Engine/Types/Refcounted.h>
 
 namespace WEngine
@@ -52,7 +47,6 @@ namespace WEngine
 
 		void LoadSpirVFromGlsl(SpirVAssetMission& mission);
 		void LoadSpirVFromSpv(SpirVAssetMission& mission);
-
 
 		// ---------------------------------- [IRIS COMMS] ----------------------------------
 

@@ -36,7 +36,7 @@ std::string RenderWatchWidget::GetHeader() const
         case GPU_VULKAN:    header += "Vulkan";     break;
         case GPU_D3D12:     header += "D3D12";      break;
         case GPU_METAL:     header += "Metal";      break;
-        case GPU_GNM:       header += "GNM";        break;
+        case GPU_AGC:       header += "GNM";        break;
         case GPU_NVN:       header += "NVN";        break;
         default:
             header += "Unknown Backend";
