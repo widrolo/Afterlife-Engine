@@ -48,7 +48,7 @@ shader:
 
         # This sets expected parameters that a material must provide.
         # The key name must match in the material, the value is the type.
-        # accepted: float, int, vec2, vec3, vec4, mat4
+        # accepted: float, int, vec2, vec3, vec4
         expectParams:
             colorTint: vec4
             roughnessScale: float

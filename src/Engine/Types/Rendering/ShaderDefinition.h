@@ -5,6 +5,7 @@
 #include "Engine/WTL/vector.h"
 
 #include "ShaderSettings.h"
+#include "yaml-cpp/yaml.h"
 
 namespace WEngine
 {
@@ -25,5 +26,7 @@ namespace WEngine
             wtl::vector<std::string> expectChannelNames;
             wtl::vector<std::pair<std::string, ShaderSettingType>> expectedParams;
         } fragInfo;
+
+        void Parse(const YAML::Node& root);
     };
 }

@@ -20,7 +20,6 @@ VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, const WEn
     VkPipelineLayout pipelineLayout);
 void SaturateDescriptorSet(VulkanContext& ctx, Vulkan_Material& material);
 
-WEngine::ShaderDefinition ParseShaderDefinition(const YAML::Node& root);
 WEngine::MaterialDefinition ParseMaterialDefinition(VulkanContext &ctx, const YAML::Node& root);
 
 void TryCompileAllShaders(VulkanContext& ctx);

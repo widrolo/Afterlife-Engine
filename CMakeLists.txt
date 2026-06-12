@@ -319,6 +319,8 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/Rendering/ShaderDefinition.h
         src/Engine/Types/Refcounted.h
         src/Engine/Types/Rendering/MaterialDefinition.h
+        src/Engine/Types/Rendering/ShaderDefinition.cpp
+        src/Engine/Types/Rendering/MaterialDefinition.cpp
 )
 
 set_target_properties(Widrolo_Engine_3D PROPERTIES

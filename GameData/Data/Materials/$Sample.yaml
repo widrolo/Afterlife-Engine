@@ -22,9 +22,6 @@ material:
         metal:      Proto/proto1024_m.png
         ao:         Proto/proto1024_ao.png
 
-    # Optional, if true this will disable the warning message for the above check.
-    disableStrictCheck: false
-
     # This is loaded by the packaged version of the game. (packed channels, dual channel normals)
     # The pbr extension isnt custom, its just a renamed PNG. It use used by the engine in combination
     # with the shader definition to check if something is a color or a pbr texture. Color textures typically
@@ -35,6 +32,9 @@ material:
     texturesPackaging:
         base: Proto/proto1024.png # rgb=colors | a=normal X
         pbr: Proto/proto1024.pbr # r=AO map | g=roughness | b=metal | a=normal Y
+
+    # Optional, if true this will disable the check for the texturesDevel channels and file extensions.
+    disableStrictCheck: false
 
     # Since the shader always assumes its in a packaged state, we need to tell the engine how to
     # transform the passed textures into the packaged textures on the fly when running in development mode. 

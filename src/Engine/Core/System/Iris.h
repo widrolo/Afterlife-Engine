@@ -13,6 +13,7 @@
 #include "Engine/Types/Rendering/LineInfo.h"
 #include "Engine/Types/Rendering/GPU/Line.h"
 #include "Engine/Types/Rendering/ModelInfo.h"
+#include "Engine/Types/Rendering/ShaderDefinition.h"
 #include "Engine/Types/Rendering/ShaderSettings.h"
 #include "Engine/Types/Rendering/TextureInfo.h"
 #include "Engine/Types/Rendering/GPU/Material.h"
@@ -36,6 +37,7 @@ public:
 
     // ----------------------- Shaders -----------------------
 
+    static WEngine::Nullable<WEngine::ShaderDefinition> GetShaderDef(const std::string& shaderName);
     static WEngine::Nullable<WEngine::Material> GetMaterial(const std::string &matName);
     static WEngine::Nullable<WEngine::Material> ALLOC_CompileMaterial(const std::string& matName);
 

@@ -151,6 +151,20 @@ void Iris::SETTING_SetViewportSize(WEngine::Vector2 size)
     vkCmdSetScissor(ctx.cmdBufs[ctx.screen.currentFrame], 0, 1, &scissor);
 }
 
+WEngine::Nullable<WEngine::ShaderDefinition> Iris::GetShaderDef(const std::string &shaderName)
+{
+    if (!ctx.loadedShadersHandles.contains(shaderName))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog(std::format("Shader \"{}\" not found!", shaderName));
+        return WEngine::Nullable<WEngine::ShaderDefinition>();
+    }
+
+    WEngine::Shader shHandle = ctx.loadedShadersHandles[shaderName];
+    Vulkan_Shader shader = ctx.loadedShaders[shHandle];
+    return WEngine::Nullable<WEngine::ShaderDefinition>(shader.shaderDefinition);
+}
+
 WEngine::Nullable<WEngine::Material> Iris::GetMaterial(const std::string &matName)
 {
     if (ctx.loadedMaterialHandles.contains(matName))
