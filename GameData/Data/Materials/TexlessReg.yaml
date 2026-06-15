@@ -1,3 +1,3 @@
 material:
-    materialName: m_texlessReg
+    materialName: TexlessReg
     shader: vertColor

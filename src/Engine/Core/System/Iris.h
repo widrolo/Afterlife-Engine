@@ -39,6 +39,8 @@ public:
 
     static WEngine::Nullable<WEngine::ShaderDefinition> GetShaderDef(const std::string& shaderName);
     static WEngine::Nullable<WEngine::Material> GetMaterial(const std::string &matName);
+    static WEngine::Nullable<WEngine::Shader> GetShader(const std::string &shaderName);
+    static WEngine::Nullable<WEngine::Shader> GetShader(WEngine::Material matQuery);
     static WEngine::Nullable<WEngine::Material> ALLOC_CompileMaterial(const std::string& matName);
 
     // ----------------------- Models ------------------------

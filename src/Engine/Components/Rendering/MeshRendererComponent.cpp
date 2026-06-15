@@ -20,10 +20,12 @@ MeshRendererComponent::MeshRendererComponent(Entity *e)
     COMP_SETUP("MeshRendererComponent")
 }
 
+
+
 void MeshRendererComponent::Awake(ComponentArgs ca)
 {
     auto modelN = ca.GetStringFromParams("meshName");
-    auto shaderN = ca.GetStringFromParams("shaderName");
+    auto matN = ca.GetStringFromParams("materialName");
 
     if (modelN.HasValue())
     {
@@ -44,40 +46,39 @@ void MeshRendererComponent::Awake(ComponentArgs ca)
         }
     }
 
-    return;
-
-    if (shaderN.HasValue())
+    if (matN.HasValue())
     {
-        auto shaderNN = Iris::GetMaterial(shaderN.GetValue());
-        if (!shaderNN.HasValue())
+        auto matNN = Iris::GetMaterial(matN.GetValue());
+        if (!matNN.HasValue())
         {
-            shaderNN = Iris::ALLOC_CompileMaterial(shaderN.GetValue());
-            if (shaderNN.HasValue())
-                m_shader = shaderNN.GetValue();
+            matNN = Iris::ALLOC_CompileMaterial(matN.GetValue());
+            if (matNN.HasValue())
+                m_material = matNN.GetValue();
         }
         else
         {
-            m_shader = shaderNN.GetValue();
+            m_material = matNN.GetValue();
         }
     }
+
+    shaderTemp = Iris::GetShader(m_material).GetValue();
 }
 
 void MeshRendererComponent::LateAwake()
 {
-    if (entity->IsStationary() && m_model != 0 && m_shader != 0)
+    if (entity->IsStationary() && m_model != 0 && m_material != 0)
     {
         m_isStationary = true;
-        CoreSystems::GetRenderHandler()->RecordStationaryAdd(m_model, m_shader, entity->transform);
+        CoreSystems::GetRenderHandler()->RecordStationaryAdd(m_model, m_material, entity->transform);
     }
 }
 
 void MeshRendererComponent::Draw()
 {
-    return;
     RenderMission mission;
     mission.transform = entity->transform;
     mission.model = m_model;
-    mission.shader = m_shader;
+    mission.shader = shaderTemp;
     mission.isStationary = m_isStationary;
 
     CoreSystems::GetRenderHandler()->AddToRenderQueue(mission);

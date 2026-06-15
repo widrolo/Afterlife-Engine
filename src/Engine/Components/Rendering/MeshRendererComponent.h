@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/Components/Component.h"
+#include "Engine/Types/Rendering/GPU/Material.h"
 #include "Engine/Types/Rendering/GPU/Model.h"
 #include "Engine/Types/Rendering/GPU/Shader.h"
 
@@ -17,8 +18,10 @@ namespace WEngine
 
     private:
         Model m_model = 0;
-        Shader m_shader = 0;
+        Material m_material = 0;
         bool m_isStationary = false;
+
+        Shader shaderTemp;
 
         COMP_HASH(0xeb113cecf16966)
 

@@ -57,10 +57,10 @@
                 Type: "String"
                 Internal: "meshName"
             Shader:
-                Name: "Shader Name"
-                Description: "Name of the shader to be used for rendering."
+                Name: "Matertial Name"
+                Description: "Name of the matertial to be used for rendering."
                 Type: "String"
-                Internal: "shaderName"
+                Internal: "materialName"
             Instanceable:
                 Name: "Is Instanceable"
                 Description: "Whether this model is available for instancing."

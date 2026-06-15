@@ -41,9 +41,9 @@ void PerfTester::LotsOfCubesMonkey(WEngine::Sector* testworld)
             {
                 switch (counterShader)
                 {
-                    case 0: settings["shaderName"] = "triangleReg"; counterShader++; break;
-                    case 1: settings["shaderName"] = "triangleInvert"; counterShader++; break;
-                    case 2: settings["shaderName"] = "triangleBlue"; counterShader = 0; break;
+                    case 0: settings["materialName"] = "SolidBlue"; counterShader++; break;
+                    case 1: settings["materialName"] = "TexlessInv"; counterShader++; break;
+                    case 2: settings["materialName"] = "TexlessReg"; counterShader = 0; break;
                 }
 
                 if (counterModel % 2 == 0)
@@ -81,7 +81,7 @@ void PerfTester::Dragon(WEngine::Sector* testworld)
     YAML::Node settings = YAML::Node();
 
     settings["meshName"] = "Dragon";
-    settings["shaderName"] = "triangleReg";
+    settings["materialName"] = "triangleReg";
 
     WEngine::ComponentArgs ca;
     ca.componentTypeId = 14;

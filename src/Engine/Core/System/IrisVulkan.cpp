@@ -161,7 +161,7 @@ WEngine::Nullable<WEngine::ShaderDefinition> Iris::GetShaderDef(const std::strin
     }
 
     WEngine::Shader shHandle = ctx.loadedShadersHandles[shaderName];
-    Vulkan_Shader shader = ctx.loadedShaders[shHandle];
+    Vulkan_Shader shader = ctx.loadedShaders[shHandle - 1];
     return WEngine::Nullable<WEngine::ShaderDefinition>(shader.shaderDefinition);
 }
 
@@ -170,6 +170,21 @@ WEngine::Nullable<WEngine::Material> Iris::GetMaterial(const std::string &matNam
     if (ctx.loadedMaterialHandles.contains(matName))
         return WEngine::Nullable<WEngine::Material>(ctx.loadedMaterialHandles[matName]);
     return WEngine::Nullable<WEngine::Material>();
+}
+
+WEngine::Nullable<WEngine::Shader> Iris::GetShader(const std::string &shaderName)
+{
+    if (ctx.loadedShadersHandles.contains(shaderName))
+        return WEngine::Nullable<WEngine::Material>(ctx.loadedShadersHandles[shaderName]);
+    return WEngine::Nullable<WEngine::Material>();
+}
+
+WEngine::Nullable<WEngine::Shader> Iris::GetShader(WEngine::Material matQuery)
+{
+    if (ctx.loadedMaterials.size() < matQuery)
+        return WEngine::Nullable<WEngine::Shader>();
+    Vulkan_Material mat = ctx.loadedMaterials[matQuery - 1];
+    return mat.materialShader;
 }
 
 WEngine::Nullable<WEngine::Material> Iris::ALLOC_CompileMaterial(const std::string& matName)
@@ -183,13 +198,34 @@ WEngine::Nullable<WEngine::Material> Iris::ALLOC_CompileMaterial(const std::stri
         return WEngine::Nullable<WEngine::Material>();
     }
 
-    //auto pipeline = CreatePipeline(ctx, ctx.renderPass, matName);
-//
-    //ctx.loadedShaders.push_back({pipeline});
-    //WEngine::Shader shaderHandle = ctx.loadedShaders.size();
-    //ctx.loadedShadersHandles[matName] = shaderHandle;
-//
-    //return WEngine::Nullable<WEngine::Material>(shaderHandle);
+
+    WEngine::YamlAssetMission mission;
+    mission.name = "../Materials/" + matName;
+    WEngine::CoreSystems::GetAssetRepo()->GetAsset(mission);
+
+    WEngine::MaterialDefinition matDef;
+    matDef.Parse(mission.root);
+
+    if (!matDef.valid)
+        return WEngine::Nullable<WEngine::Material>();
+
+    auto shaderN = Iris::GetShader(matDef.shaderName);
+
+    if (!shaderN.HasValue())
+        return WEngine::Nullable<WEngine::Material>();
+
+
+    Vulkan_Material mat;
+    mat.materialShader = shaderN.GetValue();
+
+    ctx.loadedMaterials.push_back(mat);
+    WEngine::Material matHandle = ctx.loadedMaterials.size();
+    ctx.loadedMaterialHandles[matDef.name] = matHandle;
+
+    WEngine::WLog::SetConsoleSuccess();
+    WEngine::WLog::ConsoleLog(std::format("Material \"{}\" compiled", matName));
+
+    return WEngine::Nullable<WEngine::Material>(matHandle);
 }
 
 WEngine::Nullable<WEngine::Model> Iris::GetModel(const std::string &modelName)
