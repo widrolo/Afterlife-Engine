@@ -2,7 +2,6 @@
 #include <iostream>
 #include <queue>
 
-#include <Engine/Math/Vector.h>
 #include <Engine/Util/Log.h>
 #include <Engine/Components/Rendering/CameraComponent.h>
 #include <Engine/Core/Handlers/AssetRepo.h>
@@ -15,8 +14,6 @@
 #include <Engine/Core/System/Iris.h>
 
 #include "Engine/Types/DebugFlags.h"
-
-#include <Engine/Types/Rendering/VertextData.h>
 
 #include "InputHandler.h"
 #include "Engine/Types/CoreSystems.h"
@@ -80,14 +77,10 @@ void RenderHandler::RenderFrame()
 		}
 	}
 
-	glm::mat4 vpG = m_projection * m_viewMatrix;
-	Mat4x4 vp = Glm4x4ToMat4x4(vpG);
-	ShaderSettings shaderSettings{};
-	shaderSettings.push_back({ShaderSettingType::Matrix4, vp, "vp"});
+	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
+
 	for (auto& stat : m_stationaryMissions)
-	{
-		Iris::DRAWCALL_DrawModelInstancedStationary(stat.model, stat.material, shaderSettings);
-	}
+		Iris::DRAWCALL_DrawModelInstancedStationary(stat.model, stat.material, vp);
 
 	Iris::DRAWCALL_DrawImGui();
 	Iris::DRAWCALL_SwapBuffers(m_window);
@@ -128,9 +121,8 @@ void RenderHandler::RecordStationaryAdd(Model model, Material material, const Tr
 void RenderHandler::PushStationaryData()
 {
 	for (auto& object : m_stationaryAddQueue)
-	{
 		Iris::AddStationaryObjects(object.model, object.material, object.instData);
-	}
+
 	m_stationaryAddQueue.clear();
 }
 
@@ -177,14 +169,11 @@ Mat4x4 RenderHandler::CalcMVPMatrix(const Transform &transform)
 void RenderHandler::RenderSingleMission(RenderMission &mission)
 {
 	Mat4x4 mvp = CalcMVPMatrix(mission.transform);
-	ShaderSettings shaderSettings{};
-	shaderSettings.push_back({ShaderSettingType::Matrix4, mvp, "mvp"});
-	Iris::DRAWCALL_DrawModel(mission.model, mission.material, shaderSettings);
+	Iris::DRAWCALL_DrawModel(mission.model, mission.material, mvp);
 }
 
 void RenderHandler::RenderModelGroup(const ModelGroup &group, Material material)
 {
-	return;
 	wtl::vector<InstanceData> instances(group.missions.size());
 
 	for (int i = 0; i < group.missions.size(); i++)
@@ -193,12 +182,9 @@ void RenderHandler::RenderModelGroup(const ModelGroup &group, Material material)
 		instances[i] = {model};
 	}
 
-	glm::mat4 vpG = m_projection * m_viewMatrix;
-	Mat4x4 vp = Glm4x4ToMat4x4(vpG);
+	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
 
-	ShaderSettings shaderSettings{};
-	shaderSettings.push_back({ShaderSettingType::Matrix4, vp, "vp"});
-	Iris::DRAWCALL_DrawModelInstanced(group.groupID, material, shaderSettings, instances);
+	Iris::DRAWCALL_DrawModelInstanced(group.groupID, material, vp, instances);
 }
 
 void RenderHandler::SortStationary(RenderMission &mission)

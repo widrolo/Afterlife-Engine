@@ -271,7 +271,7 @@ void Iris::DRAWCALL_ClearFrame(WEngine::Color clearColor)
     vkCmdBeginRenderPass(ctx.cmdBufs[ctx.screen.currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
-void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, const WEngine::ShaderSettings &settings)
+void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, const WEngine::Mat4x4& mvp)
 {
     Vulkan_Material vkMat = ctx.loadedMaterials[material - 1];
     Vulkan_Shader vkShader = ctx.loadedShaders[vkMat.materialShaderHandle - 1];
@@ -281,15 +281,12 @@ void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, 
         ctx.currentBoundShader = vkMat.materialShaderHandle;
     }
 
-    WEngine::Mat4x4 mvp = std::get<WEngine::Mat4x4>(settings[0].option);
-    auto mvpRaw = mvp.GetRawData();
-
     Vulkan_Model vkModel = ctx.loadedModels[model - 1];
     VkDeviceSize offset = 0;
     vkCmdBindVertexBuffers(ctx.cmdBufs[ctx.screen.currentFrame], 0, 1, &vkModel.vertexBuffer, &offset);
     vkCmdBindIndexBuffer(ctx.cmdBufs[ctx.screen.currentFrame], vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
     vkCmdPushConstants(ctx.cmdBufs[ctx.screen.currentFrame], vkShader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
-        sizeof(WEngine::Mat4x4), &mvpRaw);
+        sizeof(WEngine::Mat4x4), &mvp);
 
     vkCmdDrawIndexed(ctx.cmdBufs[ctx.screen.currentFrame], vkModel.indexCount, 1, 0, 0, 0);
 
@@ -297,7 +294,7 @@ void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, 
 }
 
 void Iris::DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material material,
-    const WEngine::ShaderSettings &settings, const wtl::vector<WEngine::InstanceData>& instanceMats)
+    const WEngine::Mat4x4& vp, const wtl::vector<WEngine::InstanceData>& instanceMats)
 {
     Vulkan_Material vkMat = ctx.loadedMaterials[material - 1];
     Vulkan_Shader vkShader = ctx.loadedShaders[vkMat.materialShaderHandle - 1];
@@ -306,10 +303,6 @@ void Iris::DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material m
         vkCmdBindPipeline(ctx.cmdBufs[ctx.screen.currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
         ctx.currentBoundShader = vkMat.materialShaderHandle;
     }
-
-
-    WEngine::Mat4x4 vp = std::get<WEngine::Mat4x4>(settings[0].option);
-    auto vpRaw = vp.GetRawData();
 
     Vulkan_Model& vkModel = ctx.loadedModels[model - 1];
 
@@ -328,7 +321,7 @@ void Iris::DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material m
     vkCmdBindVertexBuffers(ctx.cmdBufs[ctx.screen.currentFrame], 1, 1, &vkModel.instanceBuffer, &offsets[1]);
     vkCmdBindIndexBuffer(ctx.cmdBufs[ctx.screen.currentFrame], vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
     vkCmdPushConstants(ctx.cmdBufs[ctx.screen.currentFrame], vkShader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
-        sizeof(WEngine::Mat4x4), &vpRaw);
+        sizeof(WEngine::Mat4x4), &vp);
 
     vkCmdDrawIndexed(ctx.cmdBufs[ctx.screen.currentFrame], vkModel.indexCount, instanceMats.size(), 0, 0, 0);
 
@@ -337,7 +330,7 @@ void Iris::DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material m
 }
 
 void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::Material material,
-    const WEngine::ShaderSettings &settings)
+    const WEngine::Mat4x4& vp)
 {
     auto alloc = ctx.statBuf.statBookkeep.FindNode(model, material);
     if (alloc.first == 0 && alloc.second == 0)
@@ -352,10 +345,7 @@ void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::
     }
 
     Vulkan_Model& vkModel = ctx.loadedModels[model - 1];
-    WEngine::Mat4x4 vp = std::get<WEngine::Mat4x4>(settings[0].option);
-    auto vpRaw = vp.GetRawData();
 
-    uint64 offset = alloc.first / sizeof(WEngine::InstanceData);
     uint64 count = alloc.second / sizeof(WEngine::InstanceData);
 
     std::array<VkDeviceSize, 2> offsets{0, alloc.first};
@@ -363,7 +353,7 @@ void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::
     vkCmdBindVertexBuffers(ctx.cmdBufs[ctx.screen.currentFrame], 1, 1, &ctx.statBuf.statBuffer, &offsets[1]);
     vkCmdBindIndexBuffer(ctx.cmdBufs[ctx.screen.currentFrame], vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
     vkCmdPushConstants(ctx.cmdBufs[ctx.screen.currentFrame], vkShader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
-        sizeof(WEngine::Mat4x4), &vpRaw);
+        sizeof(WEngine::Mat4x4), &vp);
 
     vkCmdDrawIndexed(ctx.cmdBufs[ctx.screen.currentFrame], vkModel.indexCount, count, 0, 0, 0);
     stats.drawCallsThisFrame++;

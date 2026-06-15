@@ -1,6 +1,7 @@
 #include "MaterialDefinition.h"
 
 #include "Engine/Core/System/Iris.h"
+#include "Engine/Util/BitwiseMacros.h"
 #include "Engine/Util/Log.h"
 
 using namespace WEngine;
@@ -278,8 +279,11 @@ bool SwizzleCompiler::Compile()
     // This generates IR
     SwizzleIRGeneration();
 
+    // checks if there is any channel collision or if there is a channel that was forgotten.
+    if (!SemanticAnalysisConflictsCompleteness())
+        return false;
+
     // TODO: Finish this later
-    // semantic analysis 2, check for conflicts
     // Construct final Swizzle map.
 
     return true;
@@ -686,5 +690,69 @@ void SwizzleCompiler::SwizzleIRGeneration()
         m_tokenCursor = rightChannelCursor + 1;
     }
 
+}
+
+bool SwizzleCompiler::SemanticAnalysisConflictsCompleteness()
+{
+    // Rules for the generated IR:
+    // 1) all channels must at most have only one IR expression
+    // 2) all channels of all target textures must be saturated
+
+    // rule 1
+    for (uint64 i = 0; i < m_generated.size(); i++)
+    {
+        for (uint64 j = i + 1; j < m_generated.size(); j++)
+        {
+            if (m_generated[i].textureTarget == m_generated[j].textureTarget)
+            {
+                if (m_generated[i].channelTarget == m_generated[j].channelTarget)
+                {
+                    WLog::SetConsoleError();
+                    WLog::ConsoleLog(std::format("[SwizzleCompiler] Compilation Error! Duplicate channel assignment!"));
+                    return false;
+                }
+            }
+        }
+    }
+
+    // no, I did not smoke crack for the following code
+
+    // rule 2
+    // [0] = texture index | [1] = channel mask
+    wtl::vector<std::pair<uint8, uint8>> check;
+
+    for (const auto& ir : m_generated)
+    {
+        bool found = false;
+        for (auto& c : check)
+        {
+            if (ir.textureTarget == c.first)
+            {
+                c.second |= BIT(ir.channelTarget);
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            std::pair<uint8, uint8> tex = {ir.textureTarget, BIT(ir.channelTarget)};
+            check.push_back(tex);
+        }
+    }
+
+    constexpr uint8 FullySaturated = 0b1111;
+
+    for (const auto& c : check)
+    {
+        if (c.second != FullySaturated)
+        {
+            WLog::SetConsoleError();
+            WLog::ConsoleLog(std::format("[SwizzleCompiler] Compilation Error! Not all channels saturated on target!"));
+            return false;
+        }
+    }
+
+
+    return true;
 }
 

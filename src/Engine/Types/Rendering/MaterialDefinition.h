@@ -105,6 +105,8 @@ namespace WEngine
 
         void SwizzleIRGeneration();
 
+        bool SemanticAnalysisConflictsCompleteness();
+
     private:
         uint32 m_tokenCursor = 0;
         wtl::vector<Token> m_tokens;
