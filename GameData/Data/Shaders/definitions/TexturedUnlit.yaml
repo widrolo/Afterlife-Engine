@@ -1,0 +1,16 @@
+shader:
+    isCompute: false
+    shaderName: TexturedUnlit
+    abundance: 3
+
+    vertexCode: basic
+    fragmentCode: basicTextured
+
+    fragmentInfo:
+        expectTextureCount: 1
+        colorTextures: [base]
+        pbrTextures: []
+
+        expectChannelNames: [color]
+
+        expectParams: ~
