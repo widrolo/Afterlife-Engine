@@ -12,9 +12,13 @@ layout(push_constant) uniform PushConstants {
 } pc;
 
 layout(location = 0) out vec3 outColor;
+layout(location = 1) out vec2 outUV0;
+layout(location = 2) out vec2 outUV1;
 
 void main()
 {
     outColor = inColor;
+    outUV0 = uv0;
+    outUV1 = uv1;
     gl_Position = pc.vp * inModel * vec4(inPosition, 1.0);
 }

@@ -93,10 +93,21 @@ void MaterialDefinition::Parse(const YAML::Node &root)
         SwizzleCompiler compiler;
         for (const auto& swz : material["develTransform"])
         {
-            // yaml-cpp pass
+            std::pair<std::string, wtl::vector<std::string>> yamlExpression;
 
+            yamlExpression.first = swz.first.as<std::string>();
 
+            for (const auto& inputs : swz.second)
+                yamlExpression.second.push_back(inputs.as<std::string>());
+
+            compiler.AddSwizzleLine(yamlExpression);
         }
+
+        for (uint64 i = 0; i < develTex.size(); i++)
+            compiler.AddDevelopmentTexture({develTex[i].first, i});
+
+        for (uint64 i = 0; i < packTex.size(); i++)
+            compiler.AddPackagingTexture({packTex[i].first, i});
 
         if (!compiler.Compile())
             return;
@@ -283,13 +294,12 @@ bool SwizzleCompiler::Compile()
     if (!SemanticAnalysisConflictsCompleteness())
         return false;
 
-    // TODO: Finish this later
-    // Construct final Swizzle map.
+    ConstructFinalSwizzle();
 
     return true;
 }
 
-void SwizzleCompiler::AddSwizzleLine(const SwizzleRawLine &line)
+void SwizzleCompiler::AddSwizzleLine(const SwizzleRawLine line)
 {
     m_swizzles.push_back(line);
 }
@@ -373,6 +383,9 @@ bool SwizzleCompiler::SyntaxAnalysis()
     {
         if (!CheckSyntax_A())
             return false;
+
+        if (Peek().first == SwizzleToken::EndOfTokens)
+            break;
     }
 
     return true;
@@ -539,19 +552,32 @@ bool SwizzleCompiler::SemanticAnalysisTokenVals()
                 WLog::ConsoleLog(std::format("[SwizzleCompiler] Compilation Error! Unexpected left texture \"{}\"!", name));
                 return false;
             }
+            continue; // TODO: figure out if this breaks logic, its here now so it stops crashing.
         }
+
+        Consume();
+    }
+
+    m_tokenCursor = 0;
+
+    while (Peek().first != SwizzleToken::EndOfTokens)
+    {
+        const auto t = Peek().first;
 
         // Rule 3
         if (t == SwizzleToken::Equal || t == SwizzleToken::Separation)
         {
             Consume();
-            std::string name = m_names[Peek().second];
+
+            Token token = Peek();
+            std::string name = m_names[token.second];
             if (!std::ranges::contains(m_develTex, name, [&](const auto& tex){ return tex.first; }))
             {
                 WLog::SetConsoleError();
                 WLog::ConsoleLog(std::format("[SwizzleCompiler] Compilation Error! Unexpected right texture \"{}\"!", name));
                 return false;
             }
+            continue; // TODO: figure out if this breaks logic, its here now so it stops crashing.
         }
 
         Consume();
@@ -677,8 +703,8 @@ void SwizzleCompiler::SwizzleIRGeneration()
             SwizzleGenerated swizzle;
             swizzle.textureTarget = leftTexture;
             swizzle.textureOrigin = rightTexture;
-            swizzle.channelTarget = m_channels[m_tokens[leftChannelCursor].second];
-            swizzle.channelOrigin = m_channels[m_tokens[rightChannelCursor].second];
+            swizzle.channelTarget = ChannelToInt(m_channels[m_tokens[leftChannelCursor].second]);
+            swizzle.channelOrigin = ChannelToInt(m_channels[m_tokens[rightChannelCursor].second]);
 
             m_generated.push_back(swizzle);
 
@@ -690,6 +716,18 @@ void SwizzleCompiler::SwizzleIRGeneration()
         m_tokenCursor = rightChannelCursor + 1;
     }
 
+}
+
+uint8 SwizzleCompiler::ChannelToInt(char channel)
+{
+    switch (channel)
+    {
+        case 'r': return 0;
+        case 'g': return 1;
+        case 'b': return 2;
+        case 'a': return 3;
+        default: return 0; // will never happen, but compiler complains otherwise
+    }
 }
 
 bool SwizzleCompiler::SemanticAnalysisConflictsCompleteness()
@@ -752,7 +790,34 @@ bool SwizzleCompiler::SemanticAnalysisConflictsCompleteness()
         }
     }
 
-
     return true;
+}
+
+void SwizzleCompiler::ConstructFinalSwizzle()
+{
+    // Sort the swizzles, we need that as the actual swizzler logic expects it to be in order
+    wtl::vector<SwizzleGenerated> sorted = m_generated;
+
+    std::sort(sorted.begin(), sorted.end(),
+        [](const SwizzleGenerated& a, const SwizzleGenerated& b)
+        {
+            if (a.textureTarget != b.textureTarget)
+                return a.textureTarget < b.textureTarget;
+            return a.channelTarget < b.channelTarget;
+        });
+
+    // Translate the swizzles
+    for (uint64 i = 0; i < sorted.size(); i += 4)
+    {
+        MaterialDefinitionSwizzle swizzle;
+        swizzle.packedTexTarget = sorted[i].textureTarget;
+
+        for (uint64 j = 0; j < 4; j++)
+            swizzle.swizzle[j] = {sorted[i + j].textureOrigin, sorted[i + j].channelOrigin};
+
+        m_outSwizzle.push_back(swizzle);
+    }
+
+    // and were done!
 }
 

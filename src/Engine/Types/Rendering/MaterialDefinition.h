@@ -74,16 +74,18 @@ namespace WEngine
         struct SwizzleGenerated
         {
             uint8 textureTarget;
-            char channelTarget;
+            uint8 channelTarget;
             uint8 textureOrigin;
-            char channelOrigin;
+            uint8 channelOrigin;
         };
 
     public:
         bool Compile();
-        void AddSwizzleLine(const SwizzleRawLine& line);
+        void AddSwizzleLine(const SwizzleRawLine line);
         void AddDevelopmentTexture(const TextureIndex& tex);
         void AddPackagingTexture(const TextureIndex& tex);
+
+        [[nodiscard]] wtl::vector<MaterialDefinitionSwizzle> GetSwizzles() const { return m_outSwizzle; }
 
     private:
         void Lexer();
@@ -104,8 +106,11 @@ namespace WEngine
         bool SemanticAnalysisTokenVals();
 
         void SwizzleIRGeneration();
+        uint8 ChannelToInt(char channel);
 
         bool SemanticAnalysisConflictsCompleteness();
+
+        void ConstructFinalSwizzle();
 
     private:
         uint32 m_tokenCursor = 0;
@@ -118,5 +123,8 @@ namespace WEngine
         wtl::vector<SwizzleRawLine> m_swizzles;
         wtl::vector<TextureIndex> m_develTex;
         wtl::vector<TextureIndex> m_packTex;
+
+        // output
+        wtl::vector<MaterialDefinitionSwizzle> m_outSwizzle;
     };
 }

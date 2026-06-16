@@ -55,6 +55,20 @@ VkBool32 ValidationCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeveri
     else if (messageTypes == VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT)
         WEngine::WLog::ConsoleLog(std::format("{} Non-optimal use of Vulkan! \"{}\"\n{}", warnStart, pCallbackData->pMessageIdName, pCallbackData->pMessage));
 
+    if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+    {
+        switch (GPUSettingsVulkan::validationErrorAction)
+        {
+            case GPUSettingsVulkan::InvalidResultAction::LetGo:
+                return VK_FALSE;
+            case GPUSettingsVulkan::InvalidResultAction::Stall:
+                while (true);
+            case GPUSettingsVulkan::InvalidResultAction::Abort:
+                abort();
+            default:
+                return VK_FALSE;
+        }
+    }
 
     return VK_FALSE;
 }

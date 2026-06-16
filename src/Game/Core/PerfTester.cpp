@@ -43,7 +43,7 @@ void PerfTester::LotsOfCubesMonkey(WEngine::Sector* testworld)
                 {
                     case 0: settings["materialName"] = "SolidBlue"; counterShader++; break;
                     case 1: settings["materialName"] = "TexlessInv"; counterShader++; break;
-                    case 2: settings["materialName"] = "TexlessReg"; counterShader = 0; break;
+                    case 2: settings["materialName"] = "MissingMat"; counterShader = 0; break;
                 }
 
                 if (counterModel % 2 == 0)
