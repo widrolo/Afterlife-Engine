@@ -6,9 +6,7 @@
 #include <tinyxml2/tinyxml2.h>
 #include <Engine/Types/Audio.h>
 
-#include "Rendering/MaterialDefinition.h"
 #include "Rendering/ModelInfo.h"
-#include "Rendering/TextureInfo.h"
 
 namespace WEngine
 {
@@ -74,16 +72,4 @@ namespace WEngine
 	};
 
 	// ---------------------------------- [IRIS SPECIFIC] ----------------------------------
-
-	enum class IrisAssetCommunicationType : uint8
-	{
-		GetMaterial,
-		RetireMaterial
-	};
-	struct IrisAssetCommunication
-	{
-		IrisAssetCommunicationType commType;
-		MaterialDefinition matDef;
-		wtl::vector<TextureInfo> textureData;
-	};
 }

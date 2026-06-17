@@ -323,6 +323,7 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/Rendering/MaterialDefinition.cpp
         src/Engine/Util/TextureSwizzler.cpp
         src/Engine/Util/TextureSwizzler.h
+        src/Engine/Types/Rendering/Iris/IrisAssetComms.h
 )
 
 set_target_properties(Widrolo_Engine_3D PROPERTIES

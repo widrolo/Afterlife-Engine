@@ -67,6 +67,10 @@ struct Vulkan_Queues
     wtl::vector<QueueFamily> queueFamilies;
     uint32 primaryDrawQueueFamilyIndex = 0;
     VkQueue primaryDrawQueue = VK_NULL_HANDLE;
+
+    // if no dedicated transfer queue was found, then this will be the same as the graphics queue
+    uint32 primaryTransferQueueFamilyIndex = 0;
+    VkQueue primaryTransferQueue = VK_NULL_HANDLE;
 };
 
 struct Vulkan_Shader;
@@ -114,6 +118,14 @@ struct Vulkan_StatBuf
     InstThreadedList statBookkeep;
     VkBuffer statBuffer;
     VmaAllocation statAllocation;
+};
+
+struct Vulkan_Texture
+{
+    VkImage image;
+    VkImageView imageView;
+    VkSampler sampler;
+    VmaAllocation imageAllocation;
 };
 
 using BufferCollection = wtl::vector<std::pair<VkBuffer, VmaAllocation>>;

@@ -209,7 +209,7 @@ void Engine::Loop_Begin(std::chrono::steady_clock::time_point& last, StopWatch& 
 
 
 	m_physicsTickTimer += m_deltaTime;
-	CoreSystems::renderHandler->BeginFrame();
+
 
 	m_game->GameLoopBegin();
 	m_frameBegin = timings.GetTime<TimeUnit::Microseconds>();
@@ -266,6 +266,7 @@ void Engine::Loop_Audio()
 
 void Engine::Loop_Draw()
 {
+	CoreSystems::renderHandler->BeginFrame();
 	CoreSystems::renderHandler->PushStationaryData();
 
 	StopWatch timings;

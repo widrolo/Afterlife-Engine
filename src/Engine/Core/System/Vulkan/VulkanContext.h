@@ -15,6 +15,11 @@ struct VulkanContext
     VkDescriptorPool imGuiDescriptorPool{};
     VkCommandPool commandPool{};
 
+    VkCommandBuffer transferCommandBuffer{};
+    VkSemaphore transferSemaphore{};
+    VkFence transferFence{};
+    wtl::vector<std::pair<VkBuffer, VmaAllocation>> stagingBuffers{};
+
     wtl::vector<VkCommandBuffer> cmdBufs{};
     VkRenderPass renderPass{};
 
@@ -27,6 +32,7 @@ struct VulkanContext
 
     WEngine::Shader currentBoundShader = 999999999;
     std::vector<BufferCollection> bufferGraveyard{};
+    bool firstFrame = true;
 };
 
 #endif

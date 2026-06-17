@@ -192,14 +192,13 @@ bool SetupGraphicsDevice(VulkanContext& ctx)
     // Do I also have to hire a babysitter for the damn gpu??
     auto resDev = vkCreateDevice(ctx.vcore.gpuPhysicalDevice, &info, ctx.vcore.allocator, &ctx.vcore.gpuDevice);
 
+    if (!ParseVkResult(resDev))
+        return false;
+
     SetupDeviceQueues(ctx);
 
     for (auto queue : queues)
         wFree((void*)queue.pQueuePriorities);
-
-
-    if (!ParseVkResult(resDev))
-        return false;
 
     return true;
 }

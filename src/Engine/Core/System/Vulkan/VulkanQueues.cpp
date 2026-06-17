@@ -42,13 +42,24 @@ wtl::vector<VkDeviceQueueCreateInfo> FindDeviceQueues(VulkanContext& ctx)
     {
         if (familiy.purpose & (uint8)QueuePurpose::Drawing)
         {
-            ctx.queues.primaryDrawQueue = familiy.queues[0];
             ctx.queues.primaryDrawQueueFamilyIndex = count;
             break;
         }
         count++;
     }
+    count = 0;
+    for (auto& familiy : ctx.queues.queueFamilies)
+    {
+        if (familiy.purpose & (uint8)QueuePurpose::Transfer)
+        {
+            ctx.queues.primaryTransferQueueFamilyIndex = count;
 
+            // basically, were being racist towards the draw family
+            if (count != ctx.queues.primaryDrawQueueFamilyIndex)
+                break;
+        }
+        count++;
+    }
     return infos;
 }
 
@@ -56,12 +67,22 @@ void SetupDeviceQueues(VulkanContext& ctx)
 {
     for (int i = 0; i < ctx.queues.queueFamilyCount; i++)
     {
-        if (ctx.queues.queueFamilies[i].purpose & (uint8)QueuePurpose::Drawing)
+        for (int j = 0; j < ctx.queues.queueFamilies[i].queues.size(); j++)
         {
-            vkGetDeviceQueue(ctx.vcore.gpuDevice, i, 0, &ctx.queues.queueFamilies[i].queues[0]);
-            ctx.queues.primaryDrawQueue = ctx.queues.queueFamilies[i].queues[0];
-            break;
+            vkGetDeviceQueue(ctx.vcore.gpuDevice, i, j, &ctx.queues.queueFamilies[i].queues[j]);
+
+
+            if (ctx.queues.queueFamilies[i].purpose & (uint8)QueuePurpose::Drawing)
+            {
+                ctx.queues.primaryDrawQueue = ctx.queues.queueFamilies[i].queues[j];
+            }
+
+            if (ctx.queues.queueFamilies[i].purpose & (uint8)QueuePurpose::Transfer)
+            {
+                ctx.queues.primaryTransferQueue = ctx.queues.queueFamilies[i].queues[j];
+            }
         }
+
     }
 }
 

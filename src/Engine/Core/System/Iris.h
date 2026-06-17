@@ -19,6 +19,7 @@
 #include "Engine/Types/Rendering/GPU/Material.h"
 #include "Engine/Types/Rendering/GPU/Model.h"
 #include "Engine/Types/Rendering/Iris/InstThreadedList.h"
+#include "Engine/Types/Rendering/Iris/IrisAssetComms.h"
 
 /**
  * This class is the primary interface to talk to the GPU.
@@ -75,5 +76,5 @@ public:
 
     // --------------------- Asset Repo ----------------------
 
-    static void
+    static void AssetIrisCommunication(WEngine::AssetIrisCommunication& mission);
 };

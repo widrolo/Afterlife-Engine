@@ -5,6 +5,8 @@
 #include <string>
 #include <Engine/Types/Refcounted.h>
 
+#include "Engine/Types/Rendering/Iris/IrisAssetComms.h"
+
 namespace WEngine
 {
 	struct TextureInfo;
@@ -22,7 +24,7 @@ namespace WEngine
 	private:
 		std::string m_dataPath;
 		std::unordered_map<std::string, AudioClip> m_audioRepo;
-		std::unordered_map<std::string, Ref<TextureInfo>> m_textureRepo;
+		std::unordered_map<std::string, Ref<uint64>> m_textureRepo;
 
 	public:
 		/**

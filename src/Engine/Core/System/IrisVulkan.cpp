@@ -45,14 +45,11 @@ bool Iris::SETTING_InitGPUApi(SDL_Window *window)
 {
     if (!SetupVkInstance(ctx))
         return false;
-
 #ifndef PACKAGE
     SetupValidation(ctx);
 #endif
-
     if (!SetupGraphicsDevice(ctx))
         return false;
-
     SetupVmaAllocator(ctx);
 
     if (!SDL_Vulkan_CreateSurface(window, ctx.vcore.instance, ctx.vcore.allocator, &ctx.screen.screen))
@@ -64,25 +61,27 @@ bool Iris::SETTING_InitGPUApi(SDL_Window *window)
 
     if (!SetupDepthImage(ctx, stats))
         return false;
-
     if (!SetupSwapchain(ctx, stats))
         return false;
-
-    if (!SetupCommandPool(ctx))
+    if (!SetupDrawCommandPool(ctx))
         return false;
-
     if (!SetupStationaryInstanceBuffer(ctx, stats))
+        return false;
+    if (!SetupTransferCommandBuffer(ctx))
         return false;
 
 
     ctx.cmdBufs.resize(ctx.screen.swapchainImages.size());
     for (uint32 i = 0; i < ctx.screen.swapchainImages.size(); i++)
-        ctx.cmdBufs[i] = CreateCommandBuffer(ctx, ctx.commandPool);
+        ctx.cmdBufs[i] = CreateDrawCommandBuffer(ctx, ctx.commandPool);
     ctx.renderPass = CreateBasicRenderPass(ctx);
 
     SetupSwapchainFramebuffers(ctx, stats);
-
     TryCompileAllShaders(ctx);
+
+    WEngine::WLog::ConsoleLog(std::format(
+        "Same queue? {}",
+        ctx.queues.primaryDrawQueue == ctx.queues.primaryTransferQueue));
 
     return true;
 }
@@ -114,6 +113,8 @@ void Iris::SETTING_ConfigureImGui(SDL_Window *window)
 
 void Iris::SETTING_BeginNewFrame()
 {
+    if (!ctx.firstFrame)
+        UploadTextures(ctx);
     vkWaitForFences(ctx.vcore.gpuDevice, 1, &ctx.screen.endOfFrameFences[ctx.screen.currentFrame], VK_TRUE, UINT64_MAX);
 
     for (auto& buf : ctx.bufferGraveyard[ctx.screen.currentFrame])
@@ -422,6 +423,9 @@ void Iris::DRAWCALL_SwapBuffers(SDL_Window *window)
 
     stats.drawCallsLastFrame = stats.drawCallsThisFrame;
     stats.drawCallsThisFrame = 0;
+
+    BeginTextureUpload(ctx);
+    ctx.firstFrame = false;
 }
 
 uint64 Iris::GetVramUsage()
@@ -481,6 +485,17 @@ void Iris::AddStationaryObjects(WEngine::Model model, WEngine::Material material
         memcpy(data + trueOffset + trueOldSize, instanceMats.data(), size);
     }
     vmaUnmapMemory(ctx.vcore.vmaAllocator, ctx.statBuf.statAllocation);
+}
+
+void Iris::AssetIrisCommunication(WEngine::AssetIrisCommunication &mission)
+{
+    switch (mission.commType)
+    {
+        case WEngine::AssetIrisCommunicationType::StoreTexture:
+            break;
+        case WEngine::AssetIrisCommunicationType::UnloadTexture:
+            break;
+    }
 }
 
 #endif

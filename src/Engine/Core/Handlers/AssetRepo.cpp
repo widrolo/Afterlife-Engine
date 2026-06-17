@@ -16,9 +16,11 @@
 #include <shaderc/shaderc.hpp>
 
 #include "RNGHandler.h"
+#include "Engine/Core/System/Iris.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Types/Rendering/TextureInfo.h"
 #include "Engine/Types/Rendering/VertextData.h"
+#include "Engine/Types/Rendering/Iris/IrisAssetComms.h"
 #include "Engine/Util/TextureSwizzler.h"
 
 
@@ -429,7 +431,7 @@ void AssetRepo::LoadSpirVFromSpv(SpirVAssetMission &mission)
 void AssetRepo::IrisCommsGetMat(IrisAssetCommunication &mission)
 {
 	// This is only here because I don't trust myself.
-	mission.textureData.resize(mission.matDef.texturesPackaging.size());
+	mission.texReferences.resize(mission.matDef.texturesPackaging.size());
 
 #ifdef PACKAGE
 	IrisCommsGetMatPackage(mission);
@@ -447,12 +449,12 @@ void AssetRepo::IrisCommsRetMat(IrisAssetCommunication &mission)
 
 		if (isUnused)
 		{
-			TextureInfo info = m_textureRepo.at(request).Get();
+			uint64 ref = m_textureRepo.at(request).Get();
 
-			free(info.data);
-
-			uint64 size = info.width * info.height * 4;
-			WAllocator::ReportExternalFree(size);
+			AssetIrisCommunication comms{};
+			comms.commType = AssetIrisCommunicationType::UnloadTexture;
+			comms.texReferenceIn = ref;
+			Iris::AssetIrisCommunication(comms);
 
 			m_textureRepo.erase(request);
 		}
@@ -469,7 +471,7 @@ void AssetRepo::IrisCommsGetMatDevel(IrisAssetCommunication &mission)
 	{
 		if (m_textureRepo.contains(request))
 		{
-			mission.textureData[i] = m_textureRepo.at(request).Get();
+			mission.texReferences[i] = m_textureRepo.at(request).Get();
 			m_textureRepo.at(request).Add();
 		}
 		else
@@ -496,8 +498,14 @@ void AssetRepo::IrisCommsGetMatDevel(IrisAssetCommunication &mission)
 		}
 		swizzler.Swizzle();
 		TextureInfo info = swizzler.RetrieveResult();
-		m_textureRepo.try_emplace(mission.matDef.texturesPackaging[index], info);
-		mission.textureData[index] = info;
+
+		AssetIrisCommunication comms{};
+		comms.commType = AssetIrisCommunicationType::StoreTexture;
+		comms.textureData = info;
+		Iris::AssetIrisCommunication(comms);
+
+		m_textureRepo.try_emplace(mission.matDef.texturesPackaging[index], comms.texReferenceOut);
+		mission.texReferences[index] = comms.texReferenceOut;
 		m_textureRepo.at(mission.matDef.texturesPackaging[index]).Add();
 	}
 }
@@ -510,10 +518,16 @@ void AssetRepo::IrisCommsGetMatPackage(IrisAssetCommunication &mission)
 		if (!m_textureRepo.contains(request))
 		{
 			TextureInfo info = LoadTexturePNG(m_dataPath + EngineSettings::texturePath + request);
-			m_textureRepo.try_emplace(request, info);
+
+			AssetIrisCommunication comms{};
+			comms.commType = AssetIrisCommunicationType::StoreTexture;
+			comms.textureData = info;
+			Iris::AssetIrisCommunication(comms);
+
+			m_textureRepo.try_emplace(request, comms.texReferenceOut);
 		}
 
-		mission.textureData[i] = m_textureRepo.at(request).Get();
+		mission.texReferences[i] = m_textureRepo.at(request).Get();
 		m_textureRepo.at(request).Add();
 		i++;
 	}

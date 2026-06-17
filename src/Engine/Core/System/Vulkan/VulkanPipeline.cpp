@@ -160,7 +160,7 @@ VkDescriptorPool CreateDescriptorPool(VulkanContext &ctx, const WEngine::ShaderD
     return descriptorPool;
 }
 
-bool SetupCommandPool(VulkanContext& ctx)
+bool SetupDrawCommandPool(VulkanContext& ctx)
 {
     VkCommandPoolCreateInfo commandPoolInfo{};
     commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -178,7 +178,7 @@ bool SetupCommandPool(VulkanContext& ctx)
     return true;
 }
 
-VkCommandBuffer CreateCommandBuffer(const VulkanContext& ctx, VkCommandPool cmdPool)
+VkCommandBuffer CreateDrawCommandBuffer(const VulkanContext& ctx, VkCommandPool cmdPool)
 {
     VkCommandBuffer cmdBuff;
 

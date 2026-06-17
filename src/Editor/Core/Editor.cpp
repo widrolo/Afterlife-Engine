@@ -117,11 +117,12 @@ void Editor::Run()
 
 		auto frameStart = std::chrono::steady_clock::now();
 
-		EditorSystems::renderHandler->BeginFrame();
 		EditorSystems::inputHandler->FetchInput();
 
+		EditorSystems::renderHandler->BeginFrame();
 		EditorSystems::menubarHandler->Render();
 		Dock();
+
 		EditorSystems::editorUIHandler->DrawWidgets();
 
 		WEngine::Sector::m_root->Draw();
