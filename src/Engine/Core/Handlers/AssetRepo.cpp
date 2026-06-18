@@ -493,7 +493,7 @@ void AssetRepo::IrisCommsGetMatDevel(IrisAssetCommunication &mission)
 
 				TextureInfo info = LoadTexturePNG(m_dataPath + EngineSettings::texturePath + develTex);
 				for (uint64 j = 0; j < 4; j++)
-					swizzler.AddSource(info, swizzle.swizzle[index].channel, j);
+					swizzler.AddSource(info, swizzle.swizzle[j].channel, j);
 				i++;
 			}
 		}

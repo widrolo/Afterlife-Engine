@@ -29,7 +29,7 @@ void PerfTester::LotsOfCubesMonkey(WEngine::Sector* testworld)
     args.transform = t;
     args.ca = {ca};
 
-    const uint32 sideLen = 20;
+    const uint32 sideLen = 22;
     const float32 stride = 3.0f;
     uint32 counterModel = 0;
     uint32 counterShader = 0;
@@ -41,9 +41,10 @@ void PerfTester::LotsOfCubesMonkey(WEngine::Sector* testworld)
             {
                 switch (counterShader)
                 {
-                    case 0: settings["materialName"] = "SolidBlue"; counterShader++; break;
-                    case 1: settings["materialName"] = "TexlessInv"; counterShader++; break;
-                    case 2: settings["materialName"] = "MissingMat"; counterShader = 0; break;
+                    case 0: settings["materialName"] = "ProtoMat"; counterShader++; break;
+                    case 1: settings["materialName"] = "MonkeyMat"; counterShader++; break;
+                    case 2: settings["materialName"] = "CroSONMat"; counterShader++; break;
+                    case 3: settings["materialName"] = "MissingMat"; counterShader = 0; break;
                 }
 
                 if (counterModel % 2 == 0)

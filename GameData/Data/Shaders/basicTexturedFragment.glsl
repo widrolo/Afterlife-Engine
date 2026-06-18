@@ -9,6 +9,6 @@ layout(location = 0) out vec4 outColor;
 void main()
 {
     vec2 realUV = inUV0;
-    realUV.y = 1 - realUV.y;
+    //realUV.y = 1 - realUV.y;
     outColor = texture(tex, realUV);
 }
