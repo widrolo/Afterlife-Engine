@@ -2,11 +2,18 @@
 
 # List of Features
 
-## Rendering
-Widrolo Engine uses a simple approach to rendering. You can render sprites, animations, lines and shapes for debugging and thats it. This is a part of making sure that Widrolo Engine stays as simple as possible.
+## Platforms
+As of now, only these platforms are supported:
 
-## Physics
-The physics engine in Widrolo Engine is custom made, and therefore also simple by design. Its supports circles, rectangles, boundaries and cylinders. Physics are sophisticated and not complex, but the usage is still simple.
+- Windows (64-bit)
+- Linux (64-bit)
+
+However, adding a new platform is generally trivial. The engine framework is designed to never use system specific functions directly but rather their abstractions. If you add a new platform to the abstractions, and write the functions identically to the base platforms, then the game will run identically.
+
+## Rendering
+Widrolo Engine primarily uses Forward rendering with Vulkan as the primary rendering API. All rendering inside of the engine is accessed via Iris, the abstraction layer used for rendering.
+
+Note that the rendering is still in its early stages.
 
 ## Audio
 Audio is okay, nothing much. It can play .wav files only for now, but it will be better in the future. Soon music will be in ogg.
@@ -15,4 +22,4 @@ Audio is okay, nothing much. It can play .wav files only for now, but it will be
 Input is the most mature part of the engine right now. It supports keyboards, mice, controllers and even steeing wheels. 
 
 ## GUI
-GUI is currently handled by ImGui, even for game UI. But im planning on making my own UI system.
+GUI is currently handled by ImGui, even for game UI. But a custom game UI sollution is in the works

@@ -82,7 +82,7 @@ void PerfTester::Dragon(WEngine::Sector* testworld)
     YAML::Node settings = YAML::Node();
 
     settings["meshName"] = "Dragon";
-    settings["materialName"] = "triangleReg";
+    settings["materialName"] = "MissingMat";
 
     WEngine::ComponentArgs ca;
     ca.componentTypeId = 14;

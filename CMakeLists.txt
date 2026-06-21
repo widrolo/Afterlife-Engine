@@ -324,6 +324,7 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Util/TextureSwizzler.cpp
         src/Engine/Util/TextureSwizzler.h
         src/Engine/Types/Rendering/Iris/IrisAssetComms.h
+        src/Game/Types/GameSystems.h
 )
 
 set_target_properties(Widrolo_Engine_3D PROPERTIES

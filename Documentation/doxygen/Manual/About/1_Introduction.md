@@ -3,13 +3,14 @@
 # Introduction
 
 ## About
-The Widrolo Engine is a propriotary 2D game engine designed to work on Windows and Linux. Its meant to be easy to develop on, with an intuitive and ever modern design. Its light weight by design and doesnt require any expensive hardware.
+The Widrolo Engine is a propriotary 3D game engine designed to work on Windows and Linux. Its meant to be intuitive to work on for people that just want to code instead of hanging around editors all day long, but also allows designers to edit the world via WEDGE.
 
 ## Installation
 1. Download the repo: https://github.com/widrolo/Widrolo-Engine.git
 2. Download CLion: https://www.jetbrains.com/clion/download
 3. Install GCC. **DO NOT USE MSVC OR CLANG!** 
-4. Open the repo in CLion and run to see what youre missing. Install whatever youre missing.
+4. Install dependencies like Vulkan and VMA.
+5. Open the repo in CLion and run to see what youre missing. Install whatever youre missing.
 
 Note that while CLion is not a strict requirement, the engine is always at the newest version of C++, which Visual Studio misght not support. 
 

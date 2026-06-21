@@ -8,12 +8,21 @@ You must understand that its appearance as an general purpose engine is only an 
 
 One such example is the complete lack of rotation. The engine does offer trionometric functions, but rotation is completely disallowed. This is to avoid making lazy rotations: lets say you have a spinning fireball. Using Unity you would instincively just rotate it while its flying. Widrolo Engine forces you to draw a sprite for each angle of rotation, theoretically enhancing art quality.
 
-## Pipeline
-The main tool used for making games is WEDGE (Widrolo Enhanced Development Game Editor). Wedge is the tool that gives Widrolo Engine a face, allowing for the editing of sectors.
+## Game Development Pipeline
 
-Other tools are also recommended, as long as the exported files are supported by Widrolo Engine.
+### World creation
+The main tool used for making games is WEDGE (Widrolo Enhanced Development Game Editor). Wedge is the tool that gives Widrolo Engine a face, allowing for the editing of sectors. It also contains some other useful tooling.
 
-## Programming
+### Models
+While the engine currently uses GLB for 3D meshes, a new, engine specific file format is in the planning phase.
+
+### Textures
+Widrolo Engine only supports the PNG file format. However, there is a catch to it. Your file extensions can be ".png" and ".pbr". That is completely optional and only meant for sanity checking during material compilation. the PBR file extention is not custom; it is just a renamed PNG file. More on that in the material section.
+
+### Audio
+I wouldnt bother with audio right now. If you must, then only WAV is supported. But i will integrate FMOD soon, so just wait for that.
+
+### Programming
 Its just C++. Nope, nothing else. Yes, you can integrate Lua if youre brave.
 
 
