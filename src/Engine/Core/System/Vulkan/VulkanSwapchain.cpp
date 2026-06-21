@@ -3,6 +3,7 @@
 
 #include "VulkanSwapchain.h"
 
+#include "VulkanCommands.h"
 #include "VulkanHelpers.h"
 
 bool SetupSwapchain(VulkanContext& ctx, VulkanStatistics& stats)
@@ -39,25 +40,11 @@ bool SetupSwapchain(VulkanContext& ctx, VulkanStatistics& stats)
     vkGetSwapchainImagesKHR(ctx.vcore.gpuDevice, ctx.screen.swapchain, &ctx.screen.swapchainImageCount,
         ctx.displayTarget.targetImages.data());
 
-    ctx.screen.imageAvailableSems.resize(ctx.screen.swapchainImageCount);
-    ctx.screen.renderFinishedSems.resize(ctx.screen.swapchainImageCount);
-    ctx.screen.endOfFrameFences.resize(ctx.screen.swapchainImageCount);
     ctx.bufferGraveyard.resize(ctx.screen.swapchainImageCount);
 
     stats.vramUsage += CalcTextureSize(4, EngineSettings::resolution.x, EngineSettings::resolution.y) * ctx.screen.swapchainImageCount;
 
-    VkSemaphoreCreateInfo semInfo{};
-    semInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
-        vkCreateSemaphore(ctx.vcore.gpuDevice, &semInfo, ctx.vcore.allocator, &ctx.screen.imageAvailableSems[i]);
-    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
-        vkCreateSemaphore(ctx.vcore.gpuDevice, &semInfo, ctx.vcore.allocator, &ctx.screen.renderFinishedSems[i]);
-
-    VkFenceCreateInfo fenceInfo{};
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
-        vkCreateFence(ctx.vcore.gpuDevice, &fenceInfo, ctx.vcore.allocator, &ctx.screen.endOfFrameFences[i]);
+    PopulateSemsAndFences(ctx, ctx.displayTarget);
 
     ctx.displayTarget.targetImageViews.resize(ctx.screen.swapchainImageCount);
     for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)

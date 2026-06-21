@@ -6,6 +6,7 @@
 #include "Engine/Math/Vector.h"
 #include "Engine/Types/Rendering/InstanceData.h"
 #include "Engine/Types/Rendering/RenderMission.h"
+#include "Engine/Types/Rendering/GPU/Framebuffer.h"
 #include "Engine/Types/Rendering/GPU/Material.h"
 #include "Engine/WTL/deque.h"
 #include "Engine/WTL/list.h"
@@ -61,7 +62,13 @@ namespace WEngine
 		glm::mat4 m_projection;
 		glm::mat4 m_viewMatrix;
 
+		bool m_isEditor = false;
+		Framebuffer m_viewportFb{};
+		Vector2 m_viewportResolution{};
+
 	public:
+		void EnableEditorMode(const Vector2& viewportResolution);
+
 		void BeginFrame();
 		void RenderFrame();
 

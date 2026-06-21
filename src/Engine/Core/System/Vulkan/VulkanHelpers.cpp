@@ -136,7 +136,7 @@ uint32 GetVulkanVersion()
     return VK_API_VERSION_1_4;
 }
 
-VkCommandBuffer& GetCmdBuff(const VulkanContext &ctx)
+VkCommandBuffer& GetFbCmdBuff(const VulkanContext &ctx)
 {
     return ctx.currentRenderTarget->cmdBuffs[ctx.screen.currentFrame];
 }
@@ -149,6 +149,21 @@ VkImage& GetFbImage(const VulkanContext &ctx)
 VkImageView& GetFbImageView(const VulkanContext &ctx)
 {
     return ctx.currentRenderTarget->targetImageViews[ctx.screen.currentFrame];
+}
+
+VkSemaphore& GetFbImageAvailSem(const VulkanContext &ctx)
+{
+    return ctx.currentRenderTarget->imageAvailableSems[ctx.screen.currentFrame];
+}
+
+VkSemaphore& GetFbRenderFinishedSem(const VulkanContext &ctx)
+{
+    return ctx.currentRenderTarget->renderFinishedSems[ctx.screen.currentFrame];
+}
+
+VkFence& GetFbEndOfFrameFence(const VulkanContext &ctx)
+{
+    return ctx.currentRenderTarget->endOfFrameFences[ctx.screen.currentFrame];
 }
 
 #endif

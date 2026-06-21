@@ -83,4 +83,24 @@ Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &sta
     return target;
 }
 
+void PopulateSemsAndFences(VulkanContext &ctx, Vulkan_RenderTarget &rt)
+{
+    rt.imageAvailableSems.resize(ctx.screen.swapchainImageCount);
+    rt.renderFinishedSems.resize(ctx.screen.swapchainImageCount);
+    rt.endOfFrameFences.resize(ctx.screen.swapchainImageCount);
+
+    VkSemaphoreCreateInfo semInfo{};
+    semInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
+        vkCreateSemaphore(ctx.vcore.gpuDevice, &semInfo, ctx.vcore.allocator, &rt.imageAvailableSems[i]);
+    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
+        vkCreateSemaphore(ctx.vcore.gpuDevice, &semInfo, ctx.vcore.allocator, &rt.renderFinishedSems[i]);
+
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
+        vkCreateFence(ctx.vcore.gpuDevice, &fenceInfo, ctx.vcore.allocator, &rt.endOfFrameFences[i]);
+}
+
 #endif

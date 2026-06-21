@@ -37,9 +37,6 @@ struct Vulkan_Screen
     uint32 swapchainImageCount = 0;
     uint32 swapchainCurrentImage = 0;
 
-    wtl::vector<VkSemaphore> imageAvailableSems;
-    wtl::vector<VkSemaphore> renderFinishedSems;
-    wtl::vector<VkFence> endOfFrameFences;
     uint32 currentFrame = 0;
 
     VkImage depthImage;
@@ -131,6 +128,9 @@ struct Vulkan_RenderTarget
     wtl::vector<VkImage> targetImages;
     wtl::vector<VkImageView> targetImageViews;
     wtl::vector<VmaAllocation> targetImageAlloc;
+    wtl::vector<VkSemaphore> imageAvailableSems;
+    wtl::vector<VkSemaphore> renderFinishedSems;
+    wtl::vector<VkFence> endOfFrameFences;
     wtl::vector<VkCommandBuffer> cmdBuffs{};
 };
 

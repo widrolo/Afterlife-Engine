@@ -118,15 +118,15 @@ void Iris::SETTING_BeginNewFrame()
 {
     UploadTextures(ctx);
 
-    vkWaitForFences(ctx.vcore.gpuDevice, 1, &ctx.screen.endOfFrameFences[ctx.screen.currentFrame], VK_TRUE, UINT64_MAX);
+    vkWaitForFences(ctx.vcore.gpuDevice, 1, &ctx.displayTarget.endOfFrameFences[ctx.screen.currentFrame], VK_TRUE, UINT64_MAX);
 
     for (auto& buf : ctx.bufferGraveyard[ctx.screen.currentFrame])
         vmaDestroyBuffer(ctx.vcore.vmaAllocator, buf.first, buf.second);
     ctx.bufferGraveyard[ctx.screen.currentFrame].clear();
 
-    vkResetFences(ctx.vcore.gpuDevice, 1, &ctx.screen.endOfFrameFences[ctx.screen.currentFrame]);
+    vkResetFences(ctx.vcore.gpuDevice, 1, &ctx.displayTarget.endOfFrameFences[ctx.screen.currentFrame]);
     vkAcquireNextImageKHR(ctx.vcore.gpuDevice, ctx.screen.swapchain, max_uint64,
-        ctx.screen.imageAvailableSems[ctx.screen.currentFrame], VK_NULL_HANDLE, &ctx.screen.swapchainCurrentImage);
+        ctx.displayTarget.imageAvailableSems[ctx.screen.currentFrame], VK_NULL_HANDLE, &ctx.screen.swapchainCurrentImage);
 
     for (auto& model : ctx.loadedModels)
         model.activeInstances = 0;
@@ -139,12 +139,12 @@ void Iris::SETTING_SetViewportSize(WEngine::Vector2 size)
     viewport.height = size.y;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
-    vkCmdSetViewport(GetCmdBuff(ctx), 0, 1, &viewport);
+    vkCmdSetViewport(GetFbCmdBuff(ctx), 0, 1, &viewport);
 
     VkRect2D scissor{};
     scissor.extent.width = size.x;
     scissor.extent.height = size.y;
-    vkCmdSetScissor(GetCmdBuff(ctx), 0, 1, &scissor);
+    vkCmdSetScissor(GetFbCmdBuff(ctx), 0, 1, &scissor);
 }
 
 WEngine::Nullable<WEngine::ShaderDefinition> Iris::GetShaderDef(const std::string &shaderName)
@@ -269,7 +269,7 @@ void Iris::DRAWCALL_ClearFrame(WEngine::Color clearColor)
     colBarrier.subresourceRange.baseArrayLayer = 0;
     colBarrier.subresourceRange.layerCount = 1;
 
-    vkCmdPipelineBarrier(GetCmdBuff(ctx), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+    vkCmdPipelineBarrier(GetFbCmdBuff(ctx), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, nullptr, 0, nullptr, 1, &colBarrier);
 
     // never trusting vulkan with things passed in as reference!
@@ -279,7 +279,7 @@ void Iris::DRAWCALL_ClearFrame(WEngine::Color clearColor)
     depthBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
     depthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-    vkCmdPipelineBarrier(GetCmdBuff(ctx), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+    vkCmdPipelineBarrier(GetFbCmdBuff(ctx), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
         VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, 0, nullptr, 0, nullptr, 1, &depthBarrier);
 
     VkRenderingAttachmentInfo colorAttachmentInfo{};
@@ -307,7 +307,7 @@ void Iris::DRAWCALL_ClearFrame(WEngine::Color clearColor)
     renderingInfo.pColorAttachments = &colorAttachmentInfo;
     renderingInfo.pDepthAttachment = &depthAttachmentInfo;
 
-    vkCmdBeginRendering(GetCmdBuff(ctx), &renderingInfo);
+    vkCmdBeginRendering(GetFbCmdBuff(ctx), &renderingInfo);
     ctx.currentBoundShader = 99999999;
 }
 
@@ -324,21 +324,21 @@ void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, 
     Vulkan_Shader vkShader = ctx.loadedShaders[vkMat.materialShaderHandle - 1];
     if (ctx.currentBoundShader != vkMat.materialShaderHandle)
     {
-        vkCmdBindPipeline(GetCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
+        vkCmdBindPipeline(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
         ctx.currentBoundShader = vkMat.materialShaderHandle;
     }
 
     Vulkan_Model vkModel = ctx.loadedModels[model - 1];
     VkDeviceSize offset = 0;
     if (!vkMat.hasTextures)
-        vkCmdBindDescriptorSets(GetCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout,
+        vkCmdBindDescriptorSets(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout,
             0, 1, &vkMat.materialDescriptorSet, 0, nullptr);
-    vkCmdBindVertexBuffers(GetCmdBuff(ctx), 0, 1, &vkModel.vertexBuffer, &offset);
-    vkCmdBindIndexBuffer(GetCmdBuff(ctx), vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-    vkCmdPushConstants(GetCmdBuff(ctx), vkShader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
+    vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 0, 1, &vkModel.vertexBuffer, &offset);
+    vkCmdBindIndexBuffer(GetFbCmdBuff(ctx), vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdPushConstants(GetFbCmdBuff(ctx), vkShader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
         sizeof(WEngine::Mat4x4), &mvp);
 
-    vkCmdDrawIndexed(GetCmdBuff(ctx), vkModel.indexCount, 1, 0, 0, 0);
+    vkCmdDrawIndexed(GetFbCmdBuff(ctx), vkModel.indexCount, 1, 0, 0, 0);
 
     stats.drawCallsThisFrame++;
 }
@@ -357,7 +357,7 @@ void Iris::DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material m
     Vulkan_Shader vkShader = ctx.loadedShaders[vkMat.materialShaderHandle - 1];
     if (ctx.currentBoundShader != vkMat.materialShaderHandle)
     {
-        vkCmdBindPipeline(GetCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
+        vkCmdBindPipeline(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
         ctx.currentBoundShader = vkMat.materialShaderHandle;
     }
 
@@ -375,15 +375,15 @@ void Iris::DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material m
 
     std::array<VkDeviceSize, 2> offsets{0, sizeof(WEngine::InstanceData) * vkModel.activeInstances};
     if (!vkMat.hasTextures)
-        vkCmdBindDescriptorSets(GetCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout,
+        vkCmdBindDescriptorSets(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout,
             0, 1, &vkMat.materialDescriptorSet, 0, nullptr);
-    vkCmdBindVertexBuffers(GetCmdBuff(ctx), 0, 1, &vkModel.vertexBuffer, &offsets[0]);
-    vkCmdBindVertexBuffers(GetCmdBuff(ctx), 1, 1, &vkModel.instanceBuffer, &offsets[1]);
-    vkCmdBindIndexBuffer(GetCmdBuff(ctx), vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-    vkCmdPushConstants(GetCmdBuff(ctx), vkShader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
+    vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 0, 1, &vkModel.vertexBuffer, &offsets[0]);
+    vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 1, 1, &vkModel.instanceBuffer, &offsets[1]);
+    vkCmdBindIndexBuffer(GetFbCmdBuff(ctx), vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdPushConstants(GetFbCmdBuff(ctx), vkShader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
         sizeof(WEngine::Mat4x4), &vp);
 
-    vkCmdDrawIndexed(GetCmdBuff(ctx), vkModel.indexCount, instanceMats.size(), 0, 0, 0);
+    vkCmdDrawIndexed(GetFbCmdBuff(ctx), vkModel.indexCount, instanceMats.size(), 0, 0, 0);
 
     vkModel.activeInstances += instanceMats.size();
     stats.drawCallsThisFrame++;
@@ -407,7 +407,7 @@ void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::
     Vulkan_Shader& vkShader = ctx.loadedShaders[vkMat.materialShaderHandle - 1];
     if (ctx.currentBoundShader != vkMat.materialShaderHandle)
     {
-        vkCmdBindPipeline(GetCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
+        vkCmdBindPipeline(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
         ctx.currentBoundShader = vkMat.materialShaderHandle;
     }
 
@@ -417,15 +417,15 @@ void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::
 
     std::array<VkDeviceSize, 2> offsets{0, alloc.first};
     if (vkMat.hasTextures)
-        vkCmdBindDescriptorSets(GetCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout,
+        vkCmdBindDescriptorSets(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout,
             0, 1, &vkMat.materialDescriptorSet, 0, nullptr);
-    vkCmdBindVertexBuffers(GetCmdBuff(ctx), 0, 1, &vkModel.vertexBuffer, &offsets[0]);
-    vkCmdBindVertexBuffers(GetCmdBuff(ctx), 1, 1, &ctx.statBuf.statBuffer, &offsets[1]);
-    vkCmdBindIndexBuffer(GetCmdBuff(ctx), vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-    vkCmdPushConstants(GetCmdBuff(ctx), vkShader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
+    vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 0, 1, &vkModel.vertexBuffer, &offsets[0]);
+    vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 1, 1, &ctx.statBuf.statBuffer, &offsets[1]);
+    vkCmdBindIndexBuffer(GetFbCmdBuff(ctx), vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    vkCmdPushConstants(GetFbCmdBuff(ctx), vkShader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
         sizeof(WEngine::Mat4x4), &vp);
 
-    vkCmdDrawIndexed(GetCmdBuff(ctx), vkModel.indexCount, count, 0, 0, 0);
+    vkCmdDrawIndexed(GetFbCmdBuff(ctx), vkModel.indexCount, count, 0, 0, 0);
     stats.drawCallsThisFrame++;
 }
 
@@ -446,7 +446,7 @@ void Iris::DRAWCALL_DrawImGui()
     }
 
     ImGui::Render();
-    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), GetCmdBuff(ctx));
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), GetFbCmdBuff(ctx));
 }
 
 void Iris::DRAWCALL_DrawToDisplay(SDL_Window *window)
@@ -455,7 +455,7 @@ void Iris::DRAWCALL_DrawToDisplay(SDL_Window *window)
     VkPresentInfoKHR presentInfo{};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &ctx.screen.renderFinishedSems[ctx.screen.currentFrame];
+    presentInfo.pWaitSemaphores = &ctx.displayTarget.renderFinishedSems[ctx.screen.currentFrame];
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = &ctx.screen.swapchain;
     presentInfo.pImageIndices = &ctx.screen.swapchainCurrentImage;
@@ -503,12 +503,13 @@ void Iris::SETTING_SelectFramebufferForRender(const WEngine::Framebuffer framebu
 
     ctx.currentRenderTarget = &ctx.renderTargets[framebuffer - 1];
 
-    vkResetCommandBuffer(GetCmdBuff(ctx), 0);
+    vkResetFences(ctx.vcore.gpuDevice, 1, &GetFbEndOfFrameFence(ctx));
+    vkResetCommandBuffer(GetFbCmdBuff(ctx), 0);
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    vkBeginCommandBuffer(GetCmdBuff(ctx), &beginInfo);
+    vkBeginCommandBuffer(GetFbCmdBuff(ctx), &beginInfo);
 
     ctx.isCommandRecording = true;
 }
@@ -524,12 +525,12 @@ void Iris::SETTING_SelectFramebufferScreenForRender()
 
     ctx.currentRenderTarget = &ctx.displayTarget;
 
-    vkResetCommandBuffer(GetCmdBuff(ctx), 0);
+    vkResetCommandBuffer(GetFbCmdBuff(ctx), 0);
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-    vkBeginCommandBuffer(GetCmdBuff(ctx), &beginInfo);
+    vkBeginCommandBuffer(GetFbCmdBuff(ctx), &beginInfo);
 
     ctx.isCommandRecording = true;
 }
@@ -543,7 +544,7 @@ void Iris::SETTING_FinishFramebufferRender()
         return;
     }
 
-    vkCmdEndRendering(GetCmdBuff(ctx));
+    vkCmdEndRendering(GetFbCmdBuff(ctx));
 
     VkImageMemoryBarrier imgBarrier{};
     imgBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -559,10 +560,10 @@ void Iris::SETTING_FinishFramebufferRender()
     imgBarrier.subresourceRange.baseArrayLayer = 0;
     imgBarrier.subresourceRange.layerCount = 1;
 
-    vkCmdPipelineBarrier(GetCmdBuff(ctx), VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+    vkCmdPipelineBarrier(GetFbCmdBuff(ctx), VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
         VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imgBarrier);
 
-    auto res = vkEndCommandBuffer(GetCmdBuff(ctx));
+    auto res = vkEndCommandBuffer(GetFbCmdBuff(ctx));
     if (!ParseVkResult(res))
         WEngine::WLog::ConsoleLog("Something went wrong after ending the command buffer!");
 
@@ -570,19 +571,19 @@ void Iris::SETTING_FinishFramebufferRender()
 
     VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
-    VkCommandBuffer cmdBuff = GetCmdBuff(ctx);
+    VkCommandBuffer cmdBuff = GetFbCmdBuff(ctx);
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &ctx.screen.imageAvailableSems[ctx.screen.currentFrame];
+    submitInfo.pWaitSemaphores = &GetFbImageAvailSem(ctx);
     submitInfo.pWaitDstStageMask = &waitStage;
     submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &ctx.screen.renderFinishedSems[ctx.screen.currentFrame];
+    submitInfo.pSignalSemaphores = &GetFbRenderFinishedSem(ctx);
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmdBuff;
 
-    vkQueueSubmit(ctx.queues.primaryDrawQueue, 1, &submitInfo, ctx.screen.endOfFrameFences[ctx.screen.currentFrame]);
+    vkQueueSubmit(ctx.queues.primaryDrawQueue, 1, &submitInfo, GetFbEndOfFrameFence(ctx));
 }
 
 uint64 Iris::GetVramUsage()

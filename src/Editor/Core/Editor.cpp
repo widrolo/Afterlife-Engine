@@ -27,6 +27,7 @@
 #include <Engine/imgui/implot.h>
 
 #include "Editor/Types/EditorState.h"
+#include "Engine/Core/System/Iris.h"
 
 using namespace WEditor;
 
@@ -90,8 +91,8 @@ void StartHandlerSingleEditor(T** container, std::string name)
 void Editor::InitHandlers()
 {
     StartHandlerSingle<WEngine::InputHandler>(&EditorSystems::inputHandler, &WEngine::CoreSystems::inputHandler, "Input Handler");
-    StartHandlerSingle<WEngine::RenderHandler>(&EditorSystems::renderHandler, &WEngine::CoreSystems::renderHandler, "Render Handler");
     StartHandlerSingle<WEngine::AssetRepo>(&EditorSystems::assetRepo, &WEngine::CoreSystems::assetRepo, "Asset Repo");
+    StartHandlerSingle<WEngine::RenderHandler>(&EditorSystems::renderHandler, &WEngine::CoreSystems::renderHandler, "Render Handler");
 
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	ImGui::GetStyle().WindowBorderSize = 1;
@@ -109,6 +110,8 @@ void Editor::Run()
 	bool imguiDemo = true;
 	const uint64 cap = static_cast<uint64>((1.0f / EngineSettings::maxFrameRate) * 1000000); // shut up damn compiler!!
 
+	EditorSystems::renderHandler->EnableEditorMode({1000, 1000});
+
 	while (*EditorSystems::isEditorRunning)
 	{
 		// delta time
@@ -118,6 +121,7 @@ void Editor::Run()
 		auto frameStart = std::chrono::steady_clock::now();
 
 		EditorSystems::inputHandler->FetchInput();
+		Iris::SETTING_BeginNewPreFrame();
 
 		EditorSystems::renderHandler->BeginFrame();
 		EditorSystems::menubarHandler->Render();

@@ -41,15 +41,45 @@ RenderHandler::RenderHandler()
 		);
 }
 
+void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)
+{
+	m_isEditor = true;
+	m_viewportResolution = viewportResolution;
+
+	auto fbN = Iris::ALLOC_CreateFramebuffer(viewportResolution);
+
+	if (fbN.HasValue())
+		m_viewportFb = fbN.GetValue();
+	else
+	{
+		WLog::SetConsoleError();
+		WLog::ConsoleLog("Could not create a new Framebuffer for the viewport, falling back!");
+		m_isEditor = false;
+	}
+
+	m_projection = glm::perspective(
+		glm::radians(90.0f),
+		m_viewportResolution.x / m_viewportResolution.y,
+		0.01f,
+		1000.0f
+		);
+}
+
 void RenderHandler::BeginFrame()
 {
 	Iris::SETTING_BeginNewFrame();
 
-	Iris::SETTING_SelectFramebufferScreenForRender();
+	if (m_isEditor)
+		Iris::SETTING_SelectFramebufferForRender(m_viewportFb);
+	else
+		Iris::SETTING_SelectFramebufferScreenForRender();
 
 	Iris::DRAWCALL_ResetImGui();
 	Iris::DRAWCALL_ClearFrame(Color{30, 30, 30, 255});
-	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
+	if (m_isEditor)
+		Iris::SETTING_SetViewportSize(m_viewportResolution);
+	else
+		Iris::SETTING_SetViewportSize(EngineSettings::resolution);
 
 
 	if (m_camera == nullptr)
@@ -73,7 +103,6 @@ void RenderHandler::RenderFrame()
 {
 	SortMissions();
 
-
 	for (auto& materialGroup : m_sortedMissions)
 	{
 		for (auto& modelGroup : materialGroup.models)
@@ -87,9 +116,18 @@ void RenderHandler::RenderFrame()
 	for (auto& stat : m_stationaryMissions)
 		Iris::DRAWCALL_DrawModelInstancedStationary(stat.model, stat.material, vp);
 
-	Iris::DRAWCALL_DrawImGui();
-
-	Iris::SETTING_FinishFramebufferRender();
+	if (m_isEditor)
+	{
+		Iris::SETTING_FinishFramebufferRender();
+		Iris::SETTING_SelectFramebufferScreenForRender();
+		Iris::DRAWCALL_DrawImGui();
+		Iris::SETTING_FinishFramebufferRender();
+	}
+	else
+	{
+		Iris::DRAWCALL_DrawImGui();
+		Iris::SETTING_FinishFramebufferRender();
+	}
 
 	Iris::DRAWCALL_DrawToDisplay(m_window);
 

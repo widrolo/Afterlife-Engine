@@ -244,9 +244,6 @@ void SaturateDescriptorSet(VulkanContext& ctx, Vulkan_Material& material)
     vkUpdateDescriptorSets(ctx.vcore.gpuDevice, 1, &write, 0, nullptr);
 }
 
-
-WEngine::MaterialDefinition ParseMaterialDefinition(VulkanContext &ctx, const YAML::Node &root);
-
 void TryCompileAllShaders(VulkanContext &ctx)
 {
     std::string dir = WEngine::CoreSystems::GetAssetRepo()->GetDataPath() + EngineSettings::shaderPath + "definitions";
