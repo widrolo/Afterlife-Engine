@@ -5,6 +5,7 @@
 #include <Engine/Core/System/GPUSettings.h>
 #include "Engine/Util/Log.h"
 #include "Engine/WTL/vector.h"
+#include <vulkan/vk_enum_string_helper.h>
 
 bool ParseVkResult(VkResult result)
 {
@@ -12,7 +13,8 @@ bool ParseVkResult(VkResult result)
         return true;
 
     WEngine::WLog::SetConsoleError();
-    WEngine::WLog::ConsoleLog("[GPU ERROR] VkResult was not success!");
+    WEngine::WLog::ConsoleLog(std::format("[GPU ERROR] VkResult was not success! {}", string_VkResult(result)));
+
     switch (GPUSettingsVulkan::invalidResultAction)
     {
         case GPUSettingsVulkan::InvalidResultAction::LetGo:
@@ -104,7 +106,7 @@ VkFormat FindBestDepthFormat(const VulkanContext& ctx)
     return VK_FORMAT_UNDEFINED;
 }
 
-VkFormat FindBestColorFormat(const VulkanContext &ctx)
+VkFormat FindBestSwapchainFormat(const VulkanContext &ctx)
 {
     wtl::vector<VkFormat> candidates =
     {

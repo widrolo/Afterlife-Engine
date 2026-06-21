@@ -129,8 +129,7 @@ VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Fragment(const Vulka
     return shaderStage;
 }
 
-VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, const WEngine::ShaderDefinition& shaderDef,
-    VkPipelineLayout pipelineLayout)
+VkPipeline CreatePipeline(VulkanContext& ctx, const WEngine::ShaderDefinition& shaderDef, VkPipelineLayout pipelineLayout)
 {
     VkPipelineRasterizationStateCreateInfo rasterInfo{};
     rasterInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
@@ -180,8 +179,19 @@ VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, const WEn
     auto inputAssembly = CreatePipeline_InputAssembly();
     auto vertexDefinition = CreatePipeline_VertexDefinition();
 
+    // This is basically attempting to make the compiler only call it once, we need it in pointer form anyway.
+    // No clue if the compiler actually ends up only calling it once thought.
+    static VkFormat swapFormat = FindBestSwapchainFormat(ctx);
+
+    VkPipelineRenderingCreateInfo dynaRenderInfo{};
+    dynaRenderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+    dynaRenderInfo.colorAttachmentCount = 1;
+    dynaRenderInfo.pColorAttachmentFormats = &swapFormat;
+    dynaRenderInfo.depthAttachmentFormat = FindBestDepthFormat(ctx); // hypocrisy
+
     VkGraphicsPipelineCreateInfo pipeInfo{};
     pipeInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipeInfo.pNext = &dynaRenderInfo;
     pipeInfo.pInputAssemblyState = &inputAssembly;
     pipeInfo.pVertexInputState = &vertexDefinition;
     pipeInfo.pRasterizationState = &rasterInfo;
@@ -192,7 +202,6 @@ VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, const WEn
     pipeInfo.pDynamicState = &dynamicInfo;
     pipeInfo.stageCount = shaderStages.size();
     pipeInfo.pStages = shaderStages.data();
-    pipeInfo.renderPass = renderPass;
     pipeInfo.layout = pipelineLayout;
 
     VkPipeline pipeline;
@@ -268,7 +277,7 @@ void TryCompileAllShaders(VulkanContext &ctx)
         auto descPool = CreateDescriptorPool(ctx, def);
         auto descLayout = CreateDescriptorSetLayout(ctx, def);
         auto pipeLayout = CreatePipelineLayout(ctx, descLayout);
-        auto pipeline = CreatePipeline(ctx, ctx.renderPass, def, pipeLayout);
+        auto pipeline = CreatePipeline(ctx, def, pipeLayout);
 
         shader.descriptorPool = descPool;
         shader.descriptorSetLayout = descLayout;

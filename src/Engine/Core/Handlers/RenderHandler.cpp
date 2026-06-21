@@ -84,7 +84,7 @@ void RenderHandler::RenderFrame()
 		Iris::DRAWCALL_DrawModelInstancedStationary(stat.model, stat.material, vp);
 
 	Iris::DRAWCALL_DrawImGui();
-	Iris::DRAWCALL_SwapBuffers(m_window);
+	Iris::DRAWCALL_DrawToDisplay(m_window);
 	m_renderQueue.clear();
 	CleanSortedMissions();
 }

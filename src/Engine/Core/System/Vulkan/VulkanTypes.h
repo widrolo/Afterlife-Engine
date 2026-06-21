@@ -36,7 +36,6 @@ struct Vulkan_Screen
     VkSwapchainKHR swapchain = VK_NULL_HANDLE;
     wtl::vector<VkImage> swapchainImages;
     wtl::vector<VkImageView> swapchainImageViews;
-    wtl::vector<VkFramebuffer> swapchainFramebuffers;
     uint32 swapchainCurrentImage = 0;
 
     wtl::vector<VkSemaphore> imageAvailableSems;

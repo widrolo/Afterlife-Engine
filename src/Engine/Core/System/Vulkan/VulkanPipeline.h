@@ -13,6 +13,5 @@ bool SetupImGuiDescriptorPool(VulkanContext& ctx);
 VkDescriptorPool CreateDescriptorPool(VulkanContext& ctx, const WEngine::ShaderDefinition& shaderDef);
 bool SetupDrawCommandPool(VulkanContext& ctx);
 VkCommandBuffer CreateDrawCommandBuffer(const VulkanContext& ctx, VkCommandPool cmdPool);
-VkRenderPass CreateBasicRenderPass(VulkanContext& ctx);
 
 #endif

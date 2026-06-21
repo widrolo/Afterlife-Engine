@@ -130,7 +130,7 @@ bool SetupVkInstance(VulkanContext& ctx)
     VkInstanceCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     info.pApplicationInfo = &appInfo;
-    info.enabledExtensionCount = extensions.size();
+    info.enabledExtensionCount = extensionsData.size();
     info.ppEnabledExtensionNames = extensionsData.data();
     info.enabledLayerCount = 1;
     info.ppEnabledLayerNames = validationLayers;
@@ -180,14 +180,20 @@ bool SetupGraphicsDevice(VulkanContext& ctx)
 
     auto queues = FindDeviceQueues(ctx);
 
-    const char* extensions[1] = { "VK_KHR_swapchain" };
+    wtl::vector<const char*> extensions = { "VK_KHR_swapchain", "VK_KHR_dynamic_rendering" };
+
+    VkPhysicalDeviceDynamicRenderingFeatures dynaRendering{};
+    dynaRendering.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+    dynaRendering.dynamicRendering = VK_TRUE;
+
 
     VkDeviceCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    info.pNext = &dynaRendering;
     info.queueCreateInfoCount = queues.size();
     info.pQueueCreateInfos = queues.data();
-    info.enabledExtensionCount = 1;
-    info.ppEnabledExtensionNames = extensions;
+    info.enabledExtensionCount = extensions.size();
+    info.ppEnabledExtensionNames = extensions.data();
 
     // Do I also have to hire a babysitter for the damn gpu??
     auto resDev = vkCreateDevice(ctx.vcore.gpuPhysicalDevice, &info, ctx.vcore.allocator, &ctx.vcore.gpuDevice);

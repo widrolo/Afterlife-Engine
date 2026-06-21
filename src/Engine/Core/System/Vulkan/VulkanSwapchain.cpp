@@ -5,46 +5,6 @@
 
 #include "VulkanHelpers.h"
 
-void SetupSwapchainFramebuffers(VulkanContext& ctx, VulkanStatistics& stats)
-{
-    ctx.screen.swapchainImageViews.resize(ctx.screen.swapchainImages.size());
-    ctx.screen.swapchainFramebuffers.resize(ctx.screen.swapchainImages.size());
-
-
-    for (int i = 0; i < ctx.screen.swapchainImages.size(); i++)
-    {
-        VkImageViewCreateInfo viewInfo{};
-        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        viewInfo.image = ctx.screen.swapchainImages[i];
-        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        viewInfo.format = FindBestColorFormat(ctx);
-        viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        viewInfo.subresourceRange.baseMipLevel = 0;
-        viewInfo.subresourceRange.levelCount = 1;
-        viewInfo.subresourceRange.baseArrayLayer = 0;
-        viewInfo.subresourceRange.layerCount = 1;
-
-        vkCreateImageView(ctx.vcore.gpuDevice, &viewInfo, ctx.vcore.allocator, &ctx.screen.swapchainImageViews[i]);
-
-        std::array<VkImageView, 2> attachments = {
-            ctx.screen.swapchainImageViews[i],
-            ctx.screen.depthImageView
-        };
-
-        VkFramebufferCreateInfo fbInfo{};
-        fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        fbInfo.renderPass = ctx.renderPass;
-        fbInfo.attachmentCount = attachments.size();
-        fbInfo.pAttachments = attachments.data();
-        fbInfo.width = EngineSettings::resolution.x;
-        fbInfo.height = EngineSettings::resolution.y;
-        fbInfo.layers = 1;
-
-        vkCreateFramebuffer(ctx.vcore.gpuDevice, &fbInfo, ctx.vcore.allocator, &ctx.screen.swapchainFramebuffers[i]);
-        stats.vramUsage += CalcTextureSize(4, EngineSettings::resolution.x, EngineSettings::resolution.y);
-    }
-}
-
 bool SetupSwapchain(VulkanContext& ctx, VulkanStatistics& stats)
 {
     VkSurfaceCapabilitiesKHR capabilities{};
@@ -61,7 +21,7 @@ bool SetupSwapchain(VulkanContext& ctx, VulkanStatistics& stats)
     info.surface = ctx.screen.screen;
     info.minImageCount = capabilities.minImageCount + 1;
 
-    info.imageFormat = FindBestColorFormat(ctx);
+    info.imageFormat = FindBestSwapchainFormat(ctx);
     info.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
     info.imageExtent = capabilities.currentExtent;
     info.imageArrayLayers = 1;
@@ -99,6 +59,25 @@ bool SetupSwapchain(VulkanContext& ctx, VulkanStatistics& stats)
     for (uint32 i = 0; i < swapchainImageCount; i++)
         vkCreateFence(ctx.vcore.gpuDevice, &fenceInfo, ctx.vcore.allocator, &ctx.screen.endOfFrameFences[i]);
 
+    ctx.screen.swapchainImageViews.resize(swapchainImageCount);
+    for (uint32 i = 0; i < swapchainImageCount; i++)
+    {
+        VkImageViewCreateInfo viewInfo{};
+        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.format = FindBestSwapchainFormat(ctx);
+        viewInfo.image = ctx.screen.swapchainImages[i];
+        viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        viewInfo.subresourceRange.baseMipLevel = 0;
+        viewInfo.subresourceRange.levelCount = 1;
+        viewInfo.subresourceRange.baseArrayLayer = 0;
+        viewInfo.subresourceRange.layerCount = 1;
+        auto resImg = vkCreateImageView(ctx.vcore.gpuDevice, &viewInfo, ctx.vcore.allocator,
+            &ctx.screen.swapchainImageViews[i]);
+
+        if (!ParseVkResult(resImg))
+            return false;
+    }
 
     return ParseVkResult(res);
 }

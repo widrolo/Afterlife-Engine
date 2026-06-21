@@ -74,12 +74,8 @@ bool Iris::SETTING_InitGPUApi(SDL_Window *window)
     ctx.cmdBufs.resize(ctx.screen.swapchainImages.size());
     for (uint32 i = 0; i < ctx.screen.swapchainImages.size(); i++)
         ctx.cmdBufs[i] = CreateDrawCommandBuffer(ctx, ctx.commandPool);
-    ctx.renderPass = CreateBasicRenderPass(ctx);
 
-    SetupSwapchainFramebuffers(ctx, stats);
     TryCompileAllShaders(ctx);
-
-
     return true;
 }
 
@@ -87,6 +83,15 @@ void Iris::SETTING_ConfigureImGui(SDL_Window *window)
 {
     if (!SetupImGuiDescriptorPool(ctx))
         return;
+
+    static VkFormat swapFormat = FindBestSwapchainFormat(ctx);
+
+    VkPipelineRenderingCreateInfo pipeInfo{};
+    pipeInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+    pipeInfo.colorAttachmentCount = 1;
+    pipeInfo.pColorAttachmentFormats = &swapFormat;
+    pipeInfo.depthAttachmentFormat = FindBestDepthFormat(ctx);
+
 
     ImGui_ImplSDL3_InitForVulkan(window);
     ImGui_ImplVulkan_InitInfo initInfo{};
@@ -100,8 +105,8 @@ void Iris::SETTING_ConfigureImGui(SDL_Window *window)
     initInfo.ImageCount = ctx.screen.swapchainImages.size();
     initInfo.MinImageCount = ctx.screen.swapchainImages.size();
     initInfo.DescriptorPoolSize = 8;
-    initInfo.PipelineInfoMain.RenderPass = ctx.renderPass;
-    initInfo.PipelineInfoMain.Subpass = 0;
+    initInfo.UseDynamicRendering = true;
+    initInfo.PipelineInfoMain.PipelineRenderingCreateInfo = pipeInfo;
     initInfo.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
     ImGui_ImplVulkan_Init(&initInfo);
@@ -262,16 +267,60 @@ void Iris::DRAWCALL_ClearFrame(WEngine::Color clearColor)
     clearValues[0].color = clearCol;
     clearValues[1].depthStencil = { 1.0f, 0 };
 
-    VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = ctx.renderPass;
-    renderPassInfo.clearValueCount = clearValues.size();
-    renderPassInfo.pClearValues = clearValues.data();
-    renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = {(uint32)EngineSettings::resolution.x, (uint32)EngineSettings::resolution.y};
-    renderPassInfo.framebuffer = ctx.screen.swapchainFramebuffers[ctx.screen.swapchainCurrentImage];
+    VkImageMemoryBarrier colBarrier{};
+    colBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    colBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    colBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colBarrier.image = ctx.screen.swapchainImages[ctx.screen.currentFrame];
+    colBarrier.srcAccessMask = 0;
+    colBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    colBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    colBarrier.subresourceRange.baseMipLevel = 0;
+    colBarrier.subresourceRange.levelCount = 1;
+    colBarrier.subresourceRange.baseArrayLayer = 0;
+    colBarrier.subresourceRange.layerCount = 1;
+
+    vkCmdPipelineBarrier(ctx.cmdBufs[ctx.screen.currentFrame], VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, nullptr, 0, nullptr, 1, &colBarrier);
+
+    // never trusting vulkan with things passed in as reference!
+    VkImageMemoryBarrier depthBarrier = colBarrier;
+    depthBarrier.image = ctx.screen.depthImage;
+    depthBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    depthBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    depthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+    vkCmdPipelineBarrier(ctx.cmdBufs[ctx.screen.currentFrame], VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, 0, nullptr, 0, nullptr, 1, &depthBarrier);
+
+    VkRenderingAttachmentInfo colorAttachmentInfo{};
+    colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    colorAttachmentInfo.clearValue = clearValues[0];
+    colorAttachmentInfo.imageView = ctx.screen.swapchainImageViews[ctx.screen.swapchainCurrentImage];
+    colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+    VkRenderingAttachmentInfo depthAttachmentInfo{};
+    depthAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+    depthAttachmentInfo.clearValue = clearValues[1];
+    depthAttachmentInfo.imageView = ctx.screen.depthImageView;
+    depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    depthAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+
+    VkRenderingInfo renderingInfo{};
+    renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    renderingInfo.renderArea.offset = {0, 0};
+    renderingInfo.renderArea.extent = {(uint32)EngineSettings::resolution.x, (uint32)EngineSettings::resolution.y};
+    renderingInfo.layerCount = 1;
+    renderingInfo.colorAttachmentCount = 1;
+    renderingInfo.pColorAttachments = &colorAttachmentInfo;
+    renderingInfo.pDepthAttachment = &depthAttachmentInfo;
+
+    vkCmdBeginRendering(ctx.cmdBufs[ctx.screen.currentFrame], &renderingInfo);
     ctx.currentBoundShader = 99999999;
-    vkCmdBeginRenderPass(ctx.cmdBufs[ctx.screen.currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
 void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, const WEngine::Mat4x4& mvp)
@@ -384,14 +433,31 @@ void Iris::DRAWCALL_DrawImGui()
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), ctx.cmdBufs[ctx.screen.currentFrame]);
 }
 
-void Iris::DRAWCALL_SwapBuffers(SDL_Window *window)
+void Iris::DRAWCALL_DrawToDisplay(SDL_Window *window)
 {
-    vkCmdEndRenderPass(ctx.cmdBufs[ctx.screen.currentFrame]);
+    vkCmdEndRendering(ctx.cmdBufs[ctx.screen.currentFrame]);
+
+    VkImageMemoryBarrier imgBarrier{};
+    imgBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    imgBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    imgBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    imgBarrier.image = ctx.screen.swapchainImages[ctx.screen.currentFrame];
+    imgBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    imgBarrier.dstAccessMask = 0;
+
+    imgBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imgBarrier.subresourceRange.baseMipLevel = 0;
+    imgBarrier.subresourceRange.levelCount = 1;
+    imgBarrier.subresourceRange.baseArrayLayer = 0;
+    imgBarrier.subresourceRange.layerCount = 1;
+
+    vkCmdPipelineBarrier(ctx.cmdBufs[ctx.screen.currentFrame], VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imgBarrier);
+
     auto res = vkEndCommandBuffer(ctx.cmdBufs[ctx.screen.currentFrame]);
     if (!ParseVkResult(res))
         WEngine::WLog::ConsoleLog("Something went wrong after ending the command buffer!");
 
-    // just for now
     VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
     VkSubmitInfo submitInfo{};

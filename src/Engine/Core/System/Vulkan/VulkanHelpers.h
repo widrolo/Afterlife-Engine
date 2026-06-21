@@ -11,7 +11,7 @@ VkBool32 ValidationCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeveri
 uint64 CalcTextureSize(uint8 bytesPerPixel, uint32 width, uint32 height);
 uint64 CalcModelSize(uint8 bytesPerVertex, uint32 vertexCount);
 VkFormat FindBestDepthFormat(const VulkanContext& ctx);
-VkFormat FindBestColorFormat(const VulkanContext& ctx);
+VkFormat FindBestSwapchainFormat(const VulkanContext& ctx);
 uint64 GetSizeOfImageInBytes(WEngine::Vector2 imageSize, uint8 channelCount);
 uint32 GetVulkanVersion();
 

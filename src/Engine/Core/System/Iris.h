@@ -63,7 +63,7 @@ public:
     static void DRAWCALL_ResetImGui();
     static void DRAWCALL_DrawImGui();
 
-    static void DRAWCALL_SwapBuffers(SDL_Window* window);
+    static void DRAWCALL_DrawToDisplay(SDL_Window* window);
 
     // ------------------------ Memory -----------------------
 

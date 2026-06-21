@@ -21,7 +21,6 @@ struct VulkanContext
     wtl::vector<std::pair<VkBuffer, VmaAllocation>> stagingBuffers{};
 
     wtl::vector<VkCommandBuffer> cmdBufs{};
-    VkRenderPass renderPass{};
 
     wtl::vector<Vulkan_Shader> loadedShaders{};
     std::unordered_map<std::string, WEngine::Shader> loadedShadersHandles{};

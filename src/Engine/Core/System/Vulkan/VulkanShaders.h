@@ -16,8 +16,7 @@ VkPipelineVertexInputStateCreateInfo CreatePipeline_VertexDefinition();
 VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Vertex(const VulkanContext& ctx, const std::string &shaderName);
 VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Fragment(const VulkanContext& ctx, const std::string &shaderName);
 
-VkPipeline CreatePipeline(VulkanContext& ctx, VkRenderPass renderPass, const WEngine::ShaderDefinition& shaderDef,
-    VkPipelineLayout pipelineLayout);
+VkPipeline CreatePipeline(VulkanContext& ctx, const WEngine::ShaderDefinition& shaderDef, VkPipelineLayout pipelineLayout);
 void SaturateDescriptorSet(VulkanContext& ctx, Vulkan_Material& material);
 
 WEngine::MaterialDefinition ParseMaterialDefinition(VulkanContext &ctx, const YAML::Node& root);
