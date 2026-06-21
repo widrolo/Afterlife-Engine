@@ -160,45 +160,7 @@ VkDescriptorPool CreateDescriptorPool(VulkanContext &ctx, const WEngine::ShaderD
     return descriptorPool;
 }
 
-bool SetupDrawCommandPool(VulkanContext& ctx)
-{
-    VkCommandPoolCreateInfo commandPoolInfo{};
-    commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    commandPoolInfo.queueFamilyIndex = ctx.queues.primaryDrawQueueFamilyIndex;
-    commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-    auto res = vkCreateCommandPool(ctx.vcore.gpuDevice, &commandPoolInfo, ctx.vcore.allocator, &ctx.commandPool);
-
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleWarning();
-        WEngine::WLog::ConsoleLog("Unable to create command buffer!");
-        return false;
-    }
-    return true;
-}
-
-VkCommandBuffer CreateDrawCommandBuffer(const VulkanContext& ctx, VkCommandPool cmdPool)
-{
-    VkCommandBuffer cmdBuff;
-
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = cmdPool;
-    allocInfo.commandBufferCount = 1;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-
-    auto res = vkAllocateCommandBuffers(ctx.vcore.gpuDevice, &allocInfo, &cmdBuff);
-
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleWarning();
-        WEngine::WLog::ConsoleLog("Unable to create command buffer!");
-        return VK_NULL_HANDLE;
-    }
-
-    return cmdBuff;
-}
 
 #endif
 

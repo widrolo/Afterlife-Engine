@@ -325,6 +325,8 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Util/TextureSwizzler.h
         src/Engine/Types/Rendering/Iris/IrisAssetComms.h
         src/Game/Types/GameSystems.h
+        src/Engine/Core/System/Vulkan/VulkanCommands.cpp
+        src/Engine/Core/System/Vulkan/VulkanCommands.h
 )
 
 set_target_properties(Widrolo_Engine_3D PROPERTIES

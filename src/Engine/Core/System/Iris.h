@@ -65,6 +65,14 @@ public:
 
     static void DRAWCALL_DrawToDisplay(SDL_Window* window);
 
+    // --------------------- Framebuffers --------------------
+
+    static WEngine::Nullable<WEngine::Framebuffer> ALLOC_CreateFramebuffer(const WEngine::Vector2& resolution);
+
+    static void SETTING_SelectFramebufferForRender(WEngine::Framebuffer framebuffer);
+    static void SETTING_SelectFramebufferScreenForRender();
+    static void SETTING_FinishFramebufferRender();
+
     // ------------------------ Memory -----------------------
 
     static uint64 GetVramUsage();

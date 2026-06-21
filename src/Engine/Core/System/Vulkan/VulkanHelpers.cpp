@@ -136,4 +136,19 @@ uint32 GetVulkanVersion()
     return VK_API_VERSION_1_4;
 }
 
+VkCommandBuffer& GetCmdBuff(const VulkanContext &ctx)
+{
+    return ctx.currentRenderTarget->cmdBuffs[ctx.screen.currentFrame];
+}
+
+VkImage& GetFbImage(const VulkanContext &ctx)
+{
+    return ctx.currentRenderTarget->targetImages[ctx.screen.currentFrame];
+}
+
+VkImageView& GetFbImageView(const VulkanContext &ctx)
+{
+    return ctx.currentRenderTarget->targetImageViews[ctx.screen.currentFrame];
+}
+
 #endif

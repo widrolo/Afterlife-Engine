@@ -34,46 +34,46 @@ bool SetupSwapchain(VulkanContext& ctx, VulkanStatistics& stats)
 
     auto res = vkCreateSwapchainKHR(ctx.vcore.gpuDevice, &info, ctx.vcore.allocator, &ctx.screen.swapchain);
 
-    uint32 swapchainImageCount;
-    vkGetSwapchainImagesKHR(ctx.vcore.gpuDevice, ctx.screen.swapchain, &swapchainImageCount, nullptr);
-    ctx.screen.swapchainImages.resize(swapchainImageCount);
-    vkGetSwapchainImagesKHR(ctx.vcore.gpuDevice, ctx.screen.swapchain, &swapchainImageCount, ctx.screen.swapchainImages.data());
+    vkGetSwapchainImagesKHR(ctx.vcore.gpuDevice, ctx.screen.swapchain, &ctx.screen.swapchainImageCount, nullptr);
+    ctx.displayTarget.targetImages.resize(ctx.screen.swapchainImageCount);
+    vkGetSwapchainImagesKHR(ctx.vcore.gpuDevice, ctx.screen.swapchain, &ctx.screen.swapchainImageCount,
+        ctx.displayTarget.targetImages.data());
 
-    ctx.screen.imageAvailableSems.resize(swapchainImageCount);
-    ctx.screen.renderFinishedSems.resize(swapchainImageCount);
-    ctx.screen.endOfFrameFences.resize(swapchainImageCount);
-    ctx.bufferGraveyard.resize(swapchainImageCount);
+    ctx.screen.imageAvailableSems.resize(ctx.screen.swapchainImageCount);
+    ctx.screen.renderFinishedSems.resize(ctx.screen.swapchainImageCount);
+    ctx.screen.endOfFrameFences.resize(ctx.screen.swapchainImageCount);
+    ctx.bufferGraveyard.resize(ctx.screen.swapchainImageCount);
 
-    stats.vramUsage += CalcTextureSize(4, EngineSettings::resolution.x, EngineSettings::resolution.y) * swapchainImageCount;
+    stats.vramUsage += CalcTextureSize(4, EngineSettings::resolution.x, EngineSettings::resolution.y) * ctx.screen.swapchainImageCount;
 
     VkSemaphoreCreateInfo semInfo{};
     semInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    for (uint32 i = 0; i < swapchainImageCount; i++)
+    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
         vkCreateSemaphore(ctx.vcore.gpuDevice, &semInfo, ctx.vcore.allocator, &ctx.screen.imageAvailableSems[i]);
-    for (uint32 i = 0; i < swapchainImageCount; i++)
+    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
         vkCreateSemaphore(ctx.vcore.gpuDevice, &semInfo, ctx.vcore.allocator, &ctx.screen.renderFinishedSems[i]);
 
     VkFenceCreateInfo fenceInfo{};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-    for (uint32 i = 0; i < swapchainImageCount; i++)
+    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
         vkCreateFence(ctx.vcore.gpuDevice, &fenceInfo, ctx.vcore.allocator, &ctx.screen.endOfFrameFences[i]);
 
-    ctx.screen.swapchainImageViews.resize(swapchainImageCount);
-    for (uint32 i = 0; i < swapchainImageCount; i++)
+    ctx.displayTarget.targetImageViews.resize(ctx.screen.swapchainImageCount);
+    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
     {
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
         viewInfo.format = FindBestSwapchainFormat(ctx);
-        viewInfo.image = ctx.screen.swapchainImages[i];
+        viewInfo.image = ctx.displayTarget.targetImages[i];
         viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         viewInfo.subresourceRange.baseMipLevel = 0;
         viewInfo.subresourceRange.levelCount = 1;
         viewInfo.subresourceRange.baseArrayLayer = 0;
         viewInfo.subresourceRange.layerCount = 1;
         auto resImg = vkCreateImageView(ctx.vcore.gpuDevice, &viewInfo, ctx.vcore.allocator,
-            &ctx.screen.swapchainImageViews[i]);
+            &ctx.displayTarget.targetImageViews[i]);
 
         if (!ParseVkResult(resImg))
             return false;

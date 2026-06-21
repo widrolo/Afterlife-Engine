@@ -44,6 +44,9 @@ RenderHandler::RenderHandler()
 void RenderHandler::BeginFrame()
 {
 	Iris::SETTING_BeginNewFrame();
+
+	Iris::SETTING_SelectFramebufferScreenForRender();
+
 	Iris::DRAWCALL_ResetImGui();
 	Iris::DRAWCALL_ClearFrame(Color{30, 30, 30, 255});
 	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
@@ -70,6 +73,7 @@ void RenderHandler::RenderFrame()
 {
 	SortMissions();
 
+
 	for (auto& materialGroup : m_sortedMissions)
 	{
 		for (auto& modelGroup : materialGroup.models)
@@ -84,7 +88,11 @@ void RenderHandler::RenderFrame()
 		Iris::DRAWCALL_DrawModelInstancedStationary(stat.model, stat.material, vp);
 
 	Iris::DRAWCALL_DrawImGui();
+
+	Iris::SETTING_FinishFramebufferRender();
+
 	Iris::DRAWCALL_DrawToDisplay(m_window);
+
 	m_renderQueue.clear();
 	CleanSortedMissions();
 }

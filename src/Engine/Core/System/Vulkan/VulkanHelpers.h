@@ -15,4 +15,8 @@ VkFormat FindBestSwapchainFormat(const VulkanContext& ctx);
 uint64 GetSizeOfImageInBytes(WEngine::Vector2 imageSize, uint8 channelCount);
 uint32 GetVulkanVersion();
 
+VkCommandBuffer& GetCmdBuff(const VulkanContext& ctx);
+VkImage& GetFbImage(const VulkanContext& ctx);
+VkImageView& GetFbImageView(const VulkanContext& ctx);
+
 #endif

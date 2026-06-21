@@ -34,8 +34,7 @@ struct Vulkan_Screen
 {
     VkSurfaceKHR screen = VK_NULL_HANDLE;
     VkSwapchainKHR swapchain = VK_NULL_HANDLE;
-    wtl::vector<VkImage> swapchainImages;
-    wtl::vector<VkImageView> swapchainImageViews;
+    uint32 swapchainImageCount = 0;
     uint32 swapchainCurrentImage = 0;
 
     wtl::vector<VkSemaphore> imageAvailableSems;
@@ -125,6 +124,14 @@ struct Vulkan_Texture
     VkImageView imageView;
     VkSampler sampler;
     VmaAllocation imageAllocation;
+};
+
+struct Vulkan_RenderTarget
+{
+    wtl::vector<VkImage> targetImages;
+    wtl::vector<VkImageView> targetImageViews;
+    wtl::vector<VmaAllocation> targetImageAlloc;
+    wtl::vector<VkCommandBuffer> cmdBuffs{};
 };
 
 using BufferCollection = wtl::vector<std::pair<VkBuffer, VmaAllocation>>;

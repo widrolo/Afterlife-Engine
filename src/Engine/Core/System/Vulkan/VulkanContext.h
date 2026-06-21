@@ -20,8 +20,6 @@ struct VulkanContext
     VkFence transferFence{};
     wtl::vector<std::pair<VkBuffer, VmaAllocation>> stagingBuffers{};
 
-    wtl::vector<VkCommandBuffer> cmdBufs{};
-
     wtl::vector<Vulkan_Shader> loadedShaders{};
     std::unordered_map<std::string, WEngine::Shader> loadedShadersHandles{};
     wtl::vector<Vulkan_Model> loadedModels{};
@@ -29,6 +27,10 @@ struct VulkanContext
     wtl::vector<Vulkan_Material> loadedMaterials{};
     std::unordered_map<std::string, WEngine::Material> loadedMaterialHandles{};
     wtl::vector<Vulkan_Texture> loadedTextures{};
+
+    Vulkan_RenderTarget displayTarget{};
+    wtl::vector<Vulkan_RenderTarget> renderTargets{};
+    Vulkan_RenderTarget* currentRenderTarget{};
 
     WEngine::Shader currentBoundShader = 999999999;
     std::vector<BufferCollection> bufferGraveyard{};
