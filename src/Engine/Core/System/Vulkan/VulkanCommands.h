@@ -5,9 +5,11 @@
 
 #include "VulkanContext.h"
 #include "VulkanStatistics.h"
+#include "Engine/Types/Rendering/GPU/Framebuffer.h"
 
 bool SetupDrawCommandPool(VulkanContext& ctx);
 VkCommandBuffer CreateCommandBuffer(const VulkanContext& ctx);
 bool SetupDisplayRenderTarget(VulkanContext& ctx, VulkanStatistics& stat);
+Vulkan_RenderTarget CreateRenderTarget(VulkanContext& ctx, VulkanStatistics& stat, const WEngine::Vector2& resolution);
 
 #endif

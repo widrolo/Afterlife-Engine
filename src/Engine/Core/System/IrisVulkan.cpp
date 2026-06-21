@@ -128,9 +128,6 @@ void Iris::SETTING_BeginNewFrame()
     vkAcquireNextImageKHR(ctx.vcore.gpuDevice, ctx.screen.swapchain, max_uint64,
         ctx.screen.imageAvailableSems[ctx.screen.currentFrame], VK_NULL_HANDLE, &ctx.screen.swapchainCurrentImage);
 
-
-
-
     for (auto& model : ctx.loadedModels)
         model.activeInstances = 0;
 }
@@ -316,6 +313,13 @@ void Iris::DRAWCALL_ClearFrame(WEngine::Color clearColor)
 
 void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, const WEngine::Mat4x4& mvp)
 {
+    if (!ctx.isCommandRecording)
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Tried render model while no framebuffer was selected!");
+        return;
+    }
+
     Vulkan_Material vkMat = ctx.loadedMaterials[material - 1];
     Vulkan_Shader vkShader = ctx.loadedShaders[vkMat.materialShaderHandle - 1];
     if (ctx.currentBoundShader != vkMat.materialShaderHandle)
@@ -342,6 +346,13 @@ void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, 
 void Iris::DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material material,
     const WEngine::Mat4x4& vp, const wtl::vector<WEngine::InstanceData>& instanceMats)
 {
+    if (!ctx.isCommandRecording)
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Tried render model while no framebuffer was selected!");
+        return;
+    }
+
     Vulkan_Material vkMat = ctx.loadedMaterials[material - 1];
     Vulkan_Shader vkShader = ctx.loadedShaders[vkMat.materialShaderHandle - 1];
     if (ctx.currentBoundShader != vkMat.materialShaderHandle)
@@ -381,6 +392,13 @@ void Iris::DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material m
 void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::Material material,
     const WEngine::Mat4x4& vp)
 {
+    if (!ctx.isCommandRecording)
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Tried render model while no framebuffer was selected!");
+        return;
+    }
+
     auto alloc = ctx.statBuf.statBookkeep.FindNode(model, material);
     if (alloc.first == 0 && alloc.second == 0)
         return;
@@ -420,6 +438,13 @@ void Iris::DRAWCALL_ResetImGui()
 
 void Iris::DRAWCALL_DrawImGui()
 {
+    if (!ctx.isCommandRecording)
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Tried render ImGui while no framebuffer was selected!");
+        return;
+    }
+
     ImGui::Render();
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), GetCmdBuff(ctx));
 }
@@ -452,16 +477,51 @@ void Iris::DRAWCALL_DrawToDisplay(SDL_Window *window)
 
 WEngine::Nullable<WEngine::Framebuffer> Iris::ALLOC_CreateFramebuffer(const WEngine::Vector2 &resolution)
 {
+    Vulkan_RenderTarget target = CreateRenderTarget(ctx, stats, resolution);
 
+    ctx.renderTargets.push_back(target);
+    WEngine::Framebuffer handle = ctx.renderTargets.size();
+
+    return handle;
 }
 
-void Iris::SETTING_SelectFramebufferForRender(WEngine::Framebuffer framebuffer)
+void Iris::SETTING_SelectFramebufferForRender(const WEngine::Framebuffer framebuffer)
 {
+    if (ctx.renderTargets.size() < framebuffer)
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Frame buffer handle out of scope!");
+        return;
+    }
 
+    if (ctx.isCommandRecording)
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Tried to change frame buffer in the middle of drawing!");
+        return;
+    }
+
+    ctx.currentRenderTarget = &ctx.renderTargets[framebuffer - 1];
+
+    vkResetCommandBuffer(GetCmdBuff(ctx), 0);
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    vkBeginCommandBuffer(GetCmdBuff(ctx), &beginInfo);
+
+    ctx.isCommandRecording = true;
 }
 
 void Iris::SETTING_SelectFramebufferScreenForRender()
 {
+    if (ctx.isCommandRecording)
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Tried to change frame buffer in the middle of drawing!");
+        return;
+    }
+
     ctx.currentRenderTarget = &ctx.displayTarget;
 
     vkResetCommandBuffer(GetCmdBuff(ctx), 0);
@@ -470,10 +530,19 @@ void Iris::SETTING_SelectFramebufferScreenForRender()
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     vkBeginCommandBuffer(GetCmdBuff(ctx), &beginInfo);
+
+    ctx.isCommandRecording = true;
 }
 
 void Iris::SETTING_FinishFramebufferRender()
 {
+    if (!ctx.isCommandRecording)
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Tried to finish a framebuffer while none was selected!");
+        return;
+    }
+
     vkCmdEndRendering(GetCmdBuff(ctx));
 
     VkImageMemoryBarrier imgBarrier{};
@@ -496,6 +565,8 @@ void Iris::SETTING_FinishFramebufferRender()
     auto res = vkEndCommandBuffer(GetCmdBuff(ctx));
     if (!ParseVkResult(res))
         WEngine::WLog::ConsoleLog("Something went wrong after ending the command buffer!");
+
+    ctx.isCommandRecording = false;
 
     VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 

@@ -54,20 +54,33 @@ bool SetupDisplayRenderTarget(VulkanContext &ctx, VulkanStatistics& stat)
         return false;
 
     ctx.displayTarget.cmdBuffs.resize(ctx.screen.swapchainImageCount);
-    //ctx.displayTarget.targetImages.resize(ctx.screen.swapchainImages.size());
-    //ctx.displayTarget.targetImageViews.resize(ctx.screen.swapchainImages.size());
-    //ctx.displayTarget.targetImageAlloc.resize(ctx.screen.swapchainImages.size());
 
     for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
-    {
-        //CreateImage(ctx, stat, EngineSettings::resolution, format, ctx.displayTarget.targetImages[i],
-        //    ctx.displayTarget.targetImageViews[i], ctx.displayTarget.targetImageAlloc[i], false);
         ctx.displayTarget.cmdBuffs[i] = CreateCommandBuffer(ctx);
-    }
 
     // this is just so i dont get slapped by a cock in the face if i forget to do it in the render handler
     ctx.currentRenderTarget = &ctx.displayTarget;
     return true;
+}
+
+Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &stat, const WEngine::Vector2& resolution)
+{
+    Vulkan_RenderTarget target;
+    VkFormat format = FindBestSwapchainFormat(ctx);
+
+    target.cmdBuffs.resize(ctx.screen.swapchainImageCount);
+    target.targetImages.resize(ctx.screen.swapchainImageCount);
+    target.targetImageViews.resize(ctx.screen.swapchainImageCount);
+    target.targetImageAlloc.resize(ctx.screen.swapchainImageCount);
+
+    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
+    {
+        CreateImage(ctx, stat, resolution, format, target.targetImages[i], target.targetImageViews[i],
+            target.targetImageAlloc[i], false);
+        target.cmdBuffs[i] = CreateCommandBuffer(ctx);
+    }
+
+    return target;
 }
 
 #endif

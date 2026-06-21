@@ -35,6 +35,7 @@ struct VulkanContext
     WEngine::Shader currentBoundShader = 999999999;
     std::vector<BufferCollection> bufferGraveyard{};
     bool firstFrame = true;
+    bool isCommandRecording = false;
 };
 
 #endif
