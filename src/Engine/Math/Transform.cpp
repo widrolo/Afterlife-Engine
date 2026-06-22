@@ -13,7 +13,7 @@ Vector3 Transform::Forward()
 
     Vector3 forward{
         std::sin(yaw) * std::cos(pitch),
-        -std::sin(pitch),
+        std::sin(pitch),
         -std::cos(yaw) * std::cos(pitch)
     };
 

@@ -100,7 +100,7 @@ void RenderHandler::BeginFrame()
 		m_viewMatrix = glm::rotate(m_viewMatrix, glm::radians(camRot.y), glm::vec3(0, 1, 0));
 		m_viewMatrix = glm::rotate(m_viewMatrix, glm::radians(camRot.z), glm::vec3(0, 0, 1));
 
-		m_viewMatrix = glm::translate(m_viewMatrix, -glm::vec3(camPos.x, camPos.y, camPos.z));
+		m_viewMatrix = glm::translate(m_viewMatrix, -glm::vec3(camPos.x, -camPos.y, camPos.z));
 	}
 }
 
@@ -187,7 +187,7 @@ Mat4x4 RenderHandler::CalcModelMatrix(const Transform &transform)
 
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
 
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(modPos.x, modPos.y, modPos.z));
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(modPos.x, -modPos.y, modPos.z));
 
 	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.x - 180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.y), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -206,7 +206,7 @@ Mat4x4 RenderHandler::CalcMVPMatrix(const Transform &transform)
 
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
 
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(modPos.x, modPos.y, modPos.z));
+	modelMatrix = glm::translate(modelMatrix, glm::vec3(modPos.x, -modPos.y, modPos.z));
 
 	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.x - 180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.y), glm::vec3(0.0f, 1.0f, 0.0f));

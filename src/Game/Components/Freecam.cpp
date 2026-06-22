@@ -51,9 +51,9 @@ void Freecam::Tick(float32 dt)
         entity->transform.position = entity->transform.position + entity->transform.Right() * speed;
 
     if (input->GetActionInput(WKey::SPACE))
-        entity->transform.position = entity->transform.position + entity->transform.Up() * speed;
-    if (input->GetActionInput(WKey::SHIFT))
         entity->transform.position = entity->transform.position - entity->transform.Up() * speed;
+    if (input->GetActionInput(WKey::SHIFT))
+        entity->transform.position = entity->transform.position + entity->transform.Up() * speed;
 
 
     if (input->GetActionInput(WKey::DEBUG5, WEngine::Press))
