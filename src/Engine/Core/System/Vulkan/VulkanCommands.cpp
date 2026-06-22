@@ -68,6 +68,8 @@ Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &sta
     Vulkan_RenderTarget target;
     VkFormat format = FindBestSwapchainFormat(ctx);
 
+    target.resolution = resolution;
+
     target.cmdBuffs.resize(ctx.screen.swapchainImageCount);
     target.targetImages.resize(ctx.screen.swapchainImageCount);
     target.targetImageViews.resize(ctx.screen.swapchainImageCount);
@@ -79,6 +81,8 @@ Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &sta
             target.targetImageAlloc[i], false);
         target.cmdBuffs[i] = CreateCommandBuffer(ctx);
     }
+
+    PopulateSemsAndFences(ctx, target);
 
     return target;
 }

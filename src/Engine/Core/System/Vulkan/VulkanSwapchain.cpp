@@ -46,6 +46,8 @@ bool SetupSwapchain(VulkanContext& ctx, VulkanStatistics& stats)
 
     PopulateSemsAndFences(ctx, ctx.displayTarget);
 
+    ctx.displayTarget.resolution = EngineSettings::resolution;
+
     ctx.displayTarget.targetImageViews.resize(ctx.screen.swapchainImageCount);
     for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
     {

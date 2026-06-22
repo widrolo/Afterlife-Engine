@@ -125,6 +125,7 @@ struct Vulkan_Texture
 
 struct Vulkan_RenderTarget
 {
+    WEngine::Vector2 resolution;
     wtl::vector<VkImage> targetImages;
     wtl::vector<VkImageView> targetImageViews;
     wtl::vector<VmaAllocation> targetImageAlloc;

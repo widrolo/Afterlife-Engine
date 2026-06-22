@@ -301,7 +301,7 @@ void Iris::DRAWCALL_ClearFrame(WEngine::Color clearColor)
     VkRenderingInfo renderingInfo{};
     renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
     renderingInfo.renderArea.offset = {0, 0};
-    renderingInfo.renderArea.extent = {(uint32)EngineSettings::resolution.x, (uint32)EngineSettings::resolution.y};
+    renderingInfo.renderArea.extent = {(uint32)GetFbResolution(ctx).x, (uint32)GetFbResolution(ctx).y}; // eye cancer
     renderingInfo.layerCount = 1;
     renderingInfo.colorAttachmentCount = 1;
     renderingInfo.pColorAttachments = &colorAttachmentInfo;
@@ -537,6 +537,7 @@ void Iris::SETTING_SelectFramebufferScreenForRender()
 
 void Iris::SETTING_FinishFramebufferRender()
 {
+    bool isSwapchain = ctx.currentRenderTarget == &ctx.displayTarget;
     if (!ctx.isCommandRecording)
     {
         WEngine::WLog::SetConsoleError();
@@ -571,17 +572,25 @@ void Iris::SETTING_FinishFramebufferRender()
 
     VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
-    VkCommandBuffer cmdBuff = GetFbCmdBuff(ctx);
-
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &GetFbImageAvailSem(ctx);
-    submitInfo.pWaitDstStageMask = &waitStage;
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &GetFbRenderFinishedSem(ctx);
+
+    if (isSwapchain)
+    {
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = &GetFbImageAvailSem(ctx);
+        submitInfo.pWaitDstStageMask = &waitStage;
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = &GetFbRenderFinishedSem(ctx);
+    }
+    else
+    {
+        submitInfo.waitSemaphoreCount = 0;
+        submitInfo.signalSemaphoreCount = 0;
+    }
+
     submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &cmdBuff;
+    submitInfo.pCommandBuffers = &GetFbCmdBuff(ctx);
 
     vkQueueSubmit(ctx.queues.primaryDrawQueue, 1, &submitInfo, GetFbEndOfFrameFence(ctx));
 }

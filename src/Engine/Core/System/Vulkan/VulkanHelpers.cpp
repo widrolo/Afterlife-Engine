@@ -136,6 +136,11 @@ uint32 GetVulkanVersion()
     return VK_API_VERSION_1_4;
 }
 
+WEngine::Vector2 & GetFbResolution(const VulkanContext &ctx)
+{
+    return ctx.currentRenderTarget->resolution;
+}
+
 VkCommandBuffer& GetFbCmdBuff(const VulkanContext &ctx)
 {
     return ctx.currentRenderTarget->cmdBuffs[ctx.screen.currentFrame];

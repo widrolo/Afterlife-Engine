@@ -120,6 +120,7 @@ void RenderHandler::RenderFrame()
 	{
 		Iris::SETTING_FinishFramebufferRender();
 		Iris::SETTING_SelectFramebufferScreenForRender();
+		Iris::DRAWCALL_ClearFrame(Color{30, 30, 30, 255});
 		Iris::DRAWCALL_DrawImGui();
 		Iris::SETTING_FinishFramebufferRender();
 	}
