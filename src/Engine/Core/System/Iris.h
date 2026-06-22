@@ -72,9 +72,9 @@ public:
 
     // ------------------------ Memory -----------------------
 
-
     static uint64 GetVramUsage();
     static uint32 GetDrawCallCountLastFrame();
+    static bool IsFirstFrame();
     static wtl::vector<MemListDebugInfo> GetStatInstBufAllocInfo();
 
     static void AddStationaryObjects(WEngine::Model model, WEngine::Material material,

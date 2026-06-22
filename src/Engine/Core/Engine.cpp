@@ -120,6 +120,7 @@ void Engine::InitHandlers()
 	StartHandlerSingle<WidgetHandler>(&CoreSystems::widgetHandler, "Widget Handler");
 	StartHandlerSingle<JobHandler>(&CoreSystems::jobHandler, "Job Handler");
 
+	Iris::SETTING_BeginNewPreFrame();
 	m_rootSector = new Sector("root");
 	m_game = new Game();
 }
@@ -212,7 +213,8 @@ void Engine::Loop_Begin(std::chrono::steady_clock::time_point& last, StopWatch& 
 
 	m_physicsTickTimer += m_deltaTime;
 
-	Iris::SETTING_BeginNewPreFrame();
+	if (!Iris::IsFirstFrame())
+		Iris::SETTING_BeginNewPreFrame();
 
 
 	m_game->GameLoopBegin();

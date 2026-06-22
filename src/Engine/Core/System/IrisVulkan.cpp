@@ -605,6 +605,11 @@ uint32 Iris::GetDrawCallCountLastFrame()
     return stats.drawCallsLastFrame;
 }
 
+bool Iris::IsFirstFrame()
+{
+    return ctx.firstFrame;
+}
+
 WEngine::Nullable<ImTextureID> Iris::FramebufferToImGui(WEngine::Framebuffer framebuffer)
 {
     return WEngine::Nullable<ImTextureID>();
