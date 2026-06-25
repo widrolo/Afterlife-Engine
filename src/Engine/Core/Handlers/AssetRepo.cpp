@@ -179,6 +179,7 @@ void AssetRepo::GetAsset<MeshAssetMission>(MeshAssetMission& mission)
             // ── Vertex count (driven by POSITION) ────────────────────────────
             int posIdx   = FindAttribute(prim, "POSITION");
             int colIdx   = FindAttribute(prim, "COLOR_0");
+        	int normIdx  = FindAttribute(prim, "NORMAL");
             int uv0Idx   = FindAttribute(prim, "TEXCOORD_0");
             int uv1Idx   = FindAttribute(prim, "TEXCOORD_1");
 
@@ -225,6 +226,18 @@ void AssetRepo::GetAsset<MeshAssetMission>(MeshAssetMission& mission)
                     out.vertices[vertStart + i].vertColor = { r, g, b };
                 }
             }
+
+        	// ── NORMAL (vec3 float) ───────────────────────────────────────────
+        	if (normIdx != -1)
+        	{
+        		auto [data, stride] = GetAccessorData(normIdx, sizeof(float) * 3);
+        		for (size_t i = 0; i < vertCount; i++)
+        		{
+        			const float* v = reinterpret_cast<const float*>(data + i * stride);
+        			out.vertices[vertStart + i].normal = { v[0], v[1], v[2] };
+        			WLog::ConsoleLog(std::format("N: {}", out.vertices[vertStart + i].normal));
+        		}
+        	}
 
             // ── TEXCOORD_0 (vec2 float) ───────────────────────────────────────
             if (uv0Idx != -1)
