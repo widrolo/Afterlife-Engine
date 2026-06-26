@@ -36,6 +36,8 @@ struct VulkanContext
     std::vector<BufferCollection> bufferGraveyard{};
     bool firstFrame = true;
     bool isCommandRecording = false;
+
+    WEngine::Vector3 sunDir{};
 };
 
 #endif

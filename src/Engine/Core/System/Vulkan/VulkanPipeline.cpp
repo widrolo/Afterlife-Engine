@@ -12,15 +12,24 @@
 
 VkPipelineLayout CreatePipelineLayout(VulkanContext& ctx, VkDescriptorSetLayout descLayout)
 {
-    VkPushConstantRange pushConstant{};
-    pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    pushConstant.offset = 0;
-    pushConstant.size = sizeof(WEngine::Mat4x4);
+    std::array<VkPushConstantRange, 2> pushConstants;
+
+    // mvp / vp
+    pushConstants[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pushConstants[0].offset = 0;
+    pushConstants[0].size = sizeof(WEngine::Mat4x4);
+
+    // sun
+    pushConstants[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    pushConstants[1].offset = sizeof(WEngine::Mat4x4);
+    pushConstants[1].size = sizeof(WEngine::Vector3);
+
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.pushConstantRangeCount = 1;
-    pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
+    pipelineLayoutInfo.pushConstantRangeCount = pushConstants.size();
+    pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
+
     if (descLayout != VK_NULL_HANDLE)
     {
         pipelineLayoutInfo.setLayoutCount = 1;

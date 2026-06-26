@@ -16,6 +16,15 @@ void RenderWatchWidget::RenderInternal()
     ImGui::Text("%s", GetHeader().c_str());
     ImGui::Separator();
 
+    float32* sunDir;
+    Vector3 sunDirV = Iris::GetSunDir();
+
+    sunDir = (float32*)&sunDirV;
+
+    ImGui::DragFloat3("Sun Direction", sunDir, 0.001f);
+
+    Iris::SETTING_SetSunDir(sunDirV);
+
     auto statInstBuf = Iris::GetStatInstBufAllocInfo();
 
     for (const auto& allocInfo : statInstBuf)

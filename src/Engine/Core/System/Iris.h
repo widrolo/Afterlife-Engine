@@ -34,6 +34,7 @@ public:
     static void SETTING_BeginNewPreFrame();
     static void SETTING_BeginNewFrame();
     static void SETTING_SetViewportSize(WEngine::Vector2 size);
+    static void SETTING_SetSunDir(const WEngine::Vector3& dir);
 
 
     // ----------------------- Shaders -----------------------
@@ -90,4 +91,8 @@ public:
     // --------------------- Asset Repo ----------------------
 
     static void AssetIrisCommunication(WEngine::AssetIrisCommunication& mission);
+
+    // ------------------------ Etc. -------------------------
+
+    static WEngine::Vector3 GetSunDir();
 };

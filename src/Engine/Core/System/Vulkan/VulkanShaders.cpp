@@ -71,7 +71,7 @@ VkPipelineVertexInputStateCreateInfo CreatePipeline_VertexDefinition()
     attributeDescriptions[1].offset = offsetof(WEngine::VertexData, vertColor);
     attributeDescriptions[2].binding = 0;
     attributeDescriptions[2].location = 2;
-    attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT; // Khronos had a meth party while making this one
+    attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT; // Khronos had a meth party while making this one
     attributeDescriptions[2].offset = offsetof(WEngine::VertexData, normal);
     attributeDescriptions[3].binding = 0;
     attributeDescriptions[3].location = 3;

@@ -171,4 +171,14 @@ VkFence& GetFbEndOfFrameFence(const VulkanContext &ctx)
     return ctx.currentRenderTarget->endOfFrameFences[ctx.screen.currentFrame];
 }
 
+void PopulatePushConstants(const VulkanContext &ctx, const Vulkan_Shader &shader, const WEngine::Mat4x4 &mvp)
+{
+    vkCmdPushConstants(GetFbCmdBuff(ctx), shader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
+        sizeof(WEngine::Mat4x4), &mvp);
+
+
+    vkCmdPushConstants(GetFbCmdBuff(ctx), shader.pipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(WEngine::Mat4x4),
+        sizeof(WEngine::Vector3), &ctx.sunDir);
+}
+
 #endif

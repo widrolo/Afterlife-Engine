@@ -1,6 +1,6 @@
 material:
     materialName: ProtoMat
-    shader: TexturedUnlit
+    shader: BasicLit
 
     texturesDevel:
         color: ProtoTexture.png

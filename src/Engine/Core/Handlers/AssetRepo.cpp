@@ -235,7 +235,6 @@ void AssetRepo::GetAsset<MeshAssetMission>(MeshAssetMission& mission)
         		{
         			const float* v = reinterpret_cast<const float*>(data + i * stride);
         			out.vertices[vertStart + i].normal = { v[0], v[1], v[2] };
-        			WLog::ConsoleLog(std::format("N: {}", out.vertices[vertStart + i].normal));
         		}
         	}
 

@@ -1,0 +1,16 @@
+shader:
+    isCompute: false
+    shaderName: BasicLit
+    abundance: 3
+
+    vertexCode: basic
+    fragmentCode: lit
+
+    fragmentInfo:
+        expectTextureCount: 1
+        colorTextures: [base]
+        pbrTextures: []
+
+        expectChannelNames: [color]
+
+        expectParams: ~

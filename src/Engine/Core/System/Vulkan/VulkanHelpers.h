@@ -23,4 +23,6 @@ VkSemaphore& GetFbImageAvailSem(const VulkanContext& ctx);
 VkSemaphore& GetFbRenderFinishedSem(const VulkanContext& ctx);
 VkFence& GetFbEndOfFrameFence(const VulkanContext& ctx);
 
+void PopulatePushConstants(const VulkanContext& ctx, const Vulkan_Shader& shader, const WEngine::Mat4x4& mvp);
+
 #endif

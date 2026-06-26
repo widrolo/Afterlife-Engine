@@ -1,6 +1,6 @@
 material:
     materialName: MonkeyMat
-    shader: TexturedUnlit
+    shader: BasicLit
 
     texturesDevel:
         color: Monkey.png

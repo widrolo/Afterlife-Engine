@@ -147,6 +147,11 @@ void Iris::SETTING_SetViewportSize(WEngine::Vector2 size)
     vkCmdSetScissor(GetFbCmdBuff(ctx), 0, 1, &scissor);
 }
 
+void Iris::SETTING_SetSunDir(const WEngine::Vector3 &dir)
+{
+    ctx.sunDir = dir;
+}
+
 WEngine::Nullable<WEngine::ShaderDefinition> Iris::GetShaderDef(const std::string &shaderName)
 {
     if (!ctx.loadedShadersHandles.contains(shaderName))
@@ -335,8 +340,7 @@ void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, 
             0, 1, &vkMat.materialDescriptorSet, 0, nullptr);
     vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 0, 1, &vkModel.vertexBuffer, &offset);
     vkCmdBindIndexBuffer(GetFbCmdBuff(ctx), vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-    vkCmdPushConstants(GetFbCmdBuff(ctx), vkShader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
-        sizeof(WEngine::Mat4x4), &mvp);
+    PopulatePushConstants(ctx, vkShader, mvp);
 
     vkCmdDrawIndexed(GetFbCmdBuff(ctx), vkModel.indexCount, 1, 0, 0, 0);
 
@@ -380,8 +384,7 @@ void Iris::DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material m
     vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 0, 1, &vkModel.vertexBuffer, &offsets[0]);
     vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 1, 1, &vkModel.instanceBuffer, &offsets[1]);
     vkCmdBindIndexBuffer(GetFbCmdBuff(ctx), vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-    vkCmdPushConstants(GetFbCmdBuff(ctx), vkShader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
-        sizeof(WEngine::Mat4x4), &vp);
+    PopulatePushConstants(ctx, vkShader, vp);
 
     vkCmdDrawIndexed(GetFbCmdBuff(ctx), vkModel.indexCount, instanceMats.size(), 0, 0, 0);
 
@@ -422,8 +425,7 @@ void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::
     vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 0, 1, &vkModel.vertexBuffer, &offsets[0]);
     vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 1, 1, &ctx.statBuf.statBuffer, &offsets[1]);
     vkCmdBindIndexBuffer(GetFbCmdBuff(ctx), vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-    vkCmdPushConstants(GetFbCmdBuff(ctx), vkShader.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0,
-        sizeof(WEngine::Mat4x4), &vp);
+    PopulatePushConstants(ctx, vkShader, vp);
 
     vkCmdDrawIndexed(GetFbCmdBuff(ctx), vkModel.indexCount, count, 0, 0, 0);
     stats.drawCallsThisFrame++;
@@ -680,6 +682,11 @@ void Iris::AssetIrisCommunication(WEngine::AssetIrisCommunication &mission)
         case WEngine::AssetIrisCommunicationType::UnloadTexture:
             break;
     }
+}
+
+WEngine::Vector3 Iris::GetSunDir()
+{
+    return ctx.sunDir;
 }
 
 #endif

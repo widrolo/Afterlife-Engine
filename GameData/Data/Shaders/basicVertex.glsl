@@ -16,6 +16,7 @@ layout(location = 0) out vec3 outColor;
 layout(location = 1) out vec2 outUV0;
 layout(location = 2) out vec2 outUV1;
 layout(location = 3) out vec3 outNormal;
+layout(location = 4) out vec3 outFragPos;
 
 void main()
 {
@@ -23,10 +24,9 @@ void main()
     outUV0 = uv0;
     outUV1 = uv1;
 
-    mat3 normalMatrix = transpose(inverse(mat3(inModel)));
-    outNormal = normalMatrix * inNormal;
+    outNormal = mat3(inModel) * inNormal;
 
-    //outNormal = inNormal;
 
     gl_Position = pc.vp * inModel * vec4(inPosition, 1.0);
+    outFragPos = vec3(inModel * vec4(inPosition, 1.0));
 }
