@@ -131,7 +131,7 @@ void Iris::SETTING_BeginNewFrame()
         vmaDestroyBuffer(ctx.vcore.vmaAllocator, buf.first, buf.second);
     ctx.bufferGraveyard[ctx.screen.currentFrame].clear();
 
-    //vkResetFences(ctx.vcore.gpuDevice, 1, &GetFbEndOfFrameFence(ctx));
+    vkResetFences(ctx.vcore.gpuDevice, 1, &GetFbEndOfFrameFence(ctx));
     vkAcquireNextImageKHR(ctx.vcore.gpuDevice, ctx.screen.swapchain, max_uint64,
         ctx.displayTarget.imageAvailableSems[ctx.screen.currentFrame], VK_NULL_HANDLE, &ctx.screen.swapchainCurrentImage);
 
@@ -544,7 +544,7 @@ void Iris::SETTING_SelectFramebufferScreenForRender()
 
     ctx.currentRenderTarget = &ctx.displayTarget;
 
-    vkResetFences(ctx.vcore.gpuDevice, 1, &GetFbEndOfFrameFence(ctx));
+    //vkResetFences(ctx.vcore.gpuDevice, 1, &GetFbEndOfFrameFence(ctx));
     vkResetCommandBuffer(GetFbCmdBuff(ctx), 0);
 
     VkCommandBufferBeginInfo beginInfo{};

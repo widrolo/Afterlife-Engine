@@ -143,7 +143,7 @@ WEngine::Vector2 & GetFbResolution(const VulkanContext &ctx)
 
 VkCommandBuffer& GetFbCmdBuff(const VulkanContext &ctx)
 {
-    return ctx.currentRenderTarget->cmdBuffs[ctx.screen.swapchainCurrentImage];
+    return ctx.currentRenderTarget->cmdBuffs[ctx.screen.currentFrame];
 }
 
 VkImage& GetFbImage(const VulkanContext &ctx)
@@ -158,7 +158,7 @@ VkImageView& GetFbImageView(const VulkanContext &ctx)
 
 VkSemaphore& GetFbImageAvailSem(const VulkanContext &ctx)
 {
-    return ctx.currentRenderTarget->imageAvailableSems[ctx.screen.swapchainCurrentImage];
+    return ctx.currentRenderTarget->imageAvailableSems[ctx.screen.currentFrame];
 }
 
 VkSemaphore& GetFbRenderFinishedSem(const VulkanContext &ctx)
@@ -168,7 +168,7 @@ VkSemaphore& GetFbRenderFinishedSem(const VulkanContext &ctx)
 
 VkFence& GetFbEndOfFrameFence(const VulkanContext &ctx)
 {
-    return ctx.currentRenderTarget->endOfFrameFences[ctx.screen.swapchainCurrentImage];
+    return ctx.currentRenderTarget->endOfFrameFences[ctx.screen.currentFrame];
 }
 
 void PopulatePushConstants(const VulkanContext &ctx, const Vulkan_Shader &shader, const WEngine::Mat4x4 &mvp)
