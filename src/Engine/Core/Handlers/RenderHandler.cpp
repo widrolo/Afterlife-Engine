@@ -40,11 +40,11 @@ RenderHandler::RenderHandler()
 		1000.0f
 		);
 
-	// A nice looking default sky direction
 	m_lighting.sun.direction = {0.58f, -0.13f, -0.31f};
 	m_lighting.sun.lightColor = Color::White;
 	m_lighting.ambient.intensity = 0.1f;
-	m_lighting.ambient.ambientColor = Color::White;
+	// A nice looking night color
+	m_lighting.ambient.ambientColor = {164, 199, 247, 255};
 	m_lighting.cameraPos = Vector3::Zero;
 
 	Iris::SETTING_SetLighting(m_lighting);

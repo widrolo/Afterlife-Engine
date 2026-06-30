@@ -67,8 +67,11 @@ void TimeHandler::UpdateRenderTime()
 
     CoreSystems::GetRenderHandler()->SetSunlightColorFactor(colorFactor);
 
-    WLog::ConsoleLog(std::format("{}", colorFactor));
-
+    // pls keep this identical to the shader
+    float32 timeFacAmb = tanh(2*sin((timeFactor - 2*std::numbers::pi) * 2*std::numbers::pi)) / 2.1 + (0.524);
+    auto amb = CoreSystems::GetRenderHandler()->GetAmbientLight();
+    amb.intensity = -timeFacAmb / 10.0f + 0.2f;
+    CoreSystems::GetRenderHandler()->SetAmbientLight(amb);
 }
 
 Vector3 TimeHandler::CalcSunDir(float32 timeFactor)

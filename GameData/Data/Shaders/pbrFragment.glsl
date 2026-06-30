@@ -66,6 +66,6 @@ void main()
     vec3 diffuse = CalcDiffuse(normal, lightDir);
     vec3 specular = CalcSpecular(normal, lightDir, rough);
 
-    vec3 pbrResult = world.ambIntensity + diffuse + specular;
+    vec3 pbrResult = (world.ambIntensity * world.ambCol) + diffuse + specular;
     outColor = texture(tex, inUV0) * vec4(pbrResult, 1.0);
 }
