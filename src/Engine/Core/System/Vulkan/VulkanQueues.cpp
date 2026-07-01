@@ -71,18 +71,16 @@ void SetupDeviceQueues(VulkanContext& ctx)
         {
             vkGetDeviceQueue(ctx.vcore.gpuDevice, i, j, &ctx.queues.queueFamilies[i].queues[j]);
 
-
-            if (ctx.queues.queueFamilies[i].purpose & (uint8)QueuePurpose::Drawing)
+            if (i == ctx.queues.primaryDrawQueueFamilyIndex && j == 0)
             {
                 ctx.queues.primaryDrawQueue = ctx.queues.queueFamilies[i].queues[j];
             }
 
-            if (ctx.queues.queueFamilies[i].purpose & (uint8)QueuePurpose::Transfer)
+            if (i == ctx.queues.primaryTransferQueueFamilyIndex && j == 0)
             {
                 ctx.queues.primaryTransferQueue = ctx.queues.queueFamilies[i].queues[j];
             }
         }
-
     }
 }
 

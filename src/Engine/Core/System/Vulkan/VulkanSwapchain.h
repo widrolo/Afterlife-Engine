@@ -6,6 +6,7 @@
 #include "VulkanContext.h"
 #include "VulkanStatistics.h"
 
+VkPresentModeKHR FindBestPresentMode(VulkanContext& ctx);
 bool SetupSwapchain(VulkanContext& ctx, VulkanStatistics& stats);
 
 #endif

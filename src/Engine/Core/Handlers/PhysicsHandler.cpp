@@ -31,7 +31,7 @@ static void TraceImpl(const char *inFMT, ...)
 	WLog::ConsoleLog(buffer);
 }
 
-static bool AssertFailedImpl(const char *inExpression, const char *inMessage, const char *inFile, uint inLine)
+static bool AssertFailedImpl(const char *inExpression, const char *inMessage, const char *inFile, uint8 inLine)
 {
 	// since we get jolt specific files, we canot use out own logging system for now.
 	std::cout << inFile << ":" << inLine << ": (" << inExpression << ") " << (inMessage != nullptr? inMessage : "") << std::endl;
@@ -44,6 +44,8 @@ PhysicsHandler::PhysicsHandler()
 {
 	if constexpr (!PhysicsSettings::physicsEnabled)
 		return;
+
+#ifndef WE_Windows
 	Setup();
 
 	JPH::RegisterDefaultAllocator();
@@ -58,6 +60,9 @@ PhysicsHandler::PhysicsHandler()
 
 	//m_physicsSystem.Init(PhysicsSettings::maxBodies, PhysicsSettings::numBodyMutexes, PhysicsSettings::maxBodyPairs,
 	//	PhysicsSettings::maxContactConstraints)
+
+#endif
+
 }
 
 void PhysicsHandler::Tick()
@@ -74,6 +79,7 @@ uint64 PhysicsHandler::MakeSimulatableObject()
 	if constexpr (!PhysicsSettings::physicsEnabled)
 		return 0;
 
+	return {};
 }
 
 Nullable<SimulatableObject*> PhysicsHandler::GetSimulatableObject(uint64 id)
@@ -83,6 +89,7 @@ Nullable<SimulatableObject*> PhysicsHandler::GetSimulatableObject(uint64 id)
 	if constexpr (!PhysicsSettings::physicsEnabled)
 		return Nullable<SimulatableObject*>();
 
+	return {};
 }
 
 void PhysicsHandler::DeleteSimulatableObject(uint64 id)
@@ -97,6 +104,7 @@ wtl::vector<OverlapResult> PhysicsHandler::CheckOverlapping(uint64 id)
 	if constexpr (!PhysicsSettings::physicsEnabled)
 		return wtl::vector<OverlapResult>();
 
+	return {};
 }
 
 

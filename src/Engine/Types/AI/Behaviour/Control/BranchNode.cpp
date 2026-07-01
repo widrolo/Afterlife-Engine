@@ -10,6 +10,7 @@ BehaviourExecutionStatus BranchNode::Execute()
         WLog::ConsoleLog("BranchNode Error! Child count is not 2!");
         return BehaviourExecutionStatus::Failed;
     }
+    return {}; // TODO: Finish ts
 }
 
 void BranchNode::SpawnNode(ComponentArgs &ca)

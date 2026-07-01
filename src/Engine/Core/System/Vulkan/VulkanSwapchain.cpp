@@ -6,6 +6,31 @@
 #include "VulkanCommands.h"
 #include "VulkanHelpers.h"
 
+VkPresentModeKHR FindBestPresentMode(VulkanContext &ctx)
+{
+    uint32_t count = 0;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(ctx.vcore.gpuPhysicalDevice, ctx.screen.screen, &count, nullptr);
+
+    std::vector<VkPresentModeKHR> modes(count);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(ctx.vcore.gpuPhysicalDevice, ctx.screen.screen, &count, modes.data());
+
+    bool hasMailbox = false;
+
+    for (VkPresentModeKHR mode : modes)
+    {
+        if (mode == VK_PRESENT_MODE_MAILBOX_KHR)
+        {
+            hasMailbox = true;
+            break;
+        }
+    }
+
+    if (hasMailbox)
+        return VK_PRESENT_MODE_MAILBOX_KHR;
+
+    return VK_PRESENT_MODE_FIFO_KHR; // always guaranteed
+}
+
 bool SetupSwapchain(VulkanContext& ctx, VulkanStatistics& stats)
 {
     VkSurfaceCapabilitiesKHR capabilities{};
@@ -27,7 +52,7 @@ bool SetupSwapchain(VulkanContext& ctx, VulkanStatistics& stats)
     info.imageExtent = capabilities.currentExtent;
     info.imageArrayLayers = 1;
     info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    info.presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+    info.presentMode = FindBestPresentMode(ctx);
     info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     info.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
     info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;

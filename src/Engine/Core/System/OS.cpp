@@ -37,6 +37,63 @@ void OS::SetConsoleColor(unsigned char color)
     SetConsoleTextAttribute(hConsole, color);
 }
 
+void OS::CreateNewProcess(const std::string &executable, const wtl::vector<std::string> &arguments)
+{
+    std::string commandLine = "\"" + executable + "\"";
+
+    for (const auto& arg : arguments)
+    {
+        commandLine += " \"" + arg + "\"";
+    }
+
+    STARTUPINFOA si{};
+    PROCESS_INFORMATION pi{};
+
+    si.cb = sizeof(si);
+
+    std::vector<char> cmd(commandLine.begin(), commandLine.end());
+    cmd.push_back('\0');
+
+    BOOL success = ::CreateProcessA(
+        executable.c_str(),
+        cmd.data(),
+        nullptr,
+        nullptr,
+        FALSE,
+        0,
+        nullptr,
+        nullptr,
+        &si,
+        &pi);
+
+    if (!success)
+    {
+        DWORD error = GetLastError();
+
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog(
+            std::format("Couldn't create process because CreateProcess failed; Code: {}",
+                        error));
+        return;
+    }
+
+    CloseHandle(pi.hThread);
+    CloseHandle(pi.hProcess);
+}
+
+wtl::vector<std::string> OS::GetAllFileNamesInDir(const std::string &dir)
+{
+    const std::filesystem::path path = dir;
+
+    wtl::vector<std::string> files;
+    for (const auto& entry : std::filesystem::directory_iterator(path))
+    {
+        if (std::filesystem::is_regular_file(entry.path()))
+            files.push_back(entry.path().string());
+    }
+    return files;
+}
+
 #endif
 
 #ifdef WE_Linux
@@ -82,7 +139,7 @@ void OS::SetConsoleColor(unsigned char color)
         std::cout << ansiColors[color];
 }
 
-void OS::CreateProcess(const std::string& executable, const wtl::vector<std::string>& arguments)
+void OS::CreateNewProcess(const std::string& executable, const wtl::vector<std::string>& arguments)
 {
     if (fork() == 0)
     {

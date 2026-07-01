@@ -102,9 +102,17 @@ wtl::vector<std::string> GetExtensionsToLoad(VulkanContext& ctx)
 
     if (instance_extensions != nullptr)
     {
+#ifdef WE_Windows
+        int count_extensions = count_instance_extensions;
+        for (int i = 0; i < count_extensions; i++)
+            extensions.emplace_back(instance_extensions[i]);
+#else
         int count_extensions = count_instance_extensions + 1;
         for (int i = 1; i < count_extensions; i++)
             extensions.emplace_back(instance_extensions[i]);
+#endif
+
+
     }
 
     return extensions;

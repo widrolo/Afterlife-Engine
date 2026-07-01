@@ -33,7 +33,11 @@ void* WAllocator::Allocate(uint64 size)
 
 void* WAllocator::AllocateAligned(uint64 size, uint64 alignment)
 {
+#if WE_Windows
+    void* p = _aligned_malloc(size, alignment);
+#else
     void* p = std::aligned_alloc(alignment, size);
+#endif
     if (!p) throw std::bad_alloc();
 
     MemoryUsed() += size;
@@ -75,7 +79,11 @@ void * WAllocator::ReallocateAligned(void *ptr, uint64 size, uint64 alignment)
         throw std::bad_alloc();
     }
 
+#if defined(_WIN32)
+    void* newPtr = _aligned_malloc(size, alignment);
+#else
     void* newPtr = std::aligned_alloc(alignment, size);
+#endif
     if (!newPtr) throw std::bad_alloc();
 
     std::memcpy(newPtr, ptr, size);

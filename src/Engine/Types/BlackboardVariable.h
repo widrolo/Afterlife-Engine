@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <variant>
 #include <Engine/Types/CommonTypes.h>
 #include <Engine/Types/Rendering/Color.h>
 #include <Engine/Math/Vector.h>

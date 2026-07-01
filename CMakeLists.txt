@@ -322,6 +322,8 @@ add_executable(Widrolo_Engine_3D
         src/Engine/EngineWidgets/TimeWatchWidget.h
 )
 
+set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "" FORCE)
+
 FetchContent_Declare(
         JoltPhysics
         GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
@@ -363,13 +365,18 @@ endif()
 # hard coded for now, sorry...
 find_package(Vulkan REQUIRED COMPONENTS shaderc_combined)
 
+FetchContent_Declare(
+        VulkanMemoryAllocator
+        GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+        GIT_TAG v3.4.0
+)
+FetchContent_MakeAvailable(VulkanMemoryAllocator)
 
-list(APPEND CMAKE_PREFIX_PATH "/home/filip/git/VulkanMemoryAllocator/build/install")
-find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 target_link_libraries(Widrolo_Engine_3D PRIVATE
-        #Vulkan::Vulkan
+        Vulkan::Vulkan
         Vulkan::shaderc_combined
         GPUOpen::VulkanMemoryAllocator
+        Jolt
 )
 
 target_include_directories(Widrolo_Engine_3D PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
@@ -381,7 +388,7 @@ if(WIN32)
     target_link_libraries(Widrolo_Engine_3D PRIVATE
             ${STEAMWORKS_PATH}/lib/steam_api64.lib
             ${SDL_PATH}/lib/SDL3.lib
-            ${CURL_PATH}/lib/libcurl.lib
+            #${CURL_PATH}/lib/libcurl.lib
     )
 
     target_link_libraries(Widrolo_Engine_3D PRIVATE
@@ -408,7 +415,7 @@ else() # really should be elseif(linux), but it doesnt work...
             GL
             dl
             pthread
-            vulkan
+            #vulkan
             TracyClient
             Jolt
     )

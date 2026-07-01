@@ -85,10 +85,15 @@ public:
 #if PACKAGE
 #else
 
+//#if WE_Linux
+    // this function is sooooo mysterious!
     const char *GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const override
     {
         return "Whatever, the docs dont speak of this.";
     }
+
+//#endif
+
 #endif
 
 

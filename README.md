@@ -1,11 +1,11 @@
 # Widrolo Engine 3D
 
-Widrolo Engine 3D is a step up from its predicessor, bringing a Vulkan rendered 3D forard rendered pipeline for creating specifically open world games.
+Widrolo Engine 3D is a step up from its predecessor, bringing a Vulkan rendered 3D forward rendered pipeline for creating specifically open world games.
 
 ![engine screenshot](/screenshots/Screenshot%20from%202026-06-30%2018-12-18.png)
 
 
-At this point in time, the engine is rather barren and not really user friendly. In addition to that, its mostly a hobby passion project. In its current state, i would recommend not even bothering with it (hence no license), and just let it marinate until its ready.
+At this point in time, the engine is rather barren and not really user-friendly. In addition to that, it's mostly a hobby passion project. In its current state, I would recommend not even bothering with it (hence no license), and just let it marinate until it's ready.
 
 The game it is being made for is a tight desert Open World with minor RPG elements. The following list of planned/implemented features will make it clear.
 
@@ -13,19 +13,19 @@ The game it is being made for is a tight desert Open World with minor RPG elemen
 
 #### Rendering
 
-Rendering is handled by a Vulkan forawrd renderer, bringing modern simplicity. It does not utilize modern Forward+ rendering, so light limits apply.
+Rendering is handled by a Vulkan forward renderer, bringing modern simplicity. It does not utilize modern Forward+ rendering, so light limits apply.
 
 A partial PBR rendering pipeline is already in place, offering normal and roughness map support.
 
 Sunlight is implemented, and reacts to the in game time. The Skybox also reacts to the in game time, showing a nice blue sky during the day, and a darker sky during the night.
 
-In addition to that, the engine supports a very custimizable shader/material pipeline, with game size optimization already built in.
+In addition to that, the engine supports a very customizable shader/material pipeline, with game size optimization already built in.
 
 #### Sectors/Entities/Components
 
 _Note:_ This system will change dramatically over the coming months.
 
-Sectors are basically "micro scenes" that split up the world granually. They are vital for world streaming due to their miniscule size. The concept alone encourages optimization by design, and drastically helps with reducing draw calls without culling techniques.
+Sectors are basically "micro scenes" that split up the world in small programmable chunks. They are vital for world streaming due to their miniscule size. The concept alone encourages optimization by design, and drastically helps with reducing draw calls without culling techniques.
 
 Entities are the members of sectors and hold components. This is not ECS. Think of entities like GameObjects in Unity.
 
@@ -54,7 +54,7 @@ The following features are currently on high priority and target to be implement
 - [ ] Shadow Maps
 - [ ] Ambient Occlusion
 - [ ] Post Processing Shaders
-- [ ] Tonemapping
+- [ ] Tone Mapping
 - [ ] LOD
 - [ ] Mip Maps
 - [ ] ImGui Texture Support for Tools
@@ -64,10 +64,10 @@ The following features are currently on high priority and target to be implement
 - [x] Game Time
 - [ ] Sector Collection
 - [ ] ECS System for Static Meshes
-- [ ] Windows Support (Windows is borked as of now)
+- [x] Windows Support
 - [ ] Custom Mesh File Format
 
-#### Gameplay releated
+#### Gameplay related
 - [ ] Jolt Physics
 - [ ] Behaviour Trees
 

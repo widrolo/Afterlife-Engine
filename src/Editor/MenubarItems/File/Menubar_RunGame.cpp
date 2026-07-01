@@ -13,5 +13,5 @@ void Menubar_RunGame::OnClick()
 {
     std::string exec = OS::GetProcessPath();
     wtl::vector<std::string> args {exec, "--game"};
-    OS::CreateProcess(exec, args);
+    OS::CreateNewProcess(exec, args);
 }

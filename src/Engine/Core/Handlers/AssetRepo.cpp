@@ -8,6 +8,7 @@
 
 #include <stb_image.h>
 #define TINYGLTF_IMPLEMENTATION
+#include <chrono>
 #include <Engine/gl/gltf/tiny_gltf_v3.h>
 #include <yaml-cpp/yaml.h>
 #include <tinyxml2/tinyxml2.h>
@@ -368,6 +369,7 @@ void AssetRepo::LoadSpirVFromGlsl(SpirVAssetMission &mission)
 
 	path += ".glsl";
 
+	auto t0 = std::chrono::high_resolution_clock::now();
 	auto shaderCode = LoadTextFile(path);
 
 	shaderc::Compiler compiler;
@@ -381,7 +383,6 @@ void AssetRepo::LoadSpirVFromGlsl(SpirVAssetMission &mission)
 #else
 	options.SetOptimizationLevel(shaderc_optimization_level_performance);
 #endif
-
 	auto res = compiler.CompileGlslToSpv(
 		shaderCode,
 		kind,
@@ -395,6 +396,9 @@ void AssetRepo::LoadSpirVFromGlsl(SpirVAssetMission &mission)
 		WLog::ConsoleLog(std::format("Failed to compile shader from GLSL to Spir-V:\n\t{}\n\t{}", path, res.GetErrorMessage()));
 		return;
 	}
+	auto t1 = std::chrono::high_resolution_clock::now();
+	WLog::ConsoleLog(std::format("Shader Compilation time: {}ms.",
+		std::chrono::duration_cast<std::chrono::milliseconds>(t1-t0).count()));
 
 	size_t wordCount = res.cend() - res.cbegin();
 	mission.shaderCode = wNewArr(uint32, wordCount);

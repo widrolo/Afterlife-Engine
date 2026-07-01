@@ -6,6 +6,7 @@
 #include "Engine/Util/Log.h"
 #include "Engine/WTL/vector.h"
 #include <vulkan/vk_enum_string_helper.h>
+#include <vk_mem_alloc.h>
 
 bool ParseVkResult(VkResult result)
 {
