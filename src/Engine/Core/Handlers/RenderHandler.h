@@ -109,6 +109,8 @@ namespace WEngine
 		void PreparePPFramebuffers();
 		void PrepareSkybox();
 		void RenderSkybox();
+		void LoadPPShaderSingle(const std::string& name);
+		void LoadPPShaders();
 
 		Mat4x4 CalcModelMatrix(const Transform& transform);
 		Mat4x4 CalcMVPMatrix(const Transform& transform);

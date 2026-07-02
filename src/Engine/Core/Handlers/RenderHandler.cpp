@@ -35,6 +35,8 @@ RenderHandler::RenderHandler()
 
 	PreparePPFramebuffers();
 
+	LoadPPShaders();
+
 	m_projection = glm::perspective(
 		glm::radians(90.0f),
 		m_windowResolution.x / m_windowResolution.y,
@@ -284,6 +286,20 @@ void RenderHandler::RenderSkybox()
 	Iris::DRAWCALL_DrawModelInstanced(m_skyboxInfo.skyModel, m_skyboxInfo.skyMaterial, vp, modelStorage);
 }
 
+void RenderHandler::LoadPPShaderSingle(const std::string& name)
+{
+	auto shN = Iris::GetShader(name);
+
+	if (shN.HasValue())
+		m_ppShaders.push_back(shN.GetValue());
+
+}
+
+void RenderHandler::LoadPPShaders()
+{
+	LoadPPShaderSingle("PP_Test");
+}
+
 Mat4x4 RenderHandler::CalcModelMatrix(const Transform &transform)
 {
 	Vector3 modPos = transform.position;
@@ -352,7 +368,6 @@ void RenderHandler::RenderPostProcessingShaders()
 		uint8 target = !m_currentPPFramebuffer;
 		uint8 origin = m_currentPPFramebuffer;
 		Iris::SETTING_SelectFramebufferForRender(m_ppFramebuffers[target]);
-		Iris::SETTING_PrepareFramebufferForRendering(m_ppFramebuffers[target]);
 		Iris::SETTING_PrepareFramebufferForSampling(m_ppFramebuffers[origin]);
 		Iris::DRAWCALL_ClearFrame(Color::Black);
 		Iris::SETTING_SetViewportSize(EngineSettings::resolution);
@@ -366,7 +381,6 @@ void RenderHandler::RenderPostProcessingShaders()
 
 	uint8 origin = m_currentPPFramebuffer;
 	Iris::SETTING_SelectFramebufferScreenForRender();
-	//Iris::SETTING_PrepareFramebufferForRendering(m_ppFramebuffers[m_currentPPFramebuffer]);
 	Iris::SETTING_PrepareFramebufferForSampling(m_ppFramebuffers[origin]);
 	Iris::DRAWCALL_ClearFrame(Color::White);
 	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
