@@ -129,11 +129,13 @@ struct Vulkan_RenderTarget
     WEngine::Vector2 resolution;
     wtl::vector<VkImage> targetImages;
     wtl::vector<VkImageView> targetImageViews;
+    wtl::vector<VkSampler> targetSampler;
     wtl::vector<VmaAllocation> targetImageAlloc;
     wtl::vector<VkSemaphore> imageAvailableSems;
     wtl::vector<VkSemaphore> renderFinishedSems;
     wtl::vector<VkFence> endOfFrameFences;
-    wtl::vector<VkCommandBuffer> cmdBuffs{};
+    wtl::vector<VkCommandBuffer> cmdBuffs;
+    wtl::vector<VkDescriptorSet> descSets;
 };
 
 struct RawLighting
@@ -155,6 +157,17 @@ struct Vulkan_Lighting
     VkDescriptorSetLayout descriptorSetLayout;
     VkDescriptorPool descriptorPool;
     VkDescriptorSet descriptorSet;
+};
+
+
+struct Vulkan_PostProcessing
+{
+    VkBuffer vertexBuffer;
+    VmaAllocation vertexAllocation;
+
+    VkDescriptorPool descriptorPool;
+    VkDescriptorSetLayout descriptorSetLayout;
+    VkPipelineLayout pipelineLayout;
 };
 
 using BufferCollection = wtl::vector<std::pair<VkBuffer, VmaAllocation>>;

@@ -1,0 +1,4 @@
+shader:
+    isPP: true
+    shaderName: PP_Test
+    fragmentCode: PostProcessing/ppTest

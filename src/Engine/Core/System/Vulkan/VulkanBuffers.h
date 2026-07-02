@@ -22,5 +22,6 @@ std::pair<VkBuffer, VmaAllocation> CreateIndexBuffer(VulkanContext& ctx, VulkanS
     const wtl::vector<uint32>& indData);
 std::pair<VkBuffer, VmaAllocation> InitInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat);
 void ExpandInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat, Vulkan_Model& model, uint64 minSize);
+bool SetupPostProcessing(VulkanContext& ctx, VulkanStatistics& stat);
 
 #endif

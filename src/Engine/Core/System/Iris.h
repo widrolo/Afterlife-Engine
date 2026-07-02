@@ -61,6 +61,7 @@ public:
     static void DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::Material material,
         const WEngine::Mat4x4& vp);
 
+    static void DRAWCALL_DrawPostProcess(WEngine::Shader ppShader, WEngine::Framebuffer sampleFrameBuffer);
 
     static void DRAWCALL_DrawToDisplay(SDL_Window* window);
 

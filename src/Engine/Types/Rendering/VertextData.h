@@ -11,4 +11,10 @@ namespace WEngine
         Vector2 uv0Coord;   // for color uv, which can overlap
         Vector2 uv1Coord;   // for shadow uv, which cannot overlap
     };
+
+    struct PPVertexData
+    {
+        Vector3 position;   // position of the vertex in model space
+        Vector2 uv;         // for color uv, which can overlap
+    };
 }

@@ -45,7 +45,7 @@ PhysicsHandler::PhysicsHandler()
 	if constexpr (!PhysicsSettings::physicsEnabled)
 		return;
 
-#ifndef WE_Windows
+#if 0
 	Setup();
 
 	JPH::RegisterDefaultAllocator();

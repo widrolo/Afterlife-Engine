@@ -74,6 +74,8 @@ bool Iris::SETTING_InitGPUApi(SDL_Window *window)
         return false;
     if (!SetupTransferCommandBuffer(ctx))
         return false;
+    if (!SetupPostProcessing(ctx, stats))
+        return false;
 
     TryCompileAllShaders(ctx);
     return true;
@@ -450,6 +452,32 @@ void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::
 
     vkCmdDrawIndexed(GetFbCmdBuff(ctx), vkModel.indexCount, count, 0, 0, 0);
     stats.drawCallsThisFrame++;
+}
+
+void Iris::DRAWCALL_DrawPostProcess(WEngine::Shader ppShader, WEngine::Framebuffer sampleFrameBuffer)
+{
+    if (!ctx.isCommandRecording)
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Tried render model while no framebuffer was selected!");
+        return;
+    }
+
+    Vulkan_Shader& vkShader = ctx.loadedShaders[ppShader - 1];
+    Vulkan_RenderTarget& vkFb = ctx.renderTargets[sampleFrameBuffer - 1];
+
+    // never gonna happen anyway due to the nature of post processing.
+    if (ctx.currentBoundShader != ppShader)
+    {
+        vkCmdBindPipeline(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
+        ctx.currentBoundShader = ppShader;
+    }
+
+    VkDeviceSize offset;
+    vkCmdBindDescriptorSets(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout, 0, 1,
+        &GetFbDescriptorSet(ctx, vkFb), 0, nullptr);
+    vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 0, 1, &ctx.postProcessing.vertexBuffer, &offset);
+    vkCmdDraw(GetFbCmdBuff(ctx), 4, 1, 0, 0);
 }
 
 void Iris::DRAWCALL_ResetImGui()

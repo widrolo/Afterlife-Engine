@@ -1,9 +1,12 @@
 # This is not an actual shader, but rather a spec that shows all names.
+# The engine skips compiling this one, so dont worry about the multiple shader nodes.
 
 # The following is a regular object shader
 shader:
     # This flag defines this shader as a rendering shader.
     isCompute: false
+    # This flag defines this shader as a post process shader
+    isPP: false
 
     shaderName: regularPBR
 
@@ -67,6 +70,16 @@ shader:
         # accepted: points, lines, triangles
         inputPrimitive: triangles 
 
+
+# The following is a post processing shader
+shader:
+    # This flag defines this shader as a post process shader
+    isPP: true
+
+    shaderName: PP_post
+
+    # A post processing shader only ever needs a fragment pass.
+    fragmentCode: post
 
 
 # The following is a compute shader

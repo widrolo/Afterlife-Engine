@@ -97,6 +97,38 @@ VkPipelineVertexInputStateCreateInfo CreatePipeline_VertexDefinition()
     return vertexInputInfo;
 }
 
+VkPipelineVertexInputStateCreateInfo CreatePipeline_PostProcessVertexDefinition()
+{
+    // it remains like this for now, but consider making this changeable pretty please
+    const uint8 bindings = 1;
+    const uint8 attributes = 2;
+
+    auto bindDesc = wNewArr(VkVertexInputBindingDescription, bindings);
+    bindDesc[0].binding = 0;
+    bindDesc[0].stride = sizeof(WEngine::PPVertexData);
+    bindDesc[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    // [0] = Position (Vector3) | [1] = UV (Vector2)
+    auto attributeDescriptions = wNewArr(VkVertexInputAttributeDescription, attributes);
+    attributeDescriptions[0].binding = 0;
+    attributeDescriptions[0].location = 0;
+    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT; // Khronos had a meth party while making this one
+    attributeDescriptions[0].offset = offsetof(WEngine::PPVertexData, position);
+    attributeDescriptions[1].binding = 0;
+    attributeDescriptions[1].location = 1;
+    attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT; // Khronos had a meth party while making this one
+    attributeDescriptions[1].offset = offsetof(WEngine::PPVertexData, uv);
+
+    VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+    vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vertexInputInfo.vertexBindingDescriptionCount = bindings;
+    vertexInputInfo.pVertexBindingDescriptions = bindDesc;
+    vertexInputInfo.vertexAttributeDescriptionCount = attributes;
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
+
+    return vertexInputInfo;
+}
+
 VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Vertex(const VulkanContext& ctx, const std::string& shaderName)
 {
     // Sperm Vee
@@ -231,6 +263,98 @@ VkPipeline CreatePipeline(VulkanContext& ctx, const WEngine::ShaderDefinition& s
     return pipeline;
 }
 
+VkPipeline CreatePostProcessingPipeline(VulkanContext &ctx, const WEngine::ShaderDefinition &shaderDef,
+    VkPipelineLayout pipelineLayout)
+{
+    VkPipelineRasterizationStateCreateInfo rasterInfo{};
+    rasterInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+    rasterInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+    rasterInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterInfo.lineWidth = 1.0f;
+
+    VkPipelineColorBlendAttachmentState blendState{};
+    blendState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+                                VK_COLOR_COMPONENT_B_BIT;
+
+    VkPipelineColorBlendStateCreateInfo blendInfo{};
+    blendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    blendInfo.attachmentCount = 1;
+    blendInfo.pAttachments = &blendState;
+
+    VkPipelineViewportStateCreateInfo viewInfo{};
+    viewInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    viewInfo.viewportCount = 1;
+    viewInfo.scissorCount = 1;
+
+    VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
+    depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+
+    VkPipelineMultisampleStateCreateInfo multisampleInfo{};
+    multisampleInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+
+    std::array<VkDynamicState, 2> dynamics{};
+    dynamics[0] = VK_DYNAMIC_STATE_VIEWPORT;
+    dynamics[1] = VK_DYNAMIC_STATE_SCISSOR;
+
+    VkPipelineDynamicStateCreateInfo dynamicInfo{};
+    dynamicInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    dynamicInfo.dynamicStateCount = dynamics.size();
+    dynamicInfo.pDynamicStates = dynamics.data();
+
+    std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{};
+    shaderStages[0] = CreatePipeline_ShaderStange_Vertex(ctx, shaderDef.vertexCodeName);
+    shaderStages[1] = CreatePipeline_ShaderStange_Fragment(ctx, shaderDef.fragmentCodeName);
+
+    auto inputAssembly = CreatePipeline_InputAssembly();
+    auto vertexDefinition = CreatePipeline_PostProcessVertexDefinition();
+
+    // This is basically attempting to make the compiler only call it once, we need it in pointer form anyway.
+    // No clue if the compiler actually ends up only calling it once thought.
+    static VkFormat swapFormat = FindBestSwapchainFormat(ctx);
+
+    VkPipelineRenderingCreateInfo dynaRenderInfo{};
+    dynaRenderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+    dynaRenderInfo.colorAttachmentCount = 1;
+    dynaRenderInfo.pColorAttachmentFormats = &swapFormat;
+    dynaRenderInfo.depthAttachmentFormat = FindBestDepthFormat(ctx); // hypocrisy
+
+    VkGraphicsPipelineCreateInfo pipeInfo{};
+    pipeInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    pipeInfo.pNext = &dynaRenderInfo;
+    pipeInfo.pInputAssemblyState = &inputAssembly;
+    pipeInfo.pVertexInputState = &vertexDefinition;
+    pipeInfo.pRasterizationState = &rasterInfo;
+    pipeInfo.pColorBlendState = &blendInfo;
+    pipeInfo.pViewportState = &viewInfo;
+    pipeInfo.pDepthStencilState = &depthStencilInfo;
+    pipeInfo.pMultisampleState = &multisampleInfo;
+    pipeInfo.pDynamicState = &dynamicInfo;
+    pipeInfo.stageCount = shaderStages.size();
+    pipeInfo.pStages = shaderStages.data();
+    pipeInfo.layout = pipelineLayout;
+
+    VkPipeline pipeline;
+
+    auto res = vkCreateGraphicsPipelines(ctx.vcore.gpuDevice, VK_NULL_HANDLE, 1, &pipeInfo, ctx.vcore.allocator, &pipeline);
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Failed to create graphics pipeline.");
+        return VK_NULL_HANDLE;
+    }
+
+    vkDestroyShaderModule(ctx.vcore.gpuDevice, shaderStages[0].module, ctx.vcore.allocator);
+    vkDestroyShaderModule(ctx.vcore.gpuDevice, shaderStages[1].module, ctx.vcore.allocator);
+
+    wFree((void*)vertexDefinition.pVertexBindingDescriptions);
+    wFree((void*)vertexDefinition.pVertexAttributeDescriptions);
+
+    return pipeline;
+}
+
 void SaturateDescriptorSet(VulkanContext& ctx, Vulkan_Material& material)
 {
     auto& set = material.materialDescriptorSet;
@@ -253,6 +377,12 @@ void SaturateDescriptorSet(VulkanContext& ctx, Vulkan_Material& material)
 }
 
 void TryCompileAllShaders(VulkanContext &ctx)
+{
+    TryCompileAllMaterialShaders(ctx);
+    TryCompileAllPostProcessingShaders(ctx);
+}
+
+void TryCompileAllMaterialShaders(VulkanContext &ctx)
 {
     std::string dir = WEngine::CoreSystems::GetAssetRepo()->GetDataPath() + EngineSettings::shaderPath + "definitions";
     auto files = OS::GetAllFileNamesInDir(dir);
@@ -296,6 +426,47 @@ void TryCompileAllShaders(VulkanContext &ctx)
 
         WEngine::WLog::SetConsoleSuccess();
         WEngine::WLog::ConsoleLog(std::format("Shader \"{}\" successfully compiled!", def.name));
+    }
+}
+
+void TryCompileAllPostProcessingShaders(VulkanContext &ctx)
+{
+    std::string dir = WEngine::CoreSystems::GetAssetRepo()->GetDataPath() + EngineSettings::shaderPath + "definitions/PostProcessing";
+    auto files = OS::GetAllFileNamesInDir(dir);
+
+    for (auto& file : files)
+    {
+        std::filesystem::path p(file);
+        file = p.stem().string();
+    }
+
+    for (const auto& file : files)
+    {
+        if (file == "$Sample")
+            continue;
+
+        WEngine::YamlAssetMission mission;
+        mission.name = "../" + EngineSettings::shaderPath + "definitions/PostProcessing/" + file;
+        WEngine::CoreSystems::GetAssetRepo()->GetAsset(mission);
+
+        WEngine::ShaderDefinition def{};
+        def.Parse(mission.root);
+        if (!def.valid)
+            continue;
+
+        Vulkan_Shader shader{};
+
+        auto pipeline = CreatePostProcessingPipeline(ctx, def, ctx.postProcessing.pipelineLayout);
+
+        shader.pipeline = pipeline;
+        shader.shaderDefinition = def;
+
+        ctx.loadedShaders.push_back(shader);
+        WEngine::Shader shaderHandle = ctx.loadedShaders.size();
+        ctx.loadedShadersHandles[def.name] = shaderHandle;
+
+        WEngine::WLog::SetConsoleSuccess();
+        WEngine::WLog::ConsoleLog(std::format("Post Processing shader \"{}\" successfully compiled!", def.name));
     }
 }
 

@@ -29,4 +29,5 @@ struct GPUSettingsVulkan
     _GLOBAL_CEX_ InvalidResultAction validationErrorAction = InvalidResultAction::Abort;
     _GLOBAL_CEX_ uint64 maxInstanceBufferSize = 4;
     _GLOBAL_CEX_ uint64 maxMaterialCount = 512;
+    _GLOBAL_CEX_ uint64 maxPPShaders = 512;
 };

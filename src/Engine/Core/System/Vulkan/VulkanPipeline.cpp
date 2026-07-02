@@ -32,9 +32,30 @@ VkPipelineLayout CreatePipelineLayout(VulkanContext& ctx, VkDescriptorSetLayout 
     pipelineLayoutInfo.setLayoutCount = descriptorSetLayouts.size();
     pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 
-    VkPipelineLayout layout;
+    VkPipelineLayout layout{};
 
     auto resLayout = vkCreatePipelineLayout(ctx.vcore.gpuDevice, &pipelineLayoutInfo, ctx.vcore.allocator, &layout);
+
+    if (!ParseVkResult(resLayout))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Unable to create pipeline layout!");
+        return VK_NULL_HANDLE;
+    }
+    return layout;
+}
+
+VkPipelineLayout CreatePostProcessingPipelineLayout(VulkanContext &ctx, VkDescriptorSetLayout descLayout)
+{
+    VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    pipelineLayoutInfo.setLayoutCount = 1;
+    pipelineLayoutInfo.pSetLayouts = &descLayout;
+
+    VkPipelineLayout layout{};
+
+    auto resLayout = vkCreatePipelineLayout(ctx.vcore.gpuDevice, &pipelineLayoutInfo, ctx.vcore.allocator, &layout);
+
     if (!ParseVkResult(resLayout))
     {
         WEngine::WLog::SetConsoleError();
@@ -46,8 +67,6 @@ VkPipelineLayout CreatePipelineLayout(VulkanContext& ctx, VkDescriptorSetLayout 
 
 VkDescriptorSetLayout CreateDescriptorSetLayout(VulkanContext &ctx, const WEngine::ShaderDefinition& shaderDef)
 {
-    VkDescriptorSetLayout layout{};
-
     wtl::vector<VkDescriptorSetLayoutBinding> bindings(shaderDef.fragInfo.expectTextureCount);
 
     for (uint32_t i = 0; i < bindings.size(); ++i)
@@ -65,12 +84,41 @@ VkDescriptorSetLayout CreateDescriptorSetLayout(VulkanContext &ctx, const WEngin
     info.bindingCount = bindings.size();
     info.pBindings = bindings.data();
 
+    VkDescriptorSetLayout layout{};
+
     auto res = vkCreateDescriptorSetLayout(ctx.vcore.gpuDevice, &info, ctx.vcore.allocator, &layout);
 
     if (!ParseVkResult(res))
     {
         WEngine::WLog::SetConsoleError();
-        WEngine::WLog::ConsoleLog("Unable to create descriptor set layout");
+        WEngine::WLog::ConsoleLog("Unable to create descriptor set layout!");
+        return VK_NULL_HANDLE;
+    }
+
+    return layout;
+}
+
+VkDescriptorSetLayout CreatePostProcessingDescriptorSetLayout(VulkanContext &ctx)
+{
+    VkDescriptorSetLayoutBinding binding{};
+    binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    binding.descriptorCount = 1;
+    binding.binding = 0;
+
+    VkDescriptorSetLayoutCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    info.bindingCount = 1;
+    info.pBindings = &binding;
+
+    VkDescriptorSetLayout layout{};
+
+    auto res = vkCreateDescriptorSetLayout(ctx.vcore.gpuDevice, &info, ctx.vcore.allocator, &layout);
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Unable to create descriptor set layout for post processing shader!");
         return VK_NULL_HANDLE;
     }
 
@@ -162,6 +210,31 @@ VkDescriptorPool CreateDescriptorPool(VulkanContext &ctx, const WEngine::ShaderD
     {
         WEngine::WLog::SetConsoleError();
         WEngine::WLog::ConsoleLog("Unable to create descriptor pool!");
+        return VK_NULL_HANDLE;
+    }
+    return descriptorPool;
+}
+
+VkDescriptorPool CreatePostProcessDescriptorPool(VulkanContext &ctx)
+{
+    VkDescriptorPoolSize poolSize;
+    poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    poolSize.descriptorCount = GPUSettingsVulkan::maxPPShaders;
+
+    VkDescriptorPoolCreateInfo descInfo{};
+    descInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    descInfo.maxSets = GPUSettingsVulkan::maxPPShaders;
+    descInfo.poolSizeCount = 1;
+    descInfo.pPoolSizes = &poolSize;
+
+    VkDescriptorPool descriptorPool{};
+
+    auto res = vkCreateDescriptorPool(ctx.vcore.gpuDevice, &descInfo, ctx.vcore.allocator, &descriptorPool);
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Unable to create descriptor pool for post processing!");
         return VK_NULL_HANDLE;
     }
     return descriptorPool;

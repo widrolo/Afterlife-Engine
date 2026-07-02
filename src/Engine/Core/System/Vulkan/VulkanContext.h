@@ -12,6 +12,7 @@ struct VulkanContext
     Vulkan_Screen screen{};
     Vulkan_Queues queues{};
     Vulkan_StatBuf statBuf{};
+    Vulkan_PostProcessing postProcessing{};
 
     VkDescriptorPool imGuiDescriptorPool{};
     VkCommandPool commandPool{};

@@ -10,6 +10,8 @@
 #include "Engine/Util/Log.h"
 #include <Engine/Types/Rendering/LightingInfo.h>
 
+#include "VulkanPipeline.h"
+
 bool SetupStationaryInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat)
 {
     VkBufferCreateInfo bufferCreateInfo{};
@@ -235,6 +237,63 @@ void ExpandInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat, Vulkan_Mod
     model.instanceBuffer = instBuf;
     model.instanceAllocation = instAlloc;
     model.instanceBufferSize = minSize * 2;
+}
+
+bool SetupPostProcessing(VulkanContext &ctx, VulkanStatistics &stat)
+{
+    std::array<WEngine::PPVertexData, 4> mesh = { {
+        { WEngine::Vector3(-0.5f,  0.5f, 0.0f), WEngine::Vector2(0.0f, 0.0f) }, // top-left
+        { WEngine::Vector3( 0.5f,  0.5f, 0.0f), WEngine::Vector2(1.0f, 0.0f) }, // top-right
+        { WEngine::Vector3(-0.5f, -0.5f, 0.0f), WEngine::Vector2(0.0f, 1.0f) }, // bottom-left
+        { WEngine::Vector3( 0.5f, -0.5f, 0.0f), WEngine::Vector2(1.0f, 1.0f) }, // bottom-right
+    }};
+
+    VkBuffer vertBuf;
+    VmaAllocation vertAlloc;
+    VkDeviceSize vertBufferSize = 4 * sizeof(WEngine::PPVertexData);
+
+    VkBufferCreateInfo bufferCreateInfo{};
+    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferCreateInfo.size = vertBufferSize;
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+
+    VmaAllocationCreateInfo allocationCreateInfo{};
+    allocationCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+    allocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+    allocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+    VmaAllocationInfo bufferAllocInfo{};
+
+    auto res = vmaCreateBuffer(ctx.vcore.vmaAllocator, &bufferCreateInfo, &allocationCreateInfo,
+        &vertBuf, &vertAlloc, &bufferAllocInfo);
+
+    stat.vramUsage += bufferAllocInfo.size;
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Failed to allocate vertex buffer");
+        return false;
+    }
+
+    if (bufferAllocInfo.pMappedData)
+    {
+        memcpy(bufferAllocInfo.pMappedData, mesh.data(), vertBufferSize);
+    }
+    else
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Failed to allocate vertex buffer");
+        return false;
+    }
+
+    ctx.postProcessing.vertexBuffer = vertBuf;
+    ctx.postProcessing.vertexAllocation = vertAlloc;
+
+    ctx.postProcessing.descriptorPool = CreatePostProcessDescriptorPool(ctx);
+    ctx.postProcessing.descriptorSetLayout = CreatePostProcessingDescriptorSetLayout(ctx);
+    ctx.postProcessing.pipelineLayout = CreatePostProcessingPipelineLayout(ctx, ctx.postProcessing.descriptorSetLayout);
+    return true;
 }
 
 #endif

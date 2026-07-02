@@ -28,6 +28,31 @@ void ShaderDefinition::Parse(const YAML::Node &root)
 
     name = shader["shaderName"].as<std::string>();
 
+    if (shader["isPP"])
+    {
+        bool isPP = shader["isPP"].as<bool>();
+        if (isPP)
+        {
+            ParsePostProcessShader(shader);
+            return;
+        }
+    }
+
+    if (shader["isCompute"])
+    {
+        bool isCompute = shader["isCompute"].as<bool>();
+        if (isCompute)
+        {
+            ParseComputeShader(shader);
+            return;
+        }
+    }
+
+    ParseMaterialShader(shader);
+}
+
+void ShaderDefinition::ParseMaterialShader(const YAML::Node &shader)
+{
     // some checks to see if the crucial stuff is present.
     if (!shader["vertexCode"] || !shader["fragmentCode"] || !shader["fragmentInfo"] || !shader["abundance"])
     {
@@ -128,3 +153,25 @@ void ShaderDefinition::Parse(const YAML::Node &root)
 
     valid = true;
 }
+
+void ShaderDefinition::ParsePostProcessShader(const YAML::Node &shader)
+{
+    if (!shader["fragmentCode"])
+    {
+        WLog::SetConsoleError();
+        WLog::ConsoleLog(std::format("Shader \"{}\" is missing one of the following fields:\n"
+            "\t vertexCode, fragmentCode, fragmentInfo, abundance", name));
+        return;
+    }
+
+    vertexCodeName = "PostProcessing/pp"; // yeah
+    fragmentCodeName = shader["fragmentCode"].as<std::string>();
+
+    valid = true;
+}
+
+void ShaderDefinition::ParseComputeShader(const YAML::Node &shader)
+{
+
+}
+

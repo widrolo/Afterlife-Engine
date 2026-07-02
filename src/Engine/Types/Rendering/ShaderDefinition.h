@@ -29,5 +29,9 @@ namespace WEngine
         } fragInfo;
 
         void Parse(const YAML::Node& root);
+
+        void ParseMaterialShader(const YAML::Node& shader);
+        void ParsePostProcessShader(const YAML::Node& shader);
+        void ParseComputeShader(const YAML::Node& shader);
     };
 }
