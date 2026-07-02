@@ -1,0 +1,4 @@
+shader:
+    isPP: true
+    shaderName: PP_Screen
+    fragmentCode: PostProcessing/ppScreen

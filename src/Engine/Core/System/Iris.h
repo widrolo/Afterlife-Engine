@@ -72,6 +72,8 @@ public:
     static void SETTING_SelectFramebufferForRender(WEngine::Framebuffer framebuffer);
     static void SETTING_SelectFramebufferScreenForRender();
     static void SETTING_FinishFramebufferRender();
+    static void SETTING_PrepareFramebufferForSampling(WEngine::Framebuffer framebuffer);
+    static void SETTING_PrepareFramebufferForRendering(WEngine::Framebuffer framebuffer);
 
     // ------------------------ Memory -----------------------
 

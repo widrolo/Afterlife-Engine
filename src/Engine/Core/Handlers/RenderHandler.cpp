@@ -33,6 +33,8 @@ RenderHandler::RenderHandler()
 	}
 	InitImGui();
 
+	PreparePPFramebuffers();
+
 	m_projection = glm::perspective(
 		glm::radians(90.0f),
 		m_windowResolution.x / m_windowResolution.y,
@@ -85,10 +87,11 @@ void RenderHandler::BeginFrame()
 {
 	Iris::SETTING_BeginNewFrame();
 
+	m_currentPPFramebuffer = 0;
 	if (m_isEditor)
 		Iris::SETTING_SelectFramebufferForRender(m_viewportFb);
 	else
-		Iris::SETTING_SelectFramebufferScreenForRender();
+		Iris::SETTING_SelectFramebufferForRender(m_ppFramebuffers[m_currentPPFramebuffer]);
 
 	Iris::DRAWCALL_ResetImGui();
 	Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
@@ -147,6 +150,7 @@ void RenderHandler::RenderFrame()
 	{
 		Iris::DRAWCALL_DrawImGui();
 		Iris::SETTING_FinishFramebufferRender();
+		RenderPostProcessingShaders();
 	}
 
 	Iris::DRAWCALL_DrawToDisplay(m_window);
@@ -226,6 +230,26 @@ const AmbientLight& RenderHandler::GetAmbientLight() const
 float32 RenderHandler::GetLightTime() const
 {
 	return m_lighting.timeOfDay;
+}
+
+void RenderHandler::PreparePPFramebuffers()
+{
+	auto fbN = Iris::ALLOC_CreateFramebuffer(EngineSettings::resolution);
+	if (fbN.HasValue())
+		m_ppFramebuffers[0] = fbN.GetValue();
+
+	fbN = Iris::ALLOC_CreateFramebuffer(EngineSettings::resolution);
+	if (fbN.HasValue())
+		m_ppFramebuffers[1] = fbN.GetValue();
+
+	auto shN = Iris::GetShader("PP_Screen");
+	if (shN.HasValue())
+		m_screenShader = shN.GetValue();
+	else
+	{
+		WLog::SetConsoleError();
+		WLog::ConsoleLog("Could not pull screen shader!");
+	}
 }
 
 void RenderHandler::PrepareSkybox()
@@ -319,6 +343,35 @@ void RenderHandler::RenderModelGroup(const ModelGroup &group, Material material)
 	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
 
 	Iris::DRAWCALL_DrawModelInstanced(group.groupID, material, vp, instances);
+}
+
+void RenderHandler::RenderPostProcessingShaders()
+{
+	for (uint64 i = 0; i < m_ppShaders.size(); i++)
+	{
+		uint8 target = !m_currentPPFramebuffer;
+		uint8 origin = m_currentPPFramebuffer;
+		Iris::SETTING_SelectFramebufferForRender(m_ppFramebuffers[target]);
+		Iris::SETTING_PrepareFramebufferForRendering(m_ppFramebuffers[target]);
+		Iris::SETTING_PrepareFramebufferForSampling(m_ppFramebuffers[origin]);
+		Iris::DRAWCALL_ClearFrame(Color::Black);
+		Iris::SETTING_SetViewportSize(EngineSettings::resolution);
+
+		Iris::DRAWCALL_DrawPostProcess(m_ppShaders[i], m_ppFramebuffers[origin]);
+
+		Iris::SETTING_FinishFramebufferRender();
+
+		m_currentPPFramebuffer = !m_currentPPFramebuffer;
+	}
+
+	uint8 origin = m_currentPPFramebuffer;
+	Iris::SETTING_SelectFramebufferScreenForRender();
+	//Iris::SETTING_PrepareFramebufferForRendering(m_ppFramebuffers[m_currentPPFramebuffer]);
+	Iris::SETTING_PrepareFramebufferForSampling(m_ppFramebuffers[origin]);
+	Iris::DRAWCALL_ClearFrame(Color::White);
+	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
+	Iris::DRAWCALL_DrawPostProcess(m_screenShader, m_ppFramebuffers[origin]);
+	Iris::SETTING_FinishFramebufferRender();
 }
 
 void RenderHandler::SortStationary(RenderMission &mission)

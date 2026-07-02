@@ -9,6 +9,7 @@
 #include "Engine/Types/Rendering/RenderMission.h"
 #include "Engine/Types/Rendering/GPU/Framebuffer.h"
 #include "Engine/Types/Rendering/GPU/Material.h"
+#include "Engine/Types/Rendering/GPU/Shader.h"
 #include "Engine/WTL/deque.h"
 #include "Engine/WTL/list.h"
 
@@ -71,10 +72,16 @@ namespace WEngine
 
 		bool m_isEditor = false;
 		Framebuffer m_viewportFb{};
+		std::array<Framebuffer, 2> m_ppFramebuffers{};
+		uint8 m_currentPPFramebuffer = 0;
 		Vector2 m_viewportResolution{};
 
 		SkyboxInfo m_skyboxInfo;
 		LightingInfo m_lighting;
+
+		Shader m_screenShader;
+		// Make it work first, make a pretty later ahh code
+		wtl::vector<Shader> m_ppShaders;
 
 	public:
 		void EnableEditorMode(const Vector2& viewportResolution);
@@ -99,6 +106,7 @@ namespace WEngine
 		[[nodiscard]] float32 GetLightTime() const;
 
 	private:
+		void PreparePPFramebuffers();
 		void PrepareSkybox();
 		void RenderSkybox();
 
@@ -107,6 +115,8 @@ namespace WEngine
 
 		void RenderSingleMission(RenderMission& mission);
 		void RenderModelGroup(const ModelGroup& group, Material material);
+
+		void RenderPostProcessingShaders();
 
 		void SortStationary(RenderMission& mission);
 

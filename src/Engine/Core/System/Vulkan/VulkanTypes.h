@@ -136,6 +136,7 @@ struct Vulkan_RenderTarget
     wtl::vector<VkFence> endOfFrameFences;
     wtl::vector<VkCommandBuffer> cmdBuffs;
     wtl::vector<VkDescriptorSet> descSets;
+    wtl::vector<VkImageLayout> currentLayouts;
 };
 
 struct RawLighting

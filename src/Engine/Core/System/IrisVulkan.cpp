@@ -473,8 +473,8 @@ void Iris::DRAWCALL_DrawPostProcess(WEngine::Shader ppShader, WEngine::Framebuff
         ctx.currentBoundShader = ppShader;
     }
 
-    VkDeviceSize offset;
-    vkCmdBindDescriptorSets(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout, 0, 1,
+    VkDeviceSize offset{};
+    vkCmdBindDescriptorSets(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, ctx.postProcessing.pipelineLayout, 0, 1,
         &GetFbDescriptorSet(ctx, vkFb), 0, nullptr);
     vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 0, 1, &ctx.postProcessing.vertexBuffer, &offset);
     vkCmdDraw(GetFbCmdBuff(ctx), 4, 1, 0, 0);
@@ -599,10 +599,14 @@ void Iris::SETTING_FinishFramebufferRender()
 
     vkCmdEndRendering(GetFbCmdBuff(ctx));
 
+    VkImageLayout newLayout = isSwapchain
+        ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+        : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
     VkImageMemoryBarrier imgBarrier{};
     imgBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     imgBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    imgBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    imgBarrier.newLayout = newLayout;
     imgBarrier.image = GetFbImage(ctx);
     imgBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
     imgBarrier.dstAccessMask = 0;
@@ -645,6 +649,62 @@ void Iris::SETTING_FinishFramebufferRender()
     submitInfo.pCommandBuffers = &GetFbCmdBuff(ctx);
 
     vkQueueSubmit(ctx.queues.primaryDrawQueue, 1, &submitInfo, GetFbEndOfFrameFence(ctx));
+}
+
+void Iris::SETTING_PrepareFramebufferForSampling(WEngine::Framebuffer framebuffer)
+{
+    Vulkan_RenderTarget& vkFb = ctx.renderTargets[framebuffer - 1];
+
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = GetFbLayout(ctx, vkFb);
+    barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = GetFbImage(ctx, vkFb);
+    barrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+    barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+    vkCmdPipelineBarrier(
+        GetFbCmdBuff(ctx),
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &barrier
+    );
+
+    GetFbLayout(ctx, vkFb) = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+}
+
+void Iris::SETTING_PrepareFramebufferForRendering(WEngine::Framebuffer framebuffer)
+{
+    Vulkan_RenderTarget& vkFb = ctx.renderTargets[framebuffer - 1];
+
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    barrier.oldLayout = GetFbLayout(ctx, vkFb);
+    barrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = GetFbImage(ctx, vkFb);
+    barrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+    barrier.srcAccessMask = 0;
+    barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+    vkCmdPipelineBarrier(
+        GetFbCmdBuff(ctx),
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        0,
+        0, nullptr,
+        0, nullptr,
+        1, &barrier
+    );
+
+    GetFbLayout(ctx, vkFb) = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 }
 
 uint64 Iris::GetVramUsage()

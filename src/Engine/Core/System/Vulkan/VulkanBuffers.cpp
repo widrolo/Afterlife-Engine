@@ -242,10 +242,10 @@ void ExpandInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat, Vulkan_Mod
 bool SetupPostProcessing(VulkanContext &ctx, VulkanStatistics &stat)
 {
     std::array<WEngine::PPVertexData, 4> mesh = { {
-        { WEngine::Vector3(-0.5f,  0.5f, 0.0f), WEngine::Vector2(0.0f, 0.0f) }, // top-left
-        { WEngine::Vector3( 0.5f,  0.5f, 0.0f), WEngine::Vector2(1.0f, 0.0f) }, // top-right
-        { WEngine::Vector3(-0.5f, -0.5f, 0.0f), WEngine::Vector2(0.0f, 1.0f) }, // bottom-left
-        { WEngine::Vector3( 0.5f, -0.5f, 0.0f), WEngine::Vector2(1.0f, 1.0f) }, // bottom-right
+        { WEngine::Vector3(-1.0f,  1.0f, 0.0f), WEngine::Vector2(0.0f, 1.0f) }, // top-left
+        { WEngine::Vector3( 1.0f,  1.0f, 0.0f), WEngine::Vector2(1.0f, 1.0f) }, // top-right
+        { WEngine::Vector3(-1.0f, -1.0f, 0.0f), WEngine::Vector2(0.0f, 0.0f) }, // bottom-left
+        { WEngine::Vector3( 1.0f, -1.0f, 0.0f), WEngine::Vector2(1.0f, 0.0f) }, // bottom-right
     }};
 
     VkBuffer vertBuf;

@@ -149,12 +149,23 @@ VkCommandBuffer& GetFbCmdBuff(const VulkanContext &ctx)
 
 VkImage& GetFbImage(const VulkanContext &ctx)
 {
-    return ctx.currentRenderTarget->targetImages[ctx.screen.swapchainCurrentImage];
+    bool isSwapchainImage = ctx.currentRenderTarget == &ctx.displayTarget;
+    return isSwapchainImage ? ctx.currentRenderTarget->targetImages[ctx.screen.swapchainCurrentImage] :
+        ctx.currentRenderTarget->targetImages[ctx.screen.currentFrame];
+}
+
+VkImage& GetFbImage(const VulkanContext &ctx, Vulkan_RenderTarget &rt)
+{
+    bool isSwapchainImage = &rt == &ctx.displayTarget;
+    return isSwapchainImage ? rt.targetImages[ctx.screen.swapchainCurrentImage] :
+        rt.targetImages[ctx.screen.currentFrame];
 }
 
 VkImageView& GetFbImageView(const VulkanContext &ctx)
 {
-    return ctx.currentRenderTarget->targetImageViews[ctx.screen.swapchainCurrentImage];
+    bool isSwapchainImage = ctx.currentRenderTarget == &ctx.displayTarget;
+    return isSwapchainImage ? ctx.currentRenderTarget->targetImageViews[ctx.screen.swapchainCurrentImage] :
+        ctx.currentRenderTarget->targetImageViews[ctx.screen.currentFrame];
 }
 
 VkSemaphore& GetFbImageAvailSem(const VulkanContext &ctx)
@@ -164,7 +175,9 @@ VkSemaphore& GetFbImageAvailSem(const VulkanContext &ctx)
 
 VkSemaphore& GetFbRenderFinishedSem(const VulkanContext &ctx)
 {
-    return ctx.currentRenderTarget->renderFinishedSems[ctx.screen.swapchainCurrentImage];
+    bool isSwapchainImage = ctx.currentRenderTarget == &ctx.displayTarget;
+    return isSwapchainImage ? ctx.currentRenderTarget->renderFinishedSems[ctx.screen.swapchainCurrentImage] :
+        ctx.currentRenderTarget->renderFinishedSems[ctx.screen.currentFrame];
 }
 
 VkFence& GetFbEndOfFrameFence(const VulkanContext &ctx)
@@ -174,7 +187,23 @@ VkFence& GetFbEndOfFrameFence(const VulkanContext &ctx)
 
 VkDescriptorSet& GetFbDescriptorSet(const VulkanContext &ctx, Vulkan_RenderTarget &rt)
 {
-    return rt.descSets[ctx.screen.swapchainCurrentImage];
+    bool isSwapchainImage = &rt == &ctx.displayTarget;
+    return isSwapchainImage ? rt.descSets[ctx.screen.swapchainCurrentImage] :
+        rt.descSets[ctx.screen.currentFrame];
+}
+
+VkImageLayout& GetFbLayout(const VulkanContext &ctx)
+{
+    bool isSwapchainImage = ctx.currentRenderTarget == &ctx.displayTarget;
+    return isSwapchainImage ? ctx.currentRenderTarget->currentLayouts[ctx.screen.swapchainCurrentImage] :
+        ctx.currentRenderTarget->currentLayouts[ctx.screen.currentFrame];
+}
+
+VkImageLayout& GetFbLayout(const VulkanContext &ctx, Vulkan_RenderTarget &rt)
+{
+    bool isSwapchainImage = &rt == &ctx.displayTarget;
+    return isSwapchainImage ? rt.currentLayouts[ctx.screen.swapchainCurrentImage] :
+        rt.currentLayouts[ctx.screen.currentFrame];
 }
 
 void PopulatePushConstants(const VulkanContext &ctx, const Vulkan_Shader &shader, const WEngine::Mat4x4 &mvp)

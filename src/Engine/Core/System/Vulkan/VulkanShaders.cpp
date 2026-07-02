@@ -43,6 +43,14 @@ VkPipelineInputAssemblyStateCreateInfo CreatePipeline_InputAssembly()
     return inputAssemblyInfo;
 }
 
+VkPipelineInputAssemblyStateCreateInfo CreatePipeline_PostProcessInputAssembly()
+{
+    VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
+    inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+    return inputAssemblyInfo;
+}
+
 VkPipelineVertexInputStateCreateInfo CreatePipeline_VertexDefinition()
 {
     // it remains like this for now, but consider making this changeable pretty please
@@ -269,7 +277,7 @@ VkPipeline CreatePostProcessingPipeline(VulkanContext &ctx, const WEngine::Shade
     VkPipelineRasterizationStateCreateInfo rasterInfo{};
     rasterInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterInfo.lineWidth = 1.0f;
 
     VkPipelineColorBlendAttachmentState blendState{};
@@ -307,7 +315,7 @@ VkPipeline CreatePostProcessingPipeline(VulkanContext &ctx, const WEngine::Shade
     shaderStages[0] = CreatePipeline_ShaderStange_Vertex(ctx, shaderDef.vertexCodeName);
     shaderStages[1] = CreatePipeline_ShaderStange_Fragment(ctx, shaderDef.fragmentCodeName);
 
-    auto inputAssembly = CreatePipeline_InputAssembly();
+    auto inputAssembly = CreatePipeline_PostProcessInputAssembly();
     auto vertexDefinition = CreatePipeline_PostProcessVertexDefinition();
 
     // This is basically attempting to make the compiler only call it once, we need it in pointer form anyway.

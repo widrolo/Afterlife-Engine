@@ -18,11 +18,14 @@ uint32 GetVulkanVersion();
 WEngine::Vector2& GetFbResolution(const VulkanContext& ctx);
 VkCommandBuffer& GetFbCmdBuff(const VulkanContext& ctx);
 VkImage& GetFbImage(const VulkanContext& ctx);
+VkImage& GetFbImage(const VulkanContext& ctx, Vulkan_RenderTarget& rt);
 VkImageView& GetFbImageView(const VulkanContext& ctx);
 VkSemaphore& GetFbImageAvailSem(const VulkanContext& ctx);
 VkSemaphore& GetFbRenderFinishedSem(const VulkanContext& ctx);
 VkFence& GetFbEndOfFrameFence(const VulkanContext& ctx);
 VkDescriptorSet& GetFbDescriptorSet(const VulkanContext& ctx, Vulkan_RenderTarget& rt);
+VkImageLayout& GetFbLayout(const VulkanContext& ctx);
+VkImageLayout& GetFbLayout(const VulkanContext& ctx, Vulkan_RenderTarget& rt);
 
 void PopulatePushConstants(const VulkanContext& ctx, const Vulkan_Shader& shader, const WEngine::Mat4x4& mvp);
 

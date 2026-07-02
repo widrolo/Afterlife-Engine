@@ -76,6 +76,8 @@ Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &sta
     target.targetImageViews.resize(ctx.screen.swapchainImageCount);
     target.targetSampler.resize(ctx.screen.swapchainImageCount);
     target.targetImageAlloc.resize(ctx.screen.swapchainImageCount);
+    target.descSets.resize(ctx.screen.swapchainImageCount);
+    target.currentLayouts.resize(ctx.screen.swapchainImageCount);
 
     for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
     {
@@ -84,14 +86,13 @@ Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &sta
 
         target.cmdBuffs[i] = CreateCommandBuffer(ctx);
 
-        VkDescriptorSet set;
         VkDescriptorSetAllocateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         info.descriptorPool = ctx.postProcessing.descriptorPool;
         info.descriptorSetCount = 1;
         info.pSetLayouts = &ctx.postProcessing.descriptorSetLayout;
 
-        auto res = vkAllocateDescriptorSets(ctx.vcore.gpuDevice, &info, &set);
+        auto res = vkAllocateDescriptorSets(ctx.vcore.gpuDevice, &info, &target.descSets[i]);
 
         if (!ParseVkResult(res))
         {
@@ -129,7 +130,7 @@ Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &sta
 
         VkWriteDescriptorSet write{};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        write.dstSet = set;
+        write.dstSet = target.descSets[i];
         write.dstBinding = 0;
         write.dstArrayElement = 0;
         write.descriptorCount = 1;
@@ -137,6 +138,8 @@ Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &sta
         write.pImageInfo = &imageInfo;
 
         vkUpdateDescriptorSets(ctx.vcore.gpuDevice, 1, &write, 0, nullptr);
+
+        target.currentLayouts[i] = VK_IMAGE_LAYOUT_UNDEFINED;
     }
 
     PopulateSemsAndFences(ctx, target);
