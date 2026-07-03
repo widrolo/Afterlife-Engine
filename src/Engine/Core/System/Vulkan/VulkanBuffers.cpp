@@ -11,6 +11,7 @@
 #include <Engine/Types/Rendering/LightingInfo.h>
 
 #include "VulkanDescriptors.h"
+#include "VulkanPipeline.h"
 
 bool SetupStationaryInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat)
 {
