@@ -12,5 +12,6 @@ VkCommandBuffer CreateCommandBuffer(const VulkanContext& ctx);
 bool SetupDisplayRenderTarget(VulkanContext& ctx, VulkanStatistics& stat);
 Vulkan_RenderTarget CreateRenderTarget(VulkanContext& ctx, VulkanStatistics& stat, const WEngine::Vector2& resolution);
 void PopulateSemsAndFences(VulkanContext& ctx, Vulkan_RenderTarget& rt);
+bool SetupTransferCommandBuffer(VulkanContext& ctx);
 
 #endif

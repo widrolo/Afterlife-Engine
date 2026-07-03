@@ -1,13 +1,16 @@
+#pragma once
+
 #include <Engine/EngineDefines.h>
 #if GPU_BACKEND == GPU_VULKAN
 
 #include "VulkanPipeline.h"
-#include <vulkan/vulkan.h>
-#include "Engine/imgui/backends/imgui_impl_vulkan.h"
 
 #include "VulkanHelpers.h"
-#include "Engine/Core/System/GPUSettings.h"
-#include "Engine/Math/Matrix.h"
+#include "VulkanShaders.h"
+#include "Engine/Core/Handlers/AssetRepo.h"
+#include "Engine/Types/AssetMission.h"
+#include "Engine/Types/CoreSystems.h"
+#include "Engine/Types/Rendering/InstanceData.h"
 #include "Engine/Util/Log.h"
 
 VkPipelineLayout CreatePipelineLayout(VulkanContext& ctx, VkDescriptorSetLayout descLayout)
@@ -65,251 +68,144 @@ VkPipelineLayout CreatePostProcessingPipelineLayout(VulkanContext &ctx, VkDescri
     return layout;
 }
 
-VkDescriptorSetLayout CreateDescriptorSetLayout(VulkanContext &ctx, const WEngine::ShaderDefinition& shaderDef)
+VkPipelineInputAssemblyStateCreateInfo CreatePipeline_InputAssembly()
 {
-    wtl::vector<VkDescriptorSetLayoutBinding> bindings(shaderDef.fragInfo.expectTextureCount);
-
-    for (uint32_t i = 0; i < bindings.size(); ++i)
-    {
-        VkDescriptorSetLayoutBinding binding{};
-        binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-        binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        binding.descriptorCount = 1;
-        binding.binding = i;
-        bindings[i] = binding;
-    }
-
-    VkDescriptorSetLayoutCreateInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    info.bindingCount = bindings.size();
-    info.pBindings = bindings.data();
-
-    VkDescriptorSetLayout layout{};
-
-    auto res = vkCreateDescriptorSetLayout(ctx.vcore.gpuDevice, &info, ctx.vcore.allocator, &layout);
-
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleError();
-        WEngine::WLog::ConsoleLog("Unable to create descriptor set layout!");
-        return VK_NULL_HANDLE;
-    }
-
-    return layout;
+    VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
+    inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    return inputAssemblyInfo;
 }
 
-VkDescriptorSetLayout CreatePostProcessingDescriptorSetLayout(VulkanContext &ctx)
+VkPipelineInputAssemblyStateCreateInfo CreatePipeline_PostProcessInputAssembly()
 {
-    VkDescriptorSetLayoutBinding binding{};
-    binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    binding.descriptorCount = 1;
-    binding.binding = 0;
-
-    VkDescriptorSetLayoutCreateInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    info.bindingCount = 1;
-    info.pBindings = &binding;
-
-    VkDescriptorSetLayout layout{};
-
-    auto res = vkCreateDescriptorSetLayout(ctx.vcore.gpuDevice, &info, ctx.vcore.allocator, &layout);
-
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleError();
-        WEngine::WLog::ConsoleLog("Unable to create descriptor set layout for post processing shader!");
-        return VK_NULL_HANDLE;
-    }
-
-    return layout;
+    VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{};
+    inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+    return inputAssemblyInfo;
 }
 
-VkDescriptorSet CreateDescriptorSet(VulkanContext &ctx, const Vulkan_Shader& shader)
+VkPipelineVertexInputStateCreateInfo CreatePipeline_VertexDefinition()
 {
-    VkDescriptorSet set;
-    VkDescriptorSetAllocateInfo info{};
-    info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    info.descriptorPool = shader.descriptorPool;
-    info.descriptorSetCount = 1;
-    info.pSetLayouts = &shader.descriptorSetLayout;
+    // it remains like this for now, but consider making this changeable pretty please
+    const uint8 bindings = 2;
+    const uint8 attributes = 9;
 
-    auto res = vkAllocateDescriptorSets(ctx.vcore.gpuDevice, &info, &set);
+    auto bindDesc = wNewArr(VkVertexInputBindingDescription, bindings);
+    bindDesc[0].binding = 0;
+    bindDesc[0].stride = sizeof(WEngine::VertexData);
+    bindDesc[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    bindDesc[1].binding = 1;
+    bindDesc[1].stride = sizeof(WEngine::InstanceData);
+    bindDesc[1].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
 
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleError();
-        WEngine::WLog::ConsoleLog("Unable to create descriptor set!");
-        return VK_NULL_HANDLE;
-    }
-    return set;
+    // [0] = Position (Vector3)   |   [1] = Color (Vector3)   | [2] = Normals (Vector 3)
+    // [3] = Color UV (Vector2)   |   [4] = Shadow UV (Vector2)
+    // [5-7] = Model (Mat4x4)     |
+    auto attributeDescriptions = wNewArr(VkVertexInputAttributeDescription, attributes);
+    attributeDescriptions[0].binding = 0;
+    attributeDescriptions[0].location = 0;
+    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT; // Khronos had a meth party while making this one
+    attributeDescriptions[0].offset = offsetof(WEngine::VertexData, position);
+    attributeDescriptions[1].binding = 0;
+    attributeDescriptions[1].location = 1;
+    attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT; // Khronos had a meth party while making this one
+    attributeDescriptions[1].offset = offsetof(WEngine::VertexData, vertColor);
+    attributeDescriptions[2].binding = 0;
+    attributeDescriptions[2].location = 2;
+    attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT; // Khronos had a meth party while making this one
+    attributeDescriptions[2].offset = offsetof(WEngine::VertexData, normal);
+    attributeDescriptions[3].binding = 0;
+    attributeDescriptions[3].location = 3;
+    attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT; // Khronos had a meth party while making this one
+    attributeDescriptions[3].offset = offsetof(WEngine::VertexData, uv0Coord);
+    attributeDescriptions[4].binding = 0;
+    attributeDescriptions[4].location = 4;
+    attributeDescriptions[4].format = VK_FORMAT_R32G32_SFLOAT; // Khronos had a meth party while making this one
+    attributeDescriptions[4].offset = offsetof(WEngine::VertexData, uv1Coord);
+
+    attributeDescriptions[5] = {5, 1, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float) * 0};
+    attributeDescriptions[6] = {6, 1, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float) * 4};
+    attributeDescriptions[7] = {7, 1, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float) * 8};
+    attributeDescriptions[8] = {8, 1, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float) * 12};
+
+    VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+    vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vertexInputInfo.vertexBindingDescriptionCount = bindings;
+    vertexInputInfo.pVertexBindingDescriptions = bindDesc;
+    vertexInputInfo.vertexAttributeDescriptionCount = attributes;
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
+
+    return vertexInputInfo;
 }
 
-bool SetupImGuiDescriptorPool(VulkanContext& ctx)
+VkPipelineVertexInputStateCreateInfo CreatePipeline_PostProcessVertexDefinition()
 {
-    wtl::vector<VkDescriptorPoolSize> poolSizes =
-    {
-        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE},
-        { VK_DESCRIPTOR_TYPE_SAMPLER, IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE },
-    };
-    VkDescriptorPoolCreateInfo descInfo{};
-    descInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    descInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-    descInfo.maxSets = 0;
-    for (VkDescriptorPoolSize& pool_size : poolSizes)
-        descInfo.maxSets += pool_size.descriptorCount;
-    descInfo.poolSizeCount = poolSizes.size();
-    descInfo.pPoolSizes = poolSizes.data();
+    // it remains like this for now, but consider making this changeable pretty please
+    const uint8 bindings = 1;
+    const uint8 attributes = 2;
 
-    auto res = vkCreateDescriptorPool(ctx.vcore.gpuDevice, &descInfo, ctx.vcore.allocator, &ctx.imGuiDescriptorPool);
+    auto bindDesc = wNewArr(VkVertexInputBindingDescription, bindings);
+    bindDesc[0].binding = 0;
+    bindDesc[0].stride = sizeof(WEngine::PPVertexData);
+    bindDesc[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleError();
-        WEngine::WLog::ConsoleLog("Unable to create descriptor pool!");
-        return false;
-    }
-    return true;
+    // [0] = Position (Vector3) | [1] = UV (Vector2)
+    auto attributeDescriptions = wNewArr(VkVertexInputAttributeDescription, attributes);
+    attributeDescriptions[0].binding = 0;
+    attributeDescriptions[0].location = 0;
+    attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT; // Khronos had a meth party while making this one
+    attributeDescriptions[0].offset = offsetof(WEngine::PPVertexData, position);
+    attributeDescriptions[1].binding = 0;
+    attributeDescriptions[1].location = 1;
+    attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT; // Khronos had a meth party while making this one
+    attributeDescriptions[1].offset = offsetof(WEngine::PPVertexData, uv);
+
+    VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+    vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vertexInputInfo.vertexBindingDescriptionCount = bindings;
+    vertexInputInfo.pVertexBindingDescriptions = bindDesc;
+    vertexInputInfo.vertexAttributeDescriptionCount = attributes;
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions;
+
+    return vertexInputInfo;
 }
 
-VkDescriptorPool CreateDescriptorPool(VulkanContext &ctx, const WEngine::ShaderDefinition& shaderDef)
+VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Vertex(const VulkanContext& ctx, const std::string& shaderName)
 {
-    if (shaderDef.fragInfo.expectTextureCount == 0 && shaderDef.fragInfo.expectedParams.empty())
-    {
-        WEngine::WLog::SetConsoleInfo();
-        WEngine::WLog::ConsoleLog(std::format("Shader \"{}\" needs no descriptor set.", shaderDef.name));
-        return VK_NULL_HANDLE;
-    }
+    // Sperm Vee
+    WEngine::SpirVAssetMission vertexShaderCode{};
+    vertexShaderCode.shaderType = WEngine::SpirVAssetMission::VertexShader;
+    vertexShaderCode.name = shaderName;
+    WEngine::CoreSystems::GetAssetRepo()->GetAsset(vertexShaderCode);
 
-    uint16 maxSets = 0;
-    switch (shaderDef.abundance)
-    {
-        case 0: maxSets = 4; break;
-        case 1: maxSets = 128; break;
-        case 2: maxSets = 512; break;
-        case 3: maxSets = 2048; break;
-    }
+    VkPipelineShaderStageCreateInfo shaderStage{};
 
-    // [0] = Textures
-    std::array<VkDescriptorPoolSize, 1> poolSizes;
+    shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    shaderStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
+    shaderStage.pName = "main";
+    shaderStage.module = CompileShader(ctx, vertexShaderCode);
+    wFree(vertexShaderCode.shaderCode);
 
-    poolSizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSizes[0].descriptorCount = shaderDef.fragInfo.expectTextureCount * maxSets;
-
-    VkDescriptorPoolCreateInfo descInfo{};
-    descInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    descInfo.maxSets = maxSets;
-    descInfo.poolSizeCount = poolSizes.size();
-    descInfo.pPoolSizes = poolSizes.data();
-
-    VkDescriptorPool descriptorPool{};
-
-    auto res = vkCreateDescriptorPool(ctx.vcore.gpuDevice, &descInfo, ctx.vcore.allocator, &descriptorPool);
-
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleError();
-        WEngine::WLog::ConsoleLog("Unable to create descriptor pool!");
-        return VK_NULL_HANDLE;
-    }
-    return descriptorPool;
+    return shaderStage;
 }
 
-VkDescriptorPool CreatePostProcessDescriptorPool(VulkanContext &ctx)
+VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Fragment(const VulkanContext& ctx, const std::string& shaderName)
 {
-    VkDescriptorPoolSize poolSize;
-    poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    poolSize.descriptorCount = GPUSettingsVulkan::maxPPShaders;
+    WEngine::SpirVAssetMission fragmentShaderCode{};
+    fragmentShaderCode.shaderType = WEngine::SpirVAssetMission::FragmentShader;
+    fragmentShaderCode.name = shaderName;
+    WEngine::CoreSystems::GetAssetRepo()->GetAsset(fragmentShaderCode);
 
-    VkDescriptorPoolCreateInfo descInfo{};
-    descInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    descInfo.maxSets = GPUSettingsVulkan::maxPPShaders;
-    descInfo.poolSizeCount = 1;
-    descInfo.pPoolSizes = &poolSize;
+    VkPipelineShaderStageCreateInfo shaderStage{};
 
-    VkDescriptorPool descriptorPool{};
+    shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    shaderStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    shaderStage.pName = "main";
+    shaderStage.module = CompileShader(ctx, fragmentShaderCode);
+    wFree(fragmentShaderCode.shaderCode);
 
-    auto res = vkCreateDescriptorPool(ctx.vcore.gpuDevice, &descInfo, ctx.vcore.allocator, &descriptorPool);
-
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleError();
-        WEngine::WLog::ConsoleLog("Unable to create descriptor pool for post processing!");
-        return VK_NULL_HANDLE;
-    }
-    return descriptorPool;
+    return shaderStage;
 }
-
-bool SetupLightingDescriptors(VulkanContext &ctx)
-{
-    VkDescriptorSetLayoutBinding binding{};
-    binding.binding = 0;
-    binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    binding.descriptorCount = 1;
-    binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-
-    VkDescriptorSetLayoutCreateInfo layoutInfo{};
-    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 1;
-    layoutInfo.pBindings = &binding;
-
-    auto res = vkCreateDescriptorSetLayout(ctx.vcore.gpuDevice, &layoutInfo, ctx.vcore.allocator, &ctx.lighting.descriptorSetLayout);
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleError();
-        WEngine::WLog::ConsoleLog("Failed to create lighting descriptor set layout");
-        return false;
-    }
-
-    VkDescriptorPoolSize poolSize{};
-    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSize.descriptorCount = 1;
-
-    VkDescriptorPoolCreateInfo poolInfo{};
-    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.maxSets = 1;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
-
-    res = vkCreateDescriptorPool(ctx.vcore.gpuDevice, &poolInfo, ctx.vcore.allocator, &ctx.lighting.descriptorPool);
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleError();
-        WEngine::WLog::ConsoleLog("Failed to create lighting descriptor pool");
-        return false;
-    }
-
-    VkDescriptorSetAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = ctx.lighting.descriptorPool;
-    allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &ctx.lighting.descriptorSetLayout;
-
-    res = vkAllocateDescriptorSets(ctx.vcore.gpuDevice, &allocInfo, &ctx.lighting.descriptorSet);
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleError();
-        WEngine::WLog::ConsoleLog("Failed to allocate lighting descriptor set");
-        return false;
-    }
-
-    VkDescriptorBufferInfo bufferInfo{};
-    bufferInfo.buffer = ctx.lighting.lightBuffer;
-    bufferInfo.offset = 0;
-    bufferInfo.range = sizeof(RawLighting);
-
-    VkWriteDescriptorSet write{};
-    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    write.dstSet = ctx.lighting.descriptorSet;
-    write.dstBinding = 0;
-    write.descriptorCount = 1;
-    write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    write.pBufferInfo = &bufferInfo;
-
-    vkUpdateDescriptorSets(ctx.vcore.gpuDevice, 1, &write, 0, nullptr);
-    return true;
-}
-
 
 #endif
 

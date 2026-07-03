@@ -7,7 +7,7 @@
 
 
 bool SetupDepthImage(VulkanContext& ctx, VulkanStatistics& stat);
-bool SetupTransferCommandBuffer(VulkanContext& ctx);
+
 
 void CreateImage(VulkanContext& ctx, VulkanStatistics &stat, const WEngine::Vector2& size, VkFormat format,
     VkImage& outImg, VkImageView& outView, VmaAllocation& outAlloc, bool canCpuAccess);

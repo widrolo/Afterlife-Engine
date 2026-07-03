@@ -33,7 +33,7 @@
 #include "Vulkan/VulkanCore.h"
 #include "Vulkan/VulkanQueues.h"
 #include "Vulkan/VulkanSwapchain.h"
-#include "Vulkan/VulkanPipeline.h"
+#include "Vulkan/VulkanDescriptors.h"
 #include "Vulkan/VulkanShaders.h"
 #include "Vulkan/VulkanBuffers.h"
 #include "Vulkan/VulkanCommands.h"

@@ -287,8 +287,8 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Core/System/Vulkan/VulkanQueues.h
         src/Engine/Core/System/Vulkan/VulkanSwapchain.cpp
         src/Engine/Core/System/Vulkan/VulkanSwapchain.h
-        src/Engine/Core/System/Vulkan/VulkanPipeline.cpp
-        src/Engine/Core/System/Vulkan/VulkanPipeline.h
+        src/Engine/Core/System/Vulkan/VulkanDescriptors.cpp
+        src/Engine/Core/System/Vulkan/VulkanDescriptors.h
         src/Engine/Core/System/Vulkan/VulkanShaders.cpp
         src/Engine/Core/System/Vulkan/VulkanShaders.h
         src/Engine/Core/System/Vulkan/VulkanBuffers.cpp
@@ -320,6 +320,8 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/Time/Date.cpp
         src/Engine/EngineWidgets/TimeWatchWidget.cpp
         src/Engine/EngineWidgets/TimeWatchWidget.h
+        src/Engine/Core/System/Vulkan/VulkanPipeline.cpp
+        src/Engine/Core/System/Vulkan/VulkanPipeline.h
 )
 
 set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "" FORCE)

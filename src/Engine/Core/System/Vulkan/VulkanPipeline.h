@@ -4,16 +4,15 @@
 #if GPU_BACKEND == GPU_VULKAN
 
 #include "VulkanContext.h"
-#include "Engine/Types/Rendering/ShaderDefinition.h"
 
 VkPipelineLayout CreatePipelineLayout(VulkanContext& ctx, VkDescriptorSetLayout descLayout);
 VkPipelineLayout CreatePostProcessingPipelineLayout(VulkanContext& ctx, VkDescriptorSetLayout descLayout);
-VkDescriptorSetLayout CreateDescriptorSetLayout(VulkanContext& ctx, const WEngine::ShaderDefinition& shaderDef);
-VkDescriptorSetLayout CreatePostProcessingDescriptorSetLayout(VulkanContext& ctx);
-VkDescriptorSet CreateDescriptorSet(VulkanContext& ctx, const Vulkan_Shader& shader);
-bool SetupImGuiDescriptorPool(VulkanContext& ctx);
-VkDescriptorPool CreateDescriptorPool(VulkanContext& ctx, const WEngine::ShaderDefinition& shaderDef);
-VkDescriptorPool CreatePostProcessDescriptorPool(VulkanContext& ctx);
-bool SetupLightingDescriptors(VulkanContext& ctx);
+
+VkPipelineInputAssemblyStateCreateInfo CreatePipeline_InputAssembly();
+VkPipelineInputAssemblyStateCreateInfo CreatePipeline_PostProcessInputAssembly();
+VkPipelineVertexInputStateCreateInfo CreatePipeline_VertexDefinition();
+VkPipelineVertexInputStateCreateInfo CreatePipeline_PostProcessVertexDefinition();
+VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Vertex(const VulkanContext& ctx, const std::string &shaderName);
+VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Fragment(const VulkanContext& ctx, const std::string &shaderName);
 
 #endif

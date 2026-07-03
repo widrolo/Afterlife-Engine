@@ -150,7 +150,6 @@ void RenderHandler::RenderFrame()
 	}
 	else
 	{
-		Iris::DRAWCALL_DrawImGui();
 		Iris::SETTING_FinishFramebufferRender();
 		RenderPostProcessingShaders();
 	}
@@ -385,6 +384,7 @@ void RenderHandler::RenderPostProcessingShaders()
 	Iris::DRAWCALL_ClearFrame(Color::White);
 	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
 	Iris::DRAWCALL_DrawPostProcess(m_screenShader, m_ppFramebuffers[origin]);
+	Iris::DRAWCALL_DrawImGui();
 	Iris::SETTING_FinishFramebufferRender();
 }
 

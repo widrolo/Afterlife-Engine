@@ -57,51 +57,6 @@ bool SetupDepthImage(VulkanContext& ctx, VulkanStatistics& stat)
     return true;
 }
 
-bool SetupTransferCommandBuffer(VulkanContext &ctx)
-{
-    VkCommandPoolCreateInfo commandPoolInfo{};
-    commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    commandPoolInfo.queueFamilyIndex = ctx.queues.primaryTransferQueueFamilyIndex;
-    commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-
-    VkCommandPool cmdPool{};
-    auto res = vkCreateCommandPool(ctx.vcore.gpuDevice, &commandPoolInfo, ctx.vcore.allocator, &cmdPool);
-
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleWarning();
-        WEngine::WLog::ConsoleLog("Unable to create transfer command buffer!");
-        return false;
-    }
-
-    VkCommandBufferAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = cmdPool;
-    allocInfo.commandBufferCount = 1;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-
-    res = vkAllocateCommandBuffers(ctx.vcore.gpuDevice, &allocInfo, &ctx.transferCommandBuffer);
-
-    if (!ParseVkResult(res))
-    {
-        WEngine::WLog::SetConsoleWarning();
-        WEngine::WLog::ConsoleLog("Unable to create transfer command buffer!");
-        return false;
-    }
-
-
-    VkSemaphoreCreateInfo semInfo{};
-    semInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    vkCreateSemaphore(ctx.vcore.gpuDevice, &semInfo, ctx.vcore.allocator, &ctx.transferSemaphore);
-
-    VkFenceCreateInfo fenceInfo{};
-    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-    vkCreateFence(ctx.vcore.gpuDevice, &fenceInfo, ctx.vcore.allocator, &ctx.transferFence);
-
-    return true;
-}
-
 void CreateImage(VulkanContext& ctx, VulkanStatistics& stat, const WEngine::Vector2& size, VkFormat format,
     VkImage& outImg, VkImageView& outView, VmaAllocation& outAlloc, bool canCpuAccess)
 {

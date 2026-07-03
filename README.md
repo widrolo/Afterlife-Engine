@@ -51,8 +51,8 @@ The following features are currently on high priority and target to be implement
 - [x] Partial PBR Support
 - [x] Time of Day Lighting
 - [ ] Full PBR Shaders
-- [ ] Shadow Maps
-- [ ] Ambient Occlusion
+- [ ] Ray Traced Ambient Occlusion
+- [ ] Ray Traced Shadows
 - [ ] Post Processing Shaders
 - [ ] Tone Mapping
 - [ ] LOD

@@ -10,7 +10,7 @@
 #include "Engine/Util/Log.h"
 #include <Engine/Types/Rendering/LightingInfo.h>
 
-#include "VulkanPipeline.h"
+#include "VulkanDescriptors.h"
 
 bool SetupStationaryInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat)
 {
