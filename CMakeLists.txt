@@ -322,6 +322,8 @@ add_executable(Widrolo_Engine_3D
         src/Engine/EngineWidgets/TimeWatchWidget.h
         src/Engine/Core/System/Vulkan/VulkanPipeline.cpp
         src/Engine/Core/System/Vulkan/VulkanPipeline.h
+        src/Engine/Core/System/Vulkan/VulkanRaytracing.cpp
+        src/Engine/Core/System/Vulkan/VulkanRaytracing.h
 )
 
 set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "" FORCE)

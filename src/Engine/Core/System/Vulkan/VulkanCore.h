@@ -18,6 +18,7 @@ void SetupVmaAllocator(VulkanContext& ctx);
 bool SetupValidation(VulkanContext& ctx);
 wtl::vector<std::string> GetExtensionsToLoad(VulkanContext& ctx);
 bool SetupVkInstance(VulkanContext& ctx);
+VkPhysicalDeviceRayQueryFeaturesKHR& GetVkPhysicalDeviceRayQueryFeatures();
 bool SetupGraphicsDevice(VulkanContext& ctx);
 
 #endif

@@ -53,7 +53,7 @@ void SetupVmaAllocator(VulkanContext& ctx)
     vulkanFunctions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
 
     VmaAllocatorCreateInfo allocatorCreateInfo = {};
-    allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+    allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT | VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
     allocatorCreateInfo.vulkanApiVersion = GetVulkanVersion();
     allocatorCreateInfo.physicalDevice = ctx.vcore.gpuPhysicalDevice;
     allocatorCreateInfo.device = ctx.vcore.gpuDevice;
@@ -148,6 +148,25 @@ bool SetupVkInstance(VulkanContext& ctx)
     return ParseVkResult(resIsnt);
 }
 
+VkPhysicalDeviceRayQueryFeaturesKHR& GetVkPhysicalDeviceRayQueryFeatures()
+{
+    static VkPhysicalDeviceBufferDeviceAddressFeatures bdaFeatures{};
+    bdaFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+    bdaFeatures.bufferDeviceAddress = VK_TRUE;
+
+    static VkPhysicalDeviceAccelerationStructureFeaturesKHR asFeatures{};
+    asFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+    asFeatures.pNext = &bdaFeatures;
+    asFeatures.accelerationStructure = VK_TRUE;
+
+    static VkPhysicalDeviceRayQueryFeaturesKHR rqFeatures{};
+    rqFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR;
+    rqFeatures.pNext = &asFeatures;
+    rqFeatures.rayQuery = VK_TRUE;
+
+    return rqFeatures;
+}
+
 bool SetupGraphicsDevice(VulkanContext& ctx)
 {
     uint32 gpusPresent;
@@ -188,12 +207,17 @@ bool SetupGraphicsDevice(VulkanContext& ctx)
 
     auto queues = FindDeviceQueues(ctx);
 
-    wtl::vector<const char*> extensions = { "VK_KHR_swapchain", "VK_KHR_dynamic_rendering" };
+    wtl::vector<const char*> extensions = {
+        "VK_KHR_swapchain", "VK_KHR_dynamic_rendering", "VK_KHR_acceleration_structure", "VK_KHR_ray_query",
+        "VK_KHR_deferred_host_operations"
+    };
+
+    auto rt = GetVkPhysicalDeviceRayQueryFeatures();
 
     VkPhysicalDeviceDynamicRenderingFeatures dynaRendering{};
     dynaRendering.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
     dynaRendering.dynamicRendering = VK_TRUE;
-
+    dynaRendering.pNext = &rt;
 
     VkDeviceCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

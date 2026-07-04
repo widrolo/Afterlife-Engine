@@ -85,6 +85,11 @@ public:
     static void AddStationaryObjects(WEngine::Model model, WEngine::Material material,
         wtl::vector<WEngine::InstanceData> instanceMats);
 
+    // --------------------- Ray Tracing ---------------------
+
+    static void ALLOC_AddModelEntryToBVH(WEngine::Model model);
+    static void SETTING_AddModelInstanceToBVH(WEngine::Model model, const WEngine::InstanceData& instance);
+
     // ------------------------- ImGui -----------------------
 
     static void SETTING_ConfigureImGui(SDL_Window* window);

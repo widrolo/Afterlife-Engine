@@ -38,6 +38,7 @@
 #include "Vulkan/VulkanBuffers.h"
 #include "Vulkan/VulkanCommands.h"
 #include "Vulkan/VulkanImages.h"
+#include "Vulkan/VulkanRaytracing.h"
 
 VulkanContext ctx;
 VulkanStatistics stats;
@@ -255,6 +256,8 @@ WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::ModelIn
     vkModel.instanceAllocation = instBuf.second;
 
     vkModel.instanceBufferSize = GPUSettingsVulkan::maxInstanceBufferSize;
+
+    AddModelToBLAS(ctx, vkModel);
 
     ctx.loadedModels.push_back(vkModel);
     WEngine::Model modelHandle = ctx.loadedModels.size();
@@ -769,6 +772,15 @@ void Iris::AddStationaryObjects(WEngine::Model model, WEngine::Material material
         memcpy(data + trueOffset + trueOldSize, instanceMats.data(), size);
     }
     vmaUnmapMemory(ctx.vcore.vmaAllocator, ctx.statBuf.statAllocation);
+}
+
+void Iris::ALLOC_AddModelEntryToBVH(WEngine::Model model)
+{
+}
+
+void Iris::SETTING_AddModelInstanceToBVH(WEngine::Model model, const WEngine::InstanceData& instance)
+{
+
 }
 
 void Iris::AssetIrisCommunication(WEngine::AssetIrisCommunication &mission)
