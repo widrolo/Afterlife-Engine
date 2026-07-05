@@ -14,7 +14,8 @@
 #include "VulkanContext.h"
 #include "VulkanStatistics.h"
 
-bool SetupStationaryInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat);
+bool SetupStationaryInstanceBuffers(VulkanContext& ctx, VulkanStatistics& stat);
+std::pair<VkBuffer, VmaAllocation> CreateStationaryInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat);
 bool SetupLightingBuffer(VulkanContext& ctx, VulkanStatistics& stat);
 std::pair<VkBuffer, VmaAllocation> CreateVertexBuffer(VulkanContext& ctx, VulkanStatistics& stat,
     const wtl::vector<WEngine::VertexData>& vertData);

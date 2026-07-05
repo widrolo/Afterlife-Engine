@@ -4,6 +4,7 @@
 struct GPUSettings
 {
     _GLOBAL_CEX_ uint64 stationaryInstBufferSize = 64 * KB;
+    _GLOBAL_CEX_ uint64 maxStationaryInstBuffers = 512;
 };
 
 struct GPUSettingsOpenGL

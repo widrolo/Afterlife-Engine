@@ -4,6 +4,7 @@
 
 #include <vulkan/vulkan.h>
 #include "VulkanContext.h"
+#include "Engine/Types/Rendering/GPU/StatBufKey.h"
 
 bool ParseVkResult(VkResult result);
 VkBool32 ValidationCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes,
@@ -26,6 +27,8 @@ VkFence& GetFbEndOfFrameFence(const VulkanContext& ctx);
 VkDescriptorSet& GetFbDescriptorSet(const VulkanContext& ctx, Vulkan_RenderTarget& rt);
 VkImageLayout& GetFbLayout(const VulkanContext& ctx);
 VkImageLayout& GetFbLayout(const VulkanContext& ctx, Vulkan_RenderTarget& rt);
+
+Vulkan_StatBuf& GetStatBuf(VulkanContext &ctx, WEngine::StatBufKey key);
 
 void PopulatePushConstants(const VulkanContext& ctx, const Vulkan_Shader& shader, const WEngine::Mat4x4& mvp);
 

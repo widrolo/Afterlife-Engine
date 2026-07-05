@@ -11,7 +11,7 @@ struct VulkanContext
     Vulkan_Core vcore{};
     Vulkan_Screen screen{};
     Vulkan_Queues queues{};
-    Vulkan_StatBuf statBuf{};
+    std::vector<Vulkan_StatBuf> statBuffers{}; // using array would ballon the size of the context
     Vulkan_PostProcessing postProcessing{};
 
     VkDescriptorPool imGuiDescriptorPool{};

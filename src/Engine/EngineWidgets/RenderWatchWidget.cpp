@@ -22,15 +22,6 @@ void RenderWatchWidget::RenderInternal()
     ShowSunlightSettings();
     ShowAmbientSettings();
     ShowTimeSettings();
-
-    auto statInstBuf = Iris::GetStatInstBufAllocInfo();
-
-    for (const auto& allocInfo : statInstBuf)
-    {
-        ImGui::PushID(&allocInfo);
-        ImGui::Text("%s", StatInstInfoToString(allocInfo).c_str());
-        ImGui::PopID();
-    }
 }
 
 std::string RenderWatchWidget::GetHeader() const

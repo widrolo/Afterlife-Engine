@@ -8,13 +8,31 @@
 #include "Engine/Core/System/GPUSettings.h"
 #include "Engine/Types/Rendering/InstanceData.h"
 #include "Engine/Util/Log.h"
-#include <Engine/Types/Rendering/LightingInfo.h>
 
 #include "VulkanDescriptors.h"
 #include "VulkanPipeline.h"
 
-bool SetupStationaryInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat)
+bool SetupStationaryInstanceBuffers(VulkanContext &ctx, VulkanStatistics &stat)
 {
+    ctx.statBuffers.resize(GPUSettings::maxStationaryInstBuffers);
+
+    for (uint32_t i = 0; i < GPUSettings::maxStationaryInstBuffers; i++)
+    {
+        auto buf = CreateStationaryInstanceBuffer(ctx, stat);
+        Vulkan_StatBuf statBuffer{};
+        statBuffer.available = true;
+        statBuffer.statBuffer = buf.first;
+        statBuffer.statAllocation = buf.second;
+        ctx.statBuffers[i] = statBuffer;
+    }
+
+    return true;
+}
+
+std::pair<VkBuffer, VmaAllocation> CreateStationaryInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat)
+{
+    VkBuffer statBuf;
+    VmaAllocation statAlloc;
     VkBufferCreateInfo bufferCreateInfo{};
     bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferCreateInfo.size = GPUSettings::stationaryInstBufferSize;
@@ -28,7 +46,7 @@ bool SetupStationaryInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat)
     VmaAllocationInfo bufferAllocInfo{};
 
     auto res = vmaCreateBuffer(ctx.vcore.vmaAllocator, &bufferCreateInfo, &allocationCreateInfo,
-        &ctx.statBuf.statBuffer, &ctx.statBuf.statAllocation, &bufferAllocInfo);
+        &statBuf, &statAlloc, &bufferAllocInfo);
 
     stat.vramUsage += bufferAllocInfo.size;
 
@@ -36,10 +54,10 @@ bool SetupStationaryInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat)
     {
         WEngine::WLog::SetConsoleError();
         WEngine::WLog::ConsoleLog("Failed to expand instance buffer");
-        return false;
+        return {VK_NULL_HANDLE, VK_NULL_HANDLE};
     }
 
-    return true;
+    return {statBuf, statAlloc};
 }
 
 bool SetupLightingBuffer(VulkanContext &ctx, VulkanStatistics &stat)

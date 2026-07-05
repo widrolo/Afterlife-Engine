@@ -19,6 +19,7 @@
 #include "Engine/Types/Rendering/TextureInfo.h"
 #include "Engine/Types/Rendering/GPU/Material.h"
 #include "Engine/Types/Rendering/GPU/Model.h"
+#include "Engine/Types/Rendering/GPU/StatBufKey.h"
 #include "Engine/Types/Rendering/Iris/InstThreadedList.h"
 #include "Engine/Types/Rendering/Iris/IrisAssetComms.h"
 
@@ -58,8 +59,8 @@ public:
     static void DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, const WEngine::Mat4x4& mvp);
     static void DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material material,
         const WEngine::Mat4x4& vp, const wtl::vector<WEngine::InstanceData>& instanceMats);
-    static void DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::Material material,
-        const WEngine::Mat4x4& vp);
+    static void DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, WEngine::Model model,
+        WEngine::Material material, const WEngine::Mat4x4& vp);
 
     static void DRAWCALL_DrawPostProcess(WEngine::Shader ppShader, WEngine::Framebuffer sampleFrameBuffer);
 
@@ -80,9 +81,9 @@ public:
     static uint64 GetVramUsage();
     static uint32 GetDrawCallCountLastFrame();
     static bool IsFirstFrame();
-    static wtl::vector<MemListDebugInfo> GetStatInstBufAllocInfo();
 
-    static void AddStationaryObjects(WEngine::Model model, WEngine::Material material,
+    static WEngine::Nullable<WEngine::StatBufKey> RequestStationaryBufferKey();
+    static void AddStationaryObjects(WEngine::StatBufKey key, WEngine::Model model, WEngine::Material material,
         wtl::vector<WEngine::InstanceData> instanceMats);
 
     // --------------------- Ray Tracing ---------------------

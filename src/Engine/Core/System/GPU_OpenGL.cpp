@@ -1,6 +1,8 @@
 #include <Engine/EngineDefines.h>
 #if GPU_BACKEND == GPU_OPENGL
 
+#error "OpenGL is deprecated! Use Vulkan."
+
 #include "GPU.h"
 #include <unordered_map>
 #include <Engine/WTL/vector.h>

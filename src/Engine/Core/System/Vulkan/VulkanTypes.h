@@ -120,6 +120,7 @@ struct Vulkan_StatBuf
     InstThreadedList statBookkeep;
     VkBuffer statBuffer;
     VmaAllocation statAllocation;
+    bool available;
 };
 
 struct Vulkan_Texture

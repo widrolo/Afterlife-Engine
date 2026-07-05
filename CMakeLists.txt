@@ -319,6 +319,7 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Core/System/Vulkan/VulkanPipeline.h
         src/Engine/Core/System/Vulkan/VulkanRaytracing.cpp
         src/Engine/Core/System/Vulkan/VulkanRaytracing.h
+        src/Engine/Types/Rendering/GPU/StatBufKey.h
 )
 
 FetchContent_Declare(
@@ -351,6 +352,13 @@ FetchContent_Declare(
         GIT_TAG "1.0.3"
 )
 
+FetchContent_Declare(
+        box3d
+        GIT_REPOSITORY	"https://github.com/erincatto/box3d.git"
+        GIT_TAG "v0.1.0"
+)
+
+FetchContent_MakeAvailable(box3d)
 FetchContent_MakeAvailable(glm)
 FetchContent_MakeAvailable(SDL)
 FetchContent_MakeAvailable(Tinyxml)
@@ -379,6 +387,7 @@ target_compile_definitions(Widrolo_Engine_3D PRIVATE
 find_package(Vulkan REQUIRED COMPONENTS shaderc_combined)
 
 target_link_libraries(Widrolo_Engine_3D PRIVATE
+        box3d::box3d
         glm::glm
         tinyxml2::tinyxml2
         yaml-cpp::yaml-cpp

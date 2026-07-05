@@ -67,7 +67,7 @@ bool Iris::SETTING_InitGPUApi(SDL_Window *window)
         return false;
     if (!SetupDisplayRenderTarget(ctx, stats))
         return false;
-    if (!SetupStationaryInstanceBuffer(ctx, stats))
+    if (!SetupStationaryInstanceBuffers(ctx, stats))
         return false;
     if (!SetupLightingBuffer(ctx, stats))
         return false;
@@ -416,8 +416,8 @@ void Iris::DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material m
     stats.drawCallsThisFrame++;
 }
 
-void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::Material material,
-    const WEngine::Mat4x4& vp)
+static void DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, WEngine::Model model,
+        WEngine::Material material, const WEngine::Mat4x4& vp)
 {
     if (!ctx.isCommandRecording)
     {
@@ -426,7 +426,7 @@ void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::
         return;
     }
 
-    auto alloc = ctx.statBuf.statBookkeep.FindNode(model, material);
+    auto alloc = GetStatBuf(ctx, sectorKey).statBookkeep.FindNode(model, material);
     if (alloc.first == 0 && alloc.second == 0)
         return;
 
@@ -450,7 +450,7 @@ void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::Model model, WEngine::
         vkCmdBindDescriptorSets(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout,
             1, 1, &vkMat.materialDescriptorSet, 0, nullptr);
     vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 0, 1, &vkModel.vertexBuffer, &offsets[0]);
-    vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 1, 1, &ctx.statBuf.statBuffer, &offsets[1]);
+    vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 1, 1, &GetStatBuf(ctx, sectorKey).statBuffer, &offsets[1]);
     vkCmdBindIndexBuffer(GetFbCmdBuff(ctx), vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
     PopulatePushConstants(ctx, vkShader, vp);
 
@@ -726,35 +726,43 @@ bool Iris::IsFirstFrame()
     return ctx.firstFrame;
 }
 
+WEngine::Nullable<WEngine::StatBufKey> Iris::RequestStationaryBufferKey()
+{
+    for (uint64 i = 0; i < GPUSettings::maxStationaryInstBuffers; i++)
+    {
+        if (ctx.statBuffers[i].available)
+        {
+            ctx.statBuffers[i].available = false;
+            // TODO: Clear all nodes within bookkeeping.
+            return WEngine::StatBufKey(i + 1); // because all handles work like that, and we can use 0 as error check.
+        }
+    }
+}
+
 WEngine::Nullable<ImTextureID> Iris::FramebufferToImGui(WEngine::Framebuffer framebuffer)
 {
     return WEngine::Nullable<ImTextureID>();
 }
 
-wtl::vector<MemListDebugInfo> Iris::GetStatInstBufAllocInfo()
-{
-    return ctx.statBuf.statBookkeep.GetDebugInfo();
-}
-
-void Iris::AddStationaryObjects(WEngine::Model model, WEngine::Material material,
+void Iris::AddStationaryObjects(WEngine::StatBufKey key, WEngine::Model model, WEngine::Material material,
     wtl::vector<WEngine::InstanceData> instanceMats)
 {
-    auto oldAlloc = ctx.statBuf.statBookkeep.FindNode(model, material);
+    auto oldAlloc = GetStatBuf(ctx, key).statBookkeep.FindNode(model, material);
 
     uint64 size = instanceMats.size() * sizeof(WEngine::InstanceData);
-    auto newAlloc = ctx.statBuf.statBookkeep.InsertData(model, material, size);
+    auto newAlloc = GetStatBuf(ctx, key).statBookkeep.InsertData(model, material, size);
 
     uint64 trueOffset = newAlloc.first / sizeof(WEngine::InstanceData);
 
     WEngine::InstanceData* data;
 
-    vmaMapMemory(ctx.vcore.vmaAllocator, ctx.statBuf.statAllocation, (void**)&data);
+    vmaMapMemory(ctx.vcore.vmaAllocator, GetStatBuf(ctx, key).statAllocation, (void**)&data);
 
     // case 1: new allocation
     if (oldAlloc.first == 0 && oldAlloc.second == 0)
     {
         memcpy(data + trueOffset, instanceMats.data(), size);
-        vmaUnmapMemory(ctx.vcore.vmaAllocator, ctx.statBuf.statAllocation);
+        vmaUnmapMemory(ctx.vcore.vmaAllocator, GetStatBuf(ctx, key).statAllocation);
         return;
     }
 
@@ -772,7 +780,7 @@ void Iris::AddStationaryObjects(WEngine::Model model, WEngine::Material material
         memmove(data + trueOffset, data + trueOldOffset, oldAlloc.second);
         memcpy(data + trueOffset + trueOldSize, instanceMats.data(), size);
     }
-    vmaUnmapMemory(ctx.vcore.vmaAllocator, ctx.statBuf.statAllocation);
+    vmaUnmapMemory(ctx.vcore.vmaAllocator, GetStatBuf(ctx, key).statAllocation);
 }
 
 void Iris::ALLOC_AddModelEntryToBVH(WEngine::Model model)
