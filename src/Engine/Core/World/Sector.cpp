@@ -11,6 +11,7 @@
 #include <Engine/Core/System/Memory.h>
 
 #include "Editor/Types/EditorState.h"
+#include "Engine/Core/System/Iris.h"
 
 using namespace WEngine;
 
@@ -187,6 +188,11 @@ void Sector::UnloadEntity(const std::string& name)
 	}
 }
 
+StatBufKey Sector::GetStatBufKey()
+{
+	return m_irisKey;
+}
+
 
 void Sector::AddEntity(Entity* e)
 {
@@ -241,6 +247,15 @@ void Sector::LoadArgsFromFile(const std::string& sectorName)
 			}
 			args.push_back(arg);
 		}
+	}
+
+	auto statN = Iris::RequestStationaryBufferKey();
+	if (statN.HasValue())
+		m_irisKey = statN.GetValue();
+	else
+	{
+		WLog::SetConsoleError();
+		WLog::ConsoleLog("Stat buffer request failed!");
 	}
 
 	for (const auto& arg : args)

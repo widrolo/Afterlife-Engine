@@ -6,6 +6,7 @@
 #include "Engine/Core/System/Iris.h"
 #include "Engine/Types/SpawnArgs.h"
 #include "Engine/Core/World/Entity.h"
+#include "Engine/Core/World/Sector.h"
 #include "Engine/Types/AssetMission.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Types/Rendering/RenderMission.h"
@@ -65,7 +66,8 @@ void MeshRendererComponent::LateAwake()
     if (entity->IsStationary() && m_model != 0 && m_material != 0)
     {
         m_isStationary = true;
-        CoreSystems::GetRenderHandler()->RecordStationaryAdd(m_model, m_material, entity->transform);
+        CoreSystems::GetRenderHandler()->RecordStationaryAdd(entity->parentSector->GetStatBufKey(), m_model, m_material,
+            entity->transform);
     }
 }
 
@@ -76,6 +78,7 @@ void MeshRendererComponent::Draw()
     mission.model = m_model;
     mission.material = m_material;
     mission.isStationary = m_isStationary;
+    mission.key = entity->parentSector->GetStatBufKey();
 
     CoreSystems::GetRenderHandler()->AddToRenderQueue(mission);
 

@@ -138,7 +138,10 @@ void RenderHandler::RenderFrame()
 	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
 
 	for (auto& stat : m_stationaryMissions)
-		Iris::DRAWCALL_DrawModelInstancedStationary(stat.model, stat.material, vp);
+	{
+		for (auto& ref : stat.references)
+			Iris::DRAWCALL_DrawModelInstancedStationary(ref, stat.model, stat.material, vp);
+	}
 
 	if (m_isEditor)
 	{
@@ -172,7 +175,7 @@ void RenderHandler::AddToRenderQueue(RenderMission& mission)
 	m_renderQueue.push_back(mission);
 }
 
-void RenderHandler::RecordStationaryAdd(Model model, Material material, const Transform& transform)
+void RenderHandler::RecordStationaryAdd(StatBufKey key, Model model, Material material, const Transform& transform)
 {
 	for (auto& objects : m_stationaryAddQueue)
 	{
@@ -184,6 +187,7 @@ void RenderHandler::RecordStationaryAdd(Model model, Material material, const Tr
 	}
 
 	StationaryObjStaged obj;
+	obj.key = key;
 	obj.model = model;
 	obj.material = material;
 	obj.instData.push_back({CalcModelMatrix(transform)});
@@ -193,7 +197,7 @@ void RenderHandler::RecordStationaryAdd(Model model, Material material, const Tr
 void RenderHandler::PushStationaryData()
 {
 	for (auto& object : m_stationaryAddQueue)
-		Iris::AddStationaryObjects(object.model, object.material, object.instData);
+		Iris::AddStationaryObjects(object.key, object.model, object.material, object.instData);
 
 	m_stationaryAddQueue.clear();
 }
@@ -393,9 +397,26 @@ void RenderHandler::SortStationary(RenderMission &mission)
 	for (auto& objects : m_stationaryMissions)
 	{
 		if (objects.model == mission.model && objects.material == mission.material)
+		{
+			bool foundRef = false;
+			for (auto ref : objects.references)
+			{
+				if (ref != mission.key)
+				{
+					foundRef = true;
+					break;
+				}
+			}
+
+			if (!foundRef)
+			{
+				objects.references.push_back(mission.key);
+			}
+
 			return;
+		}
 	}
-	m_stationaryMissions.push_back({mission.model, mission.material});
+	m_stationaryMissions.push_back({mission.model, mission.material, {mission.key}});
 }
 
 void RenderHandler::InsertModelIntoShaderGroup(RenderMission &mission, MaterialGroup &materialGroup)

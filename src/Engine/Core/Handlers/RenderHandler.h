@@ -10,8 +10,8 @@
 #include "Engine/Types/Rendering/GPU/Framebuffer.h"
 #include "Engine/Types/Rendering/GPU/Material.h"
 #include "Engine/Types/Rendering/GPU/Shader.h"
+#include "Engine/Types/Rendering/GPU/StatBufKey.h"
 #include "Engine/WTL/deque.h"
-#include "Engine/WTL/list.h"
 
 namespace WEngine
 {
@@ -37,6 +37,7 @@ namespace WEngine
 
 		struct StationaryObjStaged
 		{
+			StatBufKey key;
 			Model model;
 			Material material;
 			wtl::vector<InstanceData> instData;
@@ -46,6 +47,7 @@ namespace WEngine
 		{
 			Model model;
 			Material material;
+			wtl::vector<StatBufKey> references;
 		};
 
 		struct SkyboxInfo
@@ -94,7 +96,7 @@ namespace WEngine
 
 		void AddToRenderQueue(RenderMission& mission);
 
-		void RecordStationaryAdd(Model model, Material material, const Transform& transform);
+		void RecordStationaryAdd(StatBufKey key, Model model, Material material, const Transform& transform);
 		void PushStationaryData();
 
 		void SetSunlight(const Sunlight& light);

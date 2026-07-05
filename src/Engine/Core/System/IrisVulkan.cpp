@@ -173,7 +173,7 @@ WEngine::Nullable<WEngine::ShaderDefinition> Iris::GetShaderDef(const std::strin
     {
         WEngine::WLog::SetConsoleError();
         WEngine::WLog::ConsoleLog(std::format("Shader \"{}\" not found!", shaderName));
-        return WEngine::Nullable<WEngine::ShaderDefinition>();
+        return {};
     }
 
     WEngine::Shader shHandle = ctx.loadedShadersHandles[shaderName];
@@ -185,20 +185,20 @@ WEngine::Nullable<WEngine::Material> Iris::GetMaterial(const std::string &matNam
 {
     if (ctx.loadedMaterialHandles.contains(matName))
         return WEngine::Nullable<WEngine::Material>(ctx.loadedMaterialHandles[matName]);
-    return WEngine::Nullable<WEngine::Material>();
+    return {};
 }
 
 WEngine::Nullable<WEngine::Shader> Iris::GetShader(const std::string &shaderName)
 {
     if (ctx.loadedShadersHandles.contains(shaderName))
         return WEngine::Nullable<WEngine::Shader>(ctx.loadedShadersHandles[shaderName]);
-    return WEngine::Nullable<WEngine::Shader>();
+    return {};
 }
 
 WEngine::Nullable<WEngine::Shader> Iris::GetShader(WEngine::Material matQuery)
 {
     if (ctx.loadedMaterials.size() < matQuery)
-        return WEngine::Nullable<WEngine::Shader>();
+        return {};
     Vulkan_Material mat = ctx.loadedMaterials[matQuery - 1];
     return mat.materialShaderHandle;
 }
@@ -211,14 +211,14 @@ WEngine::Nullable<WEngine::Material> Iris::ALLOC_CompileMaterial(const std::stri
     {
         WEngine::WLog::SetConsoleError();
         WEngine::WLog::ConsoleLog(std::format("Material already {} compiled", matName));
-        return WEngine::Nullable<WEngine::Material>();
+        return {};
     }
 
 
     WEngine::Material matHandle = CompileMaterial(ctx, matName);
 
     if (matHandle == 0)
-        return WEngine::Nullable<WEngine::Material>();
+        return {};
 
     return WEngine::Nullable<WEngine::Material>(matHandle);
 }
@@ -227,7 +227,7 @@ WEngine::Nullable<WEngine::Model> Iris::GetModel(const std::string &modelName)
 {
     if (ctx.loadedModelHandles.contains(modelName))
         return WEngine::Nullable<WEngine::Model>(ctx.loadedModelHandles[modelName]);
-    return WEngine::Nullable<WEngine::Model>();
+    return {};
 }
 
 WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::ModelInfo &model, bool addToBVH)
@@ -416,8 +416,8 @@ void Iris::DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material m
     stats.drawCallsThisFrame++;
 }
 
-static void DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, WEngine::Model model,
-        WEngine::Material material, const WEngine::Mat4x4& vp)
+void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, WEngine::Model model,
+    WEngine::Material material, const WEngine::Mat4x4& vp)
 {
     if (!ctx.isCommandRecording)
     {
@@ -737,11 +737,12 @@ WEngine::Nullable<WEngine::StatBufKey> Iris::RequestStationaryBufferKey()
             return WEngine::StatBufKey(i + 1); // because all handles work like that, and we can use 0 as error check.
         }
     }
+    return {};
 }
 
 WEngine::Nullable<ImTextureID> Iris::FramebufferToImGui(WEngine::Framebuffer framebuffer)
 {
-    return WEngine::Nullable<ImTextureID>();
+    return {};
 }
 
 void Iris::AddStationaryObjects(WEngine::StatBufKey key, WEngine::Model model, WEngine::Material material,

@@ -4,6 +4,8 @@
 
 #include <Engine/Types/CommonTypes.h>
 
+#include "Engine/Types/Rendering/GPU/StatBufKey.h"
+
 namespace WEditor
 {
 	class Editor;
@@ -42,6 +44,7 @@ namespace WEngine
 	private:
 		std::string m_name;
 		wtl::vector<Entity*> m_entities;
+		StatBufKey m_irisKey;
 
 		// only available for root sector
 		_GLOBAL_ wtl::vector<Sector*> m_sectors;
@@ -75,6 +78,8 @@ namespace WEngine
 		bool IsEntityPresent(const std::string& name);
 		void UnloadEntity(Entity* e);
 		void UnloadEntity(const std::string& name);
+
+		StatBufKey GetStatBufKey();
 	private:
 		void AddEntity(Entity* e);
 

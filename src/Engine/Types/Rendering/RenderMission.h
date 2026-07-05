@@ -8,6 +8,7 @@
 #include "Engine/Math/Transform.h"
 #include "GPU/Model.h"
 #include "GPU/Material.h"
+#include "GPU/StatBufKey.h"
 
 namespace WEngine
 {
@@ -27,6 +28,7 @@ namespace WEngine
 		Model model;
 		Transform transform;
 		bool isStationary;
+		StatBufKey key;
 	};
 
 	struct RenderVisualizationMission
