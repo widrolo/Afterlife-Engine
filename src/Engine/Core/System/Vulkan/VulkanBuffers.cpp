@@ -81,7 +81,8 @@ std::pair<VkBuffer, VmaAllocation> CreateVertexBuffer(VulkanContext& ctx, Vulkan
     VkBufferCreateInfo bufferCreateInfo{};
     bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferCreateInfo.size = vertBufferSize;
-    bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 
     VmaAllocationCreateInfo allocationCreateInfo{};
     allocationCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
@@ -125,7 +126,8 @@ std::pair<VkBuffer, VmaAllocation> CreateIndexBuffer(VulkanContext& ctx, VulkanS
     VkBufferCreateInfo bufferCreateInfo{};
     bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferCreateInfo.size = indBufferSize;
-    bufferCreateInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 
     VmaAllocationCreateInfo allocationCreateInfo{};
     allocationCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
@@ -157,6 +159,71 @@ std::pair<VkBuffer, VmaAllocation> CreateIndexBuffer(VulkanContext& ctx, VulkanS
         return {VK_NULL_HANDLE, VK_NULL_HANDLE};
     }
     return {indBuf, indAlloc};
+}
+
+std::pair<VkBuffer, VmaAllocation> CreateAccelerationStructureBuffer(VulkanContext &ctx, VulkanStatistics &stat,
+    uint64 size)
+{
+    VkBuffer asBuf;
+    VmaAllocation asAlloc;
+    VkDeviceSize asBufferSize = size;
+
+    VkBufferCreateInfo bufferCreateInfo{};
+    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferCreateInfo.size = asBufferSize;
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+
+    VmaAllocationCreateInfo allocationCreateInfo{};
+    allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+
+    VmaAllocationInfo bufferAllocInfo{};
+
+    auto res = vmaCreateBuffer(ctx.vcore.vmaAllocator, &bufferCreateInfo, &allocationCreateInfo,
+        &asBuf, &asAlloc, &bufferAllocInfo);
+
+    stat.vramUsage += bufferAllocInfo.size;
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Failed to allocate acceleration structure buffer!");
+        return {VK_NULL_HANDLE, VK_NULL_HANDLE};
+    }
+
+    return {asBuf, asAlloc};
+}
+
+std::pair<VkBuffer, VmaAllocation> CreateAccelerationScratchBuffer(VulkanContext &ctx, VulkanStatistics &stat,
+    uint64 size)
+{
+    VkBuffer scBuf;
+    VmaAllocation scAlloc;
+    VkDeviceSize scBufferSize = size;
+
+    VkBufferCreateInfo bufferCreateInfo{};
+    bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferCreateInfo.size = scBufferSize;
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+
+    VmaAllocationCreateInfo allocationCreateInfo{};
+    allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+    allocationCreateInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+
+    VmaAllocationInfo bufferAllocInfo{};
+
+    auto res = vmaCreateBuffer(ctx.vcore.vmaAllocator, &bufferCreateInfo, &allocationCreateInfo,
+        &scBuf, &scAlloc, &bufferAllocInfo);
+
+    stat.vramUsage += bufferAllocInfo.size;
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Failed to allocate scratch buffer!");
+        return {VK_NULL_HANDLE, VK_NULL_HANDLE};
+    }
+
+    return {scBuf, scAlloc};
 }
 
 std::pair<VkBuffer, VmaAllocation> InitInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat)

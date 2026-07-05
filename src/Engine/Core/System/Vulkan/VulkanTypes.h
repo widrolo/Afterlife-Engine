@@ -106,6 +106,12 @@ struct Vulkan_Model
     VmaAllocation instanceAllocation;
     uint16 activeInstances;
     uint32 instanceBufferSize;
+
+    VkBuffer asBuffer;
+    VmaAllocation asAllocation;
+    VkBuffer scrBuffer;
+    VmaAllocation scrAllocation;
+    VkAccelerationStructureKHR blas;
 };
 
 

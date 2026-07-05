@@ -49,7 +49,7 @@ public:
     // ----------------------- Models ------------------------
 
     static WEngine::Nullable<WEngine::Model> GetModel(const std::string& modelName);
-    static WEngine::Nullable<WEngine::Model> ALLOC_CreateModel(const WEngine::ModelInfo& model);
+    static WEngine::Nullable<WEngine::Model> ALLOC_CreateModel(const WEngine::ModelInfo& model, bool addToBVH = true);
 
     // ----------------------- Drawing -----------------------
 

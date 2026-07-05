@@ -1,5 +1,3 @@
-#pragma once
-
 #include <Engine/EngineDefines.h>
 #if GPU_BACKEND == GPU_VULKAN
 

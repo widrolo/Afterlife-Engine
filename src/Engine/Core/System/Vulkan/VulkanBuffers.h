@@ -20,6 +20,10 @@ std::pair<VkBuffer, VmaAllocation> CreateVertexBuffer(VulkanContext& ctx, Vulkan
     const wtl::vector<WEngine::VertexData>& vertData);
 std::pair<VkBuffer, VmaAllocation> CreateIndexBuffer(VulkanContext& ctx, VulkanStatistics& stat,
     const wtl::vector<uint32>& indData);
+std::pair<VkBuffer, VmaAllocation> CreateAccelerationStructureBuffer(VulkanContext& ctx, VulkanStatistics& stat,
+    uint64 size);
+std::pair<VkBuffer, VmaAllocation> CreateAccelerationScratchBuffer(VulkanContext& ctx, VulkanStatistics& stat,
+    uint64 size);
 std::pair<VkBuffer, VmaAllocation> InitInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat);
 void ExpandInstanceBuffer(VulkanContext& ctx, VulkanStatistics& stat, Vulkan_Model& model, uint64 minSize);
 bool SetupPostProcessing(VulkanContext& ctx, VulkanStatistics& stat);

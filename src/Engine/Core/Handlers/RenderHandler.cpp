@@ -259,7 +259,7 @@ void RenderHandler::PrepareSkybox()
 	mission.name = "Skysphere";
 	CoreSystems::GetAssetRepo()->GetAsset(mission);
 
-	auto modelN = Iris::ALLOC_CreateModel(mission.model);
+	auto modelN = Iris::ALLOC_CreateModel(mission.model, false);
 	if (modelN.HasValue())
 		m_skyboxInfo.skyModel = modelN.GetValue();
 

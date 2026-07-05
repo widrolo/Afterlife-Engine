@@ -230,7 +230,7 @@ WEngine::Nullable<WEngine::Model> Iris::GetModel(const std::string &modelName)
     return WEngine::Nullable<WEngine::Model>();
 }
 
-WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::ModelInfo &model)
+WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::ModelInfo &model, bool addToBVH)
 {
     Vulkan_Model vkModel{};
     vkModel.vertexCount = model.vertices.size();
@@ -257,7 +257,8 @@ WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::ModelIn
 
     vkModel.instanceBufferSize = GPUSettingsVulkan::maxInstanceBufferSize;
 
-    AddModelToBLAS(ctx, vkModel);
+    if (addToBVH)
+        AddModelToBLAS(ctx, stats, vkModel);
 
     ctx.loadedModels.push_back(vkModel);
     WEngine::Model modelHandle = ctx.loadedModels.size();
