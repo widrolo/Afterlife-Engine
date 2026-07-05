@@ -11,7 +11,7 @@
 #include <chrono>
 #include <Engine/gl/gltf/tiny_gltf_v3.h>
 #include <yaml-cpp/yaml.h>
-#include <tinyxml2/tinyxml2.h>
+#include <tinyxml2.h>
 
 #include "Engine/imgui/imgui.h"
 #include <shaderc/shaderc.hpp>

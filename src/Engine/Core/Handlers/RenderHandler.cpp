@@ -6,7 +6,7 @@
 #include <Engine/Components/Rendering/CameraComponent.h>
 #include <Engine/Core/Handlers/AssetRepo.h>
 
-#include <gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <Engine/imgui/imgui.h>
 #include <Engine/imgui/implot.h>

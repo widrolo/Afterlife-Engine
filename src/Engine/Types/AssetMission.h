@@ -3,7 +3,7 @@
 #include <string>
 #include <Engine/Types/CommonTypes.h>
 #include <yaml-cpp/yaml.h>
-#include <tinyxml2/tinyxml2.h>
+#include <tinyxml2.h>
 #include <Engine/Types/Audio.h>
 
 #include "Rendering/ModelInfo.h"

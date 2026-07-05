@@ -5,10 +5,6 @@
 #include <Engine/Types/Physics/OverlapResult.h>
 #include <Engine/Types/Nullable.h>
 
-#include <Jolt/Jolt.h>
-#include "Jolt/Physics/PhysicsSystem.h"
-#include <Engine/Core/Physics/JoltImpl.h>
-
 
 namespace WEngine
 {
@@ -40,8 +36,6 @@ namespace WEngine
 		void Visualize();
 
 	private:
-		JPH::PhysicsSystem m_physicsSystem;
-		BPLayerInterfaceImpl m_layerInterface;
 	};
 }
 

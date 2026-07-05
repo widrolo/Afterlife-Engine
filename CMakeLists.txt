@@ -6,12 +6,9 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Packaging" CACHE STRING "" FORCE)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-set(SDL_PATH        "${CMAKE_SOURCE_DIR}/libs/SDL3-3.2.24")
+set(SDL_SHARED OFF)
+
 set(STEAMWORKS_PATH "${CMAKE_SOURCE_DIR}/libs/Steamworks-SDK")
-set(CURL_PATH       "${CMAKE_SOURCE_DIR}/libs/curl-8.13.0")
-set(YAMLCPP_PATH    "${CMAKE_SOURCE_DIR}/libs/yaml-cpp-0.8.0")
-set(GLM_PATH        "${CMAKE_SOURCE_DIR}/libs/glm-1.0.1")
-set(TINYXML2_PATH   "${CMAKE_SOURCE_DIR}/libs/tinyxml2-11.0.0")
 
 # thank god for CLion
 add_executable(Widrolo_Engine_3D
@@ -307,8 +304,6 @@ add_executable(Widrolo_Engine_3D
         src/Game/Types/GameSystems.h
         src/Engine/Core/System/Vulkan/VulkanCommands.cpp
         src/Engine/Core/System/Vulkan/VulkanCommands.h
-        src/Engine/Core/Physics/JoltImpl.cpp
-        src/Engine/Core/Physics/JoltImpl.h
         src/Engine/Types/Rendering/LightingInfo.h
         src/Engine/Core/Handlers/TimeHandler.cpp
         src/Engine/Core/Handlers/TimeHandler.h
@@ -326,15 +321,41 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Core/System/Vulkan/VulkanRaytracing.h
 )
 
-set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+        VulkanMemoryAllocator
+        GIT_REPOSITORY "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git"
+        GIT_TAG "v3.4.0"
+)
 
 FetchContent_Declare(
-        JoltPhysics
-        GIT_REPOSITORY "https://github.com/jrouwe/JoltPhysics"
-        GIT_TAG "v5.5.0"
-        SOURCE_SUBDIR "Build"
+        SDL
+        GIT_REPOSITORY "https://github.com/libsdl-org/SDL"
+        GIT_TAG "release-3.4.12"
 )
-FetchContent_MakeAvailable(JoltPhysics)
+
+FetchContent_Declare(
+        Yaml
+        GIT_REPOSITORY "https://github.com/jbeder/yaml-cpp"
+        GIT_TAG "yaml-cpp-0.9.0"
+)
+
+FetchContent_Declare(
+        Tinyxml
+        GIT_REPOSITORY "https://github.com/leethomason/tinyxml2"
+        GIT_TAG "11.0.0"
+)
+
+FetchContent_Declare(
+        glm
+        GIT_REPOSITORY	"https://github.com/g-truc/glm.git"
+        GIT_TAG "1.0.3"
+)
+
+FetchContent_MakeAvailable(glm)
+FetchContent_MakeAvailable(SDL)
+FetchContent_MakeAvailable(Tinyxml)
+FetchContent_MakeAvailable(Yaml)
+FetchContent_MakeAvailable(VulkanMemoryAllocator)
 
 set_target_properties(Widrolo_Engine_3D PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin/${CMAKE_SYSTEM_NAME}-x64"
@@ -344,12 +365,7 @@ set_target_properties(Widrolo_Engine_3D PROPERTIES
 
 target_include_directories(Widrolo_Engine_3D PRIVATE
         src
-        ${SDL_PATH}/include
         ${STEAMWORKS_PATH}/include
-        ${CURL_PATH}/include
-        ${YAMLCPP_PATH}/include
-        ${GLM_PATH}/include
-        ${TINYXML2_PATH}/include
         src/Engine/gl/include # glad
 )
 
@@ -360,68 +376,39 @@ target_compile_definitions(Widrolo_Engine_3D PRIVATE
         TINYGLTF3_ENABLE_FS
 )
 
-#add_compile_options(-fsized-deallocation)
-
-if(MSVC)
-    target_compile_options(Widrolo_Engine_3D PRIVATE /MP /wd4005)
-endif()
-
-# hard coded for now, sorry...
 find_package(Vulkan REQUIRED COMPONENTS shaderc_combined)
 
-FetchContent_Declare(
-        VulkanMemoryAllocator
-        GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
-        GIT_TAG v3.4.0
-)
-FetchContent_MakeAvailable(VulkanMemoryAllocator)
-
 target_link_libraries(Widrolo_Engine_3D PRIVATE
+        glm::glm
+        tinyxml2::tinyxml2
+        yaml-cpp::yaml-cpp
+        SDL3::SDL3-static
         Vulkan::Vulkan
         Vulkan::shaderc_combined
         GPUOpen::VulkanMemoryAllocator
-        Jolt
 )
-
-target_include_directories(Widrolo_Engine_3D PUBLIC ${JoltPhysics_SOURCE_DIR}/..)
 
 if(WIN32)
     message(STATUS Detected Windows)
+    set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "" FORCE)
+    set(CMAKE_CXX_FLAGS_PACKAGING "/O2 /DNDEBUG" CACHE STRING "" FORCE)
     target_compile_definitions(Widrolo_Engine_3D PRIVATE WE_Windows)
+    target_compile_options(Widrolo_Engine_3D PRIVATE /MP /wd4005)
 
     target_link_libraries(Widrolo_Engine_3D PRIVATE
             ${STEAMWORKS_PATH}/lib/steam_api64.lib
-            ${SDL_PATH}/lib/SDL3.lib
-            #${CURL_PATH}/lib/libcurl.lib
     )
 
-    target_link_libraries(Widrolo_Engine_3D PRIVATE
-            $<$<CONFIG:Debug>:${YAMLCPP_PATH}/lib/yaml-cppd.lib>
-            $<$<CONFIG:Release>:${YAMLCPP_PATH}/lib/yaml-cpp.lib>
-            $<$<CONFIG:Packaging>:${YAMLCPP_PATH}/lib/yaml-cpp.lib>
-            $<$<CONFIG:Debug>:${TINYXML2_PATH}/lib/tinyxml2d.lib>
-            $<$<CONFIG:Release>:${TINYXML2_PATH}/lib/tinyxml2.lib>
-            $<$<CONFIG:Packaging>:${TINYXML2_PATH}/lib/tinyxml2.lib>
-    )
-
-    # Config-specific link rules
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Widrolo_Engine_3D)
 
 else() # really should be elseif(linux), but it doesnt work...
     message(STATUS Detected Linux)
     target_compile_definitions(Widrolo_Engine_3D PRIVATE WE_Linux)
     target_link_libraries(Widrolo_Engine_3D PRIVATE
-            ${SDL_PATH}/lib/libSDL3.a
-            #${CURL_PATH}/lib/libcurl.a
-            ${YAMLCPP_PATH}/lib/libyaml-cpp.a
-            ${TINYXML2_PATH}/lib/libtinyxml2.a
             #${STEAMWORKS_PATH}/lib/libsteam_api.so
-            GL
             dl
             pthread
-            #vulkan
             TracyClient
-            Jolt
     )
 endif()
 
@@ -446,7 +433,3 @@ set_target_properties(Widrolo_Engine_3D PROPERTIES
 
 set(CMAKE_CXX_FLAGS_PACKAGING "-O3 -DNDEBUG" CACHE STRING "" FORCE)
 set(CMAKE_C_FLAGS_PACKAGING "-O3 -DNDEBUG" CACHE STRING "" FORCE)
-
-if(MSVC)
-    set(CMAKE_CXX_FLAGS_PACKAGING "/O2 /DNDEBUG" CACHE STRING "" FORCE)
-endif()
