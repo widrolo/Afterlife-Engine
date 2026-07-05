@@ -18,11 +18,11 @@ bool ParseVkResult(VkResult result)
 
     switch (GPUSettingsVulkan::invalidResultAction)
     {
-        case GPUSettingsVulkan::InvalidResultAction::LetGo:
+        case InvalidResultAction::LetGo:
             return false;
-        case GPUSettingsVulkan::InvalidResultAction::Stall:
+        case InvalidResultAction::Stall:
             while (true);
-        case GPUSettingsVulkan::InvalidResultAction::Abort:
+        case InvalidResultAction::Abort:
             abort();
         default:
             return false;
@@ -62,11 +62,11 @@ VkBool32 ValidationCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeveri
     {
         switch (GPUSettingsVulkan::validationErrorAction)
         {
-            case GPUSettingsVulkan::InvalidResultAction::LetGo:
+            case InvalidResultAction::LetGo:
                 return VK_FALSE;
-            case GPUSettingsVulkan::InvalidResultAction::Stall:
+            case InvalidResultAction::Stall:
                 while (true);
-            case GPUSettingsVulkan::InvalidResultAction::Abort:
+            case InvalidResultAction::Abort:
                 abort();
             default:
                 return VK_FALSE;
@@ -74,6 +74,21 @@ VkBool32 ValidationCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeveri
     }
 
     return VK_FALSE;
+}
+
+void PerformInvalidHandleAction()
+{
+    switch (GPUSettings::invalidHandleAction)
+    {
+        case InvalidResultAction::LetGo:
+            return;
+        case InvalidResultAction::Stall:
+            while (true);
+        case InvalidResultAction::Abort:
+            abort();
+        default:
+            return;
+    }
 }
 
 uint64 CalcTextureSize(uint8 bytesPerPixel, uint32 width, uint32 height)
@@ -209,6 +224,50 @@ VkImageLayout& GetFbLayout(const VulkanContext &ctx, Vulkan_RenderTarget &rt)
 Vulkan_StatBuf& GetStatBuf(VulkanContext &ctx, WEngine::StatBufKey key)
 {
     return ctx.statBuffers[key - 1];
+}
+
+Vulkan_Material& GetLoadedMaterial(VulkanContext &ctx, WEngine::Material material)
+{
+    if (material == 0 || material > ctx.loadedMaterials.size())
+    {
+        WEngine::WLog::SetConsoleWarning();
+        WEngine::WLog::ConsoleLog("Tried to get a material with invalid handle!");
+        PerformInvalidHandleAction();
+    }
+    return ctx.loadedMaterials[material - 1];
+}
+
+Vulkan_Shader& GetLoadedShader(VulkanContext &ctx, WEngine::Shader shader)
+{
+    if (shader == 0 || shader > ctx.loadedShaders.size())
+    {
+        WEngine::WLog::SetConsoleWarning();
+        WEngine::WLog::ConsoleLog("Tried to get a shader with invalid handle!");
+        PerformInvalidHandleAction();
+    }
+    return ctx.loadedShaders[shader - 1];
+}
+
+Vulkan_Model& GetLoadedModel(VulkanContext &ctx, WEngine::Model model)
+{
+    if (model == 0 || model > ctx.loadedModels.size())
+    {
+        WEngine::WLog::SetConsoleWarning();
+        WEngine::WLog::ConsoleLog("Tried to get a model with invalid handle!");
+        PerformInvalidHandleAction();
+    }
+    return ctx.loadedModels[model - 1];
+}
+
+Vulkan_RenderTarget& GetLoadedRenderTarget(VulkanContext &ctx, WEngine::Framebuffer fb)
+{
+    if (fb == 0 || fb > ctx.renderTargets.size())
+    {
+        WEngine::WLog::SetConsoleWarning();
+        WEngine::WLog::ConsoleLog("Tried to get a framebuffer with invalid handle!");
+        PerformInvalidHandleAction();
+    }
+    return ctx.renderTargets[fb - 1];
 }
 
 void PopulatePushConstants(const VulkanContext &ctx, const Vulkan_Shader &shader, const WEngine::Mat4x4 &mvp)

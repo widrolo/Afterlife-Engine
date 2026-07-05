@@ -21,6 +21,8 @@ Sunlight is implemented, and reacts to the in game time. The Skybox also reacts 
 
 In addition to that, the engine supports a very customizable shader/material pipeline, with game size optimization already built in.
 
+The engine performs aggressive instance count optimization with respect to sectors. A whole custom memory bookkeeping system makes sure that instancing remains fast.
+
 #### Sectors/Entities/Components
 
 _Note:_ This system will change dramatically over the coming months.
@@ -68,7 +70,7 @@ The following features are currently on high priority and target to be implement
 - [ ] Custom Mesh File Format
 
 #### Gameplay related
-- [ ] Jolt Physics
+- [ ] Box3D Physics
 - [ ] Behaviour Trees
 
 #### Audio

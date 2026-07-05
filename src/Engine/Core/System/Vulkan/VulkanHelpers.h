@@ -4,11 +4,14 @@
 
 #include <vulkan/vulkan.h>
 #include "VulkanContext.h"
+#include "Engine/Core/System/GPUSettings.h"
+#include "Engine/Types/Rendering/GPU/Framebuffer.h"
 #include "Engine/Types/Rendering/GPU/StatBufKey.h"
 
 bool ParseVkResult(VkResult result);
 VkBool32 ValidationCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes,
     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void*);
+void PerformInvalidHandleAction();
 uint64 CalcTextureSize(uint8 bytesPerPixel, uint32 width, uint32 height);
 uint64 CalcModelSize(uint8 bytesPerVertex, uint32 vertexCount);
 VkFormat FindBestDepthFormat(const VulkanContext& ctx);
@@ -29,6 +32,10 @@ VkImageLayout& GetFbLayout(const VulkanContext& ctx);
 VkImageLayout& GetFbLayout(const VulkanContext& ctx, Vulkan_RenderTarget& rt);
 
 Vulkan_StatBuf& GetStatBuf(VulkanContext &ctx, WEngine::StatBufKey key);
+Vulkan_Material& GetLoadedMaterial(VulkanContext& ctx, WEngine::Material material);
+Vulkan_Shader& GetLoadedShader(VulkanContext& ctx, WEngine::Shader shader);
+Vulkan_Model& GetLoadedModel(VulkanContext& ctx, WEngine::Model model);
+Vulkan_RenderTarget& GetLoadedRenderTarget(VulkanContext& ctx, WEngine::Framebuffer fb);
 
 void PopulatePushConstants(const VulkanContext& ctx, const Vulkan_Shader& shader, const WEngine::Mat4x4& mvp);
 

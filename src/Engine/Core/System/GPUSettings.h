@@ -1,10 +1,19 @@
 #pragma once
 #include "Engine/Types/CommonTypes.h"
 
+enum class InvalidResultAction
+{
+    LetGo,
+    Stall,
+    Abort
+};
+
 struct GPUSettings
 {
     _GLOBAL_CEX_ uint64 stationaryInstBufferSize = 64 * KB;
     _GLOBAL_CEX_ uint64 maxStationaryInstBuffers = 512;
+
+    _GLOBAL_CEX_ InvalidResultAction invalidHandleAction = InvalidResultAction::Abort;
 };
 
 struct GPUSettingsOpenGL
@@ -14,12 +23,6 @@ struct GPUSettingsOpenGL
 
 struct GPUSettingsVulkan
 {
-    enum class InvalidResultAction
-    {
-        LetGo,
-        Stall,
-        Abort
-    };
     _GLOBAL_CEX_ bool useWAllocator = true;
 #ifdef DEBUG
     _GLOBAL_CEX_ bool enableValidation = true;

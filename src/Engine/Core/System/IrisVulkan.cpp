@@ -120,13 +120,11 @@ void Iris::SETTING_BeginNewPreFrame()
     BeginTextureUpload(ctx);
 }
 
-
 void Iris::SETTING_BeginNewFrame()
 {
     UploadTextures(ctx);
 
     ctx.currentRenderTarget = &ctx.displayTarget;
-
 
     vkWaitForFences(ctx.vcore.gpuDevice, 1, &GetFbEndOfFrameFence(ctx), VK_TRUE, UINT64_MAX);
 
@@ -177,7 +175,7 @@ WEngine::Nullable<WEngine::ShaderDefinition> Iris::GetShaderDef(const std::strin
     }
 
     WEngine::Shader shHandle = ctx.loadedShadersHandles[shaderName];
-    Vulkan_Shader shader = ctx.loadedShaders[shHandle - 1];
+    Vulkan_Shader shader = GetLoadedShader(ctx, shHandle);
     return WEngine::Nullable<WEngine::ShaderDefinition>(shader.shaderDefinition);
 }
 
@@ -199,7 +197,7 @@ WEngine::Nullable<WEngine::Shader> Iris::GetShader(WEngine::Material matQuery)
 {
     if (ctx.loadedMaterials.size() < matQuery)
         return {};
-    Vulkan_Material mat = ctx.loadedMaterials[matQuery - 1];
+    Vulkan_Material mat = GetLoadedMaterial(ctx, matQuery);
     return mat.materialShaderHandle;
 }
 
@@ -343,8 +341,10 @@ void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, 
         return;
     }
 
-    Vulkan_Material vkMat = ctx.loadedMaterials[material - 1];
-    Vulkan_Shader vkShader = ctx.loadedShaders[vkMat.materialShaderHandle - 1];
+    Vulkan_Material& vkMat = GetLoadedMaterial(ctx, material);
+    Vulkan_Shader& vkShader = GetLoadedShader(ctx, vkMat.materialShaderHandle);
+    Vulkan_Model& vkModel = GetLoadedModel(ctx, model);
+
     if (ctx.currentBoundShader != vkMat.materialShaderHandle)
     {
         vkCmdBindPipeline(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
@@ -354,7 +354,6 @@ void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, 
     vkCmdBindDescriptorSets(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout,
         0, 1, &ctx.lighting.descriptorSet, 0, nullptr);
 
-    Vulkan_Model vkModel = ctx.loadedModels[model - 1];
     VkDeviceSize offset = 0;
     if (vkMat.hasTextures)
         vkCmdBindDescriptorSets(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout,
@@ -378,15 +377,15 @@ void Iris::DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material m
         return;
     }
 
-    Vulkan_Material vkMat = ctx.loadedMaterials[material - 1];
-    Vulkan_Shader vkShader = ctx.loadedShaders[vkMat.materialShaderHandle - 1];
+    Vulkan_Material& vkMat = GetLoadedMaterial(ctx, material);
+    Vulkan_Shader& vkShader = GetLoadedShader(ctx, vkMat.materialShaderHandle);
+    Vulkan_Model& vkModel = GetLoadedModel(ctx, model);
+
     if (ctx.currentBoundShader != vkMat.materialShaderHandle)
     {
         vkCmdBindPipeline(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
         ctx.currentBoundShader = vkMat.materialShaderHandle;
     }
-
-    Vulkan_Model& vkModel = ctx.loadedModels[model - 1];
 
     if (instanceMats.size() + vkModel.activeInstances > vkModel.instanceBufferSize)
         ExpandInstanceBuffer(ctx, stats, vkModel, instanceMats.size() + vkModel.activeInstances);
@@ -430,8 +429,10 @@ void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, 
     if (alloc.first == 0 && alloc.second == 0)
         return;
 
-    Vulkan_Material& vkMat = ctx.loadedMaterials[material - 1];
-    Vulkan_Shader& vkShader = ctx.loadedShaders[vkMat.materialShaderHandle - 1];
+    Vulkan_Material& vkMat = GetLoadedMaterial(ctx, material);
+    Vulkan_Shader& vkShader = GetLoadedShader(ctx, vkMat.materialShaderHandle);
+    Vulkan_Model& vkModel = GetLoadedModel(ctx, model);
+
     if (ctx.currentBoundShader != vkMat.materialShaderHandle)
     {
         vkCmdBindPipeline(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
@@ -440,8 +441,6 @@ void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, 
 
     vkCmdBindDescriptorSets(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout,
         0, 1, &ctx.lighting.descriptorSet, 0, nullptr);
-
-    Vulkan_Model& vkModel = ctx.loadedModels[model - 1];
 
     uint64 count = alloc.second / sizeof(WEngine::InstanceData);
 
@@ -467,8 +466,8 @@ void Iris::DRAWCALL_DrawPostProcess(WEngine::Shader ppShader, WEngine::Framebuff
         return;
     }
 
-    Vulkan_Shader& vkShader = ctx.loadedShaders[ppShader - 1];
-    Vulkan_RenderTarget& vkFb = ctx.renderTargets[sampleFrameBuffer - 1];
+    Vulkan_Shader& vkShader = GetLoadedShader(ctx, ppShader);
+    Vulkan_RenderTarget& vkFb = GetLoadedRenderTarget(ctx, sampleFrameBuffer);
 
     // never gonna happen anyway due to the nature of post processing.
     if (ctx.currentBoundShader != ppShader)
