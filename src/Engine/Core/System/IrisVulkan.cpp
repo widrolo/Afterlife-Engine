@@ -682,34 +682,6 @@ void Iris::SETTING_PrepareFramebufferForSampling(WEngine::Framebuffer framebuffe
     GetFbLayout(ctx, vkFb) = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 }
 
-void Iris::SETTING_PrepareFramebufferForRendering(WEngine::Framebuffer framebuffer)
-{
-    Vulkan_RenderTarget& vkFb = ctx.renderTargets[framebuffer - 1];
-
-    VkImageMemoryBarrier barrier{};
-    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    barrier.oldLayout = GetFbLayout(ctx, vkFb);
-    barrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.image = GetFbImage(ctx, vkFb);
-    barrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-    barrier.srcAccessMask = 0;
-    barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-    vkCmdPipelineBarrier(
-        GetFbCmdBuff(ctx),
-        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-        0,
-        0, nullptr,
-        0, nullptr,
-        1, &barrier
-    );
-
-    GetFbLayout(ctx, vkFb) = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-}
-
 uint64 Iris::GetVramUsage()
 {
     return stats.vramUsage;
@@ -745,7 +717,7 @@ WEngine::Nullable<ImTextureID> Iris::FramebufferToImGui(WEngine::Framebuffer fra
 }
 
 void Iris::AddStationaryObjects(WEngine::StatBufKey key, WEngine::Model model, WEngine::Material material,
-    wtl::vector<WEngine::InstanceData> instanceMats)
+    const wtl::vector<WEngine::InstanceData>& instanceMats)
 {
     auto oldAlloc = GetStatBuf(ctx, key).statBookkeep.FindNode(model, material);
 
@@ -783,10 +755,6 @@ void Iris::AddStationaryObjects(WEngine::StatBufKey key, WEngine::Model model, W
     vmaUnmapMemory(ctx.vcore.vmaAllocator, GetStatBuf(ctx, key).statAllocation);
 }
 
-void Iris::ALLOC_AddModelEntryToBVH(WEngine::Model model)
-{
-}
-
 void Iris::SETTING_AddModelInstanceToBVH(WEngine::Model model, const WEngine::InstanceData& instance)
 {
 
@@ -811,6 +779,7 @@ void Iris::AssetIrisCommunication(WEngine::AssetIrisCommunication &mission)
 
             break;
         case WEngine::AssetIrisCommunicationType::UnloadTexture:
+            // TODO.
             break;
     }
 }
