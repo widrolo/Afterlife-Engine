@@ -35,7 +35,7 @@ public:
     static void CreateNewProcess(const std::string& executable, const wtl::vector<std::string>& arguments);
 
     /**
-     *
+     * Finds all files within a given directory.
      * @param dir The directory to be scanned.
      * @return A collection of path names.
      * @note This is not recursive.

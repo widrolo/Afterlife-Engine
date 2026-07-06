@@ -1,5 +1,7 @@
 #pragma once
 
+// This file does not contain LLM generated documentation
+
 #include <SDL3/SDL.h>
 #include <cstring>
 #include <algorithm>
@@ -13,14 +15,11 @@
 namespace WEngine
 {
 	/**
-	 * The InputHandler class is responsible for handling input events from various devices such as the keyboard, mouse, gamepads, and steering wheels.
+	 * This handler is responsible for reading all available input each frame and making it available to the programmer in a nice interface.
 	 */
 	class InputHandler
 	{
 	public:
-		/**
-		 * Constructs an instance of the InputHandler class. Initializes the key states and opens joysticks if any are connected.
-		 */
 		InputHandler();
 	private:
 		SDL_Event* m_inputEvent = new SDL_Event;
@@ -36,134 +35,157 @@ namespace WEngine
 		SDL_Window* m_window;
 
 	public:
-		void SetWindow(SDL_Window* window);
 		/**
-		 * Fetches input from keyboard, mouse, controller, and steering wheel.
-		 * Also checks for newly connected or disconnected peripherals.
+		 * Sets the primary window for catching input.
+		 * @param window The window from which the handler will read input.
+		 */
+		void SetWindow(SDL_Window* window);
+
+		/**
+		 * Fetches all input.
+		 * @warning This should be called by the game loop only.
 		 */
 		void FetchInput();
+
 		/**
-		 * Checks if a specific key has been pressed in the current frame.
-		 * @param key The key to check.
-		 * @return True if the key was just pressed, false otherwise.
+		 * Checks if a key was newly pressed this frame.
+		 * @param key The key to be queried for a press.
+		 * @return True if the key was pressed this frame.
 		 */
 		[[nodiscard]] bool GetKeyPressed(WKey key) const;
+
 		/**
-		 * Checks if a specific key has been pressed.
-		 * @param key The key to check.
-		 * @return True if the key is held down, false otherwise.
-		 * @note This is not mutually Exclusive with GetKeyPressed; if a key is being pressed on the first frame, then
-		 * this function will also report as true.
+		 * Checks if a key is being pressed down.
+		 * @param key The key to be queried for a press.
+		 * @return True if the key is currently in a pressed state.
 		 */
 		[[nodiscard]] bool GetKeyHold(WKey key) const;
+
 		/**
-		 * Checks if a keyboard key was released in this frame.
-		 * @param key The key to check.
-		 * @return True if the key was released, false otherwise.
+		 * Checks if a key has just been released this frame.
+		 * @param key The key to be queried for a press.
+		 * @return True if the key was just released this frame.
 		 */
 		[[nodiscard]] bool GetKeyReleased(WKey key) const;
+
 		/**
-		 * Retrieves the current mouse position as a Vector2.
-		 * @return The current mouse position.
+		 * Gets the position of the mouse in pixels.
+		 * @return Pixel position of the mouse.
 		 */
 		[[nodiscard]] Vector2 GetMousePos() const;
-		void SetMouseRelativeMode(bool mode);
+
 		/**
-		 * Set the position of the mouse cursor to a specific pixel.
-		 * @return The current mouse position.
+		 * Basically, it captures the mouse withing the window.
+		 * @param mode Enabled if true.
+		 */
+		void SetMouseRelativeMode(bool mode);
+
+		/**
+		 * Set the position of the mouse to a specific pixel.
+		 * @param pos Pixel position of the mouse.
 		 */
 		void SetMousePos(const Vector2& pos);
+
 		/**
-		 * Checks if a specific mouse button is pressed during this frame and was not pressed in the previous frame.
-		 * @param button The mouse button to check for a press event.
-		 * @return True if the button is pressed, false otherwise.
+		 * Checks if a mouse button was newly pressed this frame.
+		 * @param button The mouse button to be queried for a press.
+		 * @return True if the mouse button was pressed this frame.
 		 */
 		[[nodiscard]] bool GetMousePressed(WMouseBtn button) const;
+
 		/**
-		 * Checks if a specific mouse button is pressed.
-		 * @param button The mouse button to check for a hold event.
-		 * @return True if the specified mouse button is being held down, false otherwise.
+		 * Checks if a mouse button is being pressed down.
+		 * @param button The mouse button to be queried for a press.
+		 * @return True if the mouse button is currently in a pressed state.
 		 */
 		[[nodiscard]] bool GetMouseHold(WMouseBtn button) const;
+
 		/**
-		 * Checks if a specified mouse button has been released since the last input update.
-		 * @param button The mouse button to check for release.
-		 * @return True if the specified mouse button was released, false otherwise.
-		 * @note This is not mutually Exclusive with GetMousePressed; if a button is being pressed on the first frame,
-		 * then this function will also report as true.
+		 * Checks if a mouse button has just been released this frame.
+		 * @param button The mouse button to be queried for a press.
+		 * @return True if the mouse button was just released this frame.
 		 */
 		[[nodiscard]] bool GetMouseReleased(WMouseBtn button) const;
+
 		/**
-		 * Fetches the current position of the left stick on a controller.
-		 * @param controller The controller object from which to get the left stick position.
-		 * @return A Vector2 representing the current position of the left stick.
+		 * Gets the position of the left joystick.
+		 * @param controller Controller to be queried.
+		 * @return Left joystick position.
 		 */
 		[[nodiscard]] Vector2 GetLeftStick(const Controller &controller) const;
+
 		/**
-		 * Retrieves the current position of a controller's right stick.
-		 * @param controller The gamepad from which to retrieve the right stick position.
-		 * @return A Vector2 representing the current position of the right stick on the given gamepad.
+		 * Gets the position of the right joystick.
+		 * @param controller Controller to be queried.
+		 * @return Right joystick position.
 		 */
 		[[nodiscard]] Vector2 GetRightStick(const Controller &controller) const;
+
 		/**
-		 * Retrieves the current pressure value of the left trigger on a specified controller.
-		 * @param controller The input controller to check for left trigger input.
-		 * @return A float representing the current pressure value of the left trigger, ranging from 0.0f to 1.0f.
+		 * Gets how far the left trigger is pressed down.
+		 * @param controller Controller to be queried.
+		 * @return Depth of the left trigger.
 		 */
 		[[nodiscard]] float GetLeftTrigger(const Controller &controller) const;
+
 		/**
-		 * Retrieves the current pressure value of the right trigger on a specified controller.
-		 * @param controller The input controller to check for right trigger input.
-		 * @return A float representing the current pressure value of the right trigger, ranging from 0.0f to 1.0f.
+		 * Gets how far the right trigger is pressed down.
+		 * @param controller Controller to be queried.
+		 * @return Depth of the right trigger.
 		 */
 		[[nodiscard]] float GetRightTrigger(const Controller &controller) const;
+
 		/**
-		 * @deprecated based on the old version, this will soon be replaced.
+		 * @deprecated
 		 */
 		[[deprecated]][[nodiscard]] Touchpad GetTouchPad() const;
+
 		/**
-		 * Checks whether a controller is currently connected.
+		 * Checks whether a controller is connected.
 		 * @return True if a controller is connected.
 		 */
 		[[nodiscard]] bool GetControllerPresent() const;
+
 		/**
-		 * Checks whether a button was pressed this frame.
-		 * @param buttonMap Button map of the controller to be checked.
-		 * @param button Button to be compared against.
-		 * @return True if the button on the controller was pressed.
+		 * Checks if a mouse button was newly pressed this frame.
+		 * @param buttonMap Button map of the controller to be queried.
+		 * @param button The gamepad button to be queried for a press.
+		 * @return True if the mouse button was pressed this frame.
 		 */
 		[[nodiscard]] bool GetGamepadPressed(InputPeripheralButtons buttonMap, WPadBtn button) const;
+
 		/**
-		 * Checks whether a button was pressed.
-		 * @param buttonMap Button map of the controller to be checked.
-		 * @param button Button to be compared against.
-		 * @return True if the button on the controller was pressed.
+		 * Checks if a gamepad button is being pressed down.
+		 * @param buttonMap Button map of the controller to be queried.
+		 * @param button The gamepad button to be queried for a press.
+		 * @return True if the gamepad button is currently in a pressed state.
 		 */
 		[[nodiscard]] bool GetGamepadHold(InputPeripheralButtons buttonMap, WPadBtn button) const;
+
 		/**
-		 * Checks whether a button was released this frame.
-		 * @param buttonMap Button map of the controller to be checked.
-		 * @param button Button to be compared against.
-		 * @return True if the button on the controller was pressed.
-		 * @note This is not mutually Exclusive with GetGamepadPressed; if a button is being pressed on the first frame,
-		 * then this function will also report as true.
+		 * Checks if a gamepad button has just been released this frame.
+		 * @param buttonMap Button map of the controller to be queried.
+		 * @param button The gamepad button to be queried for a press.
+		 * @return True if the gamepad button was just released this frame.
 		 */
 		[[nodiscard]] bool GetGamepadReleased(InputPeripheralButtons buttonMap, WPadBtn button) const;
+
 		/**
-		 * Retrieves an input peripheral based on an ID.
-		 * @param id ID of the input peripheral.
-		 * @return A constant reference to the peripheral, or a juicy SIGSEGV.
-		 * @note I was not joking about the SIGSEGV thing.
+		 * Gets an input peripheral from the repository.
+		 * @param id ID of a connected peripheral to be retrieved.
+		 * @return The retrieved input peripheral.
 		 */
 		[[nodiscard]] const InputPeripheral& GetInputPeripheral(uint8 id) const;
+
 		/**
-		 * @return The number of connected peripherals.
+		 * Gets the number of connected peripherals.
+		 * @return Number of connected peripherals.
 		 */
 		[[nodiscard]] uint8 GetInputPeripheralCount() const;
 
 		/**
-		 * Checks whether the input peripheral is still present based on the SDL JoyID
-		 * @param joyID The known JoyID of the peripheral.
+		 * Checks whether a peripheral is still connected.
+		 * @param joyID ID of the peripheral.
 		 * @return True if It's still connected.
 		 */
 		[[nodiscard]] bool IsInputPeripheralStillPresent(const SDL_JoystickID* joyID) const;
