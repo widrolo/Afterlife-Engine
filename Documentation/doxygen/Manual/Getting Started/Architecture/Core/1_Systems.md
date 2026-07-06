@@ -2,11 +2,11 @@
 
 # Systems Abstractions
 
-The core idea of the Systems Abstractions layer is basically to assure that the entire engine and subsequently the game looks and works identically across all platforms. 
+The core idea of the Systems Abstractions layer is basically to ensure that the entire engine and subsequently the game looks and works identically across all platforms.
 
-The method we use is to create a class with static members and no state. The class shall not take or return arbuments of a system specific class. For example, Iris will never return a VkImage object, but rather a handle that internally points to a VkImage.
+The method we use is to create a class with static members and no state. The class shall not take or return arguments from a system-specific class. For example, Iris will never return a VkImage object, but rather a handle that internally points to a VkImage.
 
-The implementation is defined in their own translation units with a ifdef guard that enables the translation units if the system is selected for compilation, and disables if another system is selected.
+The implementation is defined in its own translation units with an ifdef guard that enables the translation units if the system is selected for compilation, and disables if another system is selected.
 
 Taking a look at a simplified Iris for a quick example, the base class would look like this:
 
@@ -64,4 +64,4 @@ void Iris::DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, 
 
 ``` 
 
-Note that the all Vulkan related state is contained within VulkanContext, which itself is a global variable conatained in the translation unit.
+Note that all the Vulkan related state is contained within VulkanContext, which itself is a global variable contained in the translation unit.
