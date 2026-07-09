@@ -117,7 +117,7 @@ struct Vulkan_Model
 
 struct Vulkan_StatBuf
 {
-    InstThreadedList statBookkeep;
+    InstThreadedList* statBookkeep;
     VkBuffer statBuffer;
     VmaAllocation statAllocation;
     bool available;

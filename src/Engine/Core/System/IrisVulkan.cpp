@@ -425,7 +425,7 @@ void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, 
         return;
     }
 
-    auto alloc = GetStatBuf(ctx, sectorKey).statBookkeep.FindNode(model, material);
+    auto alloc = GetStatBuf(ctx, sectorKey).statBookkeep->FindNode(model, material);
     if (alloc.first == 0 && alloc.second == 0)
         return;
 
@@ -719,10 +719,10 @@ WEngine::Nullable<ImTextureID> Iris::FramebufferToImGui(WEngine::Framebuffer fra
 void Iris::AddStationaryObjects(WEngine::StatBufKey key, WEngine::Model model, WEngine::Material material,
     const wtl::vector<WEngine::InstanceData>& instanceMats)
 {
-    auto oldAlloc = GetStatBuf(ctx, key).statBookkeep.FindNode(model, material);
+    auto oldAlloc = GetStatBuf(ctx, key).statBookkeep->FindNode(model, material);
 
     uint64 size = instanceMats.size() * sizeof(WEngine::InstanceData);
-    auto newAlloc = GetStatBuf(ctx, key).statBookkeep.InsertData(model, material, size);
+    auto newAlloc = GetStatBuf(ctx, key).statBookkeep->InsertData(model, material, size);
 
     uint64 trueOffset = newAlloc.first / sizeof(WEngine::InstanceData);
 

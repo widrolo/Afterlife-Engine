@@ -23,6 +23,7 @@ bool SetupStationaryInstanceBuffers(VulkanContext &ctx, VulkanStatistics &stat)
         statBuffer.available = true;
         statBuffer.statBuffer = buf.first;
         statBuffer.statAllocation = buf.second;
+        statBuffer.statBookkeep = WAllocator::Construct<InstThreadedList>();
         ctx.statBuffers[i] = statBuffer;
     }
 
