@@ -38,6 +38,8 @@ Vulkan_Shader& GetLoadedShader(VulkanContext& ctx, WEngine::Shader shader);
 Vulkan_Model& GetLoadedModel(VulkanContext& ctx, WEngine::Model model);
 Vulkan_RenderTarget& GetLoadedRenderTarget(VulkanContext& ctx, WEngine::Framebuffer fb);
 
+bool AddExtensionIfAvailable(VulkanContext& ctx, wtl::vector<const char*>& destination, std::string extensionName);
+
 void PopulatePushConstants(const VulkanContext& ctx, const Vulkan_Shader& shader, const WEngine::Mat4x4& mvp);
 
 #endif

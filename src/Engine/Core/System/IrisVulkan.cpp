@@ -257,7 +257,7 @@ WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::ModelIn
 
     vkModel.instanceBufferSize = GPUSettingsVulkan::maxInstanceBufferSize;
 
-    if (addToBVH)
+    if (addToBVH && ctx.rtSupported)
         AddModelToBLAS(ctx, stats, vkModel);
 
     ctx.loadedModels.push_back(vkModel);

@@ -391,3 +391,5 @@ build/
 Documentation/doxygen/Output/
 keys/
 /packedBuild.zip
+pack/
+/pack.7z

@@ -11,6 +11,9 @@ void WEngine_vkGetAccelerationStructureBuildSizesKHR(VulkanContext& ctx,
     VkAccelerationStructureBuildTypeKHR buildType,const VkAccelerationStructureBuildGeometryInfoKHR *pBuildInfo,
     const uint32_t *pMaxPrimitiveCounts,VkAccelerationStructureBuildSizesInfoKHR *pSizeInfo)
 {
+    if (!ctx.rtSupported)
+        return;
+
     static auto vkGetAccelerationStructureBuildSizesKHR = (PFN_vkGetAccelerationStructureBuildSizesKHR)vkGetDeviceProcAddr(
         ctx.vcore.gpuDevice, "vkGetAccelerationStructureBuildSizesKHR");
 
@@ -27,6 +30,8 @@ void WEngine_vkGetAccelerationStructureBuildSizesKHR(VulkanContext& ctx,
 VkResult WEngine_vkCreateAccelerationStructureKHR(VulkanContext& ctx, const VkAccelerationStructureCreateInfoKHR* pCreateInfo,
     const VkAllocationCallbacks* pAllocator, VkAccelerationStructureKHR* pAccelerationStructure)
 {
+    if (!ctx.rtSupported)
+        return VK_ERROR_UNKNOWN;
     static auto vkCreateAccelerationStructureKHR = (PFN_vkCreateAccelerationStructureKHR)vkGetDeviceProcAddr(
         ctx.vcore.gpuDevice, "vkCreateAccelerationStructureKHR");
 
@@ -44,6 +49,8 @@ void WEngine_vkCmdBuildAccelerationStructuresKHR(VulkanContext& ctx, uint32_t in
                                                  const VkAccelerationStructureBuildGeometryInfoKHR* pInfos,
                                                  const VkAccelerationStructureBuildRangeInfoKHR* const* ppBuildRangeInfos)
 {
+    if (!ctx.rtSupported)
+        return;
     static auto vkCmdBuildAccelerationStructuresKHR = (PFN_vkCmdBuildAccelerationStructuresKHR)vkGetDeviceProcAddr(
         ctx.vcore.gpuDevice, "vkCmdBuildAccelerationStructuresKHR");
 
@@ -59,6 +66,9 @@ void WEngine_vkCmdBuildAccelerationStructuresKHR(VulkanContext& ctx, uint32_t in
 
 bool AddModelToBLAS(VulkanContext &ctx, VulkanStatistics& stat, Vulkan_Model &model)
 {
+    if (!ctx.rtSupported)
+        return false;
+
     VkBufferDeviceAddressInfo vertBufDevInfo{};
     vertBufDevInfo.sType = VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
     vertBufDevInfo.buffer = model.vertexBuffer;

@@ -140,8 +140,11 @@ bool SetupVkInstance(VulkanContext& ctx)
     info.pApplicationInfo = &appInfo;
     info.enabledExtensionCount = extensionsData.size();
     info.ppEnabledExtensionNames = extensionsData.data();
-    info.enabledLayerCount = 1;
-    info.ppEnabledLayerNames = validationLayers;
+    if (GPUSettingsVulkan::enableValidation)
+    {
+        info.enabledLayerCount = 1;
+        info.ppEnabledLayerNames = validationLayers;
+    }
 
     auto resIsnt = vkCreateInstance(&info, ctx.vcore.allocator, &ctx.vcore.instance);
 
@@ -208,9 +211,16 @@ bool SetupGraphicsDevice(VulkanContext& ctx)
     auto queues = FindDeviceQueues(ctx);
 
     wtl::vector<const char*> extensions = {
-        "VK_KHR_swapchain", "VK_KHR_dynamic_rendering", "VK_KHR_acceleration_structure", "VK_KHR_ray_query",
-        "VK_KHR_deferred_host_operations"
+        "VK_KHR_swapchain", "VK_KHR_dynamic_rendering"
     };
+
+    ctx.rtSupported = false;
+    //if (!AddExtensionIfAvailable(ctx, extensions, "VK_KHR_acceleration_structure"))
+    //    ctx.rtSupported = false;
+    //if (!AddExtensionIfAvailable(ctx, extensions, "VK_KHR_ray_query"))
+    //    ctx.rtSupported = false;
+    //if (!AddExtensionIfAvailable(ctx, extensions, "VK_KHR_deferred_host_operations"))
+    //    ctx.rtSupported = false;
 
     auto rt = GetVkPhysicalDeviceRayQueryFeatures();
 

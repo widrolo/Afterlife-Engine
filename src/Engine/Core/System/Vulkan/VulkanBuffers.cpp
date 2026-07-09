@@ -100,8 +100,9 @@ std::pair<VkBuffer, VmaAllocation> CreateVertexBuffer(VulkanContext& ctx, Vulkan
     VkBufferCreateInfo bufferCreateInfo{};
     bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferCreateInfo.size = vertBufferSize;
-    bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
-        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+    if (ctx.rtSupported)
+        bufferCreateInfo.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 
     VmaAllocationCreateInfo allocationCreateInfo{};
     allocationCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
@@ -145,8 +146,10 @@ std::pair<VkBuffer, VmaAllocation> CreateIndexBuffer(VulkanContext& ctx, VulkanS
     VkBufferCreateInfo bufferCreateInfo{};
     bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferCreateInfo.size = indBufferSize;
-    bufferCreateInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT |
-        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+    bufferCreateInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+    if (ctx.rtSupported)
+        bufferCreateInfo.usage |= VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
+
 
     VmaAllocationCreateInfo allocationCreateInfo{};
     allocationCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
@@ -183,6 +186,9 @@ std::pair<VkBuffer, VmaAllocation> CreateIndexBuffer(VulkanContext& ctx, VulkanS
 std::pair<VkBuffer, VmaAllocation> CreateAccelerationStructureBuffer(VulkanContext &ctx, VulkanStatistics &stat,
     uint64 size)
 {
+    if (!ctx.rtSupported)
+        return {VK_NULL_HANDLE, VK_NULL_HANDLE};
+
     VkBuffer asBuf;
     VmaAllocation asAlloc;
     VkDeviceSize asBufferSize = size;
@@ -215,6 +221,9 @@ std::pair<VkBuffer, VmaAllocation> CreateAccelerationStructureBuffer(VulkanConte
 std::pair<VkBuffer, VmaAllocation> CreateAccelerationScratchBuffer(VulkanContext &ctx, VulkanStatistics &stat,
     uint64 size)
 {
+    if (!ctx.rtSupported)
+        return {VK_NULL_HANDLE, VK_NULL_HANDLE};
+
     VkBuffer scBuf;
     VmaAllocation scAlloc;
     VkDeviceSize scBufferSize = size;
