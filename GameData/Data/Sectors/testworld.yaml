@@ -12,8 +12,8 @@ entities:
         instance: false
   e1:
     name: Monkey
-    position: [0, 0.5, -2]
-    rotation: [-35, 0, 0]
+    position: [1.4, 0.5, -1.9]
+    rotation: [-43.5, 35.7, 22.6]
     size: [1, 1, 1]
     components:
       c0:
@@ -23,8 +23,8 @@ entities:
         instance: false
   e2:
     name: Bread
-    position: [0.400000006, 2, -0.5]
-    rotation: [90, 0, 27.6000004]
+    position: [0.5, 2, 0.4]
+    rotation: [90, 0, -135.3]
     size: [10, 10, 10]
     components:
       c0:

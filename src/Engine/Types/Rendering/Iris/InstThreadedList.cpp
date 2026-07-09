@@ -22,7 +22,6 @@ InstThreadedList::InstThreadedList()
 
 InstThreadedList::~InstThreadedList()
 {
-    WEngine::WLog::ConsoleLog(std::format("Deleting list {}", (uint64)this));
     MemListNode* cursor = head;
     MemListNode* temp;
     while (cursor != nullptr)
@@ -49,7 +48,6 @@ std::pair<uint64, uint64> InstThreadedList::FindNode(WEngine::Model model, WEngi
 
 std::pair<uint64, uint64> InstThreadedList::InsertData(WEngine::Model model, WEngine::Material material, uint64 size)
 {
-    WEngine::WLog::ConsoleLog(std::format("Insetring into list {}", (uint64)this));
     if (occupiedHead == nullptr)
     {
         MemListNode* node = wNewArr(MemListNode, 1);

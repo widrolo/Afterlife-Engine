@@ -218,6 +218,8 @@ WEngine::Nullable<WEngine::Material> Iris::ALLOC_CompileMaterial(const std::stri
     if (matHandle == 0)
         return {};
 
+    ctx.loadedMaterialHandles[matName] = matHandle;
+
     return WEngine::Nullable<WEngine::Material>(matHandle);
 }
 

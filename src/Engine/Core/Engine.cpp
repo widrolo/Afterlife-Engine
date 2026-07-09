@@ -123,6 +123,7 @@ void Engine::InitHandlers()
 	StartHandlerSingle<TimeHandler>(&CoreSystems::timeHandler, "Time Handler");
 
 	Iris::SETTING_BeginNewPreFrame();
+	Iris::ALLOC_CompileMaterial("Unlit/MissingMat");
 	m_rootSector = new Sector("root");
 	m_game = new Game();
 }

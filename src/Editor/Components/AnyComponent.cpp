@@ -221,28 +221,58 @@ void AnyComponent::UpdateMeshComp()
 
     std::string missingMatName = "Unlit/MissingMat";
     std::string modelName, matName;
+    bool hasMat = false;
 
     if (!mesh.HasValue())
         return;
 
     modelName = std::get<std::string>(mesh.GetValue());
     if (mat.HasValue())
-        matName = std::get<std::string>(mat.GetValue());
-
-
-    auto matN = Iris::GetMaterial(missingMatName);
-    if (matN.HasValue())
     {
-        material = matN.GetValue();
+        matName = std::get<std::string>(mat.GetValue());
+        hasMat = true;
+    }
+
+    if (hasMat)
+    {
+        if (m_nameCache[1] != matName)
+        {
+            m_nameCache[1] = matName;
+            auto matN = Iris::GetMaterial(matName);
+
+            if (matN.HasValue())
+            {
+                material = matN.GetValue();
+                return;
+            }
+
+            matN = Iris::ALLOC_CompileMaterial(matName);
+
+            if (!matN.HasValue())
+            {
+                material = 0;
+                return;
+            }
+            material = matN.GetValue();
+        }
     }
     else
     {
-        material = Iris::ALLOC_CompileMaterial(missingMatName).GetValue();
+        auto matN = Iris::GetMaterial(missingMatName);
+        if (matN.HasValue())
+            material = matN.GetValue();
+        else
+            material = 0;
     }
+
+    if (material == 0)
+        material = Iris::GetMaterial(missingMatName).GetValue();
 
     if (m_nameCache[0] != modelName)
     {
+        m_nameCache[0] = modelName;
         auto modelN = Iris::GetModel(modelName);
+        WEngine::WLog::ConsoleLog(std::format("Updated Model to {}", modelName));
 
         if (modelN.HasValue())
         {
@@ -254,7 +284,6 @@ void AnyComponent::UpdateMeshComp()
 
         mission.name = modelName;
         EditorSystems::GetAssetRepo()->GetAsset(mission);
-        m_nameCache[0] = modelName;
 
         if (!mission.model.valid)
         {

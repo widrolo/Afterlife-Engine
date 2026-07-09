@@ -23,6 +23,7 @@ void Viewport::Setup()
     viewportCam = WAllocator::Construct<WEngine::CameraComponent>(m_viewportEntity);
     freecam = WAllocator::Construct<Freecam>(m_viewportEntity);
     freecam->Awake({});
+    freecam->EnableEditorMode();
     viewportCam->Start();
     WEngine::CoreSystems::GetRenderHandler()->RegisterCamera(viewportCam);
 }

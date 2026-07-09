@@ -33,6 +33,17 @@ void Freecam::Tick(float32 dt)
         return;
     }
 
+    if (input->GetActionInput(WKey::DEBUG5, WEngine::Press))
+    {
+        m_focused = !m_focused;
+        WEngine::CoreSystems::GetInputHandler()->SetMouseRelativeMode(m_focused);
+        firstFrame = true; // hacky solution, but it works; so meh
+        return;
+    }
+
+    if (m_editorFreecam && !m_focused)
+        return;
+
     if (dt > 10.0f)
         return;
 
@@ -55,15 +66,6 @@ void Freecam::Tick(float32 dt)
         entity->transform.position = entity->transform.position - entity->transform.Up() * speed;
     if (input->GetActionInput(WKey::SHIFT))
         entity->transform.position = entity->transform.position + entity->transform.Up() * speed;
-
-
-    if (input->GetActionInput(WKey::DEBUG5, WEngine::Press))
-    {
-        m_focused = !m_focused;
-        WEngine::CoreSystems::GetInputHandler()->SetMouseRelativeMode(m_focused);
-        firstFrame = true; // hacky solution, but it works; so meh
-        return;
-    }
 
     if (!m_focused)
         return;

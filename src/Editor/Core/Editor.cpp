@@ -100,6 +100,8 @@ void Editor::InitHandlers()
     StartHandlerSingleEditor<MenubarHandler>(&EditorSystems::menubarHandler, "Menubar Handler");
     StartHandlerSingleEditor<CompSettingsRepo>(&EditorSystems::compSettingsRepo, "Component Settings Repo");
 
+	Iris::SETTING_BeginNewPreFrame();
+	Iris::ALLOC_CompileMaterial("Unlit/MissingMat");
 	WAllocator::Construct<WEngine::Sector, const std::string&>("root");
 	EditorSystems::inputHandler->EnableEditorMode();
 }
@@ -108,10 +110,14 @@ void Editor::Run()
 {
 	std::chrono::steady_clock::time_point lastUpdate;
 
-	bool imguiDemo = true;
 	const uint64 cap = static_cast<uint64>((1.0f / EngineSettings::maxFrameRate) * 1000000); // shut up damn compiler!!
 
 	EditorSystems::renderHandler->EnableEditorMode({1000, 1000});
+
+	WEngine::AmbientLight ambLight;
+	ambLight.ambientColor = WEngine::Color::White;
+	ambLight.intensity = 1.0f;
+	EditorSystems::renderHandler->SetAmbientLight(ambLight);
 
 	while (*EditorSystems::isEditorRunning)
 	{
@@ -124,7 +130,8 @@ void Editor::Run()
 		auto frameStart = std::chrono::steady_clock::now();
 
 		EditorSystems::inputHandler->FetchInput();
-		Iris::SETTING_BeginNewPreFrame();
+		if (!Iris::IsFirstFrame())
+			Iris::SETTING_BeginNewPreFrame();
 
 		WEngine::Sector::m_root->Tick(dt);
 
