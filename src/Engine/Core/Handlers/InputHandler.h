@@ -34,7 +34,11 @@ namespace WEngine
 
 		SDL_Window* m_window;
 
+		bool m_isEditor = false;
 	public:
+
+		void EnableEditorMode() { m_isEditor = true; }
+
 		/**
 		 * Sets the primary window for catching input.
 		 * @param window The window from which the handler will read input.

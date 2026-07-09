@@ -9,6 +9,8 @@
 #include <Engine/imgui/imgui.h>
 #include <Engine/imgui/backends/imgui_impl_sdl3.h>
 #include <Engine/Core/System/Memory.h>
+
+#include "Editor/Types/EditorSystems.h"
 using namespace WEngine;
 
 float Sint16ToFloat(const int16 num)
@@ -553,7 +555,10 @@ void InputHandler::PollEvents() const
 		ImGui_ImplSDL3_ProcessEvent(m_inputEvent);
 		if (m_inputEvent->type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
 		{
-			CoreSystems::ShutdownGame();
+			if (!m_isEditor)
+				CoreSystems::ShutdownGame();
+			else
+				WEditor::EditorSystems::ShutdownEditor();
 		}
 	}
 }

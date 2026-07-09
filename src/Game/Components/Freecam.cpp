@@ -38,10 +38,6 @@ void Freecam::Tick(float32 dt)
 
     float32 speed = m_speed * dt;
 
-    //WEngine::WLog::ConsoleLog(std::format("{}", entity->transform.position));
-    //WEngine::WLog::ConsoleLog(std::format("{}", speed));
-    WEngine::WLog::ConsoleLog(std::format("{}", m_focused));
-
     if (input->GetActionInput(WKey::CONTROL))
         speed *= 2.0f;
 

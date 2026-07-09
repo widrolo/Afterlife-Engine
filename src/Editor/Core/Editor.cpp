@@ -101,6 +101,7 @@ void Editor::InitHandlers()
     StartHandlerSingleEditor<CompSettingsRepo>(&EditorSystems::compSettingsRepo, "Component Settings Repo");
 
 	WAllocator::Construct<WEngine::Sector, const std::string&>("root");
+	EditorSystems::inputHandler->EnableEditorMode();
 }
 
 void Editor::Run()
