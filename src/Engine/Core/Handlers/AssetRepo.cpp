@@ -261,6 +261,7 @@ void AssetRepo::GetAsset<MeshAssetMission>(MeshAssetMission& mission)
 	tg3_error_stack_free(&errors);
 
 	WLog::ConsoleLog(std::format("Loaded model \"{}\"", mission.name));
+	mission.model.valid = true;
 }
 
 template<>

@@ -9,6 +9,8 @@
 #include "Editor/Types/EditorSystems.h"
 #include "Engine/Core/Handlers/AssetRepo.h"
 #include "Engine/Core/Handlers/RenderHandler.h"
+#include "Engine/Core/System/Iris.h"
+#include "Engine/Core/World/Sector.h"
 #include "Engine/Math/Shapes/Shapes2D.h"
 #include "Engine/Types/AssetMission.h"
 #include "Engine/Types/CoreSystems.h"
@@ -73,6 +75,11 @@ void AnyComponent::Init(uint16 ID, uint8 dataSize)
                 break;
         }
     }
+}
+
+void AnyComponent::Tick(float32 dt)
+{
+    TryUpdate();
 }
 
 void AnyComponent::SetData(uint8 location, OptionData data)
@@ -165,10 +172,22 @@ void AnyComponent::Draw()
     DrawOnSelected();
 }
 
+void AnyComponent::TryUpdate()
+{
+    switch (m_ID)
+    {
+        case 5:
+            UpdateMeshComp();
+        default: break;
+    }
+}
+
 void AnyComponent::TryDrawGameGraphics()
 {
     switch (m_ID)
     {
+        case 5:
+            TryDrawMeshComp();
         default: break;
     }
 }
@@ -181,5 +200,76 @@ void AnyComponent::TryDrawDebugGraphics()
 void AnyComponent::DrawOnSelected()
 {
 
+}
+
+void AnyComponent::TryDrawMeshComp()
+{
+    WEngine::RenderMission mission{};
+    mission.model = model;
+    mission.material = material;
+    mission.isStationary = false;
+    mission.transform = entity->transform;
+    mission.key = entity->parentSector->GetStatBufKey();
+
+    EditorSystems::GetRenderHandler()->AddToRenderQueue(mission);
+}
+
+void AnyComponent::UpdateMeshComp()
+{
+    auto mesh = FindDataByName("meshName");
+    auto mat = FindDataByName("materialName");
+
+    std::string missingMatName = "Unlit/MissingMat";
+    std::string modelName, matName;
+
+    if (!mesh.HasValue())
+        return;
+
+    modelName = std::get<std::string>(mesh.GetValue());
+    if (mat.HasValue())
+        matName = std::get<std::string>(mat.GetValue());
+
+
+    auto matN = Iris::GetMaterial(missingMatName);
+    if (matN.HasValue())
+    {
+        material = matN.GetValue();
+    }
+    else
+    {
+        material = Iris::ALLOC_CompileMaterial(missingMatName).GetValue();
+    }
+
+    if (m_nameCache[0] != modelName)
+    {
+        auto modelN = Iris::GetModel(modelName);
+
+        if (modelN.HasValue())
+        {
+            model = modelN.GetValue();
+            return;
+        }
+
+        WEngine::MeshAssetMission mission{};
+
+        mission.name = modelName;
+        EditorSystems::GetAssetRepo()->GetAsset(mission);
+        m_nameCache[0] = modelName;
+
+        if (!mission.model.valid)
+        {
+            model = 0;
+            return;
+        }
+
+        modelN = Iris::ALLOC_CreateModel(mission.model);
+
+        if (!modelN.HasValue())
+        {
+            model = 0;
+            return;
+        }
+        model = modelN.GetValue();
+    }
 }
 

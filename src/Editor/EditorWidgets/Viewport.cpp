@@ -9,6 +9,9 @@
 #include <Engine/Components/Rendering/CameraComponent.h>
 #include <Engine/Core/World/Entity.h>
 
+#include "Editor/Types/EditorSystems.h"
+#include "Game/Components/Freecam.h"
+
 using namespace WEditor;
 
 void Viewport::Setup()
@@ -18,8 +21,10 @@ void Viewport::Setup()
     m_viewportEntity =  WAllocator::Construct<WEngine::Entity>();
     m_viewportEntity->transform.size = WEngine::Vector3::One;
     viewportCam = WAllocator::Construct<WEngine::CameraComponent>(m_viewportEntity);
+    freecam = WAllocator::Construct<Freecam>(m_viewportEntity);
+    freecam->Awake({});
     viewportCam->Start();
-    //WEngine::CoreSystems::GetRenderHandler()->SetNewCamera(viewportCam);
+    WEngine::CoreSystems::GetRenderHandler()->RegisterCamera(viewportCam);
 }
 
 void Viewport::RenderInternal()
@@ -27,24 +32,25 @@ void Viewport::RenderInternal()
     // due to docking and resolutions, we need to do this
     ImVec2 size = ImGui::GetContentRegionAvail();
 
-    viewportCam->Tick(0.0f);
+    viewportCam->Tick(EditorSystems::GetDt());
+    freecam->Tick(EditorSystems::GetDt());
 
     WEngine::Framebuffer fb = WEngine::CoreSystems::GetRenderHandler()->EditorGetViewportFramebuffer();
     auto textureNullable = Iris::FramebufferToImGui(fb);
-//
-    //if (textureNullable.HasValue())
-    //{
-    //    ImGui::Image(
-    //        textureNullable.GetValue(),
-    //        size,
-    //        ImVec2(0, 1), ImVec2(1, 0) // flip vertically due to weird stuffs
-    //    );
-    //}
-    //else
-    //{
-    //    ImGui::Text("Viewport is currently unavailable :(");
-    //}
-//
+
+    if (textureNullable.HasValue())
+    {
+        ImGui::Image(
+            textureNullable.GetValue(),
+            size
+            //ImVec2(0, 1), ImVec2(1, 0) // flip vertically due to weird stuffs
+        );
+    }
+    else
+    {
+        ImGui::Text("Viewport is currently unavailable :(");
+    }
+
     //EditorState::ViewportSelected = ImGui::IsWindowFocused();
     //ImVec2 winSize = ImGui::GetWindowSize();
     //CheckForSizeChange(winSize);

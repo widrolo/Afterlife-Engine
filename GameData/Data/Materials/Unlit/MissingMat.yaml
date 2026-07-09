@@ -1,5 +1,5 @@
 material:
-    materialName: MissingMat
+    materialName: Unlit/MissingMat
     shader: TexturedUnlit
 
     texturesDevel:

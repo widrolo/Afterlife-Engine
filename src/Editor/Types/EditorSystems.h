@@ -29,6 +29,8 @@ namespace WEditor
 
 		_GLOBAL_ bool* isEditorRunning;
 
+		_GLOBAL_ float32 dt;
+
 	public:
 		static WEngine::RenderHandler* GetRenderHandler() { return renderHandler; }
 		static WEngine::InputHandler* GetInputHandler() { return inputHandler; }
@@ -36,6 +38,7 @@ namespace WEditor
 		static EditorUIHandler* GetEditorUIHandler() { return editorUIHandler; }
 		static MenubarHandler* GetMenubarHandler() { return menubarHandler; }
 		static CompSettingsRepo* GetCompSettingsRepo() { return compSettingsRepo; }
+		static float32 GetDt() { return dt; }
 
 
 		/**

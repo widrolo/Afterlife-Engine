@@ -116,12 +116,16 @@ void Editor::Run()
 	{
 		// delta time
 		auto now = std::chrono::steady_clock::now();
+		auto dt = std::chrono::duration<float>(now - lastUpdate).count();
+		EditorSystems::dt = dt;
 		lastUpdate = now;
 
 		auto frameStart = std::chrono::steady_clock::now();
 
 		EditorSystems::inputHandler->FetchInput();
 		Iris::SETTING_BeginNewPreFrame();
+
+		WEngine::Sector::m_root->Tick(dt);
 
 		EditorSystems::renderHandler->BeginFrame();
 		EditorSystems::menubarHandler->Render();

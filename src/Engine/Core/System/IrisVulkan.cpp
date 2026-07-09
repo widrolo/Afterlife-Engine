@@ -656,7 +656,7 @@ void Iris::SETTING_FinishFramebufferRender()
 
 void Iris::SETTING_PrepareFramebufferForSampling(WEngine::Framebuffer framebuffer)
 {
-    Vulkan_RenderTarget& vkFb = ctx.renderTargets[framebuffer - 1];
+    Vulkan_RenderTarget& vkFb = GetLoadedRenderTarget(ctx, framebuffer);;
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -713,7 +713,9 @@ WEngine::Nullable<WEngine::StatBufKey> Iris::RequestStationaryBufferKey()
 
 WEngine::Nullable<ImTextureID> Iris::FramebufferToImGui(WEngine::Framebuffer framebuffer)
 {
-    return {};
+    Vulkan_RenderTarget& vkFb = GetLoadedRenderTarget(ctx, framebuffer);
+
+    return reinterpret_cast<ImTextureID>(GetFbDescriptorSet(ctx, vkFb));
 }
 
 void Iris::AddStationaryObjects(WEngine::StatBufKey key, WEngine::Model model, WEngine::Material material,

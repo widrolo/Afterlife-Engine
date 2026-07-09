@@ -3,6 +3,7 @@
 #include <Engine/Core/Widget.h>
 
 #include "Engine/Core/World/Entity.h"
+#include "Game/Components/Freecam.h"
 
 namespace WEngine {
     class CameraComponent;
@@ -25,6 +26,7 @@ namespace WEditor
     private:
         WEngine::Entity* m_viewportEntity;
         WEngine::CameraComponent* viewportCam;
+        Freecam* freecam;
         bool m_resDecided = false;
     };
 }

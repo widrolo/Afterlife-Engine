@@ -14,13 +14,14 @@ Freecam::Freecam(WEngine::Entity *e)
 void Freecam::Awake(WEngine::ComponentArgs ca)
 {
     m_speed = 3.0f;
+    m_focused = enabledByDefault;
 }
 
 void Freecam::Start()
 {
     m_oldMousePos = input->GetMousePosition();
     WEngine::CoreSystems::GetInputHandler()->SetMouseRelativeMode(enabledByDefault);
-    m_focused = enabledByDefault;
+
 }
 
 void Freecam::Tick(float32 dt)
@@ -36,6 +37,10 @@ void Freecam::Tick(float32 dt)
         return;
 
     float32 speed = m_speed * dt;
+
+    //WEngine::WLog::ConsoleLog(std::format("{}", entity->transform.position));
+    //WEngine::WLog::ConsoleLog(std::format("{}", speed));
+    WEngine::WLog::ConsoleLog(std::format("{}", m_focused));
 
     if (input->GetActionInput(WKey::CONTROL))
         speed *= 2.0f;

@@ -12,5 +12,6 @@ namespace WEngine
         std::string name;
         wtl::vector<VertexData> vertices;
         wtl::vector<uint32> indices;
+        bool valid = false;
     };
 }

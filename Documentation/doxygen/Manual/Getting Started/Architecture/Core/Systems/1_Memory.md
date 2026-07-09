@@ -2,7 +2,7 @@
 
 # Memory
 
-The implementation for memory only uses the standart library malloc functions for actual memory allocations. The real purpose is to have a common allocator which is used by everything. This enables us track memory usage trivially, instead of having to dig around in the malloc stub. This functionality is disabled for the packaging version due to performance reasons.
+The implementation for memory only uses the standard library malloc functions for actual memory allocations. The real purpose is to have a common allocator which is used by everything. This enables us to track memory usage trivially, instead of having to dig around in the malloc stub. This functionality is disabled for the packaging version due to performance reasons.
 
 ## Regular Allocation Functions
 

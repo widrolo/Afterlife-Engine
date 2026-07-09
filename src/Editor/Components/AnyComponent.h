@@ -6,6 +6,8 @@
 #include <Engine/Types/Rendering/Color.h>
 
 #include "Engine/Types/Nullable.h"
+#include "Engine/Types/Rendering/GPU/Material.h"
+#include "Engine/Types/Rendering/GPU/Model.h"
 
 
 namespace WEditor
@@ -20,10 +22,16 @@ namespace WEditor
     public:
         uint16 m_ID;
         std::vector<OptionData> m_data;
+
+        // for use by anything for caching
+        std::array<std::string, 8> m_nameCache;
+        WEngine::Model model;
+        WEngine::Material material;
     public:
 
         void Init(uint16 ID, uint8 dataSize, WEngine::ComponentArgs args);
         void Init(uint16 ID, uint8 dataSize);
+        void Tick(float32 dt);
         void SetData(uint8 location, OptionData data);
 
         void ApplySpawnData(WEngine::ComponentArgs args);
@@ -36,9 +44,14 @@ namespace WEditor
     private:
         bool m_isInitializedDraw = false;
 
+        void TryUpdate();
+
         void TryDrawGameGraphics();
         void TryDrawDebugGraphics();
         void DrawOnSelected();
+
+        void TryDrawMeshComp();
+        void UpdateMeshComp();
 
         COMP_HASH(0xf22524fc1c003f87)
     };

@@ -24,6 +24,7 @@ VkCommandBuffer& GetFbCmdBuff(const VulkanContext& ctx);
 VkImage& GetFbImage(const VulkanContext& ctx);
 VkImage& GetFbImage(const VulkanContext& ctx, Vulkan_RenderTarget& rt);
 VkImageView& GetFbImageView(const VulkanContext& ctx);
+VkImageView& GetFbImageView(const VulkanContext& ctx, Vulkan_RenderTarget& rt);
 VkSemaphore& GetFbImageAvailSem(const VulkanContext& ctx);
 VkSemaphore& GetFbRenderFinishedSem(const VulkanContext& ctx);
 VkFence& GetFbEndOfFrameFence(const VulkanContext& ctx);

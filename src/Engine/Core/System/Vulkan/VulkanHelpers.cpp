@@ -183,6 +183,13 @@ VkImageView& GetFbImageView(const VulkanContext &ctx)
         ctx.currentRenderTarget->targetImageViews[ctx.screen.currentFrame];
 }
 
+VkImageView& GetFbImageView(const VulkanContext &ctx, Vulkan_RenderTarget &rt)
+{
+    bool isSwapchainImage = ctx.currentRenderTarget == &ctx.displayTarget;
+    return isSwapchainImage ? rt.targetImageViews[ctx.screen.swapchainCurrentImage] :
+        rt.targetImageViews[ctx.screen.currentFrame];
+}
+
 VkSemaphore& GetFbImageAvailSem(const VulkanContext &ctx)
 {
     return ctx.currentRenderTarget->imageAvailableSems[ctx.screen.currentFrame];
