@@ -76,7 +76,7 @@ void CreateImage(VulkanContext& ctx, VulkanStatistics& stat, const WEngine::Vect
 
     VmaAllocationCreateInfo allocInfo{};
     allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-    allocInfo.requiredFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    //allocInfo.requiredFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
     VmaAllocationInfo allocationInfo{};
 

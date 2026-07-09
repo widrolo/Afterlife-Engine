@@ -277,7 +277,7 @@ Vulkan_RenderTarget& GetLoadedRenderTarget(VulkanContext &ctx, WEngine::Framebuf
     return ctx.renderTargets[fb - 1];
 }
 
-bool AddExtensionIfAvailable(VulkanContext &ctx, wtl::vector<const char*> &destination, std::string extensionName)
+bool AddExtensionIfAvailable(VulkanContext &ctx, wtl::vector<const char*> &destination, const char* extensionName)
 {
     uint32_t extensionCount = 0;
     vkEnumerateDeviceExtensionProperties(ctx.vcore.gpuPhysicalDevice, nullptr, &extensionCount, nullptr);
@@ -288,7 +288,10 @@ bool AddExtensionIfAvailable(VulkanContext &ctx, wtl::vector<const char*> &desti
     bool isAvailable = std::any_of(
         availableExtensions.begin(),
         availableExtensions.end(),
-        [&extensionName](const VkExtensionProperties &ext) { return extensionName == ext.extensionName; }
+        [&extensionName](const VkExtensionProperties &ext)
+        {
+            return std::strcmp(extensionName, ext.extensionName) == 0;
+        }
     );
 
     if (!isAvailable)
@@ -298,7 +301,7 @@ bool AddExtensionIfAvailable(VulkanContext &ctx, wtl::vector<const char*> &desti
         return false;
     }
 
-    destination.push_back(extensionName.c_str());
+    destination.push_back(extensionName);
     return true;
 }
 void PopulatePushConstants(const VulkanContext &ctx, const Vulkan_Shader &shader, const WEngine::Mat4x4 &mvp)

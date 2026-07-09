@@ -419,6 +419,9 @@ else() # really should be elseif(linux), but it doesnt work...
             pthread
             TracyClient
     )
+
+    set(CMAKE_CXX_FLAGS_PACKAGING "-O3 -DNDEBUG" CACHE STRING "" FORCE)
+    set(CMAKE_C_FLAGS_PACKAGING "-O3 -DNDEBUG" CACHE STRING "" FORCE)
 endif()
 
 set_property(TARGET Widrolo_Engine_3D APPEND PROPERTY
@@ -439,6 +442,3 @@ set_target_properties(Widrolo_Engine_3D PROPERTIES
         WIN32_EXECUTABLE $<$<CONFIG:Packaging>:TRUE>
         OUTPUT_NAME "$<$<CONFIG:Debug>:Widrolo_Engine_3D-Dev>$<$<CONFIG:Release>:Widrolo_Engine_3D-RC>$<$<CONFIG:Packaging>:Widrolo_Engine_3D-Package>"
 )
-
-set(CMAKE_CXX_FLAGS_PACKAGING "-O3 -DNDEBUG" CACHE STRING "" FORCE)
-set(CMAKE_C_FLAGS_PACKAGING "-O3 -DNDEBUG" CACHE STRING "" FORCE)
