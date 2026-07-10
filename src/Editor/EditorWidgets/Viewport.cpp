@@ -17,6 +17,7 @@ using namespace WEditor;
 void Viewport::Setup()
 {
     m_widgetName = "Viewport";
+    m_windowFlags = ImGuiWindowFlags_NoResize;
 
     m_viewportEntity =  WAllocator::Construct<WEngine::Entity>();
     m_viewportEntity->transform.size = WEngine::Vector3::One;

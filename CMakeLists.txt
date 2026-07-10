@@ -10,6 +10,18 @@ set(SDL_SHARED OFF)
 
 set(STEAMWORKS_PATH "${CMAKE_SOURCE_DIR}/libs/Steamworks-SDK")
 
+set(GPU_OPENGL_VAL 1)
+set(GPU_VULKAN_VAL 2)
+set(GPU_METAL_VAL 3)
+set(GPU_D3D12_VAL 4)
+set(GPU_AGC_VAL 5)
+set(GPU_NVN_VAL 6)
+
+set(OPTION_DISABLED 0)
+set(OPTION_ENABLED 1)
+
+set(STEAM_ENABLED ${OPTION_DISABLED})
+
 # thank god for CLion
 add_executable(Widrolo_Engine_3D
         src/Engine/Components/Rendering/CameraComponent.cpp
@@ -322,123 +334,11 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/Rendering/GPU/StatBufKey.h
 )
 
-FetchContent_Declare(
-        VulkanMemoryAllocator
-        GIT_REPOSITORY "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git"
-        GIT_TAG "v3.4.0"
-)
-
-FetchContent_Declare(
-        SDL
-        GIT_REPOSITORY "https://github.com/libsdl-org/SDL"
-        GIT_TAG "release-3.4.12"
-)
-
-FetchContent_Declare(
-        Yaml
-        GIT_REPOSITORY "https://github.com/jbeder/yaml-cpp"
-        GIT_TAG "yaml-cpp-0.9.0"
-)
-
-FetchContent_Declare(
-        Tinyxml
-        GIT_REPOSITORY "https://github.com/leethomason/tinyxml2"
-        GIT_TAG "11.0.0"
-)
-
-FetchContent_Declare(
-        glm
-        GIT_REPOSITORY	"https://github.com/g-truc/glm.git"
-        GIT_TAG "1.0.3"
-)
-
-FetchContent_Declare(
-        box3d
-        GIT_REPOSITORY	"https://github.com/erincatto/box3d.git"
-        GIT_TAG "v0.1.0"
-)
-
-FetchContent_MakeAvailable(box3d)
-FetchContent_MakeAvailable(glm)
-FetchContent_MakeAvailable(SDL)
-FetchContent_MakeAvailable(Tinyxml)
-FetchContent_MakeAvailable(Yaml)
-FetchContent_MakeAvailable(VulkanMemoryAllocator)
-
-set_target_properties(Widrolo_Engine_3D PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin/${CMAKE_SYSTEM_NAME}-x64"
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin/${CMAKE_SYSTEM_NAME}-x64"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../bin/${CMAKE_SYSTEM_NAME}-x64"
-)
-
 target_include_directories(Widrolo_Engine_3D PRIVATE
         src
         ${STEAMWORKS_PATH}/include
-        src/Engine/gl/include # glad
 )
 
-# ---- Common defines ----
-target_compile_definitions(Widrolo_Engine_3D PRIVATE
-        _CRT_SECURE_NO_WARNINGS
-        YAML_CPP_STATIC_DEFINE
-        TINYGLTF3_ENABLE_FS
-)
-
-find_package(Vulkan REQUIRED COMPONENTS shaderc_combined)
-
-target_link_libraries(Widrolo_Engine_3D PRIVATE
-        box3d::box3d
-        glm::glm
-        tinyxml2::tinyxml2
-        yaml-cpp::yaml-cpp
-        SDL3::SDL3-static
-        Vulkan::Vulkan
-        Vulkan::shaderc_combined
-        GPUOpen::VulkanMemoryAllocator
-)
-
-if(WIN32)
-    message(STATUS Detected Windows)
-    set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "" FORCE)
-    set(CMAKE_CXX_FLAGS_PACKAGING "/O2 /DNDEBUG" CACHE STRING "" FORCE)
-    target_compile_definitions(Widrolo_Engine_3D PRIVATE WE_Windows)
-    target_compile_options(Widrolo_Engine_3D PRIVATE /MP /wd4005)
-
-    target_link_libraries(Widrolo_Engine_3D PRIVATE
-            #${STEAMWORKS_PATH}/lib/steam_api64.lib
-    )
-
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Widrolo_Engine_3D)
-
-else() # really should be elseif(linux), but it doesnt work...
-    message(STATUS Detected Linux)
-    target_compile_definitions(Widrolo_Engine_3D PRIVATE WE_Linux)
-    target_link_libraries(Widrolo_Engine_3D PRIVATE
-            #${STEAMWORKS_PATH}/lib/libsteam_api.so
-            dl
-            pthread
-            TracyClient
-    )
-
-    set(CMAKE_CXX_FLAGS_PACKAGING "-O3 -DNDEBUG" CACHE STRING "" FORCE)
-    set(CMAKE_C_FLAGS_PACKAGING "-O3 -DNDEBUG" CACHE STRING "" FORCE)
-endif()
-
-set_property(TARGET Widrolo_Engine_3D APPEND PROPERTY
-        COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUG>
-)
-
-# RelCanditate
-set_property(TARGET Widrolo_Engine_3D APPEND PROPERTY
-        COMPILE_DEFINITIONS $<$<CONFIG:Release>:NDEBUG;RC>
-)
-
-# Packaging
-set_property(TARGET Widrolo_Engine_3D APPEND PROPERTY
-        COMPILE_DEFINITIONS $<$<CONFIG:Packaging>:NDEBUG;PACKAGE>
-)
-
-set_target_properties(Widrolo_Engine_3D PROPERTIES
-        WIN32_EXECUTABLE $<$<CONFIG:Packaging>:TRUE>
-        OUTPUT_NAME "$<$<CONFIG:Debug>:Widrolo_Engine_3D-Dev>$<$<CONFIG:Release>:Widrolo_Engine_3D-RC>$<$<CONFIG:Packaging>:Widrolo_Engine_3D-Package>"
-)
+include(cmake/Thirdparty.cmake)
+include(cmake/CompileOptions.cmake)
+include(cmake/Defines.cmake)

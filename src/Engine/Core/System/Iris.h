@@ -2,26 +2,26 @@
 
 // This file does not contain LLM generated documentation
 
-#include <../../Types/Rendering/GPU/Shader.h>
+#include <Engine/Types/Rendering/GPU/Shader.h>
 #include <Engine/Types/Nullable.h>
 #include <SDL3/SDL.h>
 
-#include "Engine/Types/Rendering/Color.h"
-#include "../../Types/Rendering/GPU/Framebuffer.h"
-#include "Engine/imgui/imgui.h"
-#include "Engine/Types/Rendering/InstanceData.h"
-#include "Engine/Types/Rendering/LightingInfo.h"
-#include "Engine/Types/Rendering/LineInfo.h"
-#include "Engine/Types/Rendering/GPU/Line.h"
-#include "Engine/Types/Rendering/ModelInfo.h"
-#include "Engine/Types/Rendering/ShaderDefinition.h"
-#include "Engine/Types/Rendering/ShaderSettings.h"
-#include "Engine/Types/Rendering/TextureInfo.h"
-#include "Engine/Types/Rendering/GPU/Material.h"
-#include "Engine/Types/Rendering/GPU/Model.h"
-#include "Engine/Types/Rendering/GPU/StatBufKey.h"
-#include "Engine/Types/Rendering/Iris/InstThreadedList.h"
-#include "Engine/Types/Rendering/Iris/IrisAssetComms.h"
+#include <Engine/Types/Rendering/Color.h>
+#include <Engine/Types/Rendering/GPU/Framebuffer.h>
+#include <Engine/imgui/imgui.h>
+#include <Engine/Types/Rendering/InstanceData.h>
+#include <Engine/Types/Rendering/LightingInfo.h>
+#include <Engine/Types/Rendering/LineInfo.h>
+#include <Engine/Types/Rendering/GPU/Line.h>
+#include <Engine/Types/Rendering/ModelInfo.h>
+#include <Engine/Types/Rendering/ShaderDefinition.h>
+#include <Engine/Types/Rendering/ShaderSettings.h>
+#include <Engine/Types/Rendering/TextureInfo.h>
+#include <Engine/Types/Rendering/GPU/Material.h>
+#include <Engine/Types/Rendering/GPU/Model.h>
+#include <Engine/Types/Rendering/GPU/StatBufKey.h>
+#include <Engine/Types/Rendering/Iris/InstThreadedList.h>
+#include <Engine/Types/Rendering/Iris/IrisAssetComms.h>
 
 /**
  * This class is the primary interface to talk to the GPU.

@@ -8,9 +8,9 @@
 #include <Engine/WTL/vector.h>
 
 #include <Engine/Math/Vector.h>
-#include <../../Types/Input/KeyCodes.h>
+#include <Engine/Types/Input/KeyCodes.h>
 #include <Engine/Types/CommonTypes.h>
-#include <../../Types/Input/InputDevice.h>
+#include <Engine/Types/Input/InputDevice.h>
 
 namespace WEngine
 {

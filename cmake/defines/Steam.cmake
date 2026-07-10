@@ -1,0 +1,1 @@
+target_compile_definitions(Widrolo_Engine_3D PRIVATE STEAM=${STEAM_ENABLED})

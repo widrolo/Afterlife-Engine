@@ -10,6 +10,7 @@ using namespace WEditor;
 void EntityList::Setup()
 {
     m_widgetName = "Entity List";
+    m_windowFlags = ImGuiWindowFlags_NoResize;
 }
 
 void EntityList::RenderInternal()

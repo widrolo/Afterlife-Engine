@@ -1,0 +1,1 @@
+target_link_libraries(Widrolo_Engine_3D PRIVATE Vulkan::Vulkan)

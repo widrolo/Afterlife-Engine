@@ -21,6 +21,7 @@ using namespace WEditor;
 void SectorList::Setup()
 {
     m_widgetName = "Loaded Sectors";
+    m_windowFlags = ImGuiWindowFlags_NoResize;
 }
 
 void SectorList::RenderInternal()

@@ -11,6 +11,7 @@ using namespace WEditor;
 void ComponentSettings::Setup()
 {
     m_widgetName = "Component Settings";
+	m_windowFlags = ImGuiWindowFlags_NoResize;
 }
 
 void ComponentSettings::RenderInternal()

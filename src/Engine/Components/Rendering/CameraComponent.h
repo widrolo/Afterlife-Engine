@@ -1,7 +1,7 @@
 #pragma once
 #include <Engine/Components/Component.h>
-#include <../../Math/Transform.h>
-#include <../../Types/Rendering/Color.h>
+#include <Engine/Math/Transform.h>
+#include <Engine/Types/Rendering/Color.h>
 
 namespace WEngine
 {

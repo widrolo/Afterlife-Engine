@@ -6,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 
-#include <stb_image.h>
+#include <Engine/gl/include/stb_image.h>
 #define TINYGLTF_IMPLEMENTATION
 #include <chrono>
 #include <Engine/gl/gltf/tiny_gltf_v3.h>

@@ -1,0 +1,3 @@
+find_package(Vulkan REQUIRED COMPONENTS shaderc_combined)
+
+target_link_libraries(Widrolo_Engine_3D PRIVATE Vulkan::shaderc_combined)

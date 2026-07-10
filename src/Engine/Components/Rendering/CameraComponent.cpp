@@ -1,11 +1,11 @@
 #include "CameraComponent.h"
 
-#include <../../Core/World/Entity.h>
+#include <Engine/Core/World/Entity.h>
 #include <Engine/Types/CoreSystems.h>
 #include <Engine/Core/Handlers/RenderHandler.h>
-#include <../../Core/World/Entity.h>
+#include <Engine/Core/World/Entity.h>
 #include <Engine/Types/SpawnArgs.h>
-#include <../../Types/Rendering/Color.h>
+#include <Engine/Types/Rendering/Color.h>
 
 using namespace WEngine;
 

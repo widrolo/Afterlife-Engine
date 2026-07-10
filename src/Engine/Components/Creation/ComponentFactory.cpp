@@ -1,7 +1,7 @@
 #include "ComponentFactory.h"
 #include <Engine/Components/Component.h>
 #include <Engine/Types/SpawnArgs.h>
-#include <../../Core/World/Entity.h>
+#include <Engine/Core/World/Entity.h>
 #include <Engine/Util/Log.h>
 #include <unordered_map>
 
