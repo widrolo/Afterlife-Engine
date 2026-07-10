@@ -40,12 +40,17 @@ namespace WEngine
 		bool m_usingSteam;				///< Indicates whether Steam integration is enabled or not.
 		uint64 m_steamID64;				///< The 64-bit Steam ID of the user.
 		std::string m_steamWebAPIKey;	///< The Web API key for Steam.
+		InputHandle_t* m_controllers = nullptr;
+		uint8 m_numControllers;
+		bool m_isControllerConnected;
+		InputHandle_t m_mainController;
 	private:
 #if STEAM
 		CSteamID m_steamID;
 #endif
 
 	public:
+		void FetchInput();
 		/**
 		 * Retrieves the account name of the current Steam user.
 		 * @return A string containing the account name. If Steam is disabled, returns "STEAM DISABLED!".
@@ -65,5 +70,7 @@ namespace WEngine
 		 * @param overlay The type of overlay window to open (see OverlayWindows enum).
 		 */
 		void OpenOverlay(OverlayWindows overlay);
+
+		void OpenControllerBinds();
 	};
 }

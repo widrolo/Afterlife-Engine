@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(SDL_SHARED OFF)
 
 set(STEAMWORKS_PATH "${CMAKE_SOURCE_DIR}/libs/Steamworks-SDK")
+set(STEAM_ENABLED ${OPTION_DISABLED})
 
 set(GPU_OPENGL_VAL 1)
 set(GPU_VULKAN_VAL 2)
@@ -20,7 +21,6 @@ set(GPU_NVN_VAL 6)
 set(OPTION_DISABLED 0)
 set(OPTION_ENABLED 1)
 
-set(STEAM_ENABLED ${OPTION_DISABLED})
 
 # thank god for CLion
 add_executable(Widrolo_Engine_3D
@@ -339,6 +339,6 @@ target_include_directories(Widrolo_Engine_3D PRIVATE
         ${STEAMWORKS_PATH}/include
 )
 
+include(cmake/Defines.cmake)
 include(cmake/Thirdparty.cmake)
 include(cmake/CompileOptions.cmake)
-include(cmake/Defines.cmake)

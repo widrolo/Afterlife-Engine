@@ -4,11 +4,14 @@
 #include <Engine/Core/Handlers/AssetRepo.h>
 #include <Engine/Types/CoreSystems.h>
 
+#include "Engine/Stores/Steam/SteamStore.h"
+
 using namespace WEngine;
 
 void PeripheralWidget::Setup()
 {
     m_widgetName = "Peripherals";
+
     const auto repo = CoreSystems::GetAssetRepo();
 
     //SpriteAssetMission mission{};
@@ -36,6 +39,11 @@ void PeripheralWidget::Setup()
 void PeripheralWidget::RenderInternal()
 {
     SetSize({300, 350});
+
+    if (ImGui::Button("Open Bindings Overlay"))
+    {
+        CoreSystems::GetSteamStore()->OpenControllerBinds();
+    }
 
     uint8 count = CoreSystems::GetInputHandler()->GetInputPeripheralCount();
 

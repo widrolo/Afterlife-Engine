@@ -238,6 +238,8 @@ void Engine::Loop_Tick()
 	StopWatch timings;
 
 	CoreSystems::inputHandler->FetchInput();
+	CoreSystems::steamStore->FetchInput();
+
 	m_game->GameLoopTickEarly();
 	m_rootSector->Tick(m_deltaTime * CoreSystems::GetTimeScale());
 	m_game->GameLoopTickLate();
