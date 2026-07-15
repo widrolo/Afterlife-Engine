@@ -9,6 +9,7 @@
 struct SDLContext
 {
     std::vector<SDLMap> maps;
+    SDLMap* selectedMap;
     SDL_Window* window;
     SDL_Event event;
     bool isEditor;
@@ -22,6 +23,7 @@ struct SDLContext
     WEngine::ValueBelt<WEngine::Vector2, 2> rawMousePosSquare;
 
     WEngine::ValueBelt<bool*, 2> rawController;
+    WEngine::ValueBelt<bool*, 2> rawSDLController;
     WEngine::ValueBelt<WEngine::Vector2, 2> rawLeftJoy;
     WEngine::ValueBelt<WEngine::Vector2, 2> rawRightJoy;
     WEngine::ValueBelt<WEngine::Vector2, 2> rawLeftTouch;
@@ -34,6 +36,7 @@ struct SDLContext
     bool isControllerConnected = false;
     SDL_Gamepad* controller = nullptr;
     WEngine::ControllerType controllerType;
+    uint16 controllerFeatures = 0;
 };
 
 #endif

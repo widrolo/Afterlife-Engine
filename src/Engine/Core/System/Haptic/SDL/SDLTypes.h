@@ -16,7 +16,7 @@ struct SDLSense
     bool controllerCheck : 1;
     bool mouseCheck : 1;
 
-    WEngine::InputKind inputKind : 2;
+    WEngine::InputSenseKind inputKind : 2;
     WKey key;
     WMouseBtn mouse;
     WPadBtn controller;

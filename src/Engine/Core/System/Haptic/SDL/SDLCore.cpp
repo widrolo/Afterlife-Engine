@@ -2,6 +2,7 @@
 
 #include "SDLCore.h"
 
+#include "SDLHelpers.h"
 #include "Engine/Core/System/Memory.h"
 #include "Engine/Util/Log.h"
 
@@ -43,6 +44,13 @@ void InitMouse(SDLContext &ctx)
 
 void InitController(SDLContext &ctx)
 {
+    ctx.rawSDLController[0] = wNewArr(bool, SDL_GAMEPAD_BUTTON_COUNT);
+    ctx.rawSDLController[1] = wNewArr(bool, SDL_GAMEPAD_BUTTON_COUNT);
+    for (uint64 i = 0; i < SDL_GAMEPAD_BUTTON_COUNT; i++)
+        ctx.rawSDLController[0][i] = false;
+    for (uint64 i = 0; i < SDL_GAMEPAD_BUTTON_COUNT; i++)
+        ctx.rawSDLController[1][i] = false;
+
     ctx.rawController[0] = wNewArr(bool, (uint8)WPadBtn::WPadBtn_Count);
     ctx.rawController[1] = wNewArr(bool, (uint8)WPadBtn::WPadBtn_Count);
     for (uint64 i = 0; i < (uint8)WPadBtn::WPadBtn_Count; i++)
@@ -118,6 +126,8 @@ void CheckNewControllerConnected(SDLContext &ctx)
     ctx.controller = SDL_OpenGamepad(controllers[0]);
     ctx.isControllerConnected = true;
     UpdateControllerType(ctx);
+    WEngine::WLog::SetConsoleInfo();
+    WEngine::WLog::ConsoleLog(std::format("Controller Name: {}", SDL_GetGamepadName(ctx.controller)));
 }
 
 void UpdateControllerType(SDLContext &ctx)
@@ -164,6 +174,39 @@ void UpdateControllerType(SDLContext &ctx)
             break;
         default: ;
     }
+}
+
+SDLSense SenseToSDLSense(SDLContext &ctx, const WEngine::InputSense& sense)
+{
+    SDLSense s{};
+    s.name = sense.senseName;
+    s.inputKind = sense.Kind();
+    if (s.inputKind == WEngine::InputSenseKind::Action)
+    {
+        auto action = std::get<WEngine::InputActionInternal>(sense.inputInternal);
+        std::string key =  action.keyName;
+        std::string btn =  action.buttonName;
+
+        if (!key.empty())
+        {
+            s.keyboardCheck = true;
+            s.key = StringToWKey(key);
+        }
+        if (!btn.empty())
+        {
+            s.controllerCheck = true;
+            s.controller = StringToWPadBtn(btn);
+        }
+    }
+    if (s.inputKind == WEngine::InputSenseKind::Float)
+    {
+
+    }
+    if (s.inputKind == WEngine::InputSenseKind::Vector)
+    {
+
+    }
+    return s;
 }
 
 #endif

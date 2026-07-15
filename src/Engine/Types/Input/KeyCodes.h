@@ -19,9 +19,9 @@ enum class WKey : uint8
 
 	ENTER,
 	ESCAPE,
-	SPACE,
-	TAB,
 	BACKSPACE,
+	TAB,
+	SPACE,
 	CAPSLOCK,
 	L_SHIFT,
 	L_CONTROL,
@@ -83,6 +83,8 @@ enum class WKey : uint8
 	WKey_Count
 };
 
+extern std::string WKey_Names[];
+
 enum class WMouseBtn : uint8
 {
 	LEFT,
@@ -118,10 +120,12 @@ enum class WPadBtn : uint8
 	Left,		///< Xbox D-Pad Left, Valve D-Pad Left, PlayStation D-Pad Left, Nintendo D-Pad Left
 	Right,		///< Xbox D-Pad Right,Valve D-Pad Right, PlayStation D-Pad Right, Nintendo D-Pad Right
 	Touchpad,	///< Valve Trackpad (any), PlayStation is mapped to Menu2
-	L4,			///< Xbox P1, Valve L4, Playstation L4
-	R4,			///< Xbox P3, Valve R4, Playstation R4
-	L5,			///< Xbox P2, Valve L5
-	R5,			///< Xbox P4, Valve R5
+	L4,			///< Xbox P3, Valve L4, Playstation L4
+	R4,			///< Xbox P1, Valve R4, Playstation R4
+	L5,			///< Xbox P4, Valve L5
+	R5,			///< Xbox P2, Valve R5
 
 	WPadBtn_Count
 };
+
+extern std::string WPadBtn_Names[];

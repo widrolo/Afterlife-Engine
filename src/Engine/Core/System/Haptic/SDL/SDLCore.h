@@ -14,4 +14,6 @@ void CheckNewControllerConnected(SDLContext &ctx);
 
 void UpdateControllerType(SDLContext &ctx);
 
+SDLSense SenseToSDLSense(SDLContext &ctx, const WEngine::InputSense& sense);
+
 #endif

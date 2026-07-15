@@ -31,13 +31,13 @@ SteamStore::SteamStore()
 		return;
 	}
 
-	std::string dataPath = CoreSystems::GetAssetRepo()->GetDataPath();
-	std::string inputFile = dataPath + "Input/game_actions_4188300.vdf";
-	inputFile = std::filesystem::canonical(inputFile).string();
-
-	WLog::ConsoleLog(inputFile);
-	SteamInput()->SetInputActionManifestFilePath(inputFile.c_str());
-	SteamInput()->Init(true);
+	//std::string dataPath = CoreSystems::GetAssetRepo()->GetDataPath();
+	//std::string inputFile = dataPath + "Input/game_actions_4188300.vdf";
+	//inputFile = std::filesystem::canonical(inputFile).string();
+//
+	//WLog::ConsoleLog(inputFile);
+	//SteamInput()->SetInputActionManifestFilePath(inputFile.c_str());
+	//SteamInput()->Init(true);
 
 	m_initSuccess = true;
 	
@@ -51,7 +51,7 @@ SteamStore::~SteamStore()
 {
 #if STEAM
 	SteamAPI_Shutdown();
-	SteamInput()->Shutdown();
+	//SteamInput()->Shutdown();
 #endif // STEAM
 }
 

@@ -124,6 +124,7 @@ void Engine::InitHandlers()
 
 	Iris::SETTING_BeginNewPreFrame();
 	Iris::ALLOC_CompileMaterial("Unlit/MissingMat");
+	Input::LoadInputMap();
 	m_rootSector = new Sector("root");
 	m_game = new Game();
 }

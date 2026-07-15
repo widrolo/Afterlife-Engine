@@ -4,6 +4,7 @@
 #include "Editor/Types/EditorSystems.h"
 #include "Engine/imgui/backends/imgui_impl_sdl3.h"
 #include "Engine/Types/CoreSystems.h"
+#include "Engine/Util/Log.h"
 #include "Haptic/SDL/SDLContext.h"
 #include "Haptic/SDL/SDLFetching.h"
 #include "Haptic/SDL/SDLCore.h"
@@ -21,10 +22,17 @@ void Haptic::Init(SDL_Window* window)
 void Haptic::FetchInput()
 {
     AdvanceBelts(ctx);
+
+
+
+
+    CheckControllerStatus(ctx);
     FetchAllInput(ctx);
     PollEvents();
-    CheckControllerStatus(ctx);
+    TranslateFetched(ctx);
     UpdateAllSenses(ctx);
+    bool res = ctx.selectedMap->results["testAction"].held;
+    WEngine::WLog::ConsoleLog(std::format("{}", res));
 }
 
 void Haptic::PollEvents()
@@ -44,17 +52,35 @@ void Haptic::PollEvents()
 
 void Haptic::EnableEditorMode()
 {
-
+    ctx.isEditor = true;
 }
 
-void Haptic::LoadInputMap(const std::string &mapName)
+void Haptic::LoadInputMap(const wtl::vector<WEngine::InputSense> &mapContent, const std::string &mapName)
 {
+    SDLMap map;
+    map.name = mapName;
 
+    for (const auto& sense : mapContent)
+    {
+        auto s = SenseToSDLSense(ctx, sense);
+        map.senses.push_back(s);
+    }
+
+    ctx.maps.push_back(map);
 }
 
 void Haptic::SelectInputMap(const std::string &mapName)
 {
-
+    for (auto& map : ctx.maps)
+    {
+        if (map.name == mapName)
+        {
+            ctx.selectedMap = &map;
+            return;
+        }
+    }
+    WEngine::WLog::SetConsoleError();
+    WEngine::WLog::ConsoleLog(std::format("Unable to find map {}", mapName));
 }
 
 void Haptic::LoadOutputMap(const std::string &mapName)

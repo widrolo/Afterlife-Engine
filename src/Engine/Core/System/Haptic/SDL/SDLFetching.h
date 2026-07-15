@@ -7,6 +7,11 @@ void FetchKeyboard(SDLContext &ctx);
 void FetchMouse(SDLContext &ctx);
 void FetchController(SDLContext &ctx);
 
+void TranslateFetched(SDLContext& ctx);
+void TranslateKeyboard(SDLContext& ctx);
+void TranslateMouse(SDLContext& ctx);
+void TranslateController(SDLContext& ctx);
+
 void UpdateAllSenses(SDLContext& ctx);
 void UpdateAllSensesInMap(SDLContext& ctx, SDLMap& map);
 

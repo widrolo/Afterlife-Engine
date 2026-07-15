@@ -2,12 +2,13 @@
 
 #include <array>
 #include <string>
+#include <variant>
 
 #include "Engine/Types/CommonTypes.h"
 
 namespace WEngine
 {
-    enum InputSenseKind
+    enum class InputSenseKind
     {
         Action,
         Float,
@@ -39,12 +40,10 @@ namespace WEngine
     struct InputSense
     {
         std::string senseName;
-        InputSenseKind kind;
-        union
+        std::variant<InputActionInternal, InputFloatInternal, InputVectorInternal> inputInternal;
+        InputSenseKind Kind() const
         {
-            InputActionInternal action;
-            InputFloatInternal floatInput;
-            InputVectorInternal vectorInput;
-        } inputInternal;
+            return (InputSenseKind)inputInternal.index();
+        }
     };
 }

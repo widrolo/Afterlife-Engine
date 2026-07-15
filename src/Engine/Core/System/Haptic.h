@@ -6,6 +6,7 @@
 #include <Engine/Types/Nullable.h>
 
 #include "Engine/Types/Input/InputPatch.h"
+#include "Engine/Types/Input/InputSense.h"
 #include "Engine/WTL/vector.h"
 
 class Haptic
@@ -17,7 +18,7 @@ public:
     static void EnableEditorMode();
 
     // ------------------------ INPUT/OUTPUT MAPS -------------------------
-    static void LoadInputMap(const std::string& mapName);
+    static void LoadInputMap(const wtl::vector<WEngine::InputSense>& mapContent, const std::string& mapName);
     static void SelectInputMap(const std::string& mapName);
     static void LoadOutputMap(const std::string& mapName);
     static void SelectOutputMap(const std::string& mapName);

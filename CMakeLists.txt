@@ -345,6 +345,9 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/ValueBelt.h
         src/Engine/Core/System/Haptic/SDL/SDLCore.cpp
         src/Engine/Core/System/Haptic/SDL/SDLCore.h
+        src/Engine/Types/Input/KeyCodes.cpp
+        src/Engine/Core/System/Haptic/SDL/SDLHelpers.cpp
+        src/Engine/Core/System/Haptic/SDL/SDLHelpers.h
 )
 
 target_include_directories(Widrolo_Engine_3D PRIVATE
