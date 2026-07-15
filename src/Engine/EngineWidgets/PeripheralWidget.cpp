@@ -1,6 +1,6 @@
 #include "PeripheralWidget.h"
 
-#include <Engine/Core/Handlers/InputHandler.h>
+#include <Engine/Core/Handlers/Input.h>
 #include <Engine/Core/Handlers/AssetRepo.h>
 #include <Engine/Types/CoreSystems.h>
 
@@ -17,6 +17,6 @@ void PeripheralWidget::RenderInternal()
 
     if (ImGui::Button("Open Bindings Overlay"))
     {
-        CoreSystems::GetInputHandler()->OpenConfigPanel();
+
     }
 }

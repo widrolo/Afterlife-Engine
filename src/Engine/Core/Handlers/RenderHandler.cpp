@@ -15,8 +15,9 @@
 
 #include "Engine/Types/DebugFlags.h"
 
-#include "InputHandler.h"
+#include "Input.h"
 #include "Engine/EngineDefines.h"
+#include "Engine/Core/System/Haptic.h"
 #include "Engine/Types/CoreSystems.h"
 
 
@@ -534,7 +535,7 @@ void RenderHandler::InitSDL()
 	}
 	WLog::ConsoleLog(std::format("Window opened at resolution {}x{}", m_windowResolution.x, m_windowResolution.y));
 
-	CoreSystems::GetInputHandler()->SetWindow(m_window);
+	Haptic::Init(m_window);
 }
 void RenderHandler::InitImGui()
 {

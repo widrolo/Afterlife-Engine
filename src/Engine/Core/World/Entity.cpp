@@ -2,7 +2,6 @@
 #include <Engine/Types/SpawnArgs.h>
 #include <Engine/Math/Transform.h>
 #include <Engine/Components/Component.h>
-#include <Engine/Components/InputComponent.h>
 #include <Engine/Components/Creation/ComponentFactory.h>
 #include <Engine/Core/System/Memory.h>
 
@@ -118,7 +117,5 @@ void Entity::EntityDestroy()
 
 void Entity::InitBaseComponents()
 {
-	ComponentArgs args{ 3, YAML::Node() };
 
-	input = dynamic_cast<InputComponent*>(ComponentFactory::CreateComponent(args, this));
 }

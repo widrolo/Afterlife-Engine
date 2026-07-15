@@ -22,6 +22,18 @@ namespace WEngine
     };
 
     /**
+     * Used for knowing which icons to use in the UI and which features you could use in gameplay,
+     */
+    enum class InputVendor //nope, could not find a better name
+    {
+        KeyboardMouse,
+        Xbox,
+        PlayStation,
+        Nintendo,
+        Valve,
+    };
+
+    /**
      * Types of controllers supported by the engine.
      */
     enum class ControllerType
@@ -73,5 +85,7 @@ namespace WEngine
         Back_Buttons                = BIT(8),
         Touch_Sensitive_Joysticks   = BIT(9),
         Touch_Sensitive_Grip        = BIT(10),
+        Touchpad_Present            = BIT(11),
+        Touchpad_Split              = BIT(12),
     };
 }

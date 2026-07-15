@@ -6,7 +6,7 @@
 
 #include <Game/Core/Game.h>
 
-#include <Engine/Core/Handlers/InputHandler.h>
+#include <Engine/Core/Handlers/Input.h>
 #include <Engine/Core/Handlers/RenderHandler.h>
 #include <Engine/Core/Handlers/AssetRepo.h>
 #include <Engine/Core/Handlers/PhysicsHandler.h>
@@ -27,6 +27,7 @@
 #include <Engine/Types/CoreSystems.h>
 #include <Engine/Core/System/Memory.h>
 
+#include "System/Haptic.h"
 #include "System/Iris.h"
 using namespace WEngine;
 
@@ -112,7 +113,6 @@ void StartHandlerSingle(T** container, std::string name)
 
 void Engine::InitHandlers()
 {
-	StartHandlerSingle<InputHandler>(&CoreSystems::inputHandler, "Input Handler");
 	StartHandlerSingle<RNGHandler>(&CoreSystems::rngHandler, "RNG Handler");
 	StartHandlerSingle<AssetRepo>(&CoreSystems::assetRepo, "Asset Repo");
 	StartHandlerSingle<RenderHandler>(&CoreSystems::renderHandler, "Render Handler");
@@ -237,7 +237,7 @@ void Engine::Loop_Tick()
 
 	StopWatch timings;
 
-	CoreSystems::inputHandler->FetchInput();
+	Haptic::FetchInput();
 
 	m_game->GameLoopTickEarly();
 	m_rootSector->Tick(m_deltaTime * CoreSystems::GetTimeScale());

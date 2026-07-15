@@ -7,7 +7,7 @@
 input:
     mapName: $Sample
 
-    # Inputs are just nodes in this node.
+    # Inputs are just nodes in this node. In the engine they are called Senses
     inputs:
         testAction:
             # This is the name, the parent node is never the name.
@@ -37,7 +37,8 @@ input:
             keyboard:
                 # Addressable keys:
                 # All of the alphabet (in upper case)
-                # Space, lShift, rShift, lCtrl, rCtrl, Tab, Enter, Back, CapsLock, ESC
+                # Space, lShift, rShift, lCtrl, rCtrl, lAlt, rAlt, Tab, Enter, Back, 
+                # CapsLock, ESC
                 # Number Row
                 # F keys in the format Debug{num} eg. Debug4 for F4.
                 key: A
@@ -56,6 +57,7 @@ input:
                 # lTrigger, rTrigger
                 # lTriggerDelta, rTriggerDelta
                 # lTouchPressure, rTouchPressure
+                # lTouchPressureDelta, rTouchPressureDelta
                 # These actually report as zero to one.
                 trigger: lTrigger
             keyboard:
@@ -78,7 +80,7 @@ input:
                 # Two things about the touchpad:
                 #   1: PlayStation gets divided into two, Steam Controller is the norm here.
                 #   2: Touch pads are squares and not unit circles.
-                trigger: lJoy
+                joy: lJoy
             keyboard:
                 # [1] : negative X
                 # [2] : positive X

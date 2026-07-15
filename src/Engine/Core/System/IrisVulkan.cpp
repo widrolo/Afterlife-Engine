@@ -40,8 +40,8 @@
 #include "Vulkan/VulkanImages.h"
 #include "Vulkan/VulkanRaytracing.h"
 
-VulkanContext ctx;
-VulkanStatistics stats;
+static VulkanContext ctx;
+static VulkanStatistics stats;
 
 bool Iris::SETTING_InitGPUApi(SDL_Window *window)
 {

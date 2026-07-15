@@ -6,7 +6,6 @@ namespace WEngine
 {
 	class AssetRepo;
 	class RenderHandler;
-	class InputHandler;
 }
 namespace WEditor
 {
@@ -21,7 +20,6 @@ namespace WEditor
 		friend Editor;
 	private:
 		_GLOBAL_ WEngine::RenderHandler* renderHandler;
-		_GLOBAL_ WEngine::InputHandler* inputHandler;
 		_GLOBAL_ WEngine::AssetRepo* assetRepo;
 		_GLOBAL_ EditorUIHandler* editorUIHandler;
 		_GLOBAL_ MenubarHandler* menubarHandler;
@@ -33,7 +31,6 @@ namespace WEditor
 
 	public:
 		static WEngine::RenderHandler* GetRenderHandler() { return renderHandler; }
-		static WEngine::InputHandler* GetInputHandler() { return inputHandler; }
 		static WEngine::AssetRepo* GetAssetRepo() { return assetRepo; }
 		static EditorUIHandler* GetEditorUIHandler() { return editorUIHandler; }
 		static MenubarHandler* GetMenubarHandler() { return menubarHandler; }

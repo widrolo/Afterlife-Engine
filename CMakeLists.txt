@@ -18,6 +18,13 @@ set(GPU_D3D12_VAL 4)
 set(GPU_AGC_VAL 5)
 set(GPU_NVN_VAL 6)
 
+set(HAPTIC_SDL_VAL 1)
+set(HAPTIC_STEAM_INPUT_VAL 2)
+set(HAPTIC_XINPUT_VAL 3)
+set(HAPTIC_PLAYSTATION_VAL 4)
+set(HAPTIC_NINTENDO_VAL 5)
+set(HAPTIC_APPLE_VAL 6)
+
 set(OPTION_DISABLED 0)
 set(OPTION_ENABLED 1)
 
@@ -30,8 +37,6 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Components/AudioComponent.h
         src/Engine/Components/Component.cpp
         src/Engine/Components/Component.h
-        src/Engine/Components/InputComponent.cpp
-        src/Engine/Components/InputComponent.h
         src/Engine/Components/RNGComponent.cpp
         src/Engine/Components/RNGComponent.h
         src/Engine/Components/SectorComponent.cpp
@@ -40,8 +45,8 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Core/Handlers/AssetRepo.h
         src/Engine/Core/Handlers/AudioHandler.cpp
         src/Engine/Core/Handlers/AudioHandler.h
-        src/Engine/Core/Handlers/InputHandler.cpp
-        src/Engine/Core/Handlers/InputHandler.h
+        src/Engine/Core/Handlers/Input.cpp
+        src/Engine/Core/Handlers/Input.h
         src/Engine/Core/Handlers/PhysicsHandler.cpp
         src/Engine/Core/Handlers/PhysicsHandler.h
         src/Engine/Core/Handlers/RenderHandler.cpp
@@ -331,7 +336,15 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/Rendering/GPU/StatBufKey.h
         src/Engine/Core/System/Haptic.h
         src/Engine/Types/Input/InputPatch.h
-        src/Engine/Types/Input/InputCodes.h
+        src/Engine/Core/System/HapticSDL.cpp
+        src/Engine/Core/System/Haptic/SDL/SDLFetching.cpp
+        src/Engine/Core/System/Haptic/SDL/SDLFetching.h
+        src/Engine/Core/System/Haptic/SDL/SDLContext.h
+        src/Engine/Types/Input/InputSense.h
+        src/Engine/Core/System/Haptic/SDL/SDLTypes.h
+        src/Engine/Types/ValueBelt.h
+        src/Engine/Core/System/Haptic/SDL/SDLCore.cpp
+        src/Engine/Core/System/Haptic/SDL/SDLCore.h
 )
 
 target_include_directories(Widrolo_Engine_3D PRIVATE

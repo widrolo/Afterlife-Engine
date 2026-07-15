@@ -25,7 +25,6 @@ namespace WEngine
 	class AssetRepo;
 	class PhysicsHandler;
 	class RenderHandler;
-	class InputHandler;
 	class RNGHandler;
 	class AudioHandler;
 	class WidgetHandler;
@@ -49,7 +48,6 @@ namespace WEngine
 	private:
 		// Pointers to core engine systems
 		_GLOBAL_ RenderHandler* renderHandler;
-		_GLOBAL_ InputHandler* inputHandler;
 		_GLOBAL_ AssetRepo* assetRepo;
 		_GLOBAL_ PhysicsHandler* physicsHandler;
 		_GLOBAL_ RNGHandler* rngHandler;
@@ -64,7 +62,6 @@ namespace WEngine
 		_GLOBAL_ float32 timeScale = 1.0f;
 	public:
 		static RenderHandler* GetRenderHandler() { return renderHandler; }
-		static InputHandler* GetInputHandler() { return inputHandler; }
 		static AssetRepo* GetAssetRepo() { return assetRepo; }
 		static PhysicsHandler* GetPhysicsHandler() { return physicsHandler; }
 		static RNGHandler* GetRNGHandler() { return rngHandler; }

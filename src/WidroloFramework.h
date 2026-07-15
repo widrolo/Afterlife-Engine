@@ -5,7 +5,6 @@
 #include <Engine/Core/System/Memory.h>
 
 // Components
-#include <Engine/Components/InputComponent.h>
 #include <Engine/Components/Rendering/CameraComponent.h>
 #include <Engine/Components/SectorComponent.h>
 #include <Engine/Components/RNGComponent.h>
@@ -20,7 +19,6 @@
 #include <Engine/Types/Input/KeyCodes.h>
 #include <Engine/Math/Math.h>
 #include <Engine/Math/Transform.h>
-#include <Engine/Types/Input/KeyEvents.h>
 #include <Engine/Types/Rendering/Color.h>
 #include <Engine/Types/SpawnArgs.h>
 #include <Engine/Types/Rendering/RenderMission.h>

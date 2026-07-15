@@ -1,7 +1,6 @@
 #include "Component.h"
 
 #include <Engine/Types/SpawnArgs.h>
-#include <Engine/Components/InputComponent.h>
 #include <Engine/Util/Log.h>
 #include <Engine/Core/World/Entity.h>
 

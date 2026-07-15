@@ -7,7 +7,7 @@
 #include <Engine/Core/System/Memory.h>
 #include <Engine/Util/Log.h>
 #include <Engine/EngineDefines.h>
-#include <Engine/Core/Handlers/InputHandler.h>
+#include <Engine/Core/Handlers/Input.h>
 #include <Engine/Core/Handlers/RenderHandler.h>
 #include <Engine/Core/Handlers/AssetRepo.h>
 #include <Engine/Types/CoreSystems.h>
@@ -27,6 +27,7 @@
 #include <Engine/imgui/implot.h>
 
 #include "Editor/Types/EditorState.h"
+#include "Engine/Core/System/Haptic.h"
 #include "Engine/Core/System/Iris.h"
 
 using namespace WEditor;
@@ -90,7 +91,6 @@ void StartHandlerSingleEditor(T** container, std::string name)
 
 void Editor::InitHandlers()
 {
-    StartHandlerSingle<WEngine::InputHandler>(&EditorSystems::inputHandler, &WEngine::CoreSystems::inputHandler, "Input Handler");
     StartHandlerSingle<WEngine::AssetRepo>(&EditorSystems::assetRepo, &WEngine::CoreSystems::assetRepo, "Asset Repo");
     StartHandlerSingle<WEngine::RenderHandler>(&EditorSystems::renderHandler, &WEngine::CoreSystems::renderHandler, "Render Handler");
 
@@ -103,7 +103,7 @@ void Editor::InitHandlers()
 	Iris::SETTING_BeginNewPreFrame();
 	Iris::ALLOC_CompileMaterial("Unlit/MissingMat");
 	WAllocator::Construct<WEngine::Sector, const std::string&>("root");
-	EditorSystems::inputHandler->EnableEditorMode();
+	Haptic::EnableEditorMode();
 }
 
 void Editor::Run()
@@ -129,7 +129,7 @@ void Editor::Run()
 
 		auto frameStart = std::chrono::steady_clock::now();
 
-		EditorSystems::inputHandler->FetchInput();
+		Haptic::FetchInput();
 		if (!Iris::IsFirstFrame())
 			Iris::SETTING_BeginNewPreFrame();
 

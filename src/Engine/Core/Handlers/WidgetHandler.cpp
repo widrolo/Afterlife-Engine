@@ -1,5 +1,6 @@
 #include "WidgetHandler.h"
 
+#include <algorithm>
 #include <Engine/EngineWidgets/SystemWidget.h>
 #include <Engine/EngineWidgets/EngineControlWidget.h>
 #include <Engine/EngineWidgets/StatisticsWidgets.h>
@@ -12,7 +13,7 @@
 
 #include <Engine/Types/CoreSystems.h>
 
-#include "InputHandler.h"
+#include "Input.h"
 #include <Engine/Core/System/Memory.h>
 
 #include "Engine/EngineWidgets/RenderWatchWidget.h"
@@ -57,41 +58,40 @@ void WidgetHandler::InitSystemWidgets()
 void WidgetHandler::DrawWidgets()
 {
     //return;
-    const auto input = CoreSystems::GetInputHandler();
 
     const auto& stat = m_systemWidgets[(uint16)SysWidgetTypes::Statistics];
     const auto& control = m_systemWidgets[(uint16)SysWidgetTypes::EngineControl];
     const auto& sys = m_systemWidgets[(uint16)SysWidgetTypes::System];
     const auto& gameSys = m_systemWidgets[(uint16)SysWidgetTypes::GameSystem];
 
-    if (input->GetKeyPressed(WKey::DEBUG1))
-        sys->m_open = !sys->m_open;
-
-    if (input->GetKeyPressed(WKey::DEBUG2))
-        gameSys->m_open = !gameSys->m_open;
-
-    if (input->GetKeyPressed(WKey::DEBUG12))
-    {
-        m_widgetsEnabled = !m_widgetsEnabled;
-        if (m_widgetsEnabled)
-        {
-            stat->m_open = true;
-            control->m_open = true;
-            sys->m_open = true;
-            gameSys->m_open = true;
-        }
-        else
-        {
-            for (uint16 i = 0; i < (uint16)SysWidgetTypes::SysWidget_Count; i++)
-                m_systemWidgets[i]->m_open = false;
-            for (const auto& widget : m_gameWidgets)
-            {
-                if (auto lw = widget.lock())
-                    lw->m_open = false;
-
-            }
-        }
-    }
+    //if (input->GetKeyPressed(WKey::DEBUG1))
+    //    sys->m_open = !sys->m_open;
+//
+    //if (input->GetKeyPressed(WKey::DEBUG2))
+    //    gameSys->m_open = !gameSys->m_open;
+//
+    //if (input->GetKeyPressed(WKey::DEBUG12))
+    //{
+    //    m_widgetsEnabled = !m_widgetsEnabled;
+    //    if (m_widgetsEnabled)
+    //    {
+    //        stat->m_open = true;
+    //        control->m_open = true;
+    //        sys->m_open = true;
+    //        gameSys->m_open = true;
+    //    }
+    //    else
+    //    {
+    //        for (uint16 i = 0; i < (uint16)SysWidgetTypes::SysWidget_Count; i++)
+    //            m_systemWidgets[i]->m_open = false;
+    //        for (const auto& widget : m_gameWidgets)
+    //        {
+    //            if (auto lw = widget.lock())
+    //                lw->m_open = false;
+//
+    //        }
+    //    }
+    //}
 
     for (uint16 i = 0; i < (uint16)SysWidgetTypes::SysWidget_Count; i++)
         if (m_systemWidgets[i]->m_open)
