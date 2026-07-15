@@ -96,7 +96,6 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/CommonTypes.h
         src/Engine/Types/CoreSystems.h
         src/Engine/Types/Input/KeyCodes.h
-        src/Engine/Types/Input/KeyEvents.h
         src/Engine/Math/Math.h
         src/Engine/Types/Nullable.h
         src/Engine/Types/Rendering/RenderMission.h
@@ -137,8 +136,6 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/Input/InputDevice.h
         src/Engine/EngineWidgets/PeripheralWidget.cpp
         src/Engine/EngineWidgets/PeripheralWidget.h
-        src/Engine/Types/Input/KeyCodes.cpp
-        src/Engine/Types/Input/InputDevice.cpp
         src/Engine/Core/Handlers/WidgetHandler.cpp
         src/Engine/Core/Handlers/WidgetHandler.h
         src/Engine/EngineWidgets/SystemWidget.cpp
@@ -332,6 +329,9 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Core/System/Vulkan/VulkanRaytracing.cpp
         src/Engine/Core/System/Vulkan/VulkanRaytracing.h
         src/Engine/Types/Rendering/GPU/StatBufKey.h
+        src/Engine/Core/System/Haptic.h
+        src/Engine/Types/Input/InputPatch.h
+        src/Engine/Types/Input/InputCodes.h
 )
 
 target_include_directories(Widrolo_Engine_3D PRIVATE

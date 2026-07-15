@@ -117,13 +117,3 @@ enum class WPadBtn : uint8
 
 	Pad_Button_Count
 };
-
-// Since apparently not every manufacturer can agree on what button
-// gives what signal, we will have to basically make google translate
-
-// The following masks are meant to relate the above enum to the
-// buttons sent by the controllers.
-
-extern uint8 WPadBtn_Generic[];
-extern uint8 WPadBtn_Playstation[];
-extern uint8 WPadBtn_Xbox[];

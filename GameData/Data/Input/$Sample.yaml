@@ -1,0 +1,96 @@
+# This is not an actual input map, but rather a spec that shows all names.
+# The engine skips loading this one, so dont about technically weird definitions.
+
+# Haptic is not required to be backwards compatible between games.
+
+# The following is a smaple for an input map
+input:
+    mapName: $Sample
+
+    # Inputs are just nodes in this node.
+    inputs:
+        testAction:
+            # This is the name, the parent node is never the name.
+            # WEDGE will generate a bogus parent name just like in sectors.
+            # Having duplicate names will trow a warning and reject the new 
+            # input instead of overriding.
+            name: testAction
+
+            # This determines what kind of inputs were testing for. The
+            # possible ones include:
+            #   Action : Either one or zero, good for button presses.
+            #   Float  : Between negative one and one, good for trigger presses.
+            #   Vector : Vector of a unit circle, good for joysticks.
+            # Haptic cannot handle actions/analogues being assigned an unsupported
+            # input Type. Haptic will throw an error and reject the input.
+            inputType: Action
+
+            # Contoller specific inputs in type Action
+            controller:
+                # Addressable buttons:
+                # North, South, East, West
+                # dUp, dDown, dRight, dLeft
+                # lBump, rBump, lStick, rStick
+                # lMenu, rMenu.
+                button: South
+            # Keyboard specific inputs in type Action
+            keyboard:
+                # Addressable keys:
+                # All of the alphabet (in upper case)
+                # Space, lShift, rShift, lCtrl, rCtrl, Tab, Enter, Back, CapsLock, ESC
+                # Number Row
+                # F keys in the format Debug{num} eg. Debug4 for F4.
+                key: A
+            # Mouse specific inputs in type Action
+            mouse:
+                # Addressable buttons:
+                # Left, Right, Middle, SideClose, SideFar
+                # WheelUp, WheelDown
+                # WheelUpFast, WheelDownFast
+                button: Left
+        testFloat:
+            name: testFloat
+            inputType: Float
+            controller:
+                # Addressable triggers:
+                # lTrigger, rTrigger
+                # lTriggerDelta, rTriggerDelta
+                # lTouchPressure, rTouchPressure
+                # These actually report as zero to one.
+                trigger: lTrigger
+            keyboard:
+                # First Key is negative one, second key is postive one
+                key: [A, D]
+            mouse:
+                # Addressable sensors:
+                # speedChange : change in veolcity compared to the last frame.
+                # wheelSpeed  : up is positive, down is negative
+                sensor: speedChange
+                # Clamps it in between this value to remain within range of the float.
+                maxSpeed: 100
+        testVector:
+            name: testVector
+            inputType: Vector
+            controller:
+                # Addressable buttons:
+                # lJoy, rJoy
+                # lTouch, rTouch
+                # Two things about the touchpad:
+                #   1: PlayStation gets divided into two, Steam Controller is the norm here.
+                #   2: Touch pads are squares and not unit circles.
+                trigger: lJoy
+            keyboard:
+                # [1] : negative X
+                # [2] : positive X
+                # [3] : positive Y
+                # [4] : negative Y
+                # Positive Y are in anti arrangments because it makes sense.
+                key: [A, D, W, S]
+            mouse:
+                # Addressable sensors:
+                # MouseDelta
+                # WindowPos, WindowPosSquare
+                # They are are squares and not unit circles. WindowPos maintains aspect ratio while
+                # WindowPosSquare does not maintain aspect ratio.
+                sensor: WindowPos
+

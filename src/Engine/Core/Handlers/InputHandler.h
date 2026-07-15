@@ -12,6 +12,8 @@
 #include <Engine/Types/CommonTypes.h>
 #include <Engine/Types/Input/InputDevice.h>
 
+#include <steam_api.h>
+
 namespace WEngine
 {
 	/**
@@ -30,11 +32,15 @@ namespace WEngine
 		uint32 m_mousestate{};
 		uint32 m_lastMousestate{};
 
-		wtl::vector<InputPeripheral> m_peripherals;
-
 		SDL_Window* m_window;
 
 		bool m_isEditor = false;
+
+		InputHandle_t* m_controllers = nullptr;
+		uint8 m_numControllers;
+		bool m_isControllerConnected;
+		InputHandle_t m_mainController;
+
 	public:
 
 		void EnableEditorMode() { m_isEditor = true; }
@@ -111,111 +117,15 @@ namespace WEngine
 		 */
 		[[nodiscard]] bool GetMouseReleased(WMouseBtn button) const;
 
-		/**
-		 * Gets the position of the left joystick.
-		 * @param controller Controller to be queried.
-		 * @return Left joystick position.
-		 */
-		[[nodiscard]] Vector2 GetLeftStick(const Controller &controller) const;
+		void OpenConfigPanel();
 
-		/**
-		 * Gets the position of the right joystick.
-		 * @param controller Controller to be queried.
-		 * @return Right joystick position.
-		 */
-		[[nodiscard]] Vector2 GetRightStick(const Controller &controller) const;
-
-		/**
-		 * Gets how far the left trigger is pressed down.
-		 * @param controller Controller to be queried.
-		 * @return Depth of the left trigger.
-		 */
-		[[nodiscard]] float GetLeftTrigger(const Controller &controller) const;
-
-		/**
-		 * Gets how far the right trigger is pressed down.
-		 * @param controller Controller to be queried.
-		 * @return Depth of the right trigger.
-		 */
-		[[nodiscard]] float GetRightTrigger(const Controller &controller) const;
-
-		/**
-		 * @deprecated
-		 */
-		[[deprecated]][[nodiscard]] Touchpad GetTouchPad() const;
-
-		/**
-		 * Checks whether a controller is connected.
-		 * @return True if a controller is connected.
-		 */
-		[[nodiscard]] bool GetControllerPresent() const;
-
-		/**
-		 * Checks if a mouse button was newly pressed this frame.
-		 * @param buttonMap Button map of the controller to be queried.
-		 * @param button The gamepad button to be queried for a press.
-		 * @return True if the mouse button was pressed this frame.
-		 */
-		[[nodiscard]] bool GetGamepadPressed(InputPeripheralButtons buttonMap, WPadBtn button) const;
-
-		/**
-		 * Checks if a gamepad button is being pressed down.
-		 * @param buttonMap Button map of the controller to be queried.
-		 * @param button The gamepad button to be queried for a press.
-		 * @return True if the gamepad button is currently in a pressed state.
-		 */
-		[[nodiscard]] bool GetGamepadHold(InputPeripheralButtons buttonMap, WPadBtn button) const;
-
-		/**
-		 * Checks if a gamepad button has just been released this frame.
-		 * @param buttonMap Button map of the controller to be queried.
-		 * @param button The gamepad button to be queried for a press.
-		 * @return True if the gamepad button was just released this frame.
-		 */
-		[[nodiscard]] bool GetGamepadReleased(InputPeripheralButtons buttonMap, WPadBtn button) const;
-
-		/**
-		 * Gets an input peripheral from the repository.
-		 * @param id ID of a connected peripheral to be retrieved.
-		 * @return The retrieved input peripheral.
-		 */
-		[[nodiscard]] const InputPeripheral& GetInputPeripheral(uint8 id) const;
-
-		/**
-		 * Gets the number of connected peripherals.
-		 * @return Number of connected peripherals.
-		 */
-		[[nodiscard]] uint8 GetInputPeripheralCount() const;
-
-		/**
-		 * Checks whether a peripheral is still connected.
-		 * @param joyID ID of the peripheral.
-		 * @return True if It's still connected.
-		 */
-		[[nodiscard]] bool IsInputPeripheralStillPresent(const SDL_JoystickID* joyID) const;
 	private:
-		void InitPeripheral(SDL_JoystickID joyID);
-		static Controller* InitController(SDL_Joystick* joystick);
-		static SteeringWheel* InitSteeringWheel(SDL_Joystick* joystick);
-		static InputPeripheralVendor GetVendor(uint16 id) ;
-
 		void FetchKeyboardInput();
 		void FetchMouseInput();
 		void FetchControllerInput();
-		void FetchSteeringWheelInput();
-		static void FetchPadButtonInput(InputPeripheral& device);
 
-		// these are not all, since i dont have them all
-		static void FetchPadButtonInput_Sony(const InputPeripheral& device, const bool* joyButtons);
-		static void FetchPadButtonInput_Microsoft(const InputPeripheral& device, const bool* joyButtons);
-		static void FetchPadButtonInput_Logitech(const InputPeripheral& device, const bool* joyButtons);
-		static void FetchPadButtonInput_Turtlebeach(const InputPeripheral& device, const bool* joyButtons);
 
-		void CheckPeripherals();
-		void CheckMissingPeripherals(int count, const SDL_JoystickID* joyID);
 		void PollEvents() const;
 
-		static void ResetController(Controller* controller);
-		static void ResetSteeringWheel(SteeringWheel* wheel);
 	};
 }

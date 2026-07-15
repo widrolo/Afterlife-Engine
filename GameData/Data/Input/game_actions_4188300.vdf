@@ -1,0 +1,51 @@
+"In Game Actions"
+{
+    "version"		"1"
+	"revision"		"1"
+	"title"		    "Official Configuration"
+    "description"	"The default input configuration."
+    "creator"		"Dev"
+
+
+	"actions"
+	{
+        "General"
+        {
+            "title" "#Set_General"
+
+            "Button"
+            {
+                "Test" "#Action_Test"
+            }
+        }
+	}
+	"localization"
+	{
+        "english"
+        {
+            "Set_General" "General Actions"
+            "Action_Test" "Test"
+        }
+	}
+    "group"
+    {
+        "id"		"0"
+		"mode"		"four_buttons"
+        "inputs"
+		{
+			"button_a"
+			{
+				"activators"
+				{
+					"Full_Press"
+					{
+						"bindings"
+						{
+							"binding" "key_press SPACE, Test"
+						}
+					}
+				}
+			}
+		}
+    }
+}

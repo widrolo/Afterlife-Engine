@@ -1,12 +1,15 @@
 #include "SteamStore.h"
 
+#include <filesystem>
 #include <Engine/Util/Log.h>
 
 #include <Engine/Util/Env.h>
 #include <sstream>
 #include <iostream>
 
+#include "Engine/Core/Handlers/AssetRepo.h"
 #include "Engine/Core/System/Memory.h"
+#include "Engine/Types/CoreSystems.h"
 
 using namespace WEngine;
 
@@ -28,11 +31,15 @@ SteamStore::SteamStore()
 		return;
 	}
 
+	std::string dataPath = CoreSystems::GetAssetRepo()->GetDataPath();
+	std::string inputFile = dataPath + "Input/game_actions_4188300.vdf";
+	inputFile = std::filesystem::canonical(inputFile).string();
+
+	WLog::ConsoleLog(inputFile);
+	SteamInput()->SetInputActionManifestFilePath(inputFile.c_str());
 	SteamInput()->Init(true);
 
 	m_initSuccess = true;
-
-	m_controllers = wNewArr(InputHandle_t, STEAM_INPUT_MAX_COUNT);
 	
 	m_steamID = SteamUser()->GetSteamID();
 	m_steamID64 = m_steamID.ConvertToUint64();
@@ -46,21 +53,6 @@ SteamStore::~SteamStore()
 	SteamAPI_Shutdown();
 	SteamInput()->Shutdown();
 #endif // STEAM
-}
-
-void SteamStore::FetchInput()
-{
-	SteamInput()->RunFrame();
-	m_numControllers = SteamInput()->GetConnectedControllers(m_controllers);
-	if (m_numControllers != 0 && m_controllers != nullptr)
-	{
-		m_mainController = m_controllers[0];
-		m_isControllerConnected = true;
-	}
-	else
-	{
-		m_isControllerConnected = false;
-	}
 }
 
 std::string SteamStore::GetSteamAccountName()
@@ -106,13 +98,6 @@ void SteamStore::OpenOverlay(OverlayWindows overlay)
 #if STEAM
 	SteamFriends()->ActivateGameOverlay(overlayWindowsStr[overlay]);
 #endif // STEAM
-}
-
-void SteamStore::OpenControllerBinds()
-{
-	if (!m_isControllerConnected)
-		return;
-	SteamInput()->ShowBindingPanel(m_mainController);
 }
 
 
