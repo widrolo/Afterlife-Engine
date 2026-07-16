@@ -74,7 +74,7 @@ bool SetupSwapchain(VulkanContext& ctx, VulkanStatistics& stats)
     ctx.displayTarget.resolution = EngineSettings::resolution;
 
     ctx.displayTarget.targetImageViews.resize(ctx.screen.swapchainImageCount);
-    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
+    for (sizeT i = 0; i < ctx.screen.swapchainImageCount; i++)
     {
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

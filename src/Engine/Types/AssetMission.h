@@ -38,8 +38,8 @@ namespace WEngine
 			FragmentShader,
 			GeometryShader,
 		} shaderType;
-		uint64 shaderSize;
-		uint32* shaderCode;
+		sizeT shaderSize;
+		dword* shaderCode;
 	};
 
 	/**

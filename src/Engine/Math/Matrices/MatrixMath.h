@@ -23,14 +23,14 @@ namespace WEngine
         std::array<std::array<float32, m1Columns>, Rows> aRows;
         std::array<std::array<float32, m2Rows>, Cols> aCols;
 
-        for (int i = 0; i < Rows; i++)
+        for (sizeT i = 0; i < Rows; i++)
             aRows[i] = m1.GetRow(i);
-        for (int i = 0; i < Cols; i++)
+        for (sizeT i = 0; i < Cols; i++)
             aCols[i] = m2.GetCol(i);
 
-        for (int i = 0; i < Rows; i++)
+        for (sizeT i = 0; i < Rows; i++)
         {
-            for (int j = 0; j < Cols; j++)
+            for (sizeT j = 0; j < Cols; j++)
             {
                 result.SetValue(i, j, Dot<m2Rows>(aRows[i], aCols[j]));
             }
@@ -41,9 +41,9 @@ namespace WEngine
     static Mat4x4 Glm4x4ToMat4x4(glm::mat4x4 mat)
     {
         Mat4x4 result;
-        for (int i = 0; i < 4; i++)
+        for (sizeT i = 0; i < 4; i++)
         {
-            for (int j = 0; j < 4; j++)
+            for (sizeT j = 0; j < 4; j++)
             {
                 result.SetValue(i, j, mat[i][j]);
             }

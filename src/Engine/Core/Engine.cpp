@@ -48,10 +48,10 @@ float64 Engine::GetDeltaTime()
 	return m_deltaTime;
 }
 
-void Engine::ParseCommandLine(int argc, char* argv[])
+void Engine::ParseCommandLine(sizeT argc, char* argv[])
 {
 	std::string arg;
-	for (int i = 1; i < argc; i++)
+	for (sizeT i = 1; i < argc; i++)
 	{
 		if (arg == "-resolution")
 		{
@@ -323,7 +323,7 @@ void Engine::Loop_Stall(std::chrono::time_point<std::chrono::steady_clock>& fram
 	if (frameEnd.count() < 0)
 		frameEnd = std::chrono::microseconds(0);
 
-	uint32 sleepMs = (uint32)frameEnd.count() / (1000 * 1000);
+	sizeT sleepMs = (sizeT)frameEnd.count() / (1000 * 1000);
 	if (sleepMs > 1) SDL_Delay(sleepMs - 1);
 
 	// Spin for the remainder, this makes sure that the frame rate is rock solid on the cap.

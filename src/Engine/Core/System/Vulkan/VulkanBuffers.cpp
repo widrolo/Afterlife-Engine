@@ -16,7 +16,7 @@ bool SetupStationaryInstanceBuffers(VulkanContext &ctx, VulkanStatistics &stat)
 {
     ctx.statBuffers.resize(GPUSettings::maxStationaryInstBuffers);
 
-    for (uint32_t i = 0; i < GPUSettings::maxStationaryInstBuffers; i++)
+    for (sizeT i = 0; i < GPUSettings::maxStationaryInstBuffers; i++)
     {
         auto buf = CreateStationaryInstanceBuffer(ctx, stat);
         Vulkan_StatBuf statBuffer{};

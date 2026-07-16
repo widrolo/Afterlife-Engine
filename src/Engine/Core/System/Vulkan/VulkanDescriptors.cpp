@@ -14,7 +14,7 @@ VkDescriptorSetLayout CreateDescriptorSetLayout(VulkanContext &ctx, const WEngin
 {
     wtl::vector<VkDescriptorSetLayoutBinding> bindings(shaderDef.fragInfo.expectTextureCount);
 
-    for (uint32_t i = 0; i < bindings.size(); ++i)
+    for (sizeT i = 0; i < bindings.size(); ++i)
     {
         VkDescriptorSetLayoutBinding binding{};
         binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;

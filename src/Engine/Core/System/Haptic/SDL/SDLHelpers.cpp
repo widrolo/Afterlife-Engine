@@ -8,7 +8,7 @@ WKey StringToWKey(const std::string &name)
 {
     std::string nameLow = name;
     std::transform(nameLow.begin(), nameLow.end(), nameLow.begin(), ::tolower);
-    for (uint64 i = 0; i < (uint8)WKey::WKey_Count; i++)
+    for (sizeT i = 0; i < (uint8)WKey::WKey_Count; i++)
     {
         if (nameLow == WKey_Names[i])
             return (WKey)i;
@@ -27,7 +27,7 @@ WPadBtn StringToWPadBtn(const std::string &name)
 {
     std::string nameLow = name;
     std::transform(nameLow.begin(), nameLow.end(), nameLow.begin(), ::tolower);
-    for (uint64 i = 0; i < (uint8)WPadBtn::WPadBtn_Count; i++)
+    for (sizeT i = 0; i < (uint8)WPadBtn::WPadBtn_Count; i++)
     {
         if (nameLow == WPadBtn_Names[i])
             return (WPadBtn)i;

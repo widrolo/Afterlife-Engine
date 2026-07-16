@@ -46,7 +46,7 @@ void WidgetHandler::InitSystemWidgets()
     m_systemWidgets[(uint16)SysWidgetTypes::TimeWatch]      = WAllocator::Construct<TimeWatchWidget>();
 
 
-    for (uint16 i = 0; i < (uint16)SysWidgetTypes::SysWidget_Count; i++)
+    for (sizeT i = 0; i < (uint16)SysWidgetTypes::SysWidget_Count; i++)
         m_systemWidgets[i]->Setup();
 
     m_systemWidgets[(uint16)SysWidgetTypes::System]->m_open = true;
@@ -82,7 +82,7 @@ void WidgetHandler::DrawWidgets()
     //    }
     //    else
     //    {
-    //        for (uint16 i = 0; i < (uint16)SysWidgetTypes::SysWidget_Count; i++)
+    //        for (sizeT i = 0; i < (uint16)SysWidgetTypes::SysWidget_Count; i++)
     //            m_systemWidgets[i]->m_open = false;
     //        for (const auto& widget : m_gameWidgets)
     //        {
@@ -93,7 +93,7 @@ void WidgetHandler::DrawWidgets()
     //    }
     //}
 
-    for (uint16 i = 0; i < (uint16)SysWidgetTypes::SysWidget_Count; i++)
+    for (sizeT i = 0; i < (uint16)SysWidgetTypes::SysWidget_Count; i++)
         if (m_systemWidgets[i]->m_open)
             m_systemWidgets[i]->RenderWidget();
 

@@ -56,7 +56,7 @@ bool SetupDisplayRenderTarget(VulkanContext &ctx, VulkanStatistics& stat)
 
     ctx.displayTarget.cmdBuffs.resize(ctx.screen.swapchainImageCount);
 
-    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
+    for (sizeT i = 0; i < ctx.screen.swapchainImageCount; i++)
         ctx.displayTarget.cmdBuffs[i] = CreateCommandBuffer(ctx);
 
     // this is just so i dont get slapped by a cock in the face if i forget to do it in the render handler
@@ -79,7 +79,7 @@ Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &sta
     target.descSets.resize(ctx.screen.swapchainImageCount);
     target.currentLayouts.resize(ctx.screen.swapchainImageCount);
 
-    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
+    for (sizeT i = 0; i < ctx.screen.swapchainImageCount; i++)
     {
         CreateImage(ctx, stat, resolution, format, target.targetImages[i], target.targetImageViews[i],
             target.targetImageAlloc[i], false);
@@ -155,15 +155,15 @@ void PopulateSemsAndFences(VulkanContext &ctx, Vulkan_RenderTarget &rt)
 
     VkSemaphoreCreateInfo semInfo{};
     semInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
+    for (sizeT i = 0; i < ctx.screen.swapchainImageCount; i++)
         vkCreateSemaphore(ctx.vcore.gpuDevice, &semInfo, ctx.vcore.allocator, &rt.imageAvailableSems[i]);
-    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
+    for (sizeT i = 0; i < ctx.screen.swapchainImageCount; i++)
         vkCreateSemaphore(ctx.vcore.gpuDevice, &semInfo, ctx.vcore.allocator, &rt.renderFinishedSems[i]);
 
     VkFenceCreateInfo fenceInfo{};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-    for (uint32 i = 0; i < ctx.screen.swapchainImageCount; i++)
+    for (sizeT i = 0; i < ctx.screen.swapchainImageCount; i++)
         vkCreateFence(ctx.vcore.gpuDevice, &fenceInfo, ctx.vcore.allocator, &rt.endOfFrameFences[i]);
 }
 

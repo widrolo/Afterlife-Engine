@@ -1,17 +1,7 @@
 #pragma once
 
-#include <exception>
-
 namespace WEngine
 {
-	class IgnoredNullableCheckException : public std::exception
-	{
-	public:
-		const char* what() 
-		{
-			return "Received a Nullable but never checked if the value can be read.";
-		}
-	};
 	/**
 	 * A template class for storing an optional value of type T.
 	 * This can be used to represent a nullable type, providing a safe

@@ -9,7 +9,7 @@
  * @param bit The position of the bit to be set.
  */
 template<typename T>
-inline void SetBit(T* field, const unsigned long bit)
+inline void SetBit(T* field, const uint64 bit)
 {
 	*field = *field | BIT(bit);
 }
@@ -20,7 +20,7 @@ inline void SetBit(T* field, const unsigned long bit)
  * @param bit The position of the bit to be cleared.
  */
 template<typename T> // preferably some kind of integer
-inline void ClearBit(T* field, const unsigned long bit)
+inline void ClearBit(T* field, const uint64 bit)
 {
 	// Black magic territory
 	*field = *field &~ BIT(bit);
@@ -33,7 +33,7 @@ inline void ClearBit(T* field, const unsigned long bit)
  * @return True if the bit is set, false otherwise.
  */
 template<typename T> // preferably some kind of integer
-inline bool CheckBitSet(const T field, const unsigned long bit)
+inline bool CheckBitSet(const T field, const uint64 bit)
 {
 	// Real black magic territory
 	return (field & BIT(bit)) != 0;

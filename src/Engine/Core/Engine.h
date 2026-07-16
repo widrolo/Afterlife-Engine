@@ -57,7 +57,7 @@ namespace WEngine
 		static uint16 GetPhysicsTickCounter() { return m_physicsTickCounterLastFrame; }
 
 	private:
-		void ParseCommandLine(int argc, char* argv[]);
+		void ParseCommandLine(sizeT argc, char* argv[]);
 
 		void StartGame();
 		void StartupMessage();

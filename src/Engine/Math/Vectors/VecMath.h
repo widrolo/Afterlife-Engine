@@ -21,7 +21,7 @@ namespace WEngine
         static float32 Dot(const std::array<float32, n>& row, const std::array<float32, n>& col)
         {
             float32 sum = 0.0f;
-            for (uint8 i = 0; i < n; i++)
+            for (sizeT i = 0; i < n; i++)
             {
                 sum += row[i] * col[i];
             }

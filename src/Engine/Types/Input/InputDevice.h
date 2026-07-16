@@ -72,7 +72,7 @@ namespace WEngine
      * Don't add the distinction between the one PlayStation touchpad and the two Valve touchpads; Haptic
      * splits the PlayStation touchpad into two regions to emulate Valve.
      */
-    enum class ControllerFeatures : uint16
+    enum class ControllerFeatures : word
     {
         Rumble                      = BIT(0),
         Impulse_Triggers            = BIT(1),

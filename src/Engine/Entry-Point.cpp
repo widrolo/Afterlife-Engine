@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
     WAllocator::BootAllocator();
 
     bool launchEditor = false;
-    for (int i = 1; i < argc; ++i)
+    for (sizeT i = 1; i < argc; ++i)
     {
         if (std::string(argv[i]) == "--wedge")
             launchEditor = true;
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 {
     WAllocator::BootAllocator();
     bool launchEditor = false;
-    for (int i = 1; i < argc; ++i)
+    for (sizeT i = 1; i < argc; ++i)
     {
         if (std::string(argv[i]) == "--wedge")
             launchEditor = true;
@@ -97,7 +97,7 @@ extern int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, 
 
 
     bool launchEditor = false;
-    for (int i = 1; i < argc; ++i)
+    for (sizeT i = 1; i < argc; ++i)
     {
         if (std::string(argv[i]) == "--wedge")
             launchEditor = true;
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 {
     WAllocator::BootAllocator();
     bool launchEditor = false;
-    for (int i = 1; i < argc; ++i)
+    for (sizeT i = 1; i < argc; ++i)
     {
         if (std::string(argv[i]) == "--wedge")
             launchEditor = true;

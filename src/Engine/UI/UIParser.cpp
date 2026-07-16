@@ -50,7 +50,7 @@ void UIParser::RecourseParseWidget(const tinyxml2::XMLNode* node, UIWidget* pare
 {
     uint32 childCount = node->ChildElementCount();
     const tinyxml2::XMLNode* currentChild = node->FirstChildElement();
-    for (uint32 i = 0; i < childCount; ++i)
+    for (sizeT i = 0; i < childCount; ++i)
     {
         std::string elementName = currentChild->Value();
         UIWidget* newWidget = nullptr;

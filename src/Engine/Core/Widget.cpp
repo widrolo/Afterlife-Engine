@@ -50,11 +50,11 @@ void Widget::SetSize(const Vector2 &size)
 
 void Widget::DequeToCArray(wtl::deque<float32> &buf, uint16 maxSize, float32 *outData)
 {
-	int16 count = (int16)std::min(buf.size(), static_cast<size_t>(maxSize));
-	for (size_t i = 0; i < count; ++i)
+	sizeT count = (sizeT)std::min(buf.size(), static_cast<size_t>(maxSize));
+	for (sizeT i = 0; i < count; ++i)
 		outData[i] = buf[i];
 
 	// NaN the rest if deque isnt full
-	for (size_t i = count; i < maxSize; ++i)
+	for (sizeT i = count; i < maxSize; ++i)
 		outData[i] = NAN;
 }

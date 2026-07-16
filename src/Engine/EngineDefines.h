@@ -45,12 +45,6 @@ struct EngineSettings
 	 */
 	_GLOBAL_CEX_ float64 maxFrameRate = 120.0f;
 	/**
-	 *  This dictates how many pixels make up one metre. It's a relic from the past, where
-	 *  graphics were rendered with SDL instead of OpenGL, and pixels were the main unit of
-	 *  measurement. This should not be touched, and must remain at 100!
-	 */
-	_GLOBAL_CEX_ uint16 pixelsPerMetre = 100;
-	/**
 	 *	If true, it will enable rounded corners on Windows 11. This does not work on Linux,
 	 *	any Windows version older than Windows 11, or Windows 11 with the basic Microsoft
 	 *	display driver.

@@ -368,7 +368,7 @@ void RenderHandler::RenderModelGroup(const ModelGroup &group, Material material)
 {
 	wtl::vector<InstanceData> instances(group.missions.size());
 
-	for (uint64 i = 0; i < group.missions.size(); i++)
+	for (sizeT i = 0; i < group.missions.size(); i++)
 	{
 		Mat4x4 model = CalcModelMatrix(group.missions[i].transform);
 		instances[i] = {model};
@@ -437,7 +437,7 @@ void RenderHandler::SortStationary(RenderMission &mission)
 void RenderHandler::InsertModelIntoShaderGroup(RenderMission &mission, MaterialGroup &materialGroup)
 {
 	bool foundModel = false;
-	for (uint64 i = 0; i < materialGroup.models.size(); ++i)
+	for (sizeT i = 0; i < materialGroup.models.size(); ++i)
 	{
 		if (materialGroup.models[i].groupID == mission.model)
 		{

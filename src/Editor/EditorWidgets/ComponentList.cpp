@@ -161,7 +161,7 @@ void ComponentList::ComponentDropdown()
 		ImGui::PopStyleVar();
 
 		ImGui::SeparatorText("Engine Components");
-		for (uint64 i = 0; i < 1023; ++i)
+		for (sizeT i = 0; i < 1023; ++i)
 		{
 			// while breaking would be more efficient, sometimes components get deprecated or similar causing gaps.
 			if (comps[i].componentName.empty())
@@ -172,7 +172,7 @@ void ComponentList::ComponentDropdown()
 		}
 
 		ImGui::SeparatorText("Game Components");
-		for (uint64 i = 1024; i < comps.size(); ++i)
+		for (sizeT i = 1024; i < comps.size(); ++i)
 		{
 			if (comps[i].componentName.empty())
 				continue;

@@ -28,16 +28,16 @@ struct MemListNode
     MemListNode* prevOfKind;
     WEngine::Model model;
     WEngine::Material material;
-    uint64 offset;
-    uint64 size;
+    sizeT offset;
+    sizeT size;
 };
 
 struct MemListDebugInfo
 {
     WEngine::Model model;
     WEngine::Material material;
-    uint64 offset;
-    uint64 size;
+    sizeT offset;
+    sizeT size;
 };
 
 /**
@@ -56,7 +56,7 @@ public:
      * @return [0] offset in the buffer in bytes; [1] reach in the buffer in bytes.
      * @note if the node cannot be found, then it returns 0,0.
      */
-    std::pair<uint64, uint64> FindNode(WEngine::Model model, WEngine::Material material) const;
+    std::pair<sizeT, sizeT> FindNode(WEngine::Model model, WEngine::Material material) const;
 
     /**
      * Inserts instance data into the buffer.
@@ -67,7 +67,7 @@ public:
      * @note if a place cannot be found, then it returns 0,0.
      * @note this may decide to reallocate the block, please make sure to check up with FindNode first!
      */
-    std::pair<uint64, uint64> InsertData(WEngine::Model model, WEngine::Material material, uint64 size);
+    std::pair<sizeT, sizeT> InsertData(WEngine::Model model, WEngine::Material material, sizeT size);
 
     /**
      * Clears an occupied region and makes it empty.
@@ -84,7 +84,7 @@ public:
     [[nodiscard]] wtl::vector<MemListDebugInfo> GetDebugInfo() const;
 
 private:
-    [[nodiscard]] MemListNode* FindBestFit(uint64 size) const;
+    [[nodiscard]] MemListNode* FindBestFit(sizeT size) const;
     void DecoupleOccupiedEntry(MemListNode* entry);
     void SqueezeEntry(MemListNode* entry, MemListNode* freeBlock);
 

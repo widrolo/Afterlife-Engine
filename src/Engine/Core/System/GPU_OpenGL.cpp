@@ -380,7 +380,7 @@ WEngine::Nullable<WEngine::Model> GPU::ALLOC_CreateModel(const WEngine::ModelInf
     uint64 modelSize = newModel.vertexCount * sizeof(float32) * 2 * 2;
 
     float32 modelBuffer[newModel.vertexCount * 4];
-    for (uint32 i = 0; i < model.vertices.size(); i++)
+    for (sizeT i = 0; i < model.vertices.size(); i++)
     {
         modelBuffer[0 + i * 4] = model.vertices[i].x;
         modelBuffer[1 + i * 4] = model.vertices[i].y;

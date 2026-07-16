@@ -701,7 +701,7 @@ bool Iris::IsFirstFrame()
 
 WEngine::Nullable<WEngine::StatBufKey> Iris::RequestStationaryBufferKey()
 {
-    for (uint64 i = 0; i < GPUSettings::maxStationaryInstBuffers; i++)
+    for (sizeT i = 0; i < GPUSettings::maxStationaryInstBuffers; i++)
     {
         if (ctx.statBuffers[i].available)
         {

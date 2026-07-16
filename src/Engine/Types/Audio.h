@@ -24,11 +24,11 @@ namespace WEngine
 	struct AudioClip
 	{
 		AudioType type;					///< The type of the audio clip
-		uint8* audioBuf;				///< The audio data buffer
+		byte* audioBuf;				///< The audio data buffer
 		uint32 audioLen;				///< Mystery variable
 		SDL_AudioFormat format;			///< The audio format
-		int channels;					///< The number of audio channels
-		int freq;						///< The frequency of the audio clip
+		int32 channels;					///< The number of audio channels
+		int32 freq;						///< The frequency of the audio clip
 	};
 
 	struct AudioPlayer

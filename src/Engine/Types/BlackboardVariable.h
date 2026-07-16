@@ -132,7 +132,7 @@ namespace WEngine
             BlackboardArray arr;
             arr.type = ToBlackboardVariableType<T>();
             arr.m_values.reserve(size);
-            for (uint64 i = 0; i < size; ++i)
+            for (sizeT i = 0; i < size; ++i)
                 arr.m_values.push_back(defaultValue);
             return arr;
         }

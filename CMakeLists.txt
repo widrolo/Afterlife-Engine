@@ -114,7 +114,6 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Core/Widget.cpp
         src/Engine/Core/Widget.h
         src/Engine/Util/BitwiseMacros.h
-        src/Engine/Util/Conversions.h
         src/Engine/Util/Env.h
         src/Engine/Util/Log.cpp
         src/Engine/Util/Log.h

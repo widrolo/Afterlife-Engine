@@ -21,7 +21,7 @@ void DebugFlagsWidget::RenderInternal()
 
     if (ImGui::BeginTable("worldSelectTable", 17, ImGuiTableFlags_Borders))
     {
-        for (uint16 i = 0; i < 17; i++)
+        for (sizeT i = 0; i < 17; i++)
         {
             if (i == 0)
             {
@@ -33,11 +33,11 @@ void DebugFlagsWidget::RenderInternal()
             ImGui::TableSetupColumn(std::format("{}", stream.str()).c_str());
         }
         ImGui::TableHeadersRow();
-        for (uint16 i = 0; i < 16; i++)
+        for (sizeT i = 0; i < 16; i++)
         {
             ImGui::TableNextRow();
 
-            for (uint16 j = 0; j < 17; j++)
+            for (sizeT j = 0; j < 17; j++)
             {
                 ImGui::TableSetColumnIndex(j);
                 ImGui::PushID(std::format("{}x{}", i, j).c_str());

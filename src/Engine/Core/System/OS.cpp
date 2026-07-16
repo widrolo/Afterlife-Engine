@@ -144,7 +144,7 @@ void OS::CreateNewProcess(const std::string& executable, const wtl::vector<std::
     if (fork() == 0)
     {
         char* argv[arguments.size() + 2];
-        for (int i = 0; i < arguments.size(); i++)
+        for (sizeT i = 0; i < arguments.size(); i++)
             argv[i] = (char*)arguments[i].c_str();
         argv[arguments.size() + 2] = nullptr;
         int32 ret = execve(executable.c_str(), argv, environ);

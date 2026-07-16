@@ -39,7 +39,7 @@ bool TextureSwizzler::Swizzle(bool deleteSource)
     if (!CreateTexture())
         return false;
 
-    for (int i = 0; i < 4; i++)
+    for (sizeT i = 0; i < 4; i++)
         SwizzleChannel(i);
 
     m_outTexture.channels = 4;
@@ -90,8 +90,8 @@ bool TextureSwizzler::SizeCheck()
 
 bool TextureSwizzler::CreateTexture()
 {
-    uint64 size = m_outTexture.height * m_outTexture.width * 4;
-    uint8* textureData = wNewArr(uint8, size);
+    sizeT size = m_outTexture.height * m_outTexture.width * 4;
+    byte* textureData = wNewArr(byte, size);
 
     if (textureData == nullptr)
         return false;
@@ -108,9 +108,9 @@ void TextureSwizzler::SwizzleChannel(uint8 channel)
     // So it turns out that images are stored as RGBA RGBA RGBA, not RRR...GGG...BBB...AAA...
     // No memcpy today :(
 
-    uint64 pixelCount = m_outTexture.height * m_outTexture.width;
+    sizeT pixelCount = m_outTexture.height * m_outTexture.width;
     auto source = m_source[channel];
-    for (uint64 i = 0; i < pixelCount; i++)
+    for (sizeT i = 0; i < pixelCount; i++)
         m_outTexture.data[i * 4 + channel] = source.texture.data[i * 4 + source.channel];
 }
 
@@ -118,7 +118,7 @@ void TextureSwizzler::DeleteSourceTextures()
 {
     wtl::vector<TextureInfo*> individualSources;
 
-    for (auto & src : m_source)
+    for (auto& src : m_source)
     {
         bool found = false;
         for (const auto& tex : individualSources)
@@ -133,7 +133,7 @@ void TextureSwizzler::DeleteSourceTextures()
             individualSources.push_back(&src.texture);
     }
 
-    uint32 size = m_outTexture.height * m_outTexture.width * m_outTexture.channels;
+    sizeT size = m_outTexture.height * m_outTexture.width * m_outTexture.channels;
 
     for (auto& tex : individualSources)
     {

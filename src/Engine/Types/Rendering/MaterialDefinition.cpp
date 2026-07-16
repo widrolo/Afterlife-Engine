@@ -103,10 +103,10 @@ void MaterialDefinition::Parse(const YAML::Node &root)
             compiler.AddSwizzleLine(yamlExpression);
         }
 
-        for (uint64 i = 0; i < develTex.size(); i++)
+        for (sizeT i = 0; i < develTex.size(); i++)
             compiler.AddDevelopmentTexture({develTex[i].first, i});
 
-        for (uint64 i = 0; i < packTex.size(); i++)
+        for (sizeT i = 0; i < packTex.size(); i++)
             compiler.AddPackagingTexture({packTex[i].first, i});
 
         if (!compiler.Compile())
@@ -744,9 +744,9 @@ bool SwizzleCompiler::SemanticAnalysisConflictsCompleteness()
     // 2) all channels of all target textures must be saturated
 
     // rule 1
-    for (uint64 i = 0; i < m_generated.size(); i++)
+    for (sizeT i = 0; i < m_generated.size(); i++)
     {
-        for (uint64 j = i + 1; j < m_generated.size(); j++)
+        for (sizeT j = i + 1; j < m_generated.size(); j++)
         {
             if (m_generated[i].textureTarget == m_generated[j].textureTarget)
             {
@@ -814,12 +814,12 @@ void SwizzleCompiler::ConstructFinalSwizzle()
         });
 
     // Translate the swizzles
-    for (uint64 i = 0; i < sorted.size(); i += 4)
+    for (sizeT i = 0; i < sorted.size(); i += 4)
     {
         MaterialDefinitionSwizzle swizzle;
         swizzle.packedTexTarget = sorted[i].textureTarget;
 
-        for (uint64 j = 0; j < 4; j++)
+        for (sizeT j = 0; j < 4; j++)
             swizzle.swizzle[j] = {sorted[i + j].textureOrigin, sorted[i + j].channelOrigin};
 
         m_outSwizzle.push_back(swizzle);

@@ -32,7 +32,7 @@ InstThreadedList::~InstThreadedList()
     }
 }
 
-std::pair<uint64, uint64> InstThreadedList::FindNode(WEngine::Model model, WEngine::Material material) const
+std::pair<sizeT, sizeT> InstThreadedList::FindNode(WEngine::Model model, WEngine::Material material) const
 {
     MemListNode* cursor = occupiedHead;
 
@@ -46,7 +46,7 @@ std::pair<uint64, uint64> InstThreadedList::FindNode(WEngine::Model model, WEngi
     return {0,0};
 }
 
-std::pair<uint64, uint64> InstThreadedList::InsertData(WEngine::Model model, WEngine::Material material, uint64 size)
+std::pair<sizeT, sizeT> InstThreadedList::InsertData(WEngine::Model model, WEngine::Material material, sizeT size)
 {
     if (occupiedHead == nullptr)
     {
@@ -212,7 +212,7 @@ wtl::vector<MemListDebugInfo> InstThreadedList::GetDebugInfo() const
     return info;
 }
 
-MemListNode* InstThreadedList::FindBestFit(uint64 size) const
+MemListNode* InstThreadedList::FindBestFit(sizeT size) const
 {
     MemListNode* cursor = emptyHead;
 

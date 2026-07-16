@@ -33,7 +33,7 @@ void FetchController(SDLContext &ctx)
     if (!ctx.isControllerConnected)
         return;
 
-    for (uint64 i = 0; i < SDL_GAMEPAD_BUTTON_COUNT; i++)
+    for (sizeT i = 0; i < SDL_GAMEPAD_BUTTON_COUNT; i++)
         ctx.rawSDLController[0][i] = SDL_GetGamepadButton(ctx.controller, (SDL_GamepadButton)i);
 
 }
@@ -53,7 +53,7 @@ void TranslateKeyboard(SDLContext &ctx)
     // SDL  -> 1...9 and 0
     // numbers
     ctx.rawKeys[0][(uint8)WKey::N0] = ctx.rawSDLKeys[0][SDL_SCANCODE_0];
-    for (uint64 i = (uint8)WKey::N1; i <= (uint8)WKey::N9; i++)
+    for (sizeT i = (uint8)WKey::N1; i <= (uint8)WKey::N9; i++)
         ctx.rawKeys[0][i] = ctx.rawSDLKeys[0][i - (uint8)WKey::N1 + SDL_SCANCODE_1];
 
     // Idk how much of a guarantee it is that scancode order stay
@@ -80,11 +80,11 @@ void TranslateKeyboard(SDLContext &ctx)
     ctx.rawKeys[0][(uint8)WKey::DOWN] = ctx.rawSDLKeys[0][SDL_SCANCODE_DOWN];
 
     // keys
-    for (uint64 i = (uint8)WKey::A; i <= (uint8)WKey::Z; i++)
+    for (sizeT i = (uint8)WKey::A; i <= (uint8)WKey::Z; i++)
         ctx.rawKeys[0][i] = ctx.rawSDLKeys[0][i - (uint8)WKey::A + SDL_SCANCODE_A];
 
     // debug
-    for (uint64 i = (uint8)WKey::DEBUG1; i <= (uint8)WKey::DEBUG12; i++)
+    for (sizeT i = (uint8)WKey::DEBUG1; i <= (uint8)WKey::DEBUG12; i++)
         ctx.rawKeys[0][i] = ctx.rawSDLKeys[0][i - (uint8)WKey::DEBUG1 + SDL_SCANCODE_F1];
 }
 
@@ -119,7 +119,7 @@ void TranslateController(SDLContext &ctx)
     ctx.rawController[0][(uint8)WPadBtn::L5]        = ctx.rawSDLController[0][SDL_GAMEPAD_BUTTON_LEFT_PADDLE2];
     ctx.rawController[0][(uint8)WPadBtn::R5]        = ctx.rawSDLController[0][SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2];
 
-    if (ctx.controllerFeatures & (uint16)WEngine::ControllerFeatures::Touch_Click_Remap)
+    if (ctx.controllerFeatures & (word)WEngine::ControllerFeatures::Touch_Click_Remap)
         ctx.rawController[0][(uint8)WPadBtn::Menu2] = ctx.rawSDLController[0][SDL_GAMEPAD_BUTTON_TOUCHPAD];
     else
         ctx.rawController[0][(uint8)WPadBtn::Touchpad] = ctx.rawSDLController[0][SDL_GAMEPAD_BUTTON_TOUCHPAD];

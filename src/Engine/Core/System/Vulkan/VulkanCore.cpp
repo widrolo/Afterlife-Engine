@@ -191,7 +191,7 @@ bool SetupGraphicsDevice(VulkanContext& ctx)
     if (!ParseVkResult(resPhy2))
         return false;
 
-    for (uint32 i = 0; i < gpusPresent; i++)
+    for (sizeT i = 0; i < gpusPresent; i++)
     {
         VkPhysicalDeviceProperties2 properties{};
         properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;

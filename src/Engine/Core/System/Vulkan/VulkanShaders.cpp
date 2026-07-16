@@ -374,7 +374,7 @@ WEngine::Material CompileMaterial(VulkanContext &ctx, const std::string &matName
         wtl::vector<VkWriteDescriptorSet> writeSets{};
         wtl::vector<VkDescriptorImageInfo> imageInfos(matDef.texturesPackaging.size());
 
-        for (uint32_t i = 0; i < matDef.texturesPackaging.size(); ++i)
+        for (sizeT i = 0; i < matDef.texturesPackaging.size(); ++i)
         {
             Vulkan_Texture tex = ctx.loadedTextures[comms.texReferences[i] - 1];
             imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

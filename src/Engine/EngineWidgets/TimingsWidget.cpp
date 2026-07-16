@@ -73,7 +73,7 @@ void TimingsWidget::MakePlot(wtl::deque<float32>& timings, const char* name, uin
 			ImPlot::SetupAxes("hist", "ms");
 			ImPlot::SetupAxesLimits(0, MaxTimings, 0, maxY / 1000);
 
-			for (int i = 0; i < MaxTimings; i++)
+			for (sizeT i = 0; i < MaxTimings; i++)
 			{
 				buf[i] = buf[i] / 1000.0f;
 			}

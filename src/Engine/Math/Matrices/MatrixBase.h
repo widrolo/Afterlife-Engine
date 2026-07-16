@@ -28,7 +28,7 @@ namespace WEngine
         MatrixBase operator+(const MatrixBase& other) const
         {
             MatrixBase result;
-            for (int i = 0; i < Size; i++)
+            for (sizeT i = 0; i < Size; i++)
             {
                 result.m_vals[i] = m_raw[i] + other.m_vals[i];
             }
@@ -37,7 +37,7 @@ namespace WEngine
         MatrixBase operator-(const MatrixBase& other) const
         {
             MatrixBase result;
-            for (int i = 0; i < Size; i++)
+            for (sizeT i = 0; i < Size; i++)
             {
                 result.m_vals[i] = m_raw[i] - other.m_vals[i];
             }
@@ -46,7 +46,7 @@ namespace WEngine
         MatrixBase operator*(const float32& scalar) const
         {
             MatrixBase result;
-            for (int i = 0; i < Size; i++)
+            for (sizeT i = 0; i < Size; i++)
             {
                 result.m_vals[i] = m_raw[i] * scalar;
             }
@@ -58,14 +58,14 @@ namespace WEngine
             std::array<std::array<float32, ColumnCount>, RowCount> aRows;
             std::array<std::array<float32, RowCount>, ColumnCount> aCols;
 
-            for (int i = 0; i < RowCount; i++)
+            for (sizeT i = 0; i < RowCount; i++)
                 aRows[i] = GetRow(i);
-            for (int i = 0; i < ColumnCount; i++)
+            for (sizeT i = 0; i < ColumnCount; i++)
                 aCols[i] = other.GetCol(i);
 
-            for (int i = 0; i < RowCount; i++)
+            for (sizeT i = 0; i < RowCount; i++)
             {
-                for (int j = 0; j < ColumnCount; j++)
+                for (sizeT j = 0; j < ColumnCount; j++)
                 {
                     m_vals[i][j] = Dot<RowCount>(aRows[i], aCols[j]);
                 }
@@ -85,7 +85,7 @@ namespace WEngine
             // be in cache anyway soooo.
 
             std::array<float32, RowCount> ret;
-            for (uint8 i = 0; i < RowCount; i++)
+            for (sizeT i = 0; i < RowCount; i++)
             {
                 ret[i] = GetValue(i, col);
             }
@@ -114,9 +114,9 @@ namespace WEngine
             if constexpr (RowCount != ColumnCount)
                 return;
 
-            for (int i = 0; i < RowCount; i++)
+            for (sizeT i = 0; i < RowCount; i++)
             {
-                for (int j = 0; j < ColumnCount; j++)
+                for (sizeT j = 0; j < ColumnCount; j++)
                 {
                     if (i == j)
                         m_vals[i][j] = 1;

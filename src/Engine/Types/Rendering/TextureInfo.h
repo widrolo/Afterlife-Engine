@@ -6,7 +6,7 @@ namespace WEngine
 {
     struct TextureInfo
     {
-        uint8* data;
+        byte* data;
         int32 width;
         int32 height;
         int32 channels;
