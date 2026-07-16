@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "Engine/Math/Vector.h"
+#include <Engine/Math/Vector.h>
 #include <Engine/WTL/deque.h>
 
 namespace WEditor
@@ -46,7 +46,7 @@ namespace WEngine
 	 	 * Sets up the widget for rendering. This function is called once when the widget is constructed and should be
 	 	 * overridden by subclasses to perform any necessary setup.
 		 */
-		virtual void Setup();
+		virtual void Setup() = 0;
 		/**
 		  * Forcefully opens or closes the widget
 		 */
@@ -57,7 +57,7 @@ namespace WEngine
 	 	 * Renders the internal contents of the widget. This function is called by RenderWidget() and should be overridden
 	 	 * by subclasses to render their own contents.
 	 	 */
-		virtual void RenderInternal();
+		virtual void RenderInternal() = 0;
 		/**
 		 * Sets the position of the widget on the screen.
 		 * @param position The new position of the widget as a Vector2 object.
@@ -69,7 +69,7 @@ namespace WEngine
 		 */
 		void SetSize(const Vector2& size);
 
-		void DequeToCArray(wtl::deque<float32>& buf, uint16 maxSize , float32* outData);
+		void DequeToCArray(const wtl::deque<float32>& buf, sizeT maxSize, float32* outData);
 
 	};
 }

@@ -4,7 +4,7 @@ using namespace WEngine;
 
 void Time::SetHour(uint32 hour)
 {
-    m_hour = hour;
+    m_hours = hour;
 }
 
 void Time::SetMinute(uint32 minute)
@@ -19,9 +19,9 @@ void Time::SetSecond(uint32 second)
 
 uint32 Time::AddHours(uint32 hours)
 {
-    uint32 totalHours = m_hour + hours;
+    uint32 totalHours = m_hours + hours;
     uint32 days = totalHours / 24;
-    m_hour = totalHours % 24;
+    m_hours = totalHours % 24;
     return days;
 }
 
@@ -45,7 +45,7 @@ uint32 Time::AddSeconds(uint32 seconds)
 
 uint32 Time::GetHours() const
 {
-    return m_hour;
+    return m_hours;
 }
 
 uint32 Time::GetMinutes() const

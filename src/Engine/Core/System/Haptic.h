@@ -42,6 +42,10 @@ public:
 
     static WEngine::Nullable<WEngine::InputVendor> GetVendor();
 
+    static bool GetDebugKeyJustPressed(uint8 keyNum);
+    static bool GetDebugKeyHeld(uint8 keyNum);
+    static bool GetDebugKeyJustReleased(uint8 keyNum);
+
     // ------------------------------ Output -------------------------------
     static void Rumble(const std::string& outputName);
     static void SetLED(const std::string& outputName);

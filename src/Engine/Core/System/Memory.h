@@ -94,8 +94,9 @@ public:
     template<class T>
     static void Destruct(T* p)
     {
-        uint64 size = MemorySizes()[p];
-        MemoryUsed() -= size;
+        auto it = MemorySizes().find(p);
+        MemorySizes().erase(it);
+        MemoryUsed() -= it->second;
         delete p;
     }
 

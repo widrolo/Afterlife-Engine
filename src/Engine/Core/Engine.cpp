@@ -50,9 +50,9 @@ float64 Engine::GetDeltaTime()
 
 void Engine::ParseCommandLine(sizeT argc, char* argv[])
 {
-	std::string arg;
 	for (sizeT i = 1; i < argc; i++)
 	{
+		std::string arg = argv[i];
 		if (arg == "-resolution")
 		{
 			m_cla.customResolution = true;
@@ -83,8 +83,7 @@ void Engine::StartGame()
 	WLog::SetConsoleSuccess();
 	WLog::ConsoleLog("--------------- Engine Done ----------------");
 
-	CoreSystems::isGameRunning = new bool; // i bet youve never seen this before
-	*CoreSystems::isGameRunning = true;
+	CoreSystems::isGameRunning = true;
 	Run();
 }
 
@@ -100,7 +99,7 @@ void Engine::StartupMessage()
 }
 
 template<class T>
-void StartHandlerSingle(T** container, std::string name)
+void StartHandlerSingle(T** container, const std::string& name)
 {
 	*container = (T*)WAllocator::Construct<T>();
 	if (*container == nullptr)
@@ -178,7 +177,7 @@ constexpr uint64 cap = static_cast<uint64>((1.0f / EngineSettings::maxFrameRate)
 [[noreturn]]
 void Engine::Run()
 {
-	std::chrono::steady_clock::time_point lastUpdate;
+	std::chrono::steady_clock::time_point lastUpdate = std::chrono::steady_clock::now();
 	std::chrono::time_point<std::chrono::steady_clock> frameStart;
 	StopWatch uptime;
 
@@ -188,7 +187,7 @@ void Engine::Run()
 	m_game->PreGameLoop();
 
 
-	while (*CoreSystems::isGameRunning)
+	while (CoreSystems::isGameRunning)
 	{
 		Loop_Begin(lastUpdate, uptime, frameStart);
 		Loop_Tick();
@@ -220,10 +219,7 @@ void Engine::Loop_Begin(std::chrono::steady_clock::time_point& last, StopWatch& 
 	if (!Iris::IsFirstFrame())
 		Iris::SETTING_BeginNewPreFrame();
 
-	if (m_deltaTime < 20.0f)
-		CoreSystems::timeHandler->Update(m_deltaTime * CoreSystems::GetTimeScale());
-	else
-		CoreSystems::timeHandler->Update(0.0f);
+	CoreSystems::timeHandler->Update(m_deltaTime * CoreSystems::GetTimeScale());
 
 	m_game->GameLoopBegin();
 	m_frameBegin = timings.GetTime<TimeUnit::Microseconds>();
@@ -254,11 +250,6 @@ void Engine::Loop_Physics()
 
 	m_game->GameLoopPhysicsEarly();
 	// this can only happen on boot, and is a bug
-	if (m_physicsTickTimer / PhysicsSettings::physicsTickRate >= 100)
-	{
-		m_physicsTickTimer = 0.0f;
-		goto skipPhysics;
-	}
 	while (m_physicsTickTimer > PhysicsSettings::physicsTickRate)
 	{
 		m_physicsTickTimer -= PhysicsSettings::physicsTickRate;

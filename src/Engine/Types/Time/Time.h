@@ -6,9 +6,9 @@ namespace WEngine
     class Time
     {
     public:
-        Time() : m_hour(0), m_minutes(0), m_seconds(0) {}
+        Time() : m_hours(0), m_minutes(0), m_seconds(0) {}
         Time(uint32 hour, uint32 minutes, uint32 seconds)
-            : m_hour(hour),
+            : m_hours(hour),
               m_minutes(minutes),
               m_seconds(seconds) {}
 
@@ -42,7 +42,7 @@ namespace WEngine
         [[nodiscard]] uint32 GetSeconds() const;
 
     private:
-        uint32 m_hour;
+        uint32 m_hours;
         uint32 m_minutes;
         uint32 m_seconds;
     };

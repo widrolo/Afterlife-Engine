@@ -10,7 +10,7 @@ namespace WEngine
     class Date
     {
     public:
-        Date() : m_year(realisticBaseYear), m_month(0), m_day(0) {}
+        Date() : m_year(realisticBaseYear), m_month(1), m_day(1) {}
         Date(uint32 year, uint32 month, uint32 day) : m_year(year), m_month(month), m_day(day) {}
         Date(uint32 year, Month month, Day day) : m_year(year), m_month((uint8)month), m_day((uint8)day) {}
 
@@ -25,8 +25,8 @@ namespace WEngine
         void AddMonths(uint32 months);
         void AddDays(uint32 days);
 
-        uint32 DaysInMonth(uint32 month);
-        uint32 DaysInMonth(Month month);
+        [[nodiscard]] static uint32 DaysInMonth(uint32 month);
+        [[nodiscard]] static uint32 DaysInMonth(Month month);
 
         [[nodiscard]] uint32 GetYear() const;
         [[nodiscard]] uint32 GetMonth() const;

@@ -185,7 +185,7 @@ VkImageView& GetFbImageView(const VulkanContext &ctx)
 
 VkImageView& GetFbImageView(const VulkanContext &ctx, Vulkan_RenderTarget &rt)
 {
-    bool isSwapchainImage = ctx.currentRenderTarget == &ctx.displayTarget;
+    bool isSwapchainImage = &rt == &ctx.displayTarget;
     return isSwapchainImage ? rt.targetImageViews[ctx.screen.swapchainCurrentImage] :
         rt.targetImageViews[ctx.screen.currentFrame];
 }

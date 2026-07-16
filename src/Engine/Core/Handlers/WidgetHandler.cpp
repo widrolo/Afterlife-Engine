@@ -13,12 +13,12 @@
 
 #include <Engine/Types/CoreSystems.h>
 
-#include "Input.h"
 #include <Engine/Core/System/Memory.h>
 
-#include "Engine/EngineWidgets/RenderWatchWidget.h"
-#include "Engine/EngineWidgets/TimeWatchWidget.h"
-#include "Engine/Util/Log.h"
+#include <Engine/Core/System/Haptic.h>
+#include <Engine/EngineWidgets/RenderWatchWidget.h>
+#include <Engine/EngineWidgets/TimeWatchWidget.h>
+#include <Engine/Util/Log.h>
 using namespace WEngine;
 
 WidgetHandler::WidgetHandler()
@@ -28,84 +28,103 @@ WidgetHandler::WidgetHandler()
 
 WidgetHandler::~WidgetHandler()
 {
-
+    for (const auto& widget : m_systemWidgets)
+    {
+        if (widget != nullptr)
+            WAllocator::Destruct(widget);
+    }
 }
 
 void WidgetHandler::InitSystemWidgets()
 {
-    m_systemWidgets[(uint16)SysWidgetTypes::System]         = WAllocator::Construct<SystemWidget>();
-    m_systemWidgets[(uint16)SysWidgetTypes::EngineControl]  = WAllocator::Construct<EngineControlWidget>();
-    m_systemWidgets[(uint16)SysWidgetTypes::GameSystem]     = WAllocator::Construct<GameSystemWidget>();
-    m_systemWidgets[(uint16)SysWidgetTypes::Statistics]     = WAllocator::Construct<StatisticsWidgets>();
-    m_systemWidgets[(uint16)SysWidgetTypes::Timings]        = WAllocator::Construct<TimingsWidget>();
-    m_systemWidgets[(uint16)SysWidgetTypes::Peripherals]    = WAllocator::Construct<PeripheralWidget>();
-    m_systemWidgets[(uint16)SysWidgetTypes::SectorWatch]    = WAllocator::Construct<SectorWatchWidget>();
-    m_systemWidgets[(uint16)SysWidgetTypes::PhysicsWatch]   = WAllocator::Construct<PhysicsWatchWidget>();
-    m_systemWidgets[(uint16)SysWidgetTypes::DebugFlags]     = WAllocator::Construct<DebugFlagsWidget>();
-    m_systemWidgets[(uint16)SysWidgetTypes::RenderWatch]    = WAllocator::Construct<RenderWatchWidget>();
-    m_systemWidgets[(uint16)SysWidgetTypes::TimeWatch]      = WAllocator::Construct<TimeWatchWidget>();
+    m_systemWidgets[(sizeT)SysWidgetTypes::System]         = WAllocator::Construct<SystemWidget>();
+    m_systemWidgets[(sizeT)SysWidgetTypes::EngineControl]  = WAllocator::Construct<EngineControlWidget>();
+    m_systemWidgets[(sizeT)SysWidgetTypes::GameSystem]     = WAllocator::Construct<GameSystemWidget>();
+    m_systemWidgets[(sizeT)SysWidgetTypes::Statistics]     = WAllocator::Construct<StatisticsWidgets>();
+    m_systemWidgets[(sizeT)SysWidgetTypes::Timings]        = WAllocator::Construct<TimingsWidget>();
+    m_systemWidgets[(sizeT)SysWidgetTypes::Peripherals]    = WAllocator::Construct<PeripheralWidget>();
+    m_systemWidgets[(sizeT)SysWidgetTypes::SectorWatch]    = WAllocator::Construct<SectorWatchWidget>();
+    m_systemWidgets[(sizeT)SysWidgetTypes::PhysicsWatch]   = WAllocator::Construct<PhysicsWatchWidget>();
+    m_systemWidgets[(sizeT)SysWidgetTypes::DebugFlags]     = WAllocator::Construct<DebugFlagsWidget>();
+    m_systemWidgets[(sizeT)SysWidgetTypes::RenderWatch]    = WAllocator::Construct<RenderWatchWidget>();
+    m_systemWidgets[(sizeT)SysWidgetTypes::TimeWatch]      = WAllocator::Construct<TimeWatchWidget>();
 
 
-    for (sizeT i = 0; i < (uint16)SysWidgetTypes::SysWidget_Count; i++)
+    for (sizeT i = 0; i < (sizeT)SysWidgetTypes::SysWidget_Count; i++)
+    {
+        if (m_systemWidgets[i] == nullptr)
+            continue;
         m_systemWidgets[i]->Setup();
+    }
 
-    m_systemWidgets[(uint16)SysWidgetTypes::System]->m_open = true;
-    m_systemWidgets[(uint16)SysWidgetTypes::EngineControl]->m_open = true;
-    m_systemWidgets[(uint16)SysWidgetTypes::GameSystem]->m_open = true;
-    m_systemWidgets[(uint16)SysWidgetTypes::Statistics]->m_open = true;
+    auto* stat =    m_systemWidgets[(sizeT)SysWidgetTypes::Statistics];
+    auto* control = m_systemWidgets[(sizeT)SysWidgetTypes::EngineControl];
+    auto* sys =     m_systemWidgets[(sizeT)SysWidgetTypes::System];
+    auto* gameSys = m_systemWidgets[(sizeT)SysWidgetTypes::GameSystem];
+
+    if (stat != nullptr)    stat->m_open = true;
+    if (control != nullptr) control->m_open = true;
+    if (sys != nullptr)     sys->m_open = true;
+    if (gameSys != nullptr) gameSys->m_open = true;
 }
 
 void WidgetHandler::DrawWidgets()
 {
-    //return;
+    auto* stat =    m_systemWidgets[(sizeT)SysWidgetTypes::Statistics];
+    auto* control = m_systemWidgets[(sizeT)SysWidgetTypes::EngineControl];
+    auto* sys =     m_systemWidgets[(sizeT)SysWidgetTypes::System];
+    auto* gameSys = m_systemWidgets[(sizeT)SysWidgetTypes::GameSystem];
 
-    const auto& stat = m_systemWidgets[(uint16)SysWidgetTypes::Statistics];
-    const auto& control = m_systemWidgets[(uint16)SysWidgetTypes::EngineControl];
-    const auto& sys = m_systemWidgets[(uint16)SysWidgetTypes::System];
-    const auto& gameSys = m_systemWidgets[(uint16)SysWidgetTypes::GameSystem];
+    if (Haptic::GetDebugKeyJustPressed(1) && sys != nullptr)
+        sys->m_open = !sys->m_open;
 
-    //if (input->GetKeyPressed(WKey::DEBUG1))
-    //    sys->m_open = !sys->m_open;
-//
-    //if (input->GetKeyPressed(WKey::DEBUG2))
-    //    gameSys->m_open = !gameSys->m_open;
-//
-    //if (input->GetKeyPressed(WKey::DEBUG12))
-    //{
-    //    m_widgetsEnabled = !m_widgetsEnabled;
-    //    if (m_widgetsEnabled)
-    //    {
-    //        stat->m_open = true;
-    //        control->m_open = true;
-    //        sys->m_open = true;
-    //        gameSys->m_open = true;
-    //    }
-    //    else
-    //    {
-    //        for (sizeT i = 0; i < (uint16)SysWidgetTypes::SysWidget_Count; i++)
-    //            m_systemWidgets[i]->m_open = false;
-    //        for (const auto& widget : m_gameWidgets)
-    //        {
-    //            if (auto lw = widget.lock())
-    //                lw->m_open = false;
-//
-    //        }
-    //    }
-    //}
+    if (Haptic::GetDebugKeyJustPressed(2) && gameSys != nullptr)
+        gameSys->m_open = !gameSys->m_open;
 
-    for (sizeT i = 0; i < (uint16)SysWidgetTypes::SysWidget_Count; i++)
+    if (Haptic::GetDebugKeyJustPressed(12))
+    {
+        m_widgetsEnabled = !m_widgetsEnabled;
+        if (m_widgetsEnabled)
+        {
+            if (stat != nullptr)    stat->m_open = true;
+            if (control != nullptr) control->m_open = true;
+            if (sys != nullptr)     sys->m_open = true;
+            if (gameSys != nullptr) gameSys->m_open = true;
+        }
+        else
+        {
+            for (sizeT i = 0; i < (sizeT)SysWidgetTypes::SysWidget_Count; i++)
+            {
+                if (m_systemWidgets[i] == nullptr)
+                    continue;
+                m_systemWidgets[i]->m_open = false;
+            }
+            for (const auto& widget : m_gameWidgets)
+            {
+                if (const auto& lw = widget.lock())
+                    lw->m_open = false;
+            }
+        }
+    }
+
+    for (sizeT i = 0; i < (sizeT)SysWidgetTypes::SysWidget_Count; i++)
+    {
+        if (m_systemWidgets[i] == nullptr)
+            continue;
         if (m_systemWidgets[i]->m_open)
             m_systemWidgets[i]->RenderWidget();
+    }
 
-    TimingsWidget* time = (TimingsWidget*)m_systemWidgets[(uint16)SysWidgetTypes::Timings];
+    auto* time = static_cast<TimingsWidget*>(m_systemWidgets[(sizeT)SysWidgetTypes::Timings]);
 
-    time->CountTime();
+    if (time != nullptr)
+        time->CountTime();
 
     // im trying everything vro, this shit will soon be nasa grade code.
-    auto widgetSnapshot = m_gameWidgets;
-    for (auto& weak : widgetSnapshot)
+    //auto widgetSnapshot = m_gameWidgets; // no longer crashes, but im gonna keep this commented for now.
+    for (const auto& weak : m_gameWidgets)
     {
-        if (auto widget = weak.lock())
+        if (const auto& widget = weak.lock())
         {
             widget->RenderWidget();
         }
@@ -120,14 +139,13 @@ void WidgetHandler::AddGameWidget(const std::shared_ptr<Widget>& widget)
 
 void WidgetHandler::RemoveGameWidget(const std::shared_ptr<Widget>& widget)
 {
-    m_gameWidgets.erase(
-        std::remove_if(
-            m_gameWidgets.begin(),
-            m_gameWidgets.end(),
-            [&widget](const std::weak_ptr<Widget>& weak)
-            {
-                auto locked = weak.lock();
-                return !locked || locked == widget;
-            }),
-        m_gameWidgets.end());
+    const auto it = std::ranges::remove_if(m_gameWidgets,
+        [&widget](const std::weak_ptr<Widget>& weak)
+        {
+            auto locked = weak.lock();
+            return !locked || locked == widget;
+        }).begin();
+
+
+    m_gameWidgets.erase(it, m_gameWidgets.end());
 }

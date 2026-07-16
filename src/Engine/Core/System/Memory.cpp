@@ -48,7 +48,7 @@ void* WAllocator::AllocateAligned(uint64 size, uint64 alignment)
 void* WAllocator::Reallocate(void* ptr, uint64 size)
 {
     auto& sizes = MemorySizes();
-    uint64 oldSize = sizes[ptr];
+    sizeT oldSize = sizes[ptr];
 
     if (size < oldSize)
     {
@@ -70,7 +70,7 @@ void* WAllocator::Reallocate(void* ptr, uint64 size)
 void * WAllocator::ReallocateAligned(void *ptr, uint64 size, uint64 alignment)
 {
     auto& sizes = MemorySizes();
-    uint64 oldSize = sizes[ptr];
+    sizeT oldSize = sizes[ptr];
 
     if (size < oldSize)
     {
@@ -86,7 +86,7 @@ void * WAllocator::ReallocateAligned(void *ptr, uint64 size, uint64 alignment)
 #endif
     if (!newPtr) throw std::bad_alloc();
 
-    std::memcpy(newPtr, ptr, size);
+    std::memcpy(newPtr, ptr, oldSize);
 
     sizes.erase(ptr);
     sizes[newPtr] = size;

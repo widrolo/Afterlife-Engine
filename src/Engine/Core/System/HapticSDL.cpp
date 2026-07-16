@@ -27,8 +27,6 @@ void Haptic::FetchInput()
     PollEvents();
     TranslateFetched(ctx);
     UpdateAllSenses(ctx);
-    bool res = ctx.selectedMap->results["testAction"].held;
-    WEngine::WLog::ConsoleLog(std::format("{}", res));
 }
 
 void Haptic::PollEvents()
@@ -106,17 +104,29 @@ wtl::vector<WEngine::InputPatch> Haptic::GetPatchList()
 
 WEngine::Nullable<bool> Haptic::GetActionJustPressed(const std::string &actionName)
 {
-
+    if (ctx.selectedMap == nullptr)
+        return {};
+    if (!ctx.selectedMap->results.contains(actionName))
+        return {};
+    return ctx.selectedMap->results[actionName].justPressed;
 }
 
 WEngine::Nullable<bool> Haptic::GetActionHeld(const std::string &actionName)
 {
-
+    if (ctx.selectedMap == nullptr)
+        return {};
+    if (!ctx.selectedMap->results.contains(actionName))
+        return {};
+    return ctx.selectedMap->results[actionName].held;
 }
 
 WEngine::Nullable<bool> Haptic::GetActionJustReleased(const std::string &actionName)
 {
-
+    if (ctx.selectedMap == nullptr)
+        return {};
+    if (!ctx.selectedMap->results.contains(actionName))
+        return {};
+    return ctx.selectedMap->results[actionName].justReleased;
 }
 
 WEngine::Nullable<float32> Haptic::GetFloatDelta(const std::string &floatName)
@@ -147,6 +157,27 @@ WEngine::Nullable<float32> Haptic::GetVectorLength(const std::string &vectorName
 WEngine::Nullable<WEngine::InputVendor> Haptic::GetVendor()
 {
 
+}
+
+bool Haptic::GetDebugKeyJustPressed(uint8 keyNum)
+{
+    if (keyNum > 12)
+        return false;
+    return ctx.rawKeys[0][(sizeT)WKey::DEBUG1 + keyNum - 1] && !ctx.rawKeys[1][(sizeT)WKey::DEBUG1 + keyNum - 1];
+}
+
+bool Haptic::GetDebugKeyHeld(uint8 keyNum)
+{
+    if (keyNum > 12)
+        return false;
+    return ctx.rawKeys[0][(sizeT)WKey::DEBUG1 + keyNum - 1];
+}
+
+bool Haptic::GetDebugKeyJustReleased(uint8 keyNum)
+{
+    if (keyNum > 12)
+        return false;
+    return !ctx.rawKeys[0][(sizeT)WKey::DEBUG1 + keyNum - 1] && ctx.rawKeys[1][(sizeT)WKey::DEBUG1 + keyNum - 1];
 }
 
 void Haptic::Rumble(const std::string &outputName)

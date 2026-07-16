@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <WGL.h>
 #include <string>
 #include <Engine/Types/CommonTypes.h>
 #include <chrono>
@@ -15,8 +14,8 @@ namespace WEngine
 	struct CmdLineArgs
 	{
 		bool customResolution;
-		int width;
-		int height;
+		uint32 width;
+		uint32 height;
 	};
 	class Engine
 	{
@@ -27,7 +26,7 @@ namespace WEngine
 		Game* m_game; // you lost it.
 
 		float64 m_physicsTickTimer = 0.0f;
-		_GLOBAL_ uint16 m_physicsTickCounterLastFrame;
+		_GLOBAL_ sizeT m_physicsTickCounterLastFrame;
 
 		_GLOBAL_ float64 m_deltaTime;
 		_GLOBAL_ uint64 m_uptime; // in seconds

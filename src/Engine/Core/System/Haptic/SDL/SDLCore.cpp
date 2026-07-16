@@ -17,11 +17,11 @@ void InitKeyboard(SDLContext &ctx)
     for (sizeT i = 0; i < numKeys; i++)
         ctx.rawSDLKeys[1][i] = false;
 
-    ctx.rawKeys[0] = wNewArr(bool, (uint8)WKey::WKey_Count);
-    ctx.rawKeys[1] = wNewArr(bool, (uint8)WKey::WKey_Count);
-    for (sizeT i = 0; i < (uint8)WKey::WKey_Count; i++)
+    ctx.rawKeys[0] = wNewArr(bool, (sizeT)WKey::WKey_Count);
+    ctx.rawKeys[1] = wNewArr(bool, (sizeT)WKey::WKey_Count);
+    for (sizeT i = 0; i < (sizeT)WKey::WKey_Count; i++)
         ctx.rawKeys[0][i] = false;
-    for (sizeT i = 0; i < (uint8)WKey::WKey_Count; i++)
+    for (sizeT i = 0; i < (sizeT)WKey::WKey_Count; i++)
         ctx.rawKeys[1][i] = false;
 }
 
@@ -30,11 +30,11 @@ void InitMouse(SDLContext &ctx)
     ctx.rawSDLMouse[0] = 0;
     ctx.rawSDLMouse[1] = 0;
 
-    ctx.rawMouse[0] = wNewArr(bool, (uint8)WMouseBtn::WMouseBtn_Count);
-    ctx.rawMouse[1] = wNewArr(bool, (uint8)WMouseBtn::WMouseBtn_Count);
-    for (sizeT i = 0; i < (uint8)WMouseBtn::WMouseBtn_Count; i++)
+    ctx.rawMouse[0] = wNewArr(bool, (sizeT)WMouseBtn::WMouseBtn_Count);
+    ctx.rawMouse[1] = wNewArr(bool, (sizeT)WMouseBtn::WMouseBtn_Count);
+    for (sizeT i = 0; i < (sizeT)WMouseBtn::WMouseBtn_Count; i++)
         ctx.rawMouse[0][i] = false;
-    for (sizeT i = 0; i < (uint8)WMouseBtn::WMouseBtn_Count; i++)
+    for (sizeT i = 0; i < (sizeT)WMouseBtn::WMouseBtn_Count; i++)
         ctx.rawMouse[1][i] = false;
     ctx.rawMousePos[0] = WEngine::Vector2::Zero;
     ctx.rawMousePos[1] = WEngine::Vector2::Zero;
@@ -51,11 +51,11 @@ void InitController(SDLContext &ctx)
     for (sizeT i = 0; i < SDL_GAMEPAD_BUTTON_COUNT; i++)
         ctx.rawSDLController[1][i] = false;
 
-    ctx.rawController[0] = wNewArr(bool, (uint8)WPadBtn::WPadBtn_Count);
-    ctx.rawController[1] = wNewArr(bool, (uint8)WPadBtn::WPadBtn_Count);
-    for (sizeT i = 0; i < (uint8)WPadBtn::WPadBtn_Count; i++)
+    ctx.rawController[0] = wNewArr(bool, (sizeT)WPadBtn::WPadBtn_Count);
+    ctx.rawController[1] = wNewArr(bool, (sizeT)WPadBtn::WPadBtn_Count);
+    for (sizeT i = 0; i < (sizeT)WPadBtn::WPadBtn_Count; i++)
         ctx.rawController[0][i] = false;
-    for (sizeT i = 0; i < (uint8)WPadBtn::WPadBtn_Count; i++)
+    for (sizeT i = 0; i < (sizeT)WPadBtn::WPadBtn_Count; i++)
         ctx.rawController[1][i] = false;
 
     ctx.rawLeftJoy[0] = WEngine::Vector2::Zero;

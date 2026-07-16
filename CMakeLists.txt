@@ -122,7 +122,6 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Components/Creation/ComponentFactory.cpp
         src/Engine/Components/Creation/ComponentFactory.h
         src/Game/GameDefines.h
-        src/WGL.h
         src/WidroloFramework.h
         src/Engine/Components/Creation/CompID.h
         src/Engine/Math/Vector.h

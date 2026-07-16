@@ -211,11 +211,11 @@ void QueueTexture(VulkanContext &ctx, const Vulkan_Texture& tex, const WEngine::
     postBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
     postBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     postBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-    postBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    postBarrier.dstAccessMask = 0;
 
     vkCmdPipelineBarrier(ctx.transferCommandBuffer,
         VK_PIPELINE_STAGE_TRANSFER_BIT,
-        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
         0, 0, nullptr, 0, nullptr, 1, &postBarrier);
 
     ctx.stagingBuffers.push_back({staging, stagingAlloc});

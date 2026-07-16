@@ -49,8 +49,8 @@ void Date::AddDays(uint32 days)
 
     while (remainingDays >= DaysInMonth(m_month))
     {
-        remainingDays -= DaysInMonth(m_month);
         m_month++;
+        remainingDays -= DaysInMonth(m_month);
 
         if (m_month > 12)
         {

@@ -99,11 +99,11 @@ typedef uint64 sizeT;
 _GLOBAL_CEX_ uint64 min_sizeT = 0;
 _GLOBAL_CEX_ uint64 max_sizeT = max_uint64;
 
-_GLOBAL_CEX_ uint64 KB = 1024;
-_GLOBAL_CEX_ uint64 MB = 1024 * KB;
-_GLOBAL_CEX_ uint64 GB = 1024 * MB;
-_GLOBAL_CEX_ uint64 TB = 1024 * GB;
-_GLOBAL_CEX_ uint64 PB = 1024 * TB;
+_GLOBAL_CEX_ sizeT KB = 1024;
+_GLOBAL_CEX_ sizeT MB = 1024 * KB;
+_GLOBAL_CEX_ sizeT GB = 1024 * MB;
+_GLOBAL_CEX_ sizeT TB = 1024 * GB;
+_GLOBAL_CEX_ sizeT PB = 1024 * TB;
 
 #undef COMPILER_AGNOSTIC_int8
 #undef COMPILER_AGNOSTIC_int16

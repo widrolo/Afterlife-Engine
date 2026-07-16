@@ -56,7 +56,7 @@ namespace WEngine
 		_GLOBAL_ JobHandler* jobHandler;
 		_GLOBAL_ TimeHandler* timeHandler;
 
-		_GLOBAL_ bool* isGameRunning; // Setting this to false will stop the game
+		_GLOBAL_ bool isGameRunning; // Setting this to false will stop the game
 
 		_GLOBAL_ SteamStore* steamStore;
 		_GLOBAL_ float32 timeScale = 1.0f;
@@ -76,11 +76,11 @@ namespace WEngine
 	 	 * Check if the game is running.
 	 	 * @return Pointer to a boolean indicating whether the game is running.
 	 	 */
-		static bool* IsGameRunning() { return isGameRunning; }
+		static bool IsGameRunning() { return isGameRunning; }
 		/**
 		 * Shutdown the game by setting the game running flag to false.
 		 */
-		static void ShutdownGame() { *isGameRunning = false; }
+		static void ShutdownGame() { isGameRunning = false; }
 
 		static float32 GetTimeScale() { return timeScale; }
 		static void SetTimeScale(float32 scale)

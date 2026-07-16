@@ -4,6 +4,8 @@
 #include <Engine/Core/Handlers/AssetRepo.h>
 #include <Engine/Types/CoreSystems.h>
 
+#include "Engine/Core/System/Haptic.h"
+
 using namespace WEngine;
 
 void PeripheralWidget::Setup()
@@ -18,5 +20,33 @@ void PeripheralWidget::RenderInternal()
     if (ImGui::Button("Open Bindings Overlay"))
     {
 
+    }
+
+    auto testJPN = Haptic::GetActionJustPressed("testAction");
+    auto testHeldN = Haptic::GetActionHeld("testAction");
+    auto testJRN = Haptic::GetActionJustReleased("testAction");
+
+    if (testJPN.HasValue())
+    {
+        if (testJPN.GetValue())
+            ImGui::Text("test is just pressed");
+        else
+            ImGui::Text("test is NOT just pressed");
+    }
+
+    if (testHeldN.HasValue())
+    {
+        if (testHeldN.GetValue())
+            ImGui::Text("test is held");
+        else
+            ImGui::Text("test is NOT held");
+    }
+
+    if (testJRN.HasValue())
+    {
+        if (testJRN.GetValue())
+            ImGui::Text("test is just released");
+        else
+            ImGui::Text("test is NOT just released");
     }
 }
