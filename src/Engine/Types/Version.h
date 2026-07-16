@@ -61,7 +61,7 @@ namespace WEngine
 
 		bool operator==(const Version& other) const
 		{
-			return major == other.major && minor == other.minor && patch == other.patch;
+			return major == other.major && minor == other.minor && patch == other.patch && kind == other.kind;
 		}
 
 		bool operator!=(const Version& other) const
@@ -97,17 +97,17 @@ namespace WEngine
 		 * Returns the major version number.
 		 * @return Major version number.
 		 */
-		int16 GetMajor() const { return major; }
+		uint16 GetMajor() const { return major; }
 		/**
 		 * Returns the minor version number.
 		 * @return Minor version number.
 		 */
-		int16 GetMinor() const { return minor; }
+		uint16 GetMinor() const { return minor; }
 		/**
 		 * Returns the patch version number.
 		 * @return Patch version number.
 		 */
-		int16 GetPatch() const { return patch; }
+		uint16 GetPatch() const { return patch; }
 		/**
 		 * Returns the kind of the version.
 		 * @return Kind of the version.
@@ -118,17 +118,17 @@ namespace WEngine
 		 * Returns the major version number in a constant expression context.
 		 * @return Major version number.
 		 */
-		constexpr int16 GetMajorCex() const { return major; }
+		constexpr uint16 GetMajorCex() const { return major; }
 		/**
 		 * Returns the minor version number in a constant expression context.
 		 * @return Minor version number.
 		 */
-		constexpr int16 GetMinorCex() const { return minor; }
+		constexpr uint16 GetMinorCex() const { return minor; }
 		/**
 		 * Returns the patch version number in a constant expression context.
 		 * @return Patch version number.
 		 */
-		constexpr int16 GetPatchCex() const { return patch; }
+		constexpr uint16 GetPatchCex() const { return patch; }
 		/**
 		 * Returns the kind of the version in a constant expression context.
 		 * @return Kind of the version.
@@ -139,7 +139,7 @@ namespace WEngine
 		 * @param v The VersionKind enum value to convert.
 		 * @return The string representation of the given VersionKind enum value.
 		 */
-		std::string VersionKind_ToString(VersionKind v) const;
+		static std::string VersionKind_ToString(const VersionKind& v);
 
 		/**
 		 * Converts a Version object to its string representation in the format "major.minor.patch (kind)".

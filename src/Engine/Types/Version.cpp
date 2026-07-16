@@ -2,7 +2,7 @@
 
 using namespace WEngine;
 
-std::string Version::VersionKind_ToString(VersionKind v) const
+std::string Version::VersionKind_ToString(const VersionKind& v)
 {
 	switch (v)
 	{

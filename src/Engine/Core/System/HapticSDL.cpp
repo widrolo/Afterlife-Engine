@@ -22,10 +22,6 @@ void Haptic::Init(SDL_Window* window)
 void Haptic::FetchInput()
 {
     AdvanceBelts(ctx);
-
-
-
-
     CheckControllerStatus(ctx);
     FetchAllInput(ctx);
     PollEvents();

@@ -121,7 +121,7 @@ void MaterialDefinition::Parse(const YAML::Node &root)
         {
             WLog::SetConsoleError();
             WLog::ConsoleLog(std::format("Material \"{}\" is missing one of the following fields:\n"
-                "\t texturesDevel", name));
+                "\t params", name));
             return;
         }
 
@@ -225,14 +225,17 @@ bool MaterialDefinition::ProcessParams(const ShaderDefinition::FragmentInfo& fra
         {
             case ShaderSettingType::Float:
                 setting.option = param.second.as<float32>();
+                break;
             case ShaderSettingType::Int:
                 setting.option = param.second.as<int32>();
+                break;
             case ShaderSettingType::Vec2:
             {
                 Vector2 vec;
                 vec.x = param.second[0].as<float32>();
                 vec.y = param.second[1].as<float32>();
                 setting.option = vec;
+                break;
             }
             case ShaderSettingType::Vec3:
             {
@@ -241,6 +244,7 @@ bool MaterialDefinition::ProcessParams(const ShaderDefinition::FragmentInfo& fra
                 vec.y = param.second[1].as<float32>();
                 vec.z = param.second[2].as<float32>();
                 setting.option = vec;
+                break;
             }
             case ShaderSettingType::Vec4:
             {
@@ -250,6 +254,7 @@ bool MaterialDefinition::ProcessParams(const ShaderDefinition::FragmentInfo& fra
                 vec.z = param.second[2].as<float32>();
                 vec.w = param.second[3].as<float32>();
                 setting.option = vec;
+                break;
             }
             default: ;
         }

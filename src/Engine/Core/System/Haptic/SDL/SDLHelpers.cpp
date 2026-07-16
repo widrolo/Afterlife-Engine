@@ -37,4 +37,10 @@ WPadBtn StringToWPadBtn(const std::string &name)
     return WPadBtn::R5;
 }
 
+bool ValidateActionRequest(const SDLContext& ctx, const std::string &name)
+{
+    if (ctx.selectedMap == nullptr)
+        return false;
+}
+
 #endif

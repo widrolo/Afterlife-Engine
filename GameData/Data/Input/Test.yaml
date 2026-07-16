@@ -1,0 +1,13 @@
+input:
+    mapName: Test
+
+    inputs:
+        testAction:
+            name: testAction
+
+            inputType: Action
+
+            controller:
+                button: South
+            keyboard:
+                key: A

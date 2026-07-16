@@ -97,7 +97,10 @@ void RenderHandler::BeginFrame()
 		Iris::SETTING_SelectFramebufferForRender(m_ppFramebuffers[m_currentPPFramebuffer]);
 
 	Iris::DRAWCALL_ResetImGui();
-	Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
+	if (m_camera == nullptr)
+		Iris::DRAWCALL_ClearFrame(Color::Black);
+	else
+		Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
 	if (m_isEditor)
 		Iris::SETTING_SetViewportSize(m_viewportResolution);
 	else
@@ -123,7 +126,10 @@ void RenderHandler::BeginFrame()
 
 void RenderHandler::RenderFrame()
 {
-	m_lighting.cameraPos = m_camera->GetPosition();
+	if (m_camera == nullptr)
+		m_lighting.cameraPos = Vector3::Zero;
+	else
+		m_lighting.cameraPos = m_camera->GetPosition();
 	Iris::SETTING_SetLighting(m_lighting);
 	RenderSkybox();
 	SortMissions();
@@ -148,7 +154,11 @@ void RenderHandler::RenderFrame()
 	{
 		Iris::SETTING_FinishFramebufferRender();
 		Iris::SETTING_SelectFramebufferScreenForRender();
-		Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
+		if (m_camera == nullptr)
+			Iris::DRAWCALL_ClearFrame(Color::Black);
+		else
+			Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
+
 		Iris::DRAWCALL_DrawImGui();
 		Iris::SETTING_FinishFramebufferRender();
 	}
@@ -276,7 +286,11 @@ void RenderHandler::PrepareSkybox()
 void RenderHandler::RenderSkybox()
 {
 	Transform skyboxTransform = Transform::Zero;
-	skyboxTransform.position = m_camera->GetPosition();
+	if (m_camera == nullptr)
+		skyboxTransform.position = Vector3::Zero;
+	else
+		skyboxTransform.position = m_camera->GetPosition();
+
 	skyboxTransform.position.y = 0.0f;
 
 	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
@@ -354,7 +368,7 @@ void RenderHandler::RenderModelGroup(const ModelGroup &group, Material material)
 {
 	wtl::vector<InstanceData> instances(group.missions.size());
 
-	for (int i = 0; i < group.missions.size(); i++)
+	for (uint64 i = 0; i < group.missions.size(); i++)
 	{
 		Mat4x4 model = CalcModelMatrix(group.missions[i].transform);
 		instances[i] = {model};
@@ -367,7 +381,7 @@ void RenderHandler::RenderModelGroup(const ModelGroup &group, Material material)
 
 void RenderHandler::RenderPostProcessingShaders()
 {
-	for (uint64 i = 0; i < m_ppShaders.size(); i++)
+	for (auto ppShader : m_ppShaders)
 	{
 		uint8 target = !m_currentPPFramebuffer;
 		uint8 origin = m_currentPPFramebuffer;
@@ -376,7 +390,7 @@ void RenderHandler::RenderPostProcessingShaders()
 		Iris::DRAWCALL_ClearFrame(Color::Black);
 		Iris::SETTING_SetViewportSize(EngineSettings::resolution);
 
-		Iris::DRAWCALL_DrawPostProcess(m_ppShaders[i], m_ppFramebuffers[origin]);
+		Iris::DRAWCALL_DrawPostProcess(ppShader, m_ppFramebuffers[origin]);
 
 		Iris::SETTING_FinishFramebufferRender();
 
@@ -400,9 +414,9 @@ void RenderHandler::SortStationary(RenderMission &mission)
 		if (objects.model == mission.model && objects.material == mission.material)
 		{
 			bool foundRef = false;
-			for (auto ref : objects.references)
+			for (const auto& ref : objects.references)
 			{
-				if (ref != mission.key)
+				if (ref == mission.key)
 				{
 					foundRef = true;
 					break;
@@ -429,6 +443,7 @@ void RenderHandler::InsertModelIntoShaderGroup(RenderMission &mission, MaterialG
 		{
 			foundModel = true;
 			materialGroup.models[i].missions.push_back(mission);
+			break;
 		}
 	}
 	if (!foundModel)
@@ -450,12 +465,13 @@ void RenderHandler::SortMissions()
 			continue;
 		}
 		bool foundShader = false;
-		for (uint64 i = 0; i < m_sortedMissions.size(); ++i)
+		for (auto& m_sortedMission : m_sortedMissions)
 		{
-			if (m_sortedMissions[i].groupID == mission.material)
+			if (m_sortedMission.groupID == mission.material)
 			{
 				foundShader = true;
-				InsertModelIntoShaderGroup(mission, m_sortedMissions[i]);
+				InsertModelIntoShaderGroup(mission, m_sortedMission);
+				return;
 			}
 		}
 		if (!foundShader)
@@ -491,7 +507,7 @@ void RenderHandler::InitSDL()
 	{
 		WLog::SetConsoleError();
 		WLog::ConsoleLog(std::format("SDL Initialisation failed: {}", SDL_GetError()));
-		return;
+		abort();
 	}
 
 	SDL_DisplayID display = SDL_GetPrimaryDisplay();
@@ -531,7 +547,7 @@ void RenderHandler::InitSDL()
 	{
 		WLog::SetConsoleError();
 		WLog::ConsoleLog("Window couldnt be opened");
-		return;
+		abort();
 	}
 	WLog::ConsoleLog(std::format("Window opened at resolution {}x{}", m_windowResolution.x, m_windowResolution.y));
 

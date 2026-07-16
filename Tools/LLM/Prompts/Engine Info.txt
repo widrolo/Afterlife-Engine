@@ -1,0 +1,41 @@
+Since the code youre reviewing is part of a game engine, you must be aware of certain parts of the game engine.
+Basic info:
+The game engine is a 3D open world game engine written in C++. On PC, it generally uses Vulkan for rendering and SDL for input. 
+The engine uses YAML for every single configuration. Everything, sectors, shader and materials, input and output and even component definitions for the editor.
+
+System Abstractions:
+System abstractions are in essence just classes with all static functions and no data in the class itself. The primary purpose is to have a common, very high level interface of a part of a system that can be switched to another implementation by a cmake edit. In that case, the implementations live in their own translation units with their own dedicated helper functions and global data.
+- Iris: Handles Rendering, exposes basic high level funtions for loading images and vertex data onto the GPU, loading shaders, rendering in 3 modes: single, instances, preloaded stationary instanced; create framebuffers and bookeep statistics.
+- Haptic: Handles input and haptic output, recieves input or output maps which define input strings bound by keyboard, mouse or controller events. 3 types of input: Action, float and vector. Can decide whther an action input is just pressed, released or held, return deltas between floats and vectors, and genrally performs signal processing on input. It behaves like Steam Input by default.
+- OS: Rare usage since the STL takes care of most OS differences, but when it doesnt, then OS steps in to resolve it.
+- Echo: In the planning phase, will be responsible for handling audio.
+
+Deep Core Handlers:
+Deep core handlers are singletons and are stored globally withing the CoreSystems class with other handlers. Only the philosophy differntiates it, as deep core handlers primarily interact with Systems Abstractions.
+Render Handler: Responsible for recording render missions during the draw part of the game loop. Performs automatic optimizations before sending it off to Iris.
+Audio Handler: Takes in audio files and plays them. TO be reworked when Echo comes around.
+Input: Not much of a handler, but rather an interface to Haptic to be used by gameplay components.
+
+Asset Repo:
+The Asset Repo is treated by the engine like a handler, but is far from it. It is the primary location to get all kinds of files. It does not usually return files themselves unlsess instructed to do so, but rather returns partially parsed versions. Instead of 3D binary data, its hands back vertex data for example.
+Communication with the asset repo is usually done by creating an asset mission with just the name, passing it into GetAsset() by reference, the asset repo wills out eh mission where it can then be used by the calle; the return type remains void.
+Another way that communication is handled is via asset communication; this is onyl permitted for system abstractions, where there are special communication channels that can perform extra work.
+
+High Level Core Handlers:
+These core handlers are also located globally within CoreSystems, but differntiate themselves by being closer to gameplay. They can also touch System Abstractions, but they do not rely on them.
+- Widget Handler: Manages engine and game widgets that use ImGui. 
+- RNG Handler: Rolls RNG. Soon to be deprecated.
+- Physics Handler: Simulates Physics using Box3D. Box3D is still in alpha, but is expected to reach relative maturity as developent of the engine goes on.
+- Time Handler: Manages in game time and date. Has settings for time speed and is used for lighting.
+
+Gameplay concepts:
+Note that the following are very similar to Unity. This is not ECS, despite the names.
+Sector: a sector is a small part of a world. It as an absurdly small part, like one apartment or one segment og the street. What is important is that sectors are used almost like a super modern version of what doom did with BSPs, but this is occluding chunks of the worls by knowing where a player is based on the player walking into triggers. The hold and tick entities.
+Entities: Entities are containers of components. Note that unlike regular game objects in other engines, there is no parent child relationships here. All entities within a sector are siblings.
+Components: Components execute logic and hold data on an entity. There is a difference between built in engine components and game components. Engine components handle general tasks: calling render handler, calling physics handler, being a camera, and can even be directly referenced by superior handlers. Gameplay components handle game specific tasks like movement or gameplay.
+Game class: The game class is used to execute game systems. The game class has an extensive access to ordering in the game loop, haveing access to tick, draw, phsics but also right before it and right after it as well as many other points.
+Game Systems: Almost like handlers but purely for gameplay. They only control gameplay, for example a score system or an enemy system. 
+
+Editor:
+The editor is called WEDGE and is an interface to visually edit the yaml configurations. It has centered around editing sectors, but also contains various tools to edit all game data.
+The Eidor itself is split funtionally from the engine, but is like a cousin. it runs a lot of the engine core handlers, which allows it to use Widgets for its UI, and the render handler with Iris for rendering the viewport. 

@@ -67,7 +67,7 @@ namespace WEngine
 			static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 			const uint64 hash = T::StaticGetHash();
 
-			for (auto c : m_components)
+			for (const auto& c : m_components)
 			{
 				if (c->GetHash() == hash)
 					return static_cast<T*>(c);
@@ -81,7 +81,7 @@ namespace WEngine
 		virtual void Draw();
 		virtual void DrawDebug();
 
-		bool IsStationary() const { return m_isStationary; }
+		[[nodiscard]] bool IsStationary() const { return m_isStationary; }
 	private:
 		void EntityStart(const SpawnArgs& args);
 		void Internal_ParentSector(Sector* parentSector);

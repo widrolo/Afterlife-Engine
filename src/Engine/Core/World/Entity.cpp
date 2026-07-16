@@ -28,7 +28,7 @@ void Entity::LateAwake()
 void Entity::Start()
 {
 	m_hasEverStarted = true;
-	auto comps = m_components;
+	auto& comps = m_components;
 	for (const auto& comp : comps)
 	{
 		comp->Start();
@@ -113,6 +113,7 @@ void Entity::EntityDestroy()
 		comp->UnloadComponent();
 		WAllocator::Destruct(comp);
 	}
+	m_components.clear();
 }
 
 void Entity::InitBaseComponents()

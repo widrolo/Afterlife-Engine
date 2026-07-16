@@ -45,7 +45,7 @@ void Sector::Tick(const float32 dt)
 
 	if (m_isRoot)
 	{
-		for (auto sector : m_sectors)
+		for (const auto& sector : m_sectors)
 			sector->Tick(dt);
 		return; // root has no entities
 	}
@@ -92,7 +92,7 @@ void Sector::Draw()
 void Sector::AddEntityPost(const SpawnArgs& args)
 {
 	Entity* e = (Entity*)WAllocator::Construct<Entity>();
-	e->Internal_ParentSector(this),
+	e->Internal_ParentSector(this);
 	e->Awake(args);
 	e->LateAwake();
 	m_entities.push_back(e);
@@ -176,9 +176,9 @@ void Sector::UnloadEntity(const std::string& name)
 	{
 		if (entity->entityName == name)
 		{
+			deletedEntity = entity;
 			entity->Stop();
 			entity->EntityDestroy();
-			deletedEntity = entity;
 			break;
 		}
 	}
@@ -278,7 +278,7 @@ void Sector::LoadArgsFromFile(const std::string& sectorName)
 	{
 		const YAML::Node logic = mission.root["logic"];
 
-		for (const auto entityNode : logic)
+		for (const auto& entityNode : logic)
 		{
 			const YAML::Node data = entityNode.second;
 
@@ -297,7 +297,7 @@ void Sector::LoadArgsFromFile(const std::string& sectorName)
 		}
 	}
 
-	for (auto il : initLogic)
+	for (const auto& il : initLogic)
 	{
 		il->Execute();
 		WAllocator::Destruct(il);
@@ -314,7 +314,7 @@ void Sector::LoadArgsFromFile(const std::string& sectorName)
 // sector has what data.
 void Sector::Unload()
 {
-	for (const auto entity : m_entities)
+	for (const auto& entity : m_entities)
 	{
 		entity->Stop();
 		entity->EntityDestroy();
