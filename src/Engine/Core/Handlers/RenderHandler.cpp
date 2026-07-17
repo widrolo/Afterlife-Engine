@@ -17,6 +17,7 @@
 
 #include "Input.h"
 #include "Engine/EngineDefines.h"
+#include "Engine/Core/Engine.h"
 #include "Engine/Core/System/Haptic.h"
 #include "Engine/Types/CoreSystems.h"
 
@@ -34,9 +35,11 @@ RenderHandler::RenderHandler()
 	}
 	InitImGui();
 
-	PreparePPFramebuffers();
+	if (!Engine::GetCla().testMode)
+		PreparePPFramebuffers();
 
-	LoadPPShaders();
+	if (!Engine::GetCla().testMode)
+		LoadPPShaders();
 
 	m_projection = glm::perspective(
 		glm::radians(90.0f),
@@ -53,8 +56,6 @@ RenderHandler::RenderHandler()
 	m_lighting.cameraPos = Vector3::Zero;
 
 	Iris::SETTING_SetLighting(m_lighting);
-
-	PrepareSkybox();
 }
 
 void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)
@@ -91,10 +92,19 @@ void RenderHandler::BeginFrame()
 	Iris::SETTING_BeginNewFrame();
 
 	m_currentPPFramebuffer = 0;
-	if (m_isEditor)
-		Iris::SETTING_SelectFramebufferForRender(m_viewportFb);
+
+	if (!Engine::GetCla().testMode)
+	{
+		if (m_isEditor)
+			Iris::SETTING_SelectFramebufferForRender(m_viewportFb);
+		else
+			Iris::SETTING_SelectFramebufferForRender(m_ppFramebuffers[m_currentPPFramebuffer]);
+	}
 	else
-		Iris::SETTING_SelectFramebufferForRender(m_ppFramebuffers[m_currentPPFramebuffer]);
+	{
+		Iris::SETTING_SelectFramebufferScreenForRender();
+	}
+
 
 	Iris::DRAWCALL_ResetImGui();
 	if (m_camera == nullptr)
@@ -150,23 +160,33 @@ void RenderHandler::RenderFrame()
 			Iris::DRAWCALL_DrawModelInstancedStationary(ref, stat.model, stat.material, vp);
 	}
 
-	if (m_isEditor)
-	{
-		Iris::SETTING_FinishFramebufferRender();
-		Iris::SETTING_SelectFramebufferScreenForRender();
-		if (m_camera == nullptr)
-			Iris::DRAWCALL_ClearFrame(Color::Black);
-		else
-			Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
 
-		Iris::DRAWCALL_DrawImGui();
-		Iris::SETTING_FinishFramebufferRender();
+	if (!Engine::GetCla().testMode)
+	{
+		if (m_isEditor)
+		{
+			Iris::SETTING_FinishFramebufferRender();
+			Iris::SETTING_SelectFramebufferScreenForRender();
+			if (m_camera == nullptr)
+				Iris::DRAWCALL_ClearFrame(Color::Black);
+			else
+				Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
+
+			Iris::DRAWCALL_DrawImGui();
+			Iris::SETTING_FinishFramebufferRender();
+		}
+		else
+		{
+			Iris::SETTING_FinishFramebufferRender();
+			RenderPostProcessingShaders();
+		}
 	}
 	else
 	{
+		Iris::DRAWCALL_DrawImGui();
 		Iris::SETTING_FinishFramebufferRender();
-		RenderPostProcessingShaders();
 	}
+
 
 	Iris::DRAWCALL_DrawToDisplay(m_window);
 

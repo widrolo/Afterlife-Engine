@@ -207,8 +207,12 @@ WEngine::Nullable<WEngine::Material> Iris::ALLOC_CompileMaterial(const std::stri
     auto cla = WEngine::Engine::GetCla();
     if (cla.testMode)
     {
-        return GetMaterial("MissingMat");
+        if (matName == "Unlit/MissingMat")
+            goto missingInit;
+        return GetMaterial("Unlit/MissingMat");
     }
+
+    missingInit:
 
     auto check = GetMaterial(matName);
 

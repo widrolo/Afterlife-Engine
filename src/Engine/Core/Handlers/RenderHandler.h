@@ -167,9 +167,9 @@ namespace WEngine
 		 */
 		[[nodiscard]] float32 GetLightTime() const;
 
+		void PrepareSkybox();
 	private:
 		void PreparePPFramebuffers();
-		void PrepareSkybox();
 		void RenderSkybox();
 		void LoadPPShaderSingle(const std::string& name);
 		void LoadPPShaders();

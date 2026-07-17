@@ -8,6 +8,7 @@
 #include "VulkanHelpers.h"
 #include "VulkanDescriptors.h"
 #include "VulkanPipeline.h"
+#include "Engine/Core/Engine.h"
 #include "Engine/Core/Handlers/AssetRepo.h"
 #include "Engine/Core/System/Iris.h"
 #include "Engine/Core/System/OS.h"
@@ -266,6 +267,12 @@ void TryCompileAllMaterialShaders(VulkanContext &ctx)
         if (file == "$Sample")
             continue;
 
+        if (WEngine::Engine::GetCla().testMode)
+        {
+            if (file != "TexturedUnlit")
+                continue;
+        }
+
         WEngine::YamlAssetMission mission;
         mission.name = "../" + EngineSettings::shaderPath + "definitions/" + file;
         WEngine::CoreSystems::GetAssetRepo()->GetAsset(mission);
@@ -299,6 +306,8 @@ void TryCompileAllMaterialShaders(VulkanContext &ctx)
 
 void TryCompileAllPostProcessingShaders(VulkanContext &ctx)
 {
+    if (WEngine::Engine::GetCla().testMode)
+        return;
     std::string dir = WEngine::CoreSystems::GetAssetRepo()->GetDataPath() + EngineSettings::shaderPath + "definitions/PostProcessing";
     auto files = OS::GetAllFileNamesInDir(dir);
 
