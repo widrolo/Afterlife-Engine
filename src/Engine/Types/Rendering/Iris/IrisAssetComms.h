@@ -30,7 +30,7 @@ namespace WEngine
     {
         // Input
         AssetIrisCommunicationType commType;
-        TextureInfo textureData;
+        TextureInfoDDS textureData;
         uint64 texReferenceIn;
 
         // Output

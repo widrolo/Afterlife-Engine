@@ -96,6 +96,18 @@ uint64 CalcTextureSize(uint8 bytesPerPixel, uint32 width, uint32 height)
     return width * height * bytesPerPixel;
 }
 
+sizeT BCBlockSize(BC format)
+{
+    return (format == BC::BC5) ? 16u : 8u;
+}
+
+sizeT BCMipSize(uint32 width, uint32 height, BC format)
+{
+    uint32_t bw = std::max(1u, (width + 3) / 4);
+    uint32_t bh = std::max(1u, (height + 3) / 4);
+    return bw * bh * BCBlockSize(format);
+}
+
 uint64 CalcModelSize(uint8 bytesPerVertex, uint32 vertexCount)
 {
     return bytesPerVertex * vertexCount;

@@ -44,13 +44,13 @@ namespace WEngine
 
 	private:
 		TextureInfo LoadTexturePNG(const std::string& path);
+		TextureInfoDDS LoadTextureDDS(const std::string& path);
 		AudioClip* LoadAudioWAV(const std::string& name);
 		std::string LoadTextFile(const std::string& path);
 
 		void LoadSpirVFromGlsl(SpirVAssetMission& mission);
 		void LoadSpirVFromSpv(SpirVAssetMission& mission);
 
-		void RGBAtoBC7(const TextureInfo& tex, std::vector<uint8_t>& outBC7);
 
 		// ---------------------------------- [IRIS COMMS] ----------------------------------
 

@@ -40,17 +40,6 @@ shader:
     fragmentInfo:
         # A material must always hand off this number of textures.
         expectTextureCount: 2 
-        # the total number of both must equal expectTextureCount. These are temp names.
-        # In the material, all textures defined by colorTextures must end with .png.
-        # In the material, all textures defined by pbrTexture must end with .pbr.
-        # These are only required if expectTextureCount is higher than zero.
-        colorTextures: [base]
-        pbrTextures: [pbr]
-
-        # Another sanity check, all these should be present in the development textures
-        # in the material definition.
-        # These are only required if expectTextureCount is higher than zero.
-        expectChannelNames: [color, normal, roughness, metal, ao]
 
         # This sets expected parameters that a material must provide.
         # The key name must match in the material, the value is the type.

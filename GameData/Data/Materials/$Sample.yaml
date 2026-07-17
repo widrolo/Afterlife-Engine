@@ -8,19 +8,6 @@ material:
     # During devel this will load the GLSL, in packaging this will use the compiled Spir-V shaders.
     shader: regularPBR
 
-    # The following two use a temporary name system. The first key is the temporary name which points 
-    # to the file on the disk. Its only used for material construction, its discarded afterwards.
-    # texturesDevel names are also used for sanity checks, please use the names provided in your 
-    # shader definition. Since the development pipeline can be flexible, a failed sanity check wont 
-    # lead to a crash, but will throw a warning.
-    # If the shader has zero textures expected, then this doesnt need to be defined
-    # This is loaded by the development version of the game.
-    texturesDevel:
-        color:      Proto/proto1024_c.png
-        normal:     Proto/proto1024_n.png # two channel
-        roughness:  Proto/proto1024_r.png
-        metal:      Proto/proto1024_m.png
-        ao:         Proto/proto1024_ao.png
 
     # This is loaded by the packaged version of the game. (packed channels, dual channel normals)
     # The pbr extension isnt custom, its just a renamed PNG. It use used by the engine in combination
@@ -29,37 +16,10 @@ material:
     # its used for another layer of error checking. The temporary names will also be used for error checking,
     # this one cannot be disabled.
     # If the shader has zero textures expected, then this doesnt need to be defined
-    texturesPackaging:
+    textures:
         base: Proto/proto1024.png # rgb=colors | a=normal X
         pbr: Proto/proto1024.pbr # r=AO map | g=roughness | b=metal | a=normal Y
 
-    # Optional, if true this will disable the check for the texturesDevel channels and file extensions.
-    disableStrictCheck: false
-
-    # Since the shader always assumes its in a packaged state, we need to tell the engine how to
-    # transform the passed textures into the packaged textures on the fly when running in development mode. 
-    # It will also be used by the game packager to package the textures.
-    # in development mode, there will be a performance impact for each load.
-    # Here, names of the tags play a crutial role. A typical name looks like this:
-    # 
-    #       base.r = color.b
-    # 
-    # For the first
-    # base: the temporary of the packaging texture, in this case Proto/proto1024.png
-    # r: the color channel, in this case red.
-    #
-    # For the second
-    # color: the temporary of the development texture, in this case Proto/proto1024_c.png
-    # b: the color channel, in this case blue.
-    # With that, the engine/packer will use the blue channel of the color texture when constructing 
-    # the red channel for the base.
-    # You can use the GLSL style rgba accessor. Channel count must match in the end, otherwise the engine aborts.
-    # Dont go overboard with swizziling, this isnt glsl; consider this more of a mix-and-match game. base.gggg 
-    # isnt supported, base.r = (float) isnt supported. 
-    # If the shader has zero textures expected, then this doesnt need to be defined
-    develTransform:
-        base.rgba: [color.rgb, normal.r]
-        pbr.rgba: [ao.r, roughness.r, metal.r, normal.g]
 
     # These are parameters that the shader expects. Please consult your shader definition to know which to use.
     # Failure to provide one or wrong type will result in a crash. Additional non required params will be dropped

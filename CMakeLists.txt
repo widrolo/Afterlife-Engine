@@ -333,6 +333,8 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Core/System/Haptic/SDL/SDLHelpers.cpp
         src/Engine/Core/System/Haptic/SDL/SDLHelpers.h
         src/Engine/Types/Input/InputSense.cpp
+        src/Engine/Types/Rendering/DDS.cpp
+        src/Engine/Types/Rendering/DDS.h
 )
 
 target_include_directories(Widrolo_Engine_3D PRIVATE

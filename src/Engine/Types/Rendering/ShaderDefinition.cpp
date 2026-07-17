@@ -89,44 +89,6 @@ void ShaderDefinition::ParseMaterialShader(const YAML::Node &shader)
 
     fragInfo.expectTextureCount = fragInfoNode["expectTextureCount"].as<uint8>();
 
-    if (fragInfo.expectTextureCount != 0)
-    {
-        // since we have textures now, we have to ensure proper sanity checks.
-        if (!fragInfoNode["colorTextures"] || !fragInfoNode["pbrTextures"] || !fragInfoNode["expectChannelNames"])
-        {
-            WLog::SetConsoleError();
-            WLog::ConsoleLog(std::format("Shader fragment info \"{}\" is missing one of the following fields:\n"
-                "\t colorTextures, pbrTextures, expectChannelNames.", name));
-            return;
-        }
-
-        uint8 sanityTextureCount = 0;
-        for (const auto& texture : fragInfoNode["colorTextures"])
-        {
-            fragInfo.colorTextures.push_back(texture.as<std::string>());
-            sanityTextureCount++;
-        }
-
-        for (const auto& texture : fragInfoNode["pbrTextures"])
-        {
-            fragInfo.pbrTextures.push_back(texture.as<std::string>());
-            sanityTextureCount++;
-        }
-
-        for (const auto& chanName : fragInfoNode["expectChannelNames"])
-        {
-            fragInfo.expectChannelNames.push_back(chanName.as<std::string>());
-        }
-
-        if (fragInfo.expectTextureCount != sanityTextureCount)
-        {
-            WLog::SetConsoleError();
-            WLog::ConsoleLog(std::format("Shader sanity test tripped in \"{}\":\n"
-                "\t texture name count not equal to expected texture count!", name));
-            return;
-        }
-    }
-
     for (const auto& param : fragInfoNode["expectParams"])
     {
         const YAML::Node name = param.first;

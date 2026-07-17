@@ -22,9 +22,6 @@ namespace WEngine
         struct FragmentInfo
         {
             uint8 expectTextureCount;
-            wtl::vector<std::string> colorTextures;
-            wtl::vector<std::string> pbrTextures;
-            wtl::vector<std::string> expectChannelNames;
             wtl::vector<std::pair<std::string, ShaderSettingType>> expectedParams;
         } fragInfo;
 

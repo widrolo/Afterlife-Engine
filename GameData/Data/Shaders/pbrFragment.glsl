@@ -14,8 +14,6 @@ layout(set = 0, binding = 0) uniform RawLighting
 } world;
 
 layout(set = 1, binding = 0) uniform sampler2D tex;
-
-// r = norm.x | g = norm.y | b = norm.z | a = roughness
 layout(set = 1, binding = 1) uniform sampler2D pbr;
 
 layout(location = 0) out vec4 outColor;
@@ -29,12 +27,12 @@ vec3 CalcDiffuse(vec3 normal, vec3 lightDir)
     return diff * world.sunCol;
 }
 
-vec3 CalcSpecular(vec3 normal, vec3 lightDir, float rough)
+vec3 CalcSpecular(vec3 normal, vec3 lightDir)
 {
     vec3 viewDir = normalize(world.camPos - inFragPos);
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-    return specularStrength * spec * world.sunCol * (1 - rough);
+    return specularStrength * spec * world.sunCol;
 }
 
 vec3 CalcWorldNormal(vec3 N, vec3 tangentNormal)
@@ -55,8 +53,9 @@ vec3 CalcWorldNormal(vec3 N, vec3 tangentNormal)
 void main()
 {
     vec4 pbrSample = texture(pbr, inUV0);
-    vec3 tangentNormal = normalize(pbrSample.xyz * 2.0 - 1.0);
-    float rough = pbrSample.w;
+    vec2 tnXY = pbrSample.rg * 2.0 - 1.0;
+    float tnZ  = sqrt(1.0 - dot(tnXY, tnXY));
+    vec3 tangentNormal = vec3(tnXY, tnZ);
 
     vec3 N = normalize(inNormal);
     vec3 normal = CalcWorldNormal(N, tangentNormal);
@@ -64,7 +63,7 @@ void main()
     vec3 lightDir = normalize(world.sunDir);
 
     vec3 diffuse = CalcDiffuse(normal, lightDir);
-    vec3 specular = CalcSpecular(normal, lightDir, rough);
+    vec3 specular = CalcSpecular(normal, lightDir);
 
     vec3 pbrResult = (world.ambIntensity * world.ambCol) + diffuse + specular;
     outColor = texture(tex, inUV0) * vec4(pbrResult, 1.0);

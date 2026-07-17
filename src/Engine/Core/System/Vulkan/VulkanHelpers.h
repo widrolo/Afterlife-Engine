@@ -5,6 +5,7 @@
 #include <vulkan/vulkan.h>
 #include "VulkanContext.h"
 #include "Engine/Core/System/GPUSettings.h"
+#include "Engine/Types/Rendering/DDS.h"
 #include "Engine/Types/Rendering/GPU/Framebuffer.h"
 #include "Engine/Types/Rendering/GPU/StatBufKey.h"
 
@@ -13,6 +14,8 @@ VkBool32 ValidationCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeveri
     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void*);
 void PerformInvalidHandleAction();
 uint64 CalcTextureSize(uint8 bytesPerPixel, uint32 width, uint32 height);
+sizeT BCBlockSize(BC format);
+sizeT BCMipSize(uint32 width, uint32 height, BC format);
 uint64 CalcModelSize(uint8 bytesPerVertex, uint32 vertexCount);
 VkFormat FindBestDepthFormat(const VulkanContext& ctx);
 VkFormat FindBestSwapchainFormat(const VulkanContext& ctx);

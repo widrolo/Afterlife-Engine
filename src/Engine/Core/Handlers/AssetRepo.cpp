@@ -23,6 +23,7 @@
 #include "Engine/Types/Rendering/VertextData.h"
 #include "Engine/Types/Rendering/Iris/IrisAssetComms.h"
 #include "Engine/Util/TextureSwizzler.h"
+#include "Engine/Types/Rendering/DDS.h"
 
 
 using namespace WEngine;
@@ -299,8 +300,37 @@ TextureInfo AssetRepo::LoadTexturePNG(const std::string& path)
 		WLog::ConsoleLog(std::format("Failed to load texture {}", path));
 		return TextureInfo{};
 	}
-	uint64 size = info.width * info.height * 4;
+	sizeT size = info.width * info.height * 4;
 	WAllocator::ReportExternalAllocation(size);
+	WLog::SetConsoleSuccess();
+	WLog::ConsoleLog(std::format("Loaded texture {}", path));
+	return info;
+}
+
+TextureInfoDDS AssetRepo::LoadTextureDDS(const std::string &path)
+{
+	DDSFile dds = LoadDDS(path);
+	WLog::ConsoleLog(std::format("DDS: {}x{}, {} mips, fmt={}, data={} bytes",
+		dds.w, dds.h, dds.mips, (int)dds.fmt, dds.data.size()));
+	if (dds.data.empty())
+	{
+		WLog::SetConsoleError();
+		WLog::ConsoleLog(std::format("Failed to load texture {}", path));
+		return {};
+	}
+
+	sizeT size = dds.data.size();
+	byte* raw   = new byte[size];
+	std::memcpy(raw, dds.data.data(), size);
+	WAllocator::ReportExternalAllocation(size);
+
+	TextureInfoDDS info{};
+	info.data     = raw;
+	info.width    = dds.w;
+	info.height   = dds.h;
+	info.mipCount = dds.mips;
+	info.format   = dds.fmt;
+
 	WLog::SetConsoleSuccess();
 	WLog::ConsoleLog(std::format("Loaded texture {}", path));
 	return info;
@@ -441,22 +471,12 @@ void AssetRepo::LoadSpirVFromSpv(SpirVAssetMission &mission)
 	file.close();
 }
 
-void AssetRepo::RGBAtoBC7(const TextureInfo &tex, std::vector<uint8_t> &outBC7)
-{
-
-}
-
 void AssetRepo::IrisCommsGetMat(IrisAssetCommunication &mission)
 {
 	// This is only here because I don't trust myself.
 	mission.texReferences.resize(mission.matDef.texturesPackaging.size());
 
-#ifdef PACKAGE
-	//IrisCommsGetMatPackage(mission);
-	IrisCommsGetMatDevel(mission);
-#else
-	IrisCommsGetMatDevel(mission);
-#endif
+	IrisCommsGetMatPackage(mission);
 }
 
 void AssetRepo::IrisCommsRetMat(IrisAssetCommunication &mission)
@@ -480,71 +500,6 @@ void AssetRepo::IrisCommsRetMat(IrisAssetCommunication &mission)
 	}
 }
 
-void AssetRepo::IrisCommsGetMatDevel(IrisAssetCommunication &mission)
-{
-	int32 i = 0;
-
-	wtl::vector<uint8> missing;
-
-	for (const auto& request : mission.matDef.texturesPackaging)
-	{
-		if (m_textureRepo.contains(request))
-		{
-			mission.texReferences[i] = m_textureRepo.at(request).Get();
-			m_textureRepo.at(request).Add();
-		}
-		else
-		{
-			missing.push_back(i);
-		}
-		i++;
-	}
-
-	i = 0;
-	for (const auto& index : missing)
-	{
-		TextureSwizzler swizzler;
-		for (const auto& swizzle : mission.matDef.swizzles)
-		{
-			if (swizzle.packedTexTarget == index)
-			{
-				std::unordered_map<std::string, TextureInfo> infoCache;
-				for (sizeT j = 0; j < 4; j++)
-				{
-					std::string develTex = mission.matDef.texturesDevel[swizzle.swizzle[j].develTexOrigin];
-
-					TextureInfo info;
-
-					if (infoCache.contains(develTex))
-						info = infoCache[develTex];
-					else
-					{
-						info= LoadTexturePNG(m_dataPath + EngineSettings::texturePath + develTex);
-						infoCache[develTex] = info;
-					}
-					swizzler.AddSource(info, swizzle.swizzle[j].channel, j);
-				}
-				i++;
-			}
-		}
-		swizzler.Swizzle(true);
-		TextureInfo info = swizzler.RetrieveResult();
-
-		AssetIrisCommunication comms{};
-		comms.commType = AssetIrisCommunicationType::StoreTexture;
-		comms.textureData = info;
-		Iris::AssetIrisCommunication(comms);
-
-		// since it was allocated by STB image, its not within our control so we need to call delete instead of wFree.
-		delete info.data;
-		uint32 size = info.height * info.width * info.channels;
-		WAllocator::ReportExternalFree(size);
-
-		m_textureRepo.try_emplace(mission.matDef.texturesPackaging[index], comms.texReferenceOut);
-		mission.texReferences[index] = comms.texReferenceOut;
-		m_textureRepo.at(mission.matDef.texturesPackaging[index]).Add();
-	}
-}
 
 void AssetRepo::IrisCommsGetMatPackage(IrisAssetCommunication &mission)
 {
@@ -553,7 +508,7 @@ void AssetRepo::IrisCommsGetMatPackage(IrisAssetCommunication &mission)
 	{
 		if (!m_textureRepo.contains(request))
 		{
-			TextureInfo info = LoadTexturePNG(m_dataPath + EngineSettings::texturePath + request);
+			TextureInfoDDS info = LoadTextureDDS(m_dataPath + EngineSettings::texturePath + request);
 
 			AssetIrisCommunication comms{};
 			comms.commType = AssetIrisCommunicationType::StoreTexture;
@@ -561,9 +516,9 @@ void AssetRepo::IrisCommsGetMatPackage(IrisAssetCommunication &mission)
 			Iris::AssetIrisCommunication(comms);
 
 			// since it was allocated by STB image, its not within our control so we need to call delete instead of wFree.
-			delete info.data;
-			uint32 size = info.height * info.width * info.channels;
-			WAllocator::ReportExternalFree(size);
+			//delete info.data;
+			//uint32 size = info.height * info.width * info.channels;
+			//WAllocator::ReportExternalFree(size);
 
 			m_textureRepo.try_emplace(request, comms.texReferenceOut);
 		}
