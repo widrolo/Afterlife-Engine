@@ -15,6 +15,59 @@ namespace WEngine
         Vector
     };
 
+    enum class FloatInputSensePad
+    {
+        lTrigger,
+        rTrigger,
+        lTriggerDelta,
+        rTriggerDelta,
+        lTouchPressure,
+        rTouchPressure,
+        lTouchPressureDelta,
+        rTouchPressureDelta,
+
+        FloatInputSensePad_Count
+    };
+
+    extern std::string FloatInputSensePad_Name[];
+
+    enum class FloatInputSenseMouse
+    {
+        SpeedChange,
+        WheelSpeed,
+
+        FloatInputSenseMouse_Count
+    };
+
+    extern std::string FloatInputSenseMouse_Name[];
+
+    enum class VectorInputSensePad
+    {
+        lJoy,
+        rJoy,
+        lJoyDelta,
+        rJoyDelta,
+        lTouch,
+        rTouch,
+        lTouchDelta,
+        rTouchDelta,
+
+        VectorInputSensePad_Count
+    };
+
+    extern std::string VectorInputSensePad_Name[];
+
+    enum class VectorInputSenseMouse
+    {
+        MouseDelta,
+        WindowPos,
+        WindowPosSquare,
+
+        VectorInputSenseMouse_Count
+    };
+
+    extern std::string VectorInputSenseMouse_Name[];
+
     struct InputActionInternal
     {
         std::string keyName;

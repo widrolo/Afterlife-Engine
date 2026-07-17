@@ -4,6 +4,8 @@
 
 #include <cstring>
 
+#include "Engine/Util/Log.h"
+
 void FetchAllInput(SDLContext &ctx)
 {
     FetchKeyboard(ctx);
@@ -36,6 +38,17 @@ void FetchController(SDLContext &ctx)
     for (sizeT i = 0; i < SDL_GAMEPAD_BUTTON_COUNT; i++)
         ctx.rawSDLController[0][i] = SDL_GetGamepadButton(ctx.controller, (SDL_GamepadButton)i);
 
+    ctx.rawLeftTrigger[0] = SDL_GetGamepadAxis(ctx.controller, SDL_GAMEPAD_AXIS_LEFT_TRIGGER);
+    ctx.rawRightTrigger[0] = SDL_GetGamepadAxis(ctx.controller, SDL_GAMEPAD_AXIS_RIGHT_TRIGGER);
+
+    WEngine::Vector2 lJoy;
+    WEngine::Vector2 rJoy;
+    lJoy.x = SDL_GetGamepadAxis(ctx.controller, SDL_GAMEPAD_AXIS_LEFTX);
+    lJoy.y = -SDL_GetGamepadAxis(ctx.controller, SDL_GAMEPAD_AXIS_LEFTY);
+    rJoy.x = SDL_GetGamepadAxis(ctx.controller, SDL_GAMEPAD_AXIS_RIGHTX);
+    rJoy.y = -SDL_GetGamepadAxis(ctx.controller, SDL_GAMEPAD_AXIS_RIGHTY);
+    ctx.rawLeftJoy[0] = lJoy;
+    ctx.rawRightJoy[0] = rJoy;
 }
 
 void TranslateFetched(SDLContext &ctx)
@@ -139,46 +152,171 @@ void UpdateAllSensesInMap(SDLContext &ctx, SDLMap &map)
 {
     for (const auto& sense : map.senses)
     {
-        bool justPressed = false;
-        bool pressed = false;
-        bool justReleased = false;
-
-        bool canPossiblyJP = true;
-        bool wasDownLastFrame = false;
-        if (sense.keyboardCheck)
+        switch (sense.inputKind)
         {
-            if (ctx.rawKeys[0][(sizeT)sense.key] && !ctx.rawKeys[1][(sizeT)sense.key])
-                justPressed = true;
-            if (ctx.rawKeys[0][(sizeT)sense.key])
-                pressed = true;
-            if (!ctx.rawKeys[0][(sizeT)sense.key] && ctx.rawKeys[1][(sizeT)sense.key])
-                justReleased = true;
-
-            if (ctx.rawKeys[0][(sizeT)sense.key] && ctx.rawKeys[1][(sizeT)sense.key])
-                canPossiblyJP = false;
-            if (ctx.rawKeys[1][(uint8)sense.key])
-                wasDownLastFrame = true;
+            case WEngine::InputSenseKind::Action:
+                map.results[sense.name] = UpdateActionSense(ctx, sense);
+                break;
+            case WEngine::InputSenseKind::Float:
+                map.results[sense.name] = UpdateFloatSense(ctx, sense);
+                break;
+            case WEngine::InputSenseKind::Vector:
+                map.results[sense.name] = UpdateVectorSense(ctx, sense);
+                break;
         }
-        if (sense.controllerCheck)
-        {
-            if (ctx.rawController[0][(sizeT)sense.controller] && !ctx.rawController[1][(sizeT)sense.controller])
-                justPressed = true;
-            if (ctx.rawController[0][(sizeT)sense.controller])
-                pressed = true;
-            if (!ctx.rawController[0][(sizeT)sense.controller] && ctx.rawController[1][(sizeT)sense.controller])
-                justReleased = true;
 
-            if (ctx.rawController[0][(sizeT)sense.controller] && ctx.rawController[1][(sizeT)sense.controller])
-                canPossiblyJP = false;
-            if (ctx.rawKeys[1][(uint8)sense.key])
-                wasDownLastFrame = true;
-        }
-        FetchResult fetch{};
-        if (canPossiblyJP && !wasDownLastFrame) fetch.justPressed = justPressed;
-        fetch.held = pressed;
-        if (!pressed) fetch.justReleased = justReleased;
-        map.results[sense.name] = fetch;
     }
+}
+
+FetchResult UpdateActionSense(const SDLContext &ctx, const SDLSense &sense)
+{
+    bool justPressed = false;
+    bool pressed = false;
+    bool justReleased = false;
+
+    bool canPossiblyJP = true;
+    bool wasDownLastFrame = false;
+    if (sense.keyboardCheck)
+    {
+        if (ctx.rawKeys[0][(sizeT)sense.key[0]] && !ctx.rawKeys[1][(sizeT)sense.key[0]])
+            justPressed = true;
+        if (ctx.rawKeys[0][(sizeT)sense.key[0]])
+            pressed = true;
+        if (!ctx.rawKeys[0][(sizeT)sense.key[0]] && ctx.rawKeys[1][(sizeT)sense.key[0]])
+            justReleased = true;
+
+        if (ctx.rawKeys[0][(sizeT)sense.key[0]] && ctx.rawKeys[1][(sizeT)sense.key[0]])
+            canPossiblyJP = false;
+        if (ctx.rawKeys[1][(sizeT)sense.key[0]])
+            wasDownLastFrame = true;
+    }
+    if (sense.controllerCheck)
+    {
+        if (ctx.rawController[0][(sizeT)sense.controller] && !ctx.rawController[1][(sizeT)sense.controller])
+            justPressed = true;
+        if (ctx.rawController[0][(sizeT)sense.controller])
+            pressed = true;
+        if (!ctx.rawController[0][(sizeT)sense.controller] && ctx.rawController[1][(sizeT)sense.controller])
+            justReleased = true;
+
+        if (ctx.rawController[0][(sizeT)sense.controller] && ctx.rawController[1][(sizeT)sense.controller])
+            canPossiblyJP = false;
+        if (ctx.rawKeys[1][(sizeT)sense.key[0]])
+            wasDownLastFrame = true;
+    }
+    FetchResult fetch{};
+    if (canPossiblyJP && !wasDownLastFrame)
+        fetch.justPressed = justPressed;
+    fetch.held = pressed;
+    if (!pressed)
+        fetch.justReleased = justReleased;
+    return fetch;
+}
+
+FetchResult UpdateFloatSense(const SDLContext &ctx, const SDLSense &sense)
+{
+    FetchResult fetch{};
+    float32 kbTrigger = 0;
+    float32 conTrigger = 0;
+    if (sense.keyboardCheck)
+    {
+        if (ctx.rawKeys[0][(sizeT)sense.key[0]])
+            kbTrigger -= 1;
+        if (ctx.rawKeys[0][(sizeT)sense.key[1]])
+            kbTrigger += 1;
+    }
+    if (sense.controllerCheck)
+    {
+        switch (sense.trigger)
+        {
+            case WEngine::FloatInputSensePad::lTrigger:
+                conTrigger = ctx.rawLeftTrigger[0] / (float32)max_int16;
+                break;
+            case WEngine::FloatInputSensePad::rTrigger:
+                conTrigger = ctx.rawRightTrigger[0] / (float32)max_int16;
+                break;
+            case WEngine::FloatInputSensePad::lTriggerDelta:
+                conTrigger = (ctx.rawLeftTrigger[1] - ctx.rawLeftTrigger[0]) / (float32)max_int16;
+                break;
+            case WEngine::FloatInputSensePad::rTriggerDelta:
+                conTrigger = (ctx.rawRightTrigger[1] - ctx.rawRightTrigger[0]) / (float32)max_int16;
+                break;
+            case WEngine::FloatInputSensePad::lTouchPressure:
+                break;
+            case WEngine::FloatInputSensePad::rTouchPressure:
+                break;
+            case WEngine::FloatInputSensePad::lTouchPressureDelta:
+                break;
+            case WEngine::FloatInputSensePad::rTouchPressureDelta:
+                break;
+            default: ;
+        }
+    }
+
+    // same as checking which one is currently in use.
+    fetch.trigger = (std::abs(kbTrigger) > std::abs(conTrigger)) ? kbTrigger : conTrigger;
+
+    return fetch;
+}
+
+FetchResult UpdateVectorSense(const SDLContext &ctx, const SDLSense &sense)
+{
+    FetchResult fetch{};
+    WEngine::Vector2 kbVec = WEngine::Vector2::Zero;
+    WEngine::Vector2 conVec = WEngine::Vector2::Zero;
+    if (sense.keyboardCheck)
+    {
+        if (ctx.rawKeys[0][(sizeT)sense.key[0]])
+            kbVec.x -= 1;
+        if (ctx.rawKeys[0][(sizeT)sense.key[1]])
+            kbVec.x += 1;
+        if (ctx.rawKeys[0][(sizeT)sense.key[2]])
+            kbVec.y += 1;
+        if (ctx.rawKeys[0][(sizeT)sense.key[3]])
+            kbVec.y -= 1;
+    }
+    if (sense.controllerCheck)
+    {
+        switch (sense.joy)
+        {
+            case WEngine::VectorInputSensePad::lJoy:
+                conVec = ctx.rawLeftJoy[0] / (float32)max_int16;
+                break;
+            case WEngine::VectorInputSensePad::rJoy:
+                conVec = ctx.rawRightJoy[0] / (float32)max_int16;
+                break;
+            case WEngine::VectorInputSensePad::lJoyDelta:
+                conVec = (ctx.rawLeftJoy[1] - ctx.rawLeftJoy[0]) / (float32)max_int16;
+                break;
+            case WEngine::VectorInputSensePad::rJoyDelta:
+                conVec = (ctx.rawRightJoy[1] - ctx.rawRightJoy[0]) / (float32)max_int16;
+                break;
+            case WEngine::VectorInputSensePad::lTouch:
+                break;
+            case WEngine::VectorInputSensePad::rTouch:
+                break;
+            case WEngine::VectorInputSensePad::lTouchDelta:
+                break;
+            case WEngine::VectorInputSensePad::rTouchDelta:
+                break;
+            case WEngine::VectorInputSensePad::VectorInputSensePad_Count:
+                break;
+        }
+    }
+
+    //kbVec.NormaliseThis();
+
+    // const for now
+    const float deadzone = 0.15f;
+
+    if (WEngine::Vector2::Magnitude(conVec) < deadzone)
+        conVec = WEngine::Vector2::Zero;
+    //else
+    //    conVec.NormaliseThis();
+
+    fetch.pos = (WEngine::Vector2::SqrMagnitude(kbVec) > WEngine::Vector2::SqrMagnitude(conVec)) ? kbVec : conVec;
+
+    return fetch;
 }
 
 #endif

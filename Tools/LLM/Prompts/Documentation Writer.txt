@@ -13,15 +13,3 @@ When you start responding, do not say any other things than your work. Do not ev
  * @return Handle to the window.
  */
 Handle OpenWidow(Vectori2 size);
-
-In addition to that, you should know that the code you are documenting is game engine code. Here are some terms you need to know if they arent obvious from the provided code:
-
-Entity: Primary game objects, they hold components.
-Components: Contain data and game logic. 
-Sectors: Like scenes in unity, but much smaller. They make up small parts of the level. Multiple sectors make one world.
-Widget: Game and engine UI.
-Jobs: Multithreaded workloads.
-Simulatable Object: Object that can be proccessed by the physics solver.
-Handlers: Core engine components, handle low level tasks.
-
-Lastly, always place your entire response in a code block.

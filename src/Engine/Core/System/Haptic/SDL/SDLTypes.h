@@ -16,10 +16,14 @@ struct SDLSense
     bool controllerCheck : 1;
     bool mouseCheck : 1;
 
-    WEngine::InputSenseKind inputKind : 2;
-    WKey key;
+    WEngine::InputSenseKind inputKind : 3;
+    std::array<WKey, 4> key;
     WMouseBtn mouse;
     WPadBtn controller;
+    WEngine::FloatInputSensePad trigger;
+    WEngine::FloatInputSenseMouse sensor;
+    WEngine::VectorInputSensePad joy;
+    WEngine::VectorInputSenseMouse sensorV;
     std::string name;
 };
 

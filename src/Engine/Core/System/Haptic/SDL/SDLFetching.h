@@ -14,5 +14,8 @@ void TranslateController(SDLContext& ctx);
 
 void UpdateAllSenses(SDLContext& ctx);
 void UpdateAllSensesInMap(SDLContext& ctx, SDLMap& map);
+FetchResult UpdateActionSense(const SDLContext &ctx, const SDLSense& sense);
+FetchResult UpdateFloatSense(const SDLContext &ctx, const SDLSense& sense);
+FetchResult UpdateVectorSense(const SDLContext &ctx, const SDLSense& sense);
 
 #endif

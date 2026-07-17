@@ -11,20 +11,6 @@ set(SDL_SHARED OFF)
 set(STEAMWORKS_PATH "${CMAKE_SOURCE_DIR}/libs/Steamworks-SDK")
 set(STEAM_ENABLED ${OPTION_DISABLED})
 
-set(GPU_OPENGL_VAL 1)
-set(GPU_VULKAN_VAL 2)
-set(GPU_METAL_VAL 3)
-set(GPU_D3D12_VAL 4)
-set(GPU_AGC_VAL 5)
-set(GPU_NVN_VAL 6)
-
-set(HAPTIC_SDL_VAL 1)
-set(HAPTIC_STEAM_INPUT_VAL 2)
-set(HAPTIC_XINPUT_VAL 3)
-set(HAPTIC_PLAYSTATION_VAL 4)
-set(HAPTIC_NINTENDO_VAL 5)
-set(HAPTIC_APPLE_VAL 6)
-
 set(OPTION_DISABLED 0)
 set(OPTION_ENABLED 1)
 
@@ -346,6 +332,7 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/Input/KeyCodes.cpp
         src/Engine/Core/System/Haptic/SDL/SDLHelpers.cpp
         src/Engine/Core/System/Haptic/SDL/SDLHelpers.h
+        src/Engine/Types/Input/InputSense.cpp
 )
 
 target_include_directories(Widrolo_Engine_3D PRIVATE

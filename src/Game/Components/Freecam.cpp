@@ -1,6 +1,7 @@
 #include "Freecam.h"
 
 #include "Engine/Core/Handlers/Input.h"
+#include "Engine/Core/System/Haptic.h"
 
 const bool enabledByDefault = false;
 
@@ -49,31 +50,26 @@ void Freecam::Tick(float32 dt)
 
     float32 speed = m_speed * dt;
 
-    //if (input->GetActionInput(WKey::CONTROL))
-    //    speed *= 2.0f;
-//
-    //if (input->GetActionInput(WKey::W))
-    //    entity->transform.position = entity->transform.position + entity->transform.Forward() * speed;
-    //if (input->GetActionInput(WKey::S))
-    //    entity->transform.position = entity->transform.position - entity->transform.Forward() * speed;
-//
-    //if (input->GetActionInput(WKey::A))
-    //    entity->transform.position = entity->transform.position - entity->transform.Right() * speed;
-    //if (input->GetActionInput(WKey::D))
-    //    entity->transform.position = entity->transform.position + entity->transform.Right() * speed;
-//
-    //if (input->GetActionInput(WKey::SPACE))
-    //    entity->transform.position = entity->transform.position - entity->transform.Up() * speed;
-    //if (input->GetActionInput(WKey::SHIFT))
-    //    entity->transform.position = entity->transform.position + entity->transform.Up() * speed;
+    WEngine::Vector2 move = Input::GetVector("camMove");
+    WEngine::Vector2 look = Input::GetVector("camLook");
 
-    if (!m_focused)
-        return;
+    if (Input::GetAction("camSpeed", PressType::Hold))
+        speed *= 2.0f;
 
-    //WEngine::Vector2 mouseDelta = input->GetMousePosition();
+    entity->transform.position = entity->transform.position + entity->transform.Forward() * move.y * speed
+        + entity->transform.Right() * move.x * speed;
 
-    //m_yaw += (mouseDelta.x / 3);
-    //m_pitch -=  (mouseDelta.y / 3);
+
+    if (Input::GetAction("camHigher", PressType::Hold))
+        entity->transform.position.y += speed;
+    if (Input::GetAction("camLower", PressType::Hold))
+        entity->transform.position.y -= speed;
+
+    //if (!m_focused)
+    //    return;
+
+    m_yaw += look.x;
+    m_pitch +=  look.y / 1.5f;
 
     if (m_pitch > 89.0f)
         m_pitch = 89.0f;

@@ -129,3 +129,10 @@ enum class WPadBtn : uint8
 };
 
 extern std::string WPadBtn_Names[];
+
+enum class PressType : uint8
+{
+	Press,
+	Hold,
+	Release
+};

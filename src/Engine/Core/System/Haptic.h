@@ -33,12 +33,9 @@ public:
     static WEngine::Nullable<bool> GetActionHeld(const std::string& actionName);
     static WEngine::Nullable<bool> GetActionJustReleased(const std::string& actionName);
 
-    static WEngine::Nullable<float32> GetFloatDelta(const std::string& floatName);
-    static WEngine::Nullable<float32> GetFloatPos(const std::string& floatName);
+    static WEngine::Nullable<float32> GetFloat(const std::string& floatName);
 
-    static WEngine::Nullable<WEngine::Vector2> GetVectorPos(const std::string& vectorName);
-    static WEngine::Nullable<WEngine::Vector2> GetVectorDelta(const std::string& vectorName);
-    static WEngine::Nullable<float32> GetVectorLength(const std::string& vectorName);
+    static WEngine::Nullable<WEngine::Vector2> GetVector(const std::string& vectorName);
 
     static WEngine::Nullable<WEngine::InputVendor> GetVendor();
 

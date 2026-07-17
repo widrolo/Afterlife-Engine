@@ -129,29 +129,22 @@ WEngine::Nullable<bool> Haptic::GetActionJustReleased(const std::string &actionN
     return ctx.selectedMap->results[actionName].justReleased;
 }
 
-WEngine::Nullable<float32> Haptic::GetFloatDelta(const std::string &floatName)
+WEngine::Nullable<float32> Haptic::GetFloat(const std::string &floatName)
 {
-
+    if (ctx.selectedMap == nullptr)
+        return {};
+    if (!ctx.selectedMap->results.contains(floatName))
+        return {};
+    return ctx.selectedMap->results[floatName].trigger;
 }
 
-WEngine::Nullable<float32> Haptic::GetFloatPos(const std::string &floatName)
+WEngine::Nullable<WEngine::Vector2> Haptic::GetVector(const std::string &vectorName)
 {
-
-}
-
-WEngine::Nullable<WEngine::Vector2> Haptic::GetVectorPos(const std::string &vectorName)
-{
-
-}
-
-WEngine::Nullable<WEngine::Vector2> Haptic::GetVectorDelta(const std::string &vectorName)
-{
-
-}
-
-WEngine::Nullable<float32> Haptic::GetVectorLength(const std::string &vectorName)
-{
-
+    if (ctx.selectedMap == nullptr)
+        return {};
+    if (!ctx.selectedMap->results.contains(vectorName))
+        return {};
+    return ctx.selectedMap->results[vectorName].pos;
 }
 
 WEngine::Nullable<WEngine::InputVendor> Haptic::GetVendor()

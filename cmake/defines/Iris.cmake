@@ -1,3 +1,10 @@
+set(GPU_OPENGL_VAL 1)
+set(GPU_VULKAN_VAL 2)
+set(GPU_METAL_VAL 3)
+set(GPU_D3D12_VAL 4)
+set(GPU_AGC_VAL 5)
+set(GPU_NVN_VAL 6)
+
 target_compile_definitions(Widrolo_Engine_3D PRIVATE
         GPU_OPENGL=${GPU_OPENGL_VAL}
         GPU_VULKAN=${GPU_VULKAN_VAL}

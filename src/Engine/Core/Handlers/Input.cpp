@@ -48,6 +48,44 @@ void Input::LoadInputMap()
     Haptic::SelectInputMap(mapName);
 }
 
+bool Input::GetAction(const std::string &name, PressType press)
+{
+    Nullable<bool> pressed;
+
+    switch (press)
+    {
+        case PressType::Press:
+            pressed = Haptic::GetActionJustPressed(name);
+            break;
+        case PressType::Hold:
+            pressed = Haptic::GetActionHeld(name);
+            break;
+        case PressType::Release:
+            pressed = Haptic::GetActionJustReleased(name);
+            break;
+        default: ;
+    }
+    if (pressed.HasValue())
+        return pressed.GetValue();
+    return false;
+}
+
+float32 Input::GetFloat(const std::string &name)
+{
+    auto floatN = Haptic::GetFloat(name);
+    if (floatN.HasValue())
+        return floatN.GetValue();
+    return 0.0f;
+}
+
+Vector2 Input::GetVector(const std::string &name)
+{
+    auto vectorN = Haptic::GetVector(name);
+    if (vectorN.HasValue())
+        return vectorN.GetValue();
+    return Vector2::Zero;
+}
+
 void Input::ParseSingleInput(const YAML::Node& root, wtl::vector<InputSense>& senses, const std::string& mapName)
 {
     InputSense sense;
@@ -95,7 +133,7 @@ void Input::ParseSingleInput(const YAML::Node& root, wtl::vector<InputSense>& se
 
 void Input::ParseAction(const YAML::Node &root, InputSense& sense, const std::string &mapName)
 {
-    InputActionInternal action;
+    InputActionInternal action{};
 
     if (root["controller"])
     {
@@ -136,12 +174,103 @@ void Input::ParseAction(const YAML::Node &root, InputSense& sense, const std::st
 
 void Input::ParseFloat(const YAML::Node &root, InputSense& sense, const std::string &mapName)
 {
+    InputFloatInternal floatIn{};
 
+    if (root["controller"])
+    {
+        auto con = root["controller"];
+        if (!con["trigger"])
+        {
+            WLog::SetConsoleError();
+            WLog::ConsoleLog(std::format("Input {} in map {}: controller defined but no button assigned!", sense.senseName, mapName));
+            return;
+        }
+        floatIn.triggerName = con["trigger"].as<std::string>();
+    }
+    if (root["keyboard"])
+    {
+        auto keys = root["keyboard"];
+        if (!keys["keys"])
+        {
+            WLog::SetConsoleError();
+            WLog::ConsoleLog(std::format("Input {} in map {}: keyboard defined but no key assigned!", sense.senseName, mapName));
+            return;
+        }
+
+        // amalgamation of both types of for loops.
+        sizeT i = 0;
+        for (const auto& key : keys["keys"])
+        {
+            if (i >= 2)
+                break;
+            floatIn.keyNames[i] = key.as<std::string>();
+            i++;
+        }
+    }
+    if (root["mouse"])
+    {
+        auto mou = root["mouse"];
+        if (!mou["sensor"] || !mou["maxSpeed"])
+        {
+            WLog::SetConsoleError();
+            WLog::ConsoleLog(std::format("Input {} in map {}: mouse defined but no button assigned!", sense.senseName, mapName));
+            return;
+        }
+        floatIn.sensorName = mou["sensor"].as<std::string>();
+        floatIn.mouseMaxSpeed = mou["maxSpeed"].as<float32>();
+    }
+
+    sense.inputInternal = floatIn;
 }
 
 void Input::ParseVector(const YAML::Node &root, InputSense& sense, const std::string &mapName)
 {
+    InputVectorInternal vec{};
 
+    if (root["controller"])
+    {
+        auto con = root["controller"];
+        if (!con["joy"])
+        {
+            WLog::SetConsoleError();
+            WLog::ConsoleLog(std::format("Input {} in map {}: controller defined but no button assigned!", sense.senseName, mapName));
+            return;
+        }
+        vec.joyName = con["joy"].as<std::string>();
+    }
+    if (root["keyboard"])
+    {
+        auto keys = root["keyboard"];
+        if (!keys["keys"])
+        {
+            WLog::SetConsoleError();
+            WLog::ConsoleLog(std::format("Input {} in map {}: keyboard defined but no key assigned!", sense.senseName, mapName));
+            return;
+        }
+
+        // amalgamation of both types of for loops.
+        sizeT i = 0;
+        for (const auto& key : keys["keys"])
+        {
+            if (i >= 4)
+                break;
+            vec.keyNames[i] = key.as<std::string>();
+            i++;
+        }
+    }
+    if (root["mouse"])
+    {
+        auto mou = root["mouse"];
+        if (!mou["sensor"])
+        {
+            WLog::SetConsoleError();
+            WLog::ConsoleLog(std::format("Input {} in map {}: mouse defined but no button assigned!", sense.senseName, mapName));
+            return;
+        }
+        vec.sensorName = mou["sensor"].as<std::string>();
+    }
+
+    sense.inputInternal = vec;
 }
 
 

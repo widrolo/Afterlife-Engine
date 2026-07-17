@@ -183,14 +183,14 @@ SDLSense SenseToSDLSense(SDLContext &ctx, const WEngine::InputSense& sense)
     s.inputKind = sense.Kind();
     if (s.inputKind == WEngine::InputSenseKind::Action)
     {
-        auto action = std::get<WEngine::InputActionInternal>(sense.inputInternal);
-        std::string key =  action.keyName;
-        std::string btn =  action.buttonName;
+        auto& action = std::get<WEngine::InputActionInternal>(sense.inputInternal);
+        std::string key = action.keyName;
+        std::string btn = action.buttonName;
 
         if (!key.empty())
         {
             s.keyboardCheck = true;
-            s.key = StringToWKey(key);
+            s.key[0] = StringToWKey(key);
         }
         if (!btn.empty())
         {
@@ -200,11 +200,41 @@ SDLSense SenseToSDLSense(SDLContext &ctx, const WEngine::InputSense& sense)
     }
     if (s.inputKind == WEngine::InputSenseKind::Float)
     {
+        auto& action = std::get<WEngine::InputFloatInternal>(sense.inputInternal);
+        auto& key = action.keyNames;
+        std::string tri = action.triggerName;
 
+        if (!key[0].empty())
+        {
+            s.keyboardCheck = true;
+            s.key[0] = StringToWKey(key[0]);
+            s.key[1] = StringToWKey(key[1]);
+        }
+        if (!tri.empty())
+        {
+            s.controllerCheck = true;
+            s.trigger = StringToFloatInput(tri);
+        }
     }
     if (s.inputKind == WEngine::InputSenseKind::Vector)
     {
+        auto& action = std::get<WEngine::InputVectorInternal>(sense.inputInternal);
+        auto& key = action.keyNames;
+        std::string tri = action.joyName;
 
+        if (!key[0].empty())
+        {
+            s.keyboardCheck = true;
+            s.key[0] = StringToWKey(key[0]);
+            s.key[1] = StringToWKey(key[1]);
+            s.key[2] = StringToWKey(key[2]);
+            s.key[3] = StringToWKey(key[3]);
+        }
+        if (!tri.empty())
+        {
+            s.controllerCheck = true;
+            s.joy = StringToVectorInput(tri);
+        }
     }
     return s;
 }

@@ -1,13 +1,36 @@
 input:
     mapName: Test
-
     inputs:
-        testAction:
-            name: testAction
-
+        camMove:
+            name: camMove
+            inputType: Vector
+            controller:
+                joy: lJoy
+            keyboard:
+                keys: [A, D, W, S]
+        camLook:
+            name: camLook
+            inputType: Vector
+            controller:
+                joy: rJoy
+        camLower:
+            name: camLower
             inputType: Action
-
+            controller:
+                button: East
+            keyboard:
+                key: lShift
+        camHigher:
+            name: camHigher
+            inputType: Action
             controller:
                 button: South
             keyboard:
-                key: A
+                key: Space
+        camSpeed:
+            name: camSpeed
+            inputType: Action
+            controller:
+                button: LB
+            keyboard:
+                key: lcontrol
