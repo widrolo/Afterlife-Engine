@@ -1,0 +1,14 @@
+GPU VRAM BUDGET,
+,
+,
+Purpose,Budget (in MB)
+Meshes,256
+Textures,1024
+Animation,64
+Framebuffers,128
+Static Instances,96
+RT BVHs,768
+Heightmaps,128
+OS Reserved,512
+,
+Total,2976

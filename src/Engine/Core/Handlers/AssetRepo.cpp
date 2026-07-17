@@ -441,6 +441,11 @@ void AssetRepo::LoadSpirVFromSpv(SpirVAssetMission &mission)
 	file.close();
 }
 
+void AssetRepo::RGBAtoBC7(const TextureInfo &tex, std::vector<uint8_t> &outBC7)
+{
+
+}
+
 void AssetRepo::IrisCommsGetMat(IrisAssetCommunication &mission)
 {
 	// This is only here because I don't trust myself.

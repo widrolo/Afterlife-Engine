@@ -50,6 +50,8 @@ namespace WEngine
 		void LoadSpirVFromGlsl(SpirVAssetMission& mission);
 		void LoadSpirVFromSpv(SpirVAssetMission& mission);
 
+		void RGBAtoBC7(const TextureInfo& tex, std::vector<uint8_t>& outBC7);
+
 		// ---------------------------------- [IRIS COMMS] ----------------------------------
 
 		void IrisCommsGetMat(IrisAssetCommunication& mission);

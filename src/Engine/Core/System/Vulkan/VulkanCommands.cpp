@@ -67,7 +67,7 @@ bool SetupDisplayRenderTarget(VulkanContext &ctx, VulkanStatistics& stat)
 Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &stat, const WEngine::Vector2& resolution)
 {
     Vulkan_RenderTarget target;
-    VkFormat format = FindBestSwapchainFormat(ctx);
+    //VkFormat format = FindBestSwapchainFormat(ctx);
 
     target.resolution = resolution;
 
@@ -81,8 +81,7 @@ Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &sta
 
     for (sizeT i = 0; i < ctx.screen.swapchainImageCount; i++)
     {
-        CreateImage(ctx, stat, resolution, format, target.targetImages[i], target.targetImageViews[i],
-            target.targetImageAlloc[i], false);
+        CreateImageRenderTarget(ctx, stat, resolution, target.targetImages[i], target.targetImageViews[i], target.targetImageAlloc[i]);
 
         target.cmdBuffs[i] = CreateCommandBuffer(ctx);
 

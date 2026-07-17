@@ -60,23 +60,26 @@ bool SetupDepthImage(VulkanContext& ctx, VulkanStatistics& stat)
 void CreateImage(VulkanContext& ctx, VulkanStatistics& stat, const WEngine::Vector2& size, VkFormat format,
     VkImage& outImg, VkImageView& outView, VmaAllocation& outAlloc, bool canCpuAccess)
 {
+    VkFormat realFormat = format;
+    if (format == VK_FORMAT_R8G8B8A8_UNORM)
+        realFormat = VK_FORMAT_BC7_UNORM_BLOCK;
+
     VkImageCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     info.imageType = VK_IMAGE_TYPE_2D;
     info.extent = { (uint32)size.x, (uint32)size.y, 1 };
     info.mipLevels = 1;
     info.arrayLayers = 1;
-    info.format = format;
+    info.format = realFormat;
     info.tiling = VK_IMAGE_TILING_OPTIMAL;
     info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    info.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
     if (canCpuAccess)
         info.usage |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     info.samples = VK_SAMPLE_COUNT_1_BIT;
 
     VmaAllocationCreateInfo allocInfo{};
     allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-    //allocInfo.requiredFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
     VmaAllocationInfo allocationInfo{};
 
@@ -95,7 +98,59 @@ void CreateImage(VulkanContext& ctx, VulkanStatistics& stat, const WEngine::Vect
     imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     imageViewInfo.image = outImg;
     imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    imageViewInfo.format = format;
+    imageViewInfo.format = realFormat;
+    imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageViewInfo.subresourceRange.baseMipLevel = 0;
+    imageViewInfo.subresourceRange.levelCount = 1;
+    imageViewInfo.subresourceRange.baseArrayLayer = 0;
+    imageViewInfo.subresourceRange.layerCount = 1;
+
+    res = vkCreateImageView(ctx.vcore.gpuDevice, &imageViewInfo, ctx.vcore.allocator, &outView);
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Unable to create image view.");
+        return;
+    }
+}
+
+void CreateImageRenderTarget(VulkanContext &ctx, VulkanStatistics &stat, const WEngine::Vector2 &size, VkImage&outImg,
+    VkImageView&outView, VmaAllocation&outAlloc)
+{
+    VkImageCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    info.imageType = VK_IMAGE_TYPE_2D;
+    info.extent = { (uint32)size.x, (uint32)size.y, 1 };
+    info.mipLevels = 1;
+    info.arrayLayers = 1;
+    info.format = FindBestSwapchainFormat(ctx);
+    info.tiling = VK_IMAGE_TILING_OPTIMAL;
+    info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    info.samples = VK_SAMPLE_COUNT_1_BIT;
+
+    VmaAllocationCreateInfo allocInfo{};
+    allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+
+    VmaAllocationInfo allocationInfo{};
+
+    auto res = vmaCreateImage(ctx.vcore.vmaAllocator, &info, &allocInfo, &outImg, &outAlloc, &allocationInfo);
+
+    stat.vramUsage += allocationInfo.size;
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Unable to create image.");
+        return;
+    }
+
+    VkImageViewCreateInfo imageViewInfo{};
+    imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    imageViewInfo.image = outImg;
+    imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    imageViewInfo.format = FindBestSwapchainFormat(ctx);
     imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     imageViewInfo.subresourceRange.baseMipLevel = 0;
     imageViewInfo.subresourceRange.levelCount = 1;
@@ -176,7 +231,10 @@ void QueueTexture(VulkanContext &ctx, const Vulkan_Texture& tex, const WEngine::
     VkBuffer staging;
     VmaAllocation stagingAlloc;
 
-    const uint64 size = texInfo.width * texInfo.height * texInfo.channels;
+    const uint32 blockW = (texInfo.width  + 3) / 4;   // ceil(w/4)
+    const uint32 blockH = (texInfo.height + 3) / 4;   // ceil(h/4)
+    const uint64 size   = blockW * blockH * 16;
+
     VkBufferCreateInfo bufInfo{};
     bufInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufInfo.size = size;
@@ -239,5 +297,6 @@ void UploadTextures(VulkanContext &ctx)
     }
     ctx.stagingBuffers.clear();
 }
+
 
 #endif
