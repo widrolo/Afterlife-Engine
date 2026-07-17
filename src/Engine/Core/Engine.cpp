@@ -36,6 +36,8 @@ using namespace WEngine;
 #pragma comment(lib, "Winmm.lib")
 #endif
 
+StopWatch bootTime;
+
 Engine::Engine(int argc, char* argv[])
 {
 	ParseCommandLine(argc, argv);
@@ -69,19 +71,29 @@ void Engine::ParseCommandLine(sizeT argc, char* argv[])
 				return;
 			}
 		}
+		if (arg == "-testing")
+		{
+			m_cla.testMode = true;
+		}
 	}
 }
 
 void Engine::StartGame()
 {
+	bootTime.Reset();
 	StartupMessage();
 	WLog::ConsoleLog("--------------- Engine Init ----------------");
 
 	InitHandlers();
 	InitSteam();
 
+	float64 time = bootTime.GetTime<TimeUnit::Seconds>();
+	WLog::SetConsoleInfo();
+	WLog::ConsoleLog(std::format("Boot time: {} seconds.", time));
+
 	WLog::SetConsoleSuccess();
 	WLog::ConsoleLog("--------------- Engine Done ----------------");
+
 
 	CoreSystems::isGameRunning = true;
 	Run();

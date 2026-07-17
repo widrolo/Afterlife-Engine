@@ -14,6 +14,7 @@ namespace WEngine
 	struct CmdLineArgs
 	{
 		bool customResolution;
+		bool testMode;
 		uint32 width;
 		uint32 height;
 	};
@@ -39,7 +40,7 @@ namespace WEngine
 		_GLOBAL_ float32 m_physicsTick;
 		_GLOBAL_ float32 m_draw;
 
-		CmdLineArgs m_cla = {};
+		_GLOBAL_ CmdLineArgs m_cla = {};
 
 	public:
 
@@ -54,6 +55,8 @@ namespace WEngine
 		static float32 GetDraw()		{ return m_draw; }
 
 		static uint16 GetPhysicsTickCounter() { return m_physicsTickCounterLastFrame; }
+
+		static const CmdLineArgs& GetCla() { return m_cla; }
 
 	private:
 		void ParseCommandLine(sizeT argc, char* argv[]);

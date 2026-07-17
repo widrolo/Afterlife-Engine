@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 #include <Engine/Types/CommonTypes.h>
 
 #include "DDS.h"
@@ -16,9 +15,9 @@ namespace WEngine
     struct TextureInfoDDS
     {
         byte* data;
-        uint32_t width;
-        uint32_t height;
-        uint32_t mipCount;
+        uint32 width;
+        uint32 height;
+        uint32 mipCount;
         BC format;
     };
 }

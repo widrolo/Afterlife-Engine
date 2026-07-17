@@ -310,8 +310,6 @@ TextureInfo AssetRepo::LoadTexturePNG(const std::string& path)
 TextureInfoDDS AssetRepo::LoadTextureDDS(const std::string &path)
 {
 	DDSFile dds = LoadDDS(path);
-	WLog::ConsoleLog(std::format("DDS: {}x{}, {} mips, fmt={}, data={} bytes",
-		dds.w, dds.h, dds.mips, (int)dds.fmt, dds.data.size()));
 	if (dds.data.empty())
 	{
 		WLog::SetConsoleError();
@@ -326,10 +324,10 @@ TextureInfoDDS AssetRepo::LoadTextureDDS(const std::string &path)
 
 	TextureInfoDDS info{};
 	info.data     = raw;
-	info.width    = dds.w;
-	info.height   = dds.h;
+	info.width    = dds.width;
+	info.height   = dds.height;
 	info.mipCount = dds.mips;
-	info.format   = dds.fmt;
+	info.format   = dds.format;
 
 	WLog::SetConsoleSuccess();
 	WLog::ConsoleLog(std::format("Loaded texture {}", path));

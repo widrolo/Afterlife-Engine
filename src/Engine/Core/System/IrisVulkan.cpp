@@ -28,6 +28,7 @@
 #include "Engine/Types/Rendering/Iris/InstThreadedList.h"
 
 // Vulkan implementation subfiles
+#include "Engine/Core/Engine.h"
 #include "Vulkan/VulkanTypes.h"
 #include "Vulkan/VulkanHelpers.h"
 #include "Vulkan/VulkanCore.h"
@@ -203,6 +204,12 @@ WEngine::Nullable<WEngine::Shader> Iris::GetShader(WEngine::Material matQuery)
 
 WEngine::Nullable<WEngine::Material> Iris::ALLOC_CompileMaterial(const std::string& matName)
 {
+    auto cla = WEngine::Engine::GetCla();
+    if (cla.testMode)
+    {
+        return GetMaterial("MissingMat");
+    }
+
     auto check = GetMaterial(matName);
 
     if (check.HasValue())

@@ -214,13 +214,13 @@ bool SetupGraphicsDevice(VulkanContext& ctx)
         "VK_KHR_swapchain", "VK_KHR_dynamic_rendering"
     };
 
-    ctx.rtSupported = false;
-    //if (!AddExtensionIfAvailable(ctx, extensions, "VK_KHR_acceleration_structure"))
-    //    ctx.rtSupported = false;
-    //if (!AddExtensionIfAvailable(ctx, extensions, "VK_KHR_ray_query"))
-    //    ctx.rtSupported = false;
-    //if (!AddExtensionIfAvailable(ctx, extensions, "VK_KHR_deferred_host_operations"))
-    //    ctx.rtSupported = false;
+    ctx.rtSupported = true;
+    if (!AddExtensionIfAvailable(ctx, extensions, "VK_KHR_acceleration_structure"))
+        ctx.rtSupported = false;
+    if (!AddExtensionIfAvailable(ctx, extensions, "VK_KHR_ray_query"))
+        ctx.rtSupported = false;
+    if (!AddExtensionIfAvailable(ctx, extensions, "VK_KHR_deferred_host_operations"))
+        ctx.rtSupported = false;
 
     auto rt = GetVkPhysicalDeviceRayQueryFeatures();
 

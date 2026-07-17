@@ -1,17 +1,23 @@
 // Thank you Deepseek
 
 #pragma once
-#include <cstdint>
-#include <vector>
-#include <string>
-#include <fstream>
-#include <cstring>
 
-enum class BC { BC1, BC4, BC5 };
-struct DDSFile {
-    std::vector<uint8_t> data;
-    uint32_t w = 0, h = 0, mips = 0;
-    BC fmt = BC::BC1;
+#include <string>
+#include "Engine/WTL/vector.h"
+
+enum class BC
+{
+    BC1,
+    BC4,
+    BC5
+};
+struct DDSFile
+{
+    wtl::vector<byte> data;
+    uint32 width;
+    uint32 height;
+    uint32 mips;
+    BC format;
 };
 
 DDSFile LoadDDS(const std::string& path);

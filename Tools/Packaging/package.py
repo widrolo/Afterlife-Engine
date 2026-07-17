@@ -14,7 +14,7 @@ def GetOSSpecifics():
     if sys.platform.startswith("win"):
         executable = os.path.join(engineFolder, "bin/Windows-x64/Widrolo_Engine_3D-Package.exe")
     elif sys.platform.startswith("linux"):
-        executable = os.path.join(engineFolder, "bin/Linux-x64/Widrolo_Engine_3D-Package")
+        executable = os.path.join(engineFolder, "bin/Linux-x64/Widrolo_Engine_3D")
     else:
         print("Unsupported OS: " + sys.platform + ", aborting packaging!")
         exit(-1)
