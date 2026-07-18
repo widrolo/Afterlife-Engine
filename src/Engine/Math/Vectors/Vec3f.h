@@ -3,6 +3,7 @@
 #include <Engine/Types/CommonTypes.h>
 #include <Engine/Math/Math.h>
 #include <format>
+#include <box3d/box3d.h>
 
 namespace WEngine
 {
@@ -47,6 +48,8 @@ namespace WEngine
 		bool operator==(const Vector3& other) const { return x == other.x && y == other.y && z == other.z; }
 		bool operator!=(const Vector3& other) const { return !(*this == other); }
 
+		Vector3& operator=(const Vector3& other) = default;
+
 		bool operator<(const Vector3& other) const
 		{
 			return SqrMagnitude(*this) < SqrMagnitude(other);
@@ -62,6 +65,15 @@ namespace WEngine
 		bool operator>=(const Vector3& other) const
 		{
 			return SqrMagnitude(*this) >= SqrMagnitude(other);
+		}
+
+		static Vector3 B3DtoVec(const b3Vec3& other)
+		{
+			return Vector3{other.x, other.y, other.z};
+		}
+		static b3Vec3 VecToB3D(const Vector3& other)
+		{
+			return b3Vec3{other.x, other.y, other.z};
 		}
 
 		// Returns a normalised vector

@@ -102,8 +102,10 @@ void Editor::InitHandlers()
 
 	Iris::SETTING_BeginNewPreFrame();
 	Iris::ALLOC_CompileMaterial("Unlit/MissingMat");
+	EditorSystems::renderHandler->PrepareSkybox();
 	WAllocator::Construct<WEngine::Sector, const std::string&>("root");
 	Haptic::EnableEditorMode();
+	Input::LoadInputMap();
 }
 
 void Editor::Run()

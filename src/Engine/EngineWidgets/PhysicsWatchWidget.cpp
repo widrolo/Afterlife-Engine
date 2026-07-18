@@ -27,5 +27,6 @@ void PhysicsWatchWidget::RenderInternal()
 
     ImGui::Text("%s", tickCount.c_str());
     ImGui::Separator();
+    ImGui::Text("Body count: %i", (uint32)ph->m_bodies.size());
 }
 

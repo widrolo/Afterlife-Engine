@@ -66,6 +66,15 @@
                 Description: "Whether this model is available for instancing."
                 Type: "Bool"
                 Internal: "instance"
+    StaticBodyComponent:
+        ID: 6
+        Name: "Static Body Component"
+        Description: "An immovable physics object."
+    DynamicBodyComponent:
+        ID: 7
+        Name: "Dynamic Body Component"
+        Description: "An moving physics object."
+
 
 
 

@@ -1,16 +1,16 @@
 #pragma once
 
-#include <Engine/WTL/map.h>
-#include <Engine/WTL/vector.h>
-#include <Engine/Types/Physics/OverlapResult.h>
-#include <Engine/Types/Nullable.h>
+#include <box3d/box3d.h>
 
+#include "Engine/Core/World/Entity.h"
+#include "Engine/Types/Physics/BodyHandle.h"
+#include "Engine/Types/Physics/BodyType.h"
+#include "Engine/Types/Physics/PhysicsBody.h"
+#include "Engine/WTL/vector.h"
 
 namespace WEngine
 {
-	struct CoreSystems;
 	class Engine;
-	class SimulatableObject;
 	class PhysicsWatchWidget;
 	class PhysicsHandler
 	{
@@ -18,24 +18,22 @@ namespace WEngine
 		friend PhysicsWatchWidget;
 	public:
 		PhysicsHandler();
-	
-	private:
-		wtl::map<uint64, SimulatableObject*> m_objects;
 
 	public:
 		void Tick();
 
-		uint64 MakeSimulatableObject();
-		[[nodiscard]] Nullable<SimulatableObject*> GetSimulatableObject(uint64 id);
-		void DeleteSimulatableObject(uint64 id);
-
-		[[nodiscard]] wtl::vector<OverlapResult> CheckOverlapping(uint64 id);
-
+		PhysicsBodyHandle CreateBody(PhysicsBodyType type, Entity *entity);
+		void ChangeBodyPosition(PhysicsBodyHandle body, const Vector3& position);
+		void ChangeBodyRotation(PhysicsBodyHandle body, const Vector3& rotation);
 	private:
 		void Setup();
 		void Visualize();
 
+		void UpdateAttachedEntity(PhysicsBody& body);
+
 	private:
+		b3WorldId m_worldID;
+		wtl::vector<PhysicsBody> m_bodies;
 	};
 }
 

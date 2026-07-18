@@ -42,9 +42,6 @@ void Freecam::Tick(float32 dt)
     //    return;
     //}
 
-    if (m_editorFreecam && !m_focused)
-        return;
-
     if (dt > 10.0f)
         return;
 

@@ -82,6 +82,7 @@ namespace WEngine
 		virtual void DrawDebug();
 
 		[[nodiscard]] bool IsStationary() const { return m_isStationary; }
+		void UnlockStationary() { m_isStationary = false; }
 	private:
 		void EntityStart(const SpawnArgs& args);
 		void Internal_ParentSector(Sector* parentSector);

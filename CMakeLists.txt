@@ -335,6 +335,13 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/Input/InputSense.cpp
         src/Engine/Types/Rendering/DDS.cpp
         src/Engine/Types/Rendering/DDS.h
+        src/Engine/Components/Physics/StaticBodyComponent.cpp
+        src/Engine/Components/Physics/StaticBodyComponent.h
+        src/Engine/Types/Physics/BodyHandle.h
+        src/Engine/Types/Physics/BodyType.h
+        src/Engine/Types/Physics/PhysicsBody.h
+        src/Engine/Components/Physics/DynamicBodyComponent.cpp
+        src/Engine/Components/Physics/DynamicBodyComponent.h
 )
 
 target_include_directories(Widrolo_Engine_3D PRIVATE
