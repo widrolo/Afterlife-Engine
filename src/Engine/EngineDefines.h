@@ -106,7 +106,7 @@ struct PhysicsSettings
 	 *	therefore higher update rate), the higher the accuracy of game physics, but also
 	 *	lower performance.
 	 */
-	_GLOBAL_CEX_ float64 physicsTickRate = (1.0f/720.0f);
+	_GLOBAL_CEX_ float64 physicsTickRate = (1.0f/240.0f);
 	/**
 	 *	When enabled, the physics bounds will be drawn. However, this will also tank
 	 *	performance, as all lines are a separate draw call for now.

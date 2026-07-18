@@ -28,7 +28,7 @@ PhysicsBodyHandle PhysicsHandler::CreateBody(PhysicsBodyType type, Entity *entit
 		groundBodyDef.type = b3_dynamicBody;
 	b3BodyId bodyId = b3CreateBody(m_worldID, &groundBodyDef);;
 
-	b3BoxHull hull = b3MakeCubeHull(0.1f);;
+	b3BoxHull hull = b3MakeCubeHull(0.1f);
 
 	b3ShapeDef shapeDef = b3DefaultShapeDef();
 	shapeDef.density = 1.0f;
@@ -77,16 +77,22 @@ void PhysicsHandler::AttachBox(PhysicsBodyHandle body, const Vector3 &size, cons
 
 	PhysicsBody& physicsBody = m_bodies[body - 1];
 
-	b3BoxHull hull = b3MakeBoxHull(size.x, size.y, size.z);
+	// b3SetLengthUnitsPerMeter doesnt seem to be working.
+	const float32 factor = 0.5f;
+	Vector3 newSize = size * factor;
+
+	b3BoxHull hull = b3MakeBoxHull(newSize.x, newSize.y, newSize .z);
 
 	b3ShapeDef shapeDef = b3DefaultShapeDef();
 	shapeDef.density = 1.0f;
+	shapeDef.baseMaterial.friction = 0.3f;
 	b3CreateHullShape(physicsBody.bodyId, &shapeDef, &hull.base);
 }
 
 
 void PhysicsHandler::Setup()
 {
+	//b3SetLengthUnitsPerMeter(0.1f);
 	auto def = b3DefaultWorldDef();
 	def.gravity = {0.0f, -9.81f, 0.0f};
 	m_worldID = b3CreateWorld(&def);

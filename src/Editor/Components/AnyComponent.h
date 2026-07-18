@@ -16,8 +16,8 @@ namespace WEditor
 
     struct PhysicsModelCollection
     {
-        WEngine::Model physicsModel;
-        WEngine::Material physicsMaterial;
+        WEngine::Model modelCube;
+        WEngine::Material material;
     };
 
     class AnyComponent : public WEngine::Component
@@ -34,12 +34,13 @@ namespace WEditor
         WEngine::Model model;
         WEngine::Material material;
 
-        WEngine::Model physicsModel;
+        _GLOBAL_ PhysicsModelCollection physics;
     public:
+        static void SetupPhysicsData();
 
         void Init(uint16 ID, uint8 dataSize, WEngine::ComponentArgs args);
         void Init(uint16 ID, uint8 dataSize);
-        void Tick(float32 dt);
+        void Tick(float32 dt) override;
         void SetData(uint8 location, OptionData data);
 
         void ApplySpawnData(WEngine::ComponentArgs args);
@@ -51,8 +52,6 @@ namespace WEditor
 
     private:
         bool m_isInitializedDraw = false;
-
-        void SetupPhysicsMaterial();
 
         void TryUpdate();
 

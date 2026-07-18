@@ -30,12 +30,22 @@ AnyComponent::AnyComponent(WEngine::Entity *e)
     COMP_SETUP("AnyComponent")
 }
 
+void AnyComponent::SetupPhysicsData()
+{
+    physics.material = Iris::GetMaterial("Unlit/MissingMat").GetValue();
+
+    WEngine::MeshAssetMission mission;
+    mission.name = "../EditorData/Meshes/Physics/Cube";
+    EditorSystems::GetAssetRepo()->GetAsset(mission);
+
+    physics.modelCube = Iris::ALLOC_CreateModel(mission.model).GetValue();
+}
+
 void AnyComponent::Init(uint16 ID, uint8 dataSize, WEngine::ComponentArgs args)
 {
     Init(ID, dataSize);
 
     ApplySpawnData(args);
-    SetupPhysicsMaterial();
 }
 
 void AnyComponent::Init(uint16 ID, uint8 dataSize)
@@ -173,11 +183,6 @@ void AnyComponent::Draw()
     DrawOnSelected();
 }
 
-void AnyComponent::SetupPhysicsMaterial()
-{
-    //physicsMaterial = Iris::GetMaterial("Unlit/MissingMat").GetValue();
-}
-
 void AnyComponent::TryUpdate()
 {
     switch (m_ID)
@@ -220,7 +225,7 @@ void AnyComponent::TryDrawMeshComp()
     mission.material = material;
     mission.isStationary = false;
     mission.transform = entity->transform;
-    mission.key = entity->parentSector->GetStatBufKey();
+    mission.key = 0;
 
     EditorSystems::GetRenderHandler()->AddToRenderQueue(mission);
 }
@@ -315,6 +320,23 @@ void AnyComponent::UpdateMeshComp()
 
 void AnyComponent::TryDrawBoxCollision()
 {
+    auto sizeN = FindDataByName("size");
+
+    if (!sizeN.HasValue())
+        return;
+    WEngine::Vector3 size = std::get<WEngine::Vector3>(sizeN.GetValue());
+
+    auto transform = entity->transform;
+    transform.size = size;
+
+    WEngine::RenderMission mission{};
+    mission.model = physics.modelCube;
+    mission.material = physics.material;
+    mission.isStationary = false;
+    mission.transform = transform;
+    mission.key = 0;
+
+    EditorSystems::GetRenderHandler()->AddToRenderQueue(mission);
 
 }
 

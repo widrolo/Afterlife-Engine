@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "../../../../cmake-build-release/_deps/box3d-src/include/box3d/base.h"
 
 
 void WAllocator::BootAllocator()
@@ -109,6 +110,6 @@ void WAllocator::Free(void* ptr) noexcept
 
 uint64 WAllocator::GetMemoryUsage()
 {
-    return MemoryUsed();
+    return MemoryUsed() + b3GetByteCount();
 }
 

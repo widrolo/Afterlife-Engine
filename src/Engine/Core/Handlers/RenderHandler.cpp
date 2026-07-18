@@ -140,6 +140,7 @@ void RenderHandler::RenderFrame()
 		m_lighting.cameraPos = Vector3::Zero;
 	else
 		m_lighting.cameraPos = m_camera->GetPosition();
+
 	Iris::SETTING_SetLighting(m_lighting);
 	RenderSkybox();
 	SortMissions();
@@ -491,7 +492,7 @@ void RenderHandler::SortMissions()
 			{
 				foundShader = true;
 				InsertModelIntoShaderGroup(mission, m_sortedMission);
-				return;
+				continue;
 			}
 		}
 		if (!foundShader)
