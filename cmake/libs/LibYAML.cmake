@@ -6,6 +6,6 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Yaml)
 
-target_compile_definitions(Widrolo_Engine_3D PRIVATE YAML_CPP_STATIC_DEFINE)
+target_compile_definitions(Afterlife_Engine PRIVATE YAML_CPP_STATIC_DEFINE)
 
-target_link_libraries(Widrolo_Engine_3D PRIVATE yaml-cpp::yaml-cpp)
+target_link_libraries(Afterlife_Engine PRIVATE yaml-cpp::yaml-cpp)

@@ -6,4 +6,4 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(box3d)
 
-target_link_libraries(Widrolo_Engine_3D PRIVATE box3d::box3d)
+target_link_libraries(Afterlife_Engine PRIVATE box3d::box3d)

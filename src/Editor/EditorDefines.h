@@ -5,5 +5,5 @@
 
 struct EditorDefines
 {
-    _GLOBAL_CONST_ std::string editorName = "WEDGE";
+    _GLOBAL_CONST_ std::string editorName = "ATK";
 };

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.0)
-project(Widrolo_Engine_3D)
+project(Afterlife_Engine)
 include(FetchContent)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Packaging" CACHE STRING "" FORCE)
@@ -16,7 +16,7 @@ set(OPTION_ENABLED 1)
 
 
 # thank god for CLion
-add_executable(Widrolo_Engine_3D
+add_executable(Afterlife_Engine
         src/Engine/Components/Rendering/CameraComponent.cpp
         src/Engine/Components/Rendering/CameraComponent.h
         src/Engine/Components/AudioComponent.cpp
@@ -346,7 +346,7 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Components/Physics/Shapes/BoxCollisionComponent.h
 )
 
-target_include_directories(Widrolo_Engine_3D PRIVATE
+target_include_directories(Afterlife_Engine PRIVATE
         src
         ${STEAMWORKS_PATH}/include
 )

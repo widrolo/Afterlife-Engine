@@ -5,7 +5,7 @@ set(GPU_D3D12_VAL 4)
 set(GPU_AGC_VAL 5)
 set(GPU_NVN_VAL 6)
 
-target_compile_definitions(Widrolo_Engine_3D PRIVATE
+target_compile_definitions(Afterlife_Engine PRIVATE
         GPU_OPENGL=${GPU_OPENGL_VAL}
         GPU_VULKAN=${GPU_VULKAN_VAL}
         GPU_METAL=${GPU_METAL_VAL}
@@ -14,4 +14,4 @@ target_compile_definitions(Widrolo_Engine_3D PRIVATE
         GPU_NVN=${GPU_NVN_VAL}
 )
 
-target_compile_definitions(Widrolo_Engine_3D PRIVATE GPU_BACKEND=${GPU_VULKAN_VAL})
+target_compile_definitions(Afterlife_Engine PRIVATE GPU_BACKEND=${GPU_VULKAN_VAL})

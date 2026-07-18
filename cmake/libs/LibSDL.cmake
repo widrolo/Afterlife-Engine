@@ -4,6 +4,7 @@ FetchContent_Declare(
         GIT_TAG "main"
 )
 
+unset(SDL_SHARED)
 FetchContent_MakeAvailable(SDL)
 
-target_link_libraries(Widrolo_Engine_3D PRIVATE SDL3::SDL3-static)
+target_link_libraries(Afterlife_Engine PRIVATE SDL3::SDL3-static)

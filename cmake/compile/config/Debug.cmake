@@ -1,5 +1,5 @@
-set_property(TARGET Widrolo_Engine_3D APPEND PROPERTY
+set_property(TARGET Afterlife_Engine APPEND PROPERTY
         COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUG>
 )
 
-set(WENGINE_OUTPUT_NAME_DEBUG "$<$<CONFIG:Debug>:Widrolo_Engine_3D-Dev>")
+set(WENGINE_OUTPUT_NAME_DEBUG "$<$<CONFIG:Debug>:Afterlife_Engine-Dev>")

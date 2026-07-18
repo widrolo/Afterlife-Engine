@@ -13,7 +13,7 @@
 struct EngineSettings
 {
 	/** This sets the name of the game engine. */
-	_GLOBAL_CONST_ std::string engineName = "Widrolo Engine 3D";
+	_GLOBAL_CONST_ std::string engineName = "Afterlife Engine";
 	/**
 	 *	This is the primary engine version, and different to the game version in the game settings.
 	 */

@@ -175,7 +175,7 @@ void AnyComponent::Draw()
 
 void AnyComponent::SetupPhysicsMaterial()
 {
-    physicsMaterial = Iris::GetMaterial("Unlit/MissingMat").GetValue();
+    //physicsMaterial = Iris::GetMaterial("Unlit/MissingMat").GetValue();
 }
 
 void AnyComponent::TryUpdate()

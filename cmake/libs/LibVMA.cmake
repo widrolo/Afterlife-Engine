@@ -6,4 +6,4 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(VulkanMemoryAllocator)
 
-target_link_libraries(Widrolo_Engine_3D PRIVATE GPUOpen::VulkanMemoryAllocator)
+target_link_libraries(Afterlife_Engine PRIVATE GPUOpen::VulkanMemoryAllocator)

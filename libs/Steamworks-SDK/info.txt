@@ -17,10 +17,10 @@ If you need a guide here, then i pray for you.
 3. Copy over the crucial parts of the SDK:
 
 Copy: "Steakworks SDK XXX/public/steam"
-To: "Widrolo-Engine/libs/Steamworks-SDK/include"
+To: "Afterlife-Engine/libs/Steamworks-SDK/include"
 
 Copy: "Steakworks SDK XXX/redistributable_bin/win64"
-To: "Widrolo-Engine/libs/Steamworks-SDK/lib"
+To: "Afterlife-Engine/libs/Steamworks-SDK/lib"
 Here you only need to copy over steam_api64.lib
 
 If any errors occur then it shouldn't be hard to fix. If its not a linker/file not found error, and your version is far away from the version i use (1.59), then contact me.

@@ -1,6 +1,6 @@
 #pragma once
 
-// Of course, Widrolo Engine is 64-bit only and we act accordingly no bitness checks
+// Of course, Afterlife Engine is 64-bit only and we act accordingly no bitness checks
 
 #pragma warning(push)
 #pragma warning(disable: 4146) // we aint popping this, its an annoying and useless warning either way.

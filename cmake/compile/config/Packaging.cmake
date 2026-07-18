@@ -1,5 +1,5 @@
-set_property(TARGET Widrolo_Engine_3D APPEND PROPERTY
+set_property(TARGET Afterlife_Engine APPEND PROPERTY
         COMPILE_DEFINITIONS $<$<CONFIG:Packaging>:NDEBUG;PACKAGE>
 )
 
-set(WENGINE_OUTPUT_NAME_PACKAGING "$<$<CONFIG:Packaging>:Widrolo_Engine_3D-Package>")
+set(WENGINE_OUTPUT_NAME_PACKAGING "$<$<CONFIG:Packaging>:Afterlife_Engine-Package>")

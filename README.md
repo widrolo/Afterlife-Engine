@@ -1,6 +1,6 @@
-# Widrolo Engine 3D
+# Afterlife Engine
 
-Widrolo Engine 3D is a step up from its predecessor, bringing a Vulkan rendered 3D forward rendered pipeline for creating specifically open world games.
+Afterlife Engine is a step up from its predecessor, bringing a Vulkan rendered 3D forward rendered pipeline for creating specifically open world games.
 
 ![engine screenshot](/screenshots/Screenshot%20from%202026-06-30%2018-12-18.png)
 
@@ -35,7 +35,7 @@ Components are the primary gameplay element. They hold values, run logic on enti
 
 #### Input
 
-Widrolo Engine holds a very mature input system that is really fast and intuitive to use. The backend tracks input, so you can easily see whether a key is being held, just pressed, just released and more.
+Afterlife Engine holds a very mature input system that is really fast and intuitive to use. The backend tracks input, so you can easily see whether a key is being held, just pressed, just released and more.
 
 #### Widgets
 

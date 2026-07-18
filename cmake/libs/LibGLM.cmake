@@ -6,4 +6,4 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(glm)
 
-target_link_libraries(Widrolo_Engine_3D PRIVATE glm::glm)
+target_link_libraries(Afterlife_Engine PRIVATE glm::glm)

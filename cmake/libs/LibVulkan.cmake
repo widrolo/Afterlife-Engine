@@ -1,1 +1,1 @@
-target_link_libraries(Widrolo_Engine_3D PRIVATE Vulkan::Vulkan)
+target_link_libraries(Afterlife_Engine PRIVATE Vulkan::Vulkan)

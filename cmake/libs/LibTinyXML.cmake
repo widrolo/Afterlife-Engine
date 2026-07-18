@@ -6,6 +6,6 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Tinyxml)
 
-target_compile_definitions(Widrolo_Engine_3D PRIVATE TINYGLTF3_ENABLE_FS)
+target_compile_definitions(Afterlife_Engine PRIVATE TINYGLTF3_ENABLE_FS)
 
-target_link_libraries(Widrolo_Engine_3D PRIVATE tinyxml2::tinyxml2)
+target_link_libraries(Afterlife_Engine PRIVATE tinyxml2::tinyxml2)
