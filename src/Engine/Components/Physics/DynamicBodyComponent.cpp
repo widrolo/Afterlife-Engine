@@ -5,6 +5,7 @@
 
 #include "Engine/Core/Handlers/PhysicsHandler.h"
 #include "Engine/Types/CoreSystems.h"
+#include "Shapes/BoxCollisionComponent.h"
 
 using namespace WEngine;
 
@@ -26,12 +27,13 @@ void DynamicBodyComponent::Awake(ComponentArgs ca)
     ph->ChangeBodyRotation(m_body, entity->transform.rotation);
 }
 
-void DynamicBodyComponent::Start()
+void DynamicBodyComponent::LateAwake()
 {
+    auto box = entity->GetComponent<BoxCollisionComponent>();
+    if (box == nullptr)
+        return;
 
+    auto* ph = CoreSystems::GetPhysicsHandler();
+    ph->AttachBox(m_body, box->GetSize(), box->GetOffset());
 }
 
-void DynamicBodyComponent::PhysicsTick(float32 tr)
-{
-
-}

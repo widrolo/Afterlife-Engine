@@ -342,6 +342,8 @@ add_executable(Widrolo_Engine_3D
         src/Engine/Types/Physics/PhysicsBody.h
         src/Engine/Components/Physics/DynamicBodyComponent.cpp
         src/Engine/Components/Physics/DynamicBodyComponent.h
+        src/Engine/Components/Physics/Shapes/BoxCollisionComponent.cpp
+        src/Engine/Components/Physics/Shapes/BoxCollisionComponent.h
 )
 
 target_include_directories(Widrolo_Engine_3D PRIVATE

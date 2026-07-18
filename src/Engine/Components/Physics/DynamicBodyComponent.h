@@ -10,10 +10,8 @@ namespace WEngine
         DynamicBodyComponent(Entity* e);
 
     public:
-
         void Awake(ComponentArgs ca) override;
-        void Start() override;
-        void PhysicsTick(float32 tr) override;
+        void LateAwake() override;
 
     private:
         PhysicsBodyHandle m_body;

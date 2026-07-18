@@ -34,8 +34,6 @@ PhysicsBodyHandle PhysicsHandler::CreateBody(PhysicsBodyType type, Entity *entit
 	shapeDef.density = 1.0f;
 	b3CreateHullShape(bodyId, &shapeDef, &hull.base);
 
-	WLog::ConsoleLog(std::format("Initial Position {}", Vector3::B3DtoVec(b3Body_GetPosition(bodyId))));
-
 	PhysicsBody body{};
 	body.bodyId = bodyId;
 	body.entity = entity;
@@ -70,6 +68,20 @@ void PhysicsHandler::ChangeBodyRotation(PhysicsBodyHandle body, const Vector3 &r
 	b3Pos pos = b3Body_GetPosition(physicsBody.bodyId);
 
 	b3Body_SetTransform(physicsBody.bodyId, pos, rot);
+}
+
+void PhysicsHandler::AttachBox(PhysicsBodyHandle body, const Vector3 &size, const Vector3 &offset)
+{
+	if (body == 0 || body > m_bodies.size())
+		return;
+
+	PhysicsBody& physicsBody = m_bodies[body - 1];
+
+	b3BoxHull hull = b3MakeBoxHull(size.x, size.y, size.z);
+
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+	shapeDef.density = 1.0f;
+	b3CreateHullShape(physicsBody.bodyId, &shapeDef, &hull.base);
 }
 
 

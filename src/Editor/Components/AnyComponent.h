@@ -14,6 +14,12 @@ namespace WEditor
 {
     using OptionData = std::variant<int32, float32, bool, std::string, WEngine::Vector2, WEngine::Vector3, WEngine::Color>;
 
+    struct PhysicsModelCollection
+    {
+        WEngine::Model physicsModel;
+        WEngine::Material physicsMaterial;
+    };
+
     class AnyComponent : public WEngine::Component
     {
     public:
@@ -27,6 +33,8 @@ namespace WEditor
         std::array<std::string, 8> m_nameCache;
         WEngine::Model model;
         WEngine::Material material;
+
+        WEngine::Model physicsModel;
     public:
 
         void Init(uint16 ID, uint8 dataSize, WEngine::ComponentArgs args);
@@ -44,6 +52,8 @@ namespace WEditor
     private:
         bool m_isInitializedDraw = false;
 
+        void SetupPhysicsMaterial();
+
         void TryUpdate();
 
         void TryDrawGameGraphics();
@@ -52,6 +62,8 @@ namespace WEditor
 
         void TryDrawMeshComp();
         void UpdateMeshComp();
+
+        void TryDrawBoxCollision();
 
         COMP_HASH(0xf22524fc1c003f87)
     };

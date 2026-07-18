@@ -35,6 +35,7 @@ void AnyComponent::Init(uint16 ID, uint8 dataSize, WEngine::ComponentArgs args)
     Init(ID, dataSize);
 
     ApplySpawnData(args);
+    SetupPhysicsMaterial();
 }
 
 void AnyComponent::Init(uint16 ID, uint8 dataSize)
@@ -172,6 +173,11 @@ void AnyComponent::Draw()
     DrawOnSelected();
 }
 
+void AnyComponent::SetupPhysicsMaterial()
+{
+    physicsMaterial = Iris::GetMaterial("Unlit/MissingMat").GetValue();
+}
+
 void AnyComponent::TryUpdate()
 {
     switch (m_ID)
@@ -194,7 +200,12 @@ void AnyComponent::TryDrawGameGraphics()
 
 void AnyComponent::TryDrawDebugGraphics()
 {
-
+    switch (m_ID)
+    {
+        case 8:
+            TryDrawBoxCollision();
+        default: break;
+    }
 }
 
 void AnyComponent::DrawOnSelected()
@@ -300,5 +311,10 @@ void AnyComponent::UpdateMeshComp()
         }
         model = modelN.GetValue();
     }
+}
+
+void AnyComponent::TryDrawBoxCollision()
+{
+
 }
 

@@ -73,7 +73,22 @@
     DynamicBodyComponent:
         ID: 7
         Name: "Dynamic Body Component"
-        Description: "An moving physics object."
+        Description: "A moving physics object."
+    BoxCollisionComponent:
+        ID: 8
+        Name: "Box Collision Component"
+        Description: "A box component that gets attached to a body."
+        Settings:
+            BoxSize:
+                Name: "Box Size"
+                Description: "Size of the box."
+                Type: "Vector3"
+                Internal: "size"
+            BoxSize:
+                Name: "Box Offset"
+                Description: "Offset of the box."
+                Type: "Vector3"
+                Internal: "offset"
 
 
 
