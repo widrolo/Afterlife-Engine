@@ -4,7 +4,9 @@ FetchContent_Declare(
         GIT_TAG "main"
 )
 
-unset(SDL_SHARED)
+set(SDL_STATIC ON CACHE BOOL "" FORCE)
+set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+
 FetchContent_MakeAvailable(SDL)
 
 target_link_libraries(Afterlife_Engine PRIVATE SDL3::SDL3-static)

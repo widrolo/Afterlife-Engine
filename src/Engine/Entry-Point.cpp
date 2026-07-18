@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     bool launchEditor = false;
     for (sizeT i = 1; i < argc; ++i)
     {
-        if (std::string(argv[i]) == "--wedge")
+        if (std::string(argv[i]) == "--atk")
             launchEditor = true;
 
         // this is so the editor can launch the game even when compiled with Force_Editor on

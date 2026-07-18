@@ -13,5 +13,5 @@ void AboutWidget::RenderInternal()
 {
     SetSize({400, 350});
 
-    ImGui::Text("[W]idrolo [E]nhanced [D]evelopment [G]ame [E]ditor");
+    ImGui::Text("[A]fterlife [T]ool[K]it");
 }
