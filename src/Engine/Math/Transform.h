@@ -4,17 +4,9 @@
 
 namespace WEngine
 {
-	/*
-	* Transform
-	* 
-	* Holds information for the position, the size and
-	* the rotation in deg (0 - 360)
-	* 
-	*/
-
 	struct Transform
 	{
-		Transform(): position(Vector3::Zero), size(Vector3::Zero) {}
+		Transform(): position(Vector3::Zero), rotation(Vector3::Zero), size(Vector3::One) {}
 		Transform(Vector3 pos, Vector3 rot, Vector3 size) : position(pos), rotation(rot), size(size) {}
 
 		Vector3 position;

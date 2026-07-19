@@ -241,7 +241,7 @@ WEngine::Nullable<WEngine::Model> Iris::GetModel(const std::string &modelName)
     return {};
 }
 
-WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::ModelInfo &model, bool addToBVH)
+WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::MeshInfo &model, bool addToBVH)
 {
     Vulkan_Model vkModel{};
     vkModel.vertexCount = model.vertices.size();

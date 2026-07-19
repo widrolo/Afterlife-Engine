@@ -148,7 +148,7 @@ void AssetRepo::GetAsset<MeshAssetMission>(MeshAssetMission& mission)
 		return -1;
 	};
 
-	ModelInfo& out = mission.model;
+	MeshInfo& out = mission.model;
 
     for (sizeT mi = 0; mi < model.meshes_count; mi++)
     {

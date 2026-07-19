@@ -7,7 +7,7 @@ namespace WEngine
 {
     struct VertexData;
 
-    struct ModelInfo
+    struct MeshInfo
     {
         std::string name;
         wtl::vector<VertexData> vertices;

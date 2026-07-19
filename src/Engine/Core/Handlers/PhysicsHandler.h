@@ -6,6 +6,7 @@
 #include "Engine/Types/Physics/BodyHandle.h"
 #include "Engine/Types/Physics/BodyType.h"
 #include "Engine/Types/Physics/PhysicsBody.h"
+#include "Engine/Types/Rendering/MeshInfo.h"
 #include "Engine/WTL/vector.h"
 
 namespace WEngine
@@ -26,6 +27,7 @@ namespace WEngine
 		void ChangeBodyPosition(PhysicsBodyHandle body, const Vector3& position);
 		void ChangeBodyRotation(PhysicsBodyHandle body, const Vector3& rotation);
 		void AttachBox(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset);
+		void AttachMesh(PhysicsBodyHandle body, const MeshInfo& mesh);
 
 	private:
 		void Setup();

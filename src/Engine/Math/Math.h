@@ -16,5 +16,7 @@ namespace WEngine {
 
         static float32 Pow(float32 x, int32 exp);
         static float32 Sqrt(float32 x);
+
+        static float32 Clamp(float32 val, float32 lower, float32 upper);
     };
 }

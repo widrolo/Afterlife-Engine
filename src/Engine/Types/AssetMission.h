@@ -6,7 +6,7 @@
 #include <tinyxml2.h>
 #include <Engine/Types/Audio.h>
 
-#include "Rendering/ModelInfo.h"
+#include "Rendering/MeshInfo.h"
 
 namespace WEngine
 {
@@ -68,7 +68,7 @@ namespace WEngine
 
 	struct MeshAssetMission : public AssetMissionBase
 	{
-		ModelInfo model;
+		MeshInfo model;
 	};
 
 	// ---------------------------------- [IRIS SPECIFIC] ----------------------------------

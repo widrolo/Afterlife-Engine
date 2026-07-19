@@ -224,7 +224,7 @@ add_executable(Afterlife_Engine
         src/Engine/Types/Rendering/ShaderSettings.h
         src/Engine/Types/Rendering/GPU/Texture.h
         src/Engine/Types/Rendering/GPU/Model.h
-        src/Engine/Types/Rendering/ModelInfo.h
+        src/Engine/Types/Rendering/MeshInfo.h
         src/Engine/Types/Rendering/GPU/Line.h
         src/Engine/Types/Rendering/LineInfo.h
         src/Engine/Types/Rendering/TextureInfo.h

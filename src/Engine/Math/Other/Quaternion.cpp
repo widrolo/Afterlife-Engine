@@ -1,12 +1,109 @@
 #include "Quaternion.h"
 
 #include <Engine/Math/Math.h>
+
+#include "Engine/Math/Vectors/VecMath.h"
+#include "Engine/Util/Log.h"
 using namespace WEngine;
 
 const Quaternion Quaternion::Zero = { 0.0f, 0.0f, 0.0f, 0.0f };
 const Quaternion Quaternion::One = { 1.0f, 1.0f, 1.0f, 1.0f };
 const Quaternion Quaternion::Identity = { 0.0f, 0.0f, 0.0f, 1.0f };
 
+
+Quaternion Quaternion::operator*(const Quaternion &other) const
+{
+    return {
+        w * other.x + x * other.w + y * other.z - z * other.y,
+        w * other.y - x * other.z + y * other.w + z * other.x,
+        w * other.z + x * other.y - y * other.x + z * other.w,
+        w * other.w - x * other.x - y * other.y - z * other.z
+    };
+}
+
+void Quaternion::ConjugateThis()
+{
+    x = -x;
+    y = -y;
+    z = -z;
+}
+
+void Quaternion::InverseThis()
+{
+    ConjugateThis();
+    float32 magSqr = MagnitudeSqr();
+    x /= magSqr;
+    y /= magSqr;
+    z /= magSqr;
+    w /= magSqr;
+}
+
+Quaternion Quaternion::Conjugate(const Quaternion& q)
+{
+    Quaternion result = q;
+    result.ConjugateThis();
+    return result;
+}
+
+Quaternion Quaternion::Inverse(const Quaternion& q)
+{
+    Quaternion result = q;
+    result.InverseThis();
+    return result;
+}
+
+Vector3 Quaternion::Rotate(const Quaternion& q, const Vector3& v)
+{
+    Vector3 qv(q.x, q.y, q.z);
+    Vector3 t = VecMath::Cross(qv, v);
+    t = t + t;
+    Vector3 u = VecMath::Cross(qv, t);
+    t = t * q.w;
+    return v + u + t;
+}
+
+Quaternion Quaternion::Slerp(const Quaternion &a, const Quaternion &b, float32 t)
+{
+    float dot = Dot(a, b);
+
+    Quaternion bAdj = b;
+    if (dot < 0.0f)
+    {
+        bAdj.x = -b.x;
+        bAdj.y = -b.y;
+        bAdj.z = -b.z;
+        bAdj.w = -b.w;
+        dot = -dot;
+    }
+
+    const float32 DOT_THRESHOLD = 0.9995f;
+    if (dot > DOT_THRESHOLD)
+    {
+        Quaternion result(
+            a.x + t * (bAdj.x - a.x),
+            a.y + t * (bAdj.y - a.y),
+            a.z + t * (bAdj.z - a.z),
+            a.w + t * (bAdj.w - a.w)
+        );
+        result.Normalize();
+        return result;
+    }
+
+    float32 theta_0 = Math::Acos(dot);
+    float32 theta = theta_0 * t;
+    float32 sin_theta = Math::Sin(theta);
+    float32 sin_theta_0 = Math::Sin(theta_0);
+
+    float32 s0 = Math::Cos(theta) - dot * sin_theta / sin_theta_0;
+    float32 s1 = sin_theta / sin_theta_0;
+
+    return {
+        s0 * a.x + s1 * bAdj.x,
+        s0 * a.y + s1 * bAdj.y,
+        s0 * a.z + s1 * bAdj.z,
+        s0 * a.w + s1 * bAdj.w
+    };
+}
 
 Quaternion Quaternion::EulerToQuaternion(const Vector3& euler)
 {
@@ -42,11 +139,11 @@ Vector3 Quaternion::QuaternionToEuler(const Quaternion &q)
     euler.x = Math::Atan2(sinr_cosp, cosr_cosp);
 
     // y axis (pitch)
-    float32 sinp = Math::Sqrt(1 + 2 * (q.w * q.y - q.x * q.z));
-    float32 cosp = Math::Sqrt(1 - 2 * (q.w * q.y - q.x * q.z));
-    euler.y = 2.0 * Math::Atan2(sinp, cosp) - pi / 2.0;
+    float32 sinp = 2.0f * (q.w * q.y - q.z * q.x);
+    sinp = Math::Clamp(sinp, -1.0f, 1.0f);  // clamp to avoid NaN
+    euler.y = Math::Asin(sinp);
 
-    // y axis (yaw)
+    // z axis (yaw)
     float32 siny_cosp = 2 * (q.w * q.z + q.x * q.y);
     float32 cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
     euler.z = Math::Atan2(siny_cosp, cosy_cosp);
@@ -55,9 +152,20 @@ Vector3 Quaternion::QuaternionToEuler(const Quaternion &q)
 
 }
 
+float32 Quaternion::Dot(const Quaternion &a, const Quaternion &b)
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+}
+
 void Quaternion::Normalize()
 {
     float32 len = Magnitude();
+    if (len == 0.0f)
+    {
+        WLog::SetConsoleWarning();
+        WLog::ConsoleLog("Tried to normalize a degenerate quaternion!");
+        return;
+    }
     x = x / len;
     y = y / len;
     z = z / len;
@@ -67,4 +175,9 @@ void Quaternion::Normalize()
 float32 Quaternion::Magnitude() const
 {
     return Math::Sqrt(x * x + y * y + z * z + w * w);
+}
+
+float32 Quaternion::MagnitudeSqr() const
+{
+    return x * x + y * y + z * z + w * w;
 }

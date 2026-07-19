@@ -13,7 +13,7 @@
 #include <Engine/Types/Rendering/LightingInfo.h>
 #include <Engine/Types/Rendering/LineInfo.h>
 #include <Engine/Types/Rendering/GPU/Line.h>
-#include <Engine/Types/Rendering/ModelInfo.h>
+#include <Engine/Types/Rendering/MeshInfo.h>
 #include <Engine/Types/Rendering/ShaderDefinition.h>
 #include <Engine/Types/Rendering/ShaderSettings.h>
 #include <Engine/Types/Rendering/TextureInfo.h>
@@ -119,7 +119,7 @@ public:
      * @param addToBVH Whether the model should be included in the BVH. This is synonymous with shadow casting.
      * @return A handle to the model which can be null.
      */
-    static WEngine::Nullable<WEngine::Model> ALLOC_CreateModel(const WEngine::ModelInfo& model, bool addToBVH = true);
+    static WEngine::Nullable<WEngine::Model> ALLOC_CreateModel(const WEngine::MeshInfo& model, bool addToBVH = true);
 
     // ----------------------- Drawing -----------------------
 
