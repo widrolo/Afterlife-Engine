@@ -25,7 +25,7 @@ namespace WEngine
 
 		PhysicsBodyHandle CreateBody(PhysicsBodyType type, Entity *entity);
 		void ChangeBodyPosition(PhysicsBodyHandle body, const Vector3& position);
-		void ChangeBodyRotation(PhysicsBodyHandle body, const Vector3& rotation);
+		void ChangeBodyRotation(PhysicsBodyHandle body, const Quaternion& rotation);
 		void AttachBox(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset);
 		void AttachMesh(PhysicsBodyHandle body, const MeshInfo& mesh);
 

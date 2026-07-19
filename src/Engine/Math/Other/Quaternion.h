@@ -1,6 +1,9 @@
 #pragma once
+#include "Engine/Math/Matrices/CommonMatracies.h"
 #include "Engine/Math/Vectors/Vec4f.h"
 #include "Engine/Math/Vectors/Vec3f.h"
+#include <glm/glm.hpp>
+
 
 namespace WEngine
 {
@@ -12,6 +15,10 @@ namespace WEngine
         Quaternion(const Quaternion& other) : x(other.x), y(other.y), z(other.z), w(other.w) {}
         Quaternion(float32 x, float32 y, float32 z, float32 w) : x(x), y(y), z(z), w(w) {}
         Quaternion(const Vector4& other) : x(other.x), y(other.y), z(other.z), w(other.w) {}
+        Quaternion(const Vector3& other)
+        {
+            *this = EulerToQuaternion(other);
+        }
 
         const static Quaternion Zero;
         const static Quaternion One;

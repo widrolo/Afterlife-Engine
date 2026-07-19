@@ -25,7 +25,7 @@ Vector3 Component::GetPosition() const
 	return entity->transform.position;
 }
 
-Vector3 Component::GetRotation() const
+Quaternion Component::GetRotation() const
 {
 	return entity->transform.rotation;
 }

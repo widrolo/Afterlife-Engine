@@ -4,6 +4,7 @@
 
 #include "Engine/Math/Vectors/VecMath.h"
 #include "Engine/Util/Log.h"
+#include <glm/glm.hpp>
 using namespace WEngine;
 
 const Quaternion Quaternion::Zero = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -107,15 +108,13 @@ Quaternion Quaternion::Slerp(const Quaternion &a, const Quaternion &b, float32 t
 
 Quaternion Quaternion::EulerToQuaternion(const Vector3& euler)
 {
-    // Save me Wikipedia, please!
-    // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 
     float32 cr = Math::Cos(euler.x * 0.5f);
     float32 sr = Math::Sin(euler.x * 0.5f);
     float32 cp = Math::Cos(euler.y * 0.5f);
     float32 sp = Math::Sin(euler.y * 0.5f);
-    float32 cy = Math::Cos(euler.z * 0.5f);
-    float32 sy = Math::Sin(euler.z * 0.5f);
+    float32 cy = Math::Cos(-euler.z * 0.5f);
+    float32 sy = Math::Sin(-euler.z * 0.5f);
 
     Quaternion q;
     q.w = cr * cp * cy + sr * sp * sy;
@@ -146,7 +145,7 @@ Vector3 Quaternion::QuaternionToEuler(const Quaternion &q)
     // z axis (yaw)
     float32 siny_cosp = 2 * (q.w * q.z + q.x * q.y);
     float32 cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
-    euler.z = Math::Atan2(siny_cosp, cosy_cosp);
+    euler.z = -Math::Atan2(siny_cosp, cosy_cosp);
 
     return euler;
 

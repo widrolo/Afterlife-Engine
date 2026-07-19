@@ -20,6 +20,7 @@
 #include "Engine/Core/Engine.h"
 #include "Engine/Core/System/Haptic.h"
 #include "Engine/Types/CoreSystems.h"
+#include "glm/gtc/quaternion.hpp"
 
 
 using namespace WEngine;
@@ -122,15 +123,12 @@ void RenderHandler::BeginFrame()
 	else
 	{
 		Vector3 camPos = m_camera->GetPosition();
-		Vector3 camRot = m_camera->GetRotation();
+		Quaternion camRot = m_camera->GetRotation();
 
-		m_viewMatrix = glm::mat4(1.0f);
+		glm::quat q(camRot.w, camRot.x, camRot.y, camRot.z);
 
-		m_viewMatrix = glm::rotate(m_viewMatrix, glm::radians(camRot.x), glm::vec3(1, 0, 0));
-		m_viewMatrix = glm::rotate(m_viewMatrix, glm::radians(camRot.y), glm::vec3(0, 1, 0));
-		m_viewMatrix = glm::rotate(m_viewMatrix, glm::radians(camRot.z), glm::vec3(0, 0, 1));
-
-		m_viewMatrix = glm::translate(m_viewMatrix, -glm::vec3(camPos.x, -camPos.y, camPos.z));
+		m_viewMatrix = glm::mat4_cast(q);
+		m_viewMatrix = glm::translate(m_viewMatrix, glm::vec3(-camPos.x, camPos.y, -camPos.z));
 	}
 }
 
@@ -341,48 +339,18 @@ void RenderHandler::LoadPPShaders()
 
 Mat4x4 RenderHandler::CalcModelMatrix(const Transform &transform)
 {
-	Vector3 modPos = transform.position;
-	Vector3 modRot = transform.rotation;
-	Vector3 modSca = transform.size;
+	glm::quat q(transform.rotation.w, transform.rotation.x,
+				transform.rotation.y, transform.rotation.z);
 
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	glm::mat4 modelMatrix = glm::mat4_cast(q);
 
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(modPos.x, -modPos.y, modPos.z));
+	modelMatrix[0] *= transform.size.x;
+	modelMatrix[1] *= transform.size.y;
+	modelMatrix[2] *= transform.size.z;
 
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.x - 180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.y), glm::vec3(0.0f, 1.0f, 0.0f));
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	modelMatrix = glm::scale(modelMatrix, glm::vec3(modSca.x, modSca.y, modSca.z));
+	modelMatrix[3] = glm::vec4(transform.position.x, -transform.position.y, transform.position.z, 1.0f);
 
 	return Glm4x4ToMat4x4(modelMatrix);
-}
-
-Mat4x4 RenderHandler::CalcMVPMatrix(const Transform &transform)
-{
-	Vector3 modPos = transform.position;
-	Vector3 modRot = transform.rotation;
-	Vector3 modSca = transform.size;
-
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
-
-	modelMatrix = glm::translate(modelMatrix, glm::vec3(modPos.x, -modPos.y, modPos.z));
-
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.x - 180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.y), glm::vec3(0.0f, 1.0f, 0.0f));
-	modelMatrix = glm::rotate(modelMatrix, glm::radians(modRot.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	modelMatrix = glm::scale(modelMatrix, glm::vec3(modSca.x, modSca.y, modSca.z));
-
-	glm::mat4 mvpG = m_projection * m_viewMatrix * modelMatrix;
-
-	return Glm4x4ToMat4x4(mvpG);
-}
-
-void RenderHandler::RenderSingleMission(RenderMission &mission)
-{
-	Mat4x4 mvp = CalcMVPMatrix(mission.transform);
-	Iris::DRAWCALL_DrawModel(mission.model, mission.material, mvp);
 }
 
 void RenderHandler::RenderModelGroup(const ModelGroup &group, Material material)

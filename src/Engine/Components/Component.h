@@ -3,6 +3,7 @@
 #include <Engine/Types/CommonTypes.h>
 
 #include "Engine/Math/Vector.h"
+#include "Engine/Math/Other/Quaternion.h"
 
 namespace WEngine
 {
@@ -39,7 +40,7 @@ namespace WEngine
 		[[nodiscard]] std::string GetName() const;
 
 		[[nodiscard]] Vector3 GetPosition() const;
-		[[nodiscard]] Vector3 GetRotation() const;
+		[[nodiscard]] Quaternion GetRotation() const;
 	protected:
 		[[deprecated]]
 		void MakeErrorMsg(int line, std::string reason);

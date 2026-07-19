@@ -175,9 +175,7 @@ namespace WEngine
 		void LoadPPShaders();
 
 		Mat4x4 CalcModelMatrix(const Transform& transform);
-		Mat4x4 CalcMVPMatrix(const Transform& transform);
 
-		void RenderSingleMission(RenderMission& mission);
 		void RenderModelGroup(const ModelGroup& group, Material material);
 
 		void RenderPostProcessingShaders();

@@ -73,6 +73,5 @@ void Freecam::Tick(float32 dt)
     if (m_pitch < -89.0f)
         m_pitch = -89.0f;
 
-    entity->transform.rotation.y = m_yaw;
-    entity->transform.rotation.x = m_pitch;
+    entity->transform.rotation = WEngine::Quaternion::EulerToQuaternion({glm::radians(m_pitch), glm::radians(m_yaw), 0.0f});
 }
