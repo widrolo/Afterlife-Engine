@@ -127,7 +127,7 @@ void RenderHandler::BeginFrame()
 
 		glm::quat q(camRot.w, camRot.x, camRot.y, camRot.z);
 
-		m_viewMatrix = glm::mat4_cast(q);
+		m_viewMatrix = glm::mat4_cast(glm::conjugate(q));
 		m_viewMatrix = glm::translate(m_viewMatrix, glm::vec3(-camPos.x, camPos.y, -camPos.z));
 	}
 }

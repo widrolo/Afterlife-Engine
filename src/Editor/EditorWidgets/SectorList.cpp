@@ -158,6 +158,7 @@ YAML::Node SectorList::GetEntityInfoYaml(WEngine::Entity *e)
     rotNode.push_back(e->transform.rotation.x);
     rotNode.push_back(e->transform.rotation.y);
     rotNode.push_back(e->transform.rotation.z);
+    rotNode.push_back(e->transform.rotation.w);
     rotNode.SetStyle(YAML::EmitterStyle::Flow);
 
     root["rotation"] = rotNode;

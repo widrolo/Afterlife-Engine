@@ -24,3 +24,8 @@ float32 Math::Clamp(float32 val, float32 lower, float32 upper)
     else
         return val;
 }
+
+float32 Math::Abs(float32 val)
+{
+    return fabsf(val);
+}

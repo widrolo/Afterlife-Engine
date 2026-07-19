@@ -109,10 +109,10 @@ Quaternion Quaternion::Slerp(const Quaternion &a, const Quaternion &b, float32 t
 Quaternion Quaternion::EulerToQuaternion(const Vector3& euler)
 {
 
-    float32 cr = Math::Cos(euler.x * 0.5f);
-    float32 sr = Math::Sin(euler.x * 0.5f);
-    float32 cp = Math::Cos(euler.y * 0.5f);
-    float32 sp = Math::Sin(euler.y * 0.5f);
+    float32 cr = Math::Cos(-euler.x * 0.5f);
+    float32 sr = Math::Sin(-euler.x * 0.5f);
+    float32 cp = Math::Cos(-euler.y * 0.5f);
+    float32 sp = Math::Sin(-euler.y * 0.5f);
     float32 cy = Math::Cos(-euler.z * 0.5f);
     float32 sy = Math::Sin(-euler.z * 0.5f);
 
@@ -127,20 +127,26 @@ Quaternion Quaternion::EulerToQuaternion(const Vector3& euler)
 
 Vector3 Quaternion::QuaternionToEuler(const Quaternion &q)
 {
-    // Save me Wikipedia, please!
-    // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-
     Vector3 euler;
+
+    float32 sinp = 2.0f * (q.w * q.y - q.z * q.x);
+    sinp = Math::Clamp(sinp, -1.0f, 1.0f);
+
+    if (Math::Abs(sinp) > 0.9999f)
+    {
+        euler.y = -Math::Asin(sinp);
+        euler.x = -2.0f * Math::Atan2(q.x, q.w);
+        euler.z = 0.0f;
+        return euler;
+    }
 
     // x axis (roll)
     float32 sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
     float32 cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
-    euler.x = Math::Atan2(sinr_cosp, cosr_cosp);
+    euler.x = -Math::Atan2(sinr_cosp, cosr_cosp);
 
     // y axis (pitch)
-    float32 sinp = 2.0f * (q.w * q.y - q.z * q.x);
-    sinp = Math::Clamp(sinp, -1.0f, 1.0f);  // clamp to avoid NaN
-    euler.y = Math::Asin(sinp);
+    euler.y = -Math::Asin(sinp);
 
     // z axis (yaw)
     float32 siny_cosp = 2 * (q.w * q.z + q.x * q.y);
@@ -148,7 +154,6 @@ Vector3 Quaternion::QuaternionToEuler(const Quaternion &q)
     euler.z = -Math::Atan2(siny_cosp, cosy_cosp);
 
     return euler;
-
 }
 
 float32 Quaternion::Dot(const Quaternion &a, const Quaternion &b)
@@ -179,4 +184,13 @@ float32 Quaternion::Magnitude() const
 float32 Quaternion::MagnitudeSqr() const
 {
     return x * x + y * y + z * z + w * w;
+}
+
+Quaternion Quaternion::B3DToQuat(const b3Quat &quat)
+{
+    return Quaternion{quat.v.x, quat.v.y, quat.v.z, quat.s};
+}
+b3Quat Quaternion::QuatToB3D(const Quaternion &quat)
+{
+    return b3Quat{quat.x, quat.y, quat.z, quat.w};
 }

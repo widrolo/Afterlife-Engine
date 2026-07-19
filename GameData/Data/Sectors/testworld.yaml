@@ -2,7 +2,7 @@ entities:
   e0:
     name: Ground
     position: [0, -1.6, 0]
-    rotation: [0, 0, 0]
+    rotation: [-2.576063e-18, 5.893345e-11, 1, -4.371139e-08]
     size: [10, 1, 10]
     components:
       c0:
@@ -13,7 +13,7 @@ entities:
   e1:
     name: Monkey
     position: [5.2, 0.5, -1.9]
-    rotation: [-43.5, 35.7, 22.6]
+    rotation: [0.78125197, -0.16098508, 0.5586925, 0.22713844]
     size: [1, 1, 1]
     components:
       c0:
@@ -30,7 +30,7 @@ entities:
   e2:
     name: Bread
     position: [4, 2.2, 0.3]
-    rotation: [90, 0, -135.3]
+    rotation: [-0.70710677, 0, 0, 0.70710677]
     size: [10, 10, 10]
     components:
       c0:
@@ -47,7 +47,7 @@ entities:
   e3:
     name: Cube
     position: [0, 1, 0]
-    rotation: [0, 0, 0]
+    rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
       c0:
@@ -64,7 +64,7 @@ entities:
   e4:
     name: Cube2
     position: [-1, 10, 0.7]
-    rotation: [0, 0, 0]
+    rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
       c0:
@@ -81,7 +81,7 @@ entities:
   e5:
     name: Cube2
     position: [2.1, 10, 0]
-    rotation: [0, 0, 0]
+    rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
       c0:
@@ -98,7 +98,7 @@ entities:
   e6:
     name: Cube
     position: [-1.9, 3.5, 0]
-    rotation: [0, 0, 0]
+    rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
       c0:
@@ -115,7 +115,7 @@ entities:
   e7:
     name: Cube2
     position: [1.4, 6.9, 0]
-    rotation: [0, 0, 0]
+    rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
       c0:
@@ -132,7 +132,7 @@ entities:
   e8:
     name: Cube2
     position: [0, 13.8, 0]
-    rotation: [0, 0, 0]
+    rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
       c0:
@@ -149,7 +149,7 @@ entities:
   e9:
     name: Ground Physics
     position: [0, -11.6, 0]
-    rotation: [0, 0, 0]
+    rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
       c0:

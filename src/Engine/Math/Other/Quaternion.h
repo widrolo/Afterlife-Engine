@@ -42,5 +42,24 @@ namespace WEngine
         void Normalize();
         [[nodiscard]] float32 Magnitude() const;
         [[nodiscard]] float32 MagnitudeSqr() const;
+
+        [[nodiscard]] static Quaternion B3DToQuat(const b3Quat& quat);
+        [[nodiscard]] static b3Quat QuatToB3D(const Quaternion& quat);
     };
 }
+
+template<>
+struct std::formatter<WEngine::Quaternion>
+{
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext& ctx)
+    {
+        return ctx.begin();
+    }
+
+    template<typename FormatContext>
+    auto format(const WEngine::Quaternion& v, FormatContext& ctx) const
+    {
+        return format_to(ctx.out(), "[{} | {} | {} | {}]", v.x, v.y, v.z, v.w);
+    }
+};

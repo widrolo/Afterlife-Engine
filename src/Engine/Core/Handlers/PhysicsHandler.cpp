@@ -17,7 +17,7 @@ PhysicsHandler::PhysicsHandler()
 
 void PhysicsHandler::Tick()
 {
-	b3World_Step(m_worldID, PhysicsSettings::physicsTickRate * CoreSystems::GetTimeScale(), 4);
+	b3World_Step(m_worldID, PhysicsSettings::physicsTickRate * CoreSystems::GetTimeScale(), 8);
 	for (auto& body : m_bodies)
 		UpdateAttachedEntity(body);
 }
@@ -62,14 +62,10 @@ void PhysicsHandler::ChangeBodyRotation(PhysicsBodyHandle body, const Quaternion
 
 	PhysicsBody& physicsBody = m_bodies[body - 1];
 
-	//b3Quat qx = b3MakeQuatFromAxisAngle({1.0f, 0.0f, 0.0f}, glm::radians(rotation.x));
-	//b3Quat qy = b3MakeQuatFromAxisAngle({0.0f, 1.0f, 0.0f}, glm::radians(rotation.y));
-	//b3Quat qz = b3MakeQuatFromAxisAngle({0.0f, 0.0f, 1.0f}, glm::radians(rotation.z));
-//
-	//b3Quat rot = b3MulQuat(b3MulQuat(qz, qy), qx);
-	//b3Pos pos = b3Body_GetPosition(physicsBody.bodyId);
-//
-	//b3Body_SetTransform(physicsBody.bodyId, pos, rot);
+	b3Quat rot = Quaternion::QuatToB3D(rotation);
+	b3Pos pos = b3Body_GetPosition(physicsBody.bodyId);
+
+	b3Body_SetTransform(physicsBody.bodyId, pos, rot);
 }
 
 void PhysicsHandler::AttachBox(PhysicsBodyHandle body, const Vector3 &size, const Vector3 &offset)
@@ -105,7 +101,6 @@ void PhysicsHandler::AttachMesh(PhysicsBodyHandle body, const MeshInfo &mesh)
 
 void PhysicsHandler::Setup()
 {
-	//b3SetLengthUnitsPerMeter(0.1f);
 	auto def = b3DefaultWorldDef();
 	def.gravity = {0.0f, -20.0f, 0.0f};
 	m_worldID = b3CreateWorld(&def);
@@ -122,32 +117,12 @@ void PhysicsHandler::UpdateAttachedEntity(PhysicsBody& body)
 	if (body.type != PhysicsBodyType::Dynamic)
 		return;
 
-	//auto& tra = body.entity->transform;
-	//b3Pos pos = b3Body_GetPosition(body.bodyId);
-	//tra.position = Vector3::B3DtoVec(pos);
-//
-	//b3Quat rot = b3Body_GetRotation(body.bodyId);
-//
-	//const float32 x = rot.v.x;
-	//const float32 y = rot.v.y;
-	//const float32 z = rot.v.z;
-	//const float32 w = rot.s;
-//
-	//// roll (X)
-	//float32 sinr_cosp = 2.0f * (w * x + y * z);
-	//float32 cosr_cosp = 1.0f - 2.0f * (x * x + y * y);
-	//float32 angleX = atan2f(sinr_cosp, cosr_cosp);
-//
-	//// pitch (Y)
-	//float32 sinp = 2.0f * (w * y - z * x);
-	//sinp = sinp > 1.0f ? 1.0f : (sinp < -1.0f ? -1.0f : sinp);
-	//float32 angleY = asinf(sinp);
-//
-	//// yaw (Z)
-	//float32 siny_cosp = 2.0f * (w * z + x * y);
-	//float32 cosy_cosp = 1.0f - 2.0f * (y * y + z * z);
-	//float32 angleZ = atan2f(siny_cosp, cosy_cosp);
-//
-	//tra.rotation = Vector3(glm::degrees(angleX), glm::degrees(angleY), glm::degrees(angleZ));
+	auto& tra = body.entity->transform;
+
+	b3Vec3 pos = b3Body_GetPosition(body.bodyId);
+	b3Quat rot = b3Body_GetRotation(body.bodyId);
+
+	tra.position = Vector3::B3DtoVec(pos);
+	tra.rotation = Quaternion::B3DToQuat(rot);
 
 }

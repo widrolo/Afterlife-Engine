@@ -37,6 +37,6 @@ float32 Math::Atan(float32 x)
 
 float32 Math::Atan2(float32 x, float32 y)
 {
-    return atan2f(y, x);
+    return atan2f(x, y);
 }
 

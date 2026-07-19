@@ -18,5 +18,6 @@ namespace WEngine {
         static float32 Sqrt(float32 x);
 
         static float32 Clamp(float32 val, float32 lower, float32 upper);
+        static float32 Abs(float32 val);
     };
 }

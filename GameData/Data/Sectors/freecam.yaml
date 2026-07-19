@@ -2,7 +2,7 @@ entities:
   e0:
     name: camera
     position: [0, 4.2, 8.6]
-    rotation: [0, 0, 0]
+    rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
       c0:

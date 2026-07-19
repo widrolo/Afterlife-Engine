@@ -6,6 +6,7 @@
 #include "Editor/Types/EditorSystems.h"
 #include "Engine/Core/World/Entity.h"
 #include "Engine/Core/World/Sector.h"
+#include "Engine/Util/Log.h"
 
 namespace WEditor {
 	class AnyComponent;
@@ -17,6 +18,12 @@ void ComponentList::Setup()
 {
     m_widgetName = "Entity Properties";
 	m_windowFlags = ImGuiWindowFlags_NoResize;
+
+	WEngine::Vector3 in(glm::radians(30.f), glm::radians(0.f), glm::radians(0.f));
+	auto q = WEngine::Quaternion::EulerToQuaternion(in);
+	auto out = WEngine::Quaternion::QuaternionToEuler(q);
+	WEngine::WLog::ConsoleLog(std::format("in=({},{},{}) out=({},{},{})", glm::degrees(in.x), glm::degrees(in.y),
+		glm::degrees(in.z), glm::degrees(out.x), glm::degrees(out.y), glm::degrees(out.z)));
 }
 
 void ComponentList::RenderInternal()
@@ -35,12 +42,20 @@ void ComponentList::RenderInternal()
 	m_entityPos[0] = entity->transform.position.x;
 	m_entityPos[1] = entity->transform.position.y;
 	m_entityPos[2] = entity->transform.position.z;
-	m_entityRot[0] = entity->transform.rotation.x;
-	m_entityRot[1] = entity->transform.rotation.y;
-	m_entityRot[2] = entity->transform.rotation.z;
 	m_entitySize[0] = entity->transform.size.x;
 	m_entitySize[1] = entity->transform.size.y;
 	m_entitySize[2] = entity->transform.size.z;
+
+	bool selectionChanged = (entity != m_lastEntity);
+	m_lastEntity = entity;
+
+	if (selectionChanged || !m_rotationActive)
+	{
+		WEngine::Vector3 euler = WEngine::Quaternion::QuaternionToEuler(entity->transform.rotation);
+		m_entityRot[0] = glm::degrees(euler.x);
+		m_entityRot[1] = glm::degrees(euler.y);
+		m_entityRot[2] = glm::degrees(euler.z);
+	}
 
 	ImGui::SeparatorText("Entity Settings");
 	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20.f, 10.f));
@@ -62,10 +77,11 @@ void ComponentList::RenderInternal()
 
 	if (ImGui::DragFloat3("Rotation", m_entityRot.data(), 0.1f))
 	{
-		vec = WEngine::Vector3(m_entityRot[0], m_entityRot[1], m_entityRot[2]);
-		entity->transform.rotation = vec;
+		vec = WEngine::Vector3(glm::radians(m_entityRot[0]), glm::radians(m_entityRot[1]), glm::radians(m_entityRot[2]));
+		entity->transform.rotation = WEngine::Quaternion::EulerToQuaternion(vec);
 		EditorState::SelectedSector->m_changedInEditor = true;
 	}
+	m_rotationActive = ImGui::IsItemActive();
 
 	if (ImGui::DragFloat3("Size", m_entitySize.data(), 0.1f))
 	{
