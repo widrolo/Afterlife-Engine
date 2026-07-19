@@ -344,6 +344,8 @@ add_executable(Afterlife_Engine
         src/Engine/Components/Physics/DynamicBodyComponent.h
         src/Engine/Components/Physics/Shapes/BoxCollisionComponent.cpp
         src/Engine/Components/Physics/Shapes/BoxCollisionComponent.h
+        src/Editor/MenubarItems/File/Menubar_RunTest.cpp
+        src/Editor/MenubarItems/File/Menubar_RunTest.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

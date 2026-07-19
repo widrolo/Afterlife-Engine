@@ -36,6 +36,7 @@ using namespace WEditor;
 
 Editor::Editor(int argc, char *argv[])
 {
+	Iris::SETTING_EnableEditorMode();
 	StartEditor();
 }
 
@@ -103,6 +104,7 @@ void Editor::InitHandlers()
 
 	Iris::SETTING_BeginNewPreFrame();
 	Iris::ALLOC_CompileMaterial("Unlit/MissingMat");
+	Iris::ALLOC_CompileMaterial("Editor/PhysicsDebug");
 	EditorSystems::renderHandler->PrepareSkybox();
 	AnyComponent::SetupPhysicsData();
 	WAllocator::Construct<WEngine::Sector, const std::string&>("root");

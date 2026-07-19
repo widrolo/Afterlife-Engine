@@ -9,6 +9,8 @@
 #include <Editor/MenubarItems/Help/Menubar_About.h>
 #include <Editor/MenubarItems/Help/Menubar_NodeTest.h>
 
+#include "Editor/MenubarItems/File/Menubar_RunTest.h"
+
 
 namespace WEditor
 {
@@ -62,6 +64,7 @@ void MenubarHandler::Render()
 void MenubarHandler::Init()
 {
     AddNewMenubarItem<Menubar_RunGame>(MenubarItemCategories::File);
+    AddNewMenubarItem<Menubar_RunTest>(MenubarItemCategories::File);
     AddNewMenubarItem<Menubar_Exit>(MenubarItemCategories::File);
 
     AddNewMenubarItem<Menubar_ResFind>(MenubarItemCategories::Tools);

@@ -1,0 +1,3 @@
+material:
+    materialName: Editor/PhysicsDebug
+    shader: Editor/PhysicsDebug

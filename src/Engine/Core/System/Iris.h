@@ -33,6 +33,11 @@ class Iris
 {
 public:
     /**
+     * If called, the behavior of the editor changes to accommodate the editors needs.
+     */
+    static void SETTING_EnableEditorMode();
+
+    /**
      * Initializes the GPU API for rendering.
      * @param window Pointer to a windows which will be used to create a Surface.
      * @return True on success.
@@ -72,6 +77,13 @@ public:
      * @note The file path and shader name are usually synonymous, please name the shader after the file path.
      */
     static WEngine::Nullable<WEngine::ShaderDefinition> GetShaderDef(const std::string& shaderName);
+
+    /**
+     * Retrieves the definition for a shader by quering a material that uses it.
+     * @param matQuery The material which uses the shader.
+     * @return The definition of the shader which can be null.
+     */
+    static WEngine::Nullable<WEngine::ShaderDefinition> GetShaderDef(WEngine::Material matQuery);
 
     /**
      * Retrieves a material handle by its name.

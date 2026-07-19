@@ -79,7 +79,9 @@ void PhysicsHandler::AttachBox(PhysicsBodyHandle body, const Vector3 &size, cons
 	const float32 factor = 0.5f;
 	Vector3 newSize = size * factor;
 
-	b3BoxHull hull = b3MakeBoxHull(newSize.x, newSize.y, newSize .z);
+	b3Vec3 off = Vector3::VecToB3D(offset);
+	//off.z = -off.z;
+	b3BoxHull hull = b3MakeOffsetBoxHull(newSize.x, newSize.y, newSize .z, off);
 
 	b3ShapeDef shapeDef = b3DefaultShapeDef();
 	shapeDef.density = 1.0f;

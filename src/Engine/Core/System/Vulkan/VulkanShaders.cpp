@@ -43,9 +43,7 @@ VkPipeline CreatePipeline(VulkanContext& ctx, const WEngine::ShaderDefinition& s
     rasterInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
     rasterInfo.lineWidth = 1.0f;
 
-    VkPipelineColorBlendAttachmentState blendState{};
-    blendState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-                                VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    auto blendState = CreatePipeline_ColorBlend(shaderDef.transparent);
 
     VkPipelineColorBlendStateCreateInfo blendInfo{};
     blendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -59,13 +57,19 @@ VkPipeline CreatePipeline(VulkanContext& ctx, const WEngine::ShaderDefinition& s
 
     VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
     depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+    if (shaderDef.transparent)
+        depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+    else
+        depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
     depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
     depthStencilInfo.stencilTestEnable = VK_FALSE;
     if (shaderDef.depthTest)
     {
         depthStencilInfo.depthTestEnable = VK_TRUE;
-        depthStencilInfo.depthWriteEnable = VK_TRUE;
+        if (shaderDef.transparent)
+            depthStencilInfo.depthWriteEnable = VK_FALSE;
+        else
+            depthStencilInfo.depthWriteEnable = VK_TRUE;
     }
 
     VkPipelineMultisampleStateCreateInfo multisampleInfo{};
@@ -260,6 +264,18 @@ void TryCompileAllMaterialShaders(VulkanContext &ctx)
     {
         std::filesystem::path p(file);
         file = p.stem().string();
+    }
+
+    if (ctx.editorMode)
+    {
+        auto editorFiles = OS::GetAllFileNamesInDir(dir + "/Editor");
+
+        for (auto& file : editorFiles)
+        {
+            std::filesystem::path p(file);
+            file = "Editor/" + p.stem().string();
+            files.push_back(file);
+        }
     }
 
     for (const auto& file : files)

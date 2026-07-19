@@ -42,11 +42,11 @@ entities:
         component-type: 7
       c2:
         component-type: 8
-        size: [0.68, 0.59, 0.21]
-        offset: [0, 0, 0]
+        size: [0.67, 0.62, 0.31]
+        offset: [0, 0.16, 0]
   e3:
     name: Cube
-    position: [0, 1, 0]
+    position: [0, 0, 0]
     rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
@@ -63,7 +63,7 @@ entities:
         offset: [0, 0, 0]
   e4:
     name: Cube2
-    position: [-1, 10, 0.7]
+    position: [0, 6.3, 0]
     rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
@@ -77,10 +77,10 @@ entities:
       c2:
         component-type: 8
         size: [2, 2, 2]
-        offset: [0, 0, 0]
+        offset: [0, -2, 0]
   e5:
-    name: Cube2
-    position: [2.1, 10, 0]
+    name: Cube
+    position: [-3, 2, 0]
     rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
@@ -96,8 +96,8 @@ entities:
         size: [2, 2, 2]
         offset: [0, 0, 0]
   e6:
-    name: Cube
-    position: [-1.9, 3.5, 0]
+    name: Cube2
+    position: [-3, 4, 0]
     rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
@@ -114,7 +114,7 @@ entities:
         offset: [0, 0, 0]
   e7:
     name: Cube2
-    position: [1.4, 6.9, 0]
+    position: [-3, 0, 0]
     rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
     components:
@@ -130,23 +130,6 @@ entities:
         size: [2, 2, 2]
         offset: [0, 0, 0]
   e8:
-    name: Cube2
-    position: [0, 13.8, 0]
-    rotation: [0, 0, 0, 1]
-    size: [1, 1, 1]
-    components:
-      c0:
-        component-type: 5
-        meshName: Cube
-        materialName: PBR/WoodMat
-        instance: false
-      c1:
-        component-type: 7
-      c2:
-        component-type: 8
-        size: [2, 2, 2]
-        offset: [0, 0, 0]
-  e9:
     name: Ground Physics
     position: [0, -11.6, 0]
     rotation: [0, 0, 0, 1]

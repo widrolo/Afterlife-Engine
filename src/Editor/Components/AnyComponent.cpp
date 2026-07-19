@@ -32,7 +32,7 @@ AnyComponent::AnyComponent(WEngine::Entity *e)
 
 void AnyComponent::SetupPhysicsData()
 {
-    physics.material = Iris::GetMaterial("Unlit/MissingMat").GetValue();
+    physics.material = Iris::GetMaterial("Editor/PhysicsDebug").GetValue();
 
     WEngine::MeshAssetMission mission;
     mission.name = "../EditorData/Meshes/Physics/Cube";
@@ -235,7 +235,7 @@ void AnyComponent::UpdateMeshComp()
     auto mesh = FindDataByName("meshName");
     auto mat = FindDataByName("materialName");
 
-    std::string missingMatName = "Unlit/MissingMat";
+    std::string missingMatName = "Editor/PhysicsDebug";
     std::string modelName, matName;
     bool hasMat = false;
 
@@ -321,12 +321,18 @@ void AnyComponent::UpdateMeshComp()
 void AnyComponent::TryDrawBoxCollision()
 {
     auto sizeN = FindDataByName("size");
+    auto offsetN = FindDataByName("offset");
 
     if (!sizeN.HasValue())
         return;
     WEngine::Vector3 size = std::get<WEngine::Vector3>(sizeN.GetValue());
 
+    WEngine::Vector3 offset = WEngine::Vector3::Zero;
+    if (offsetN.HasValue())
+        offset = std::get<WEngine::Vector3>(offsetN.GetValue());
+
     auto transform = entity->transform;
+    transform.position = transform.position + offset;
     transform.size = size;
 
     WEngine::RenderMission mission{};

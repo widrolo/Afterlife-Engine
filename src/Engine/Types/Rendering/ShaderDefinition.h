@@ -18,6 +18,7 @@ namespace WEngine
         std::string fragmentCodeName;
         uint8 abundance = 0;
         bool depthTest = true;
+        bool transparent = false;
 
         struct FragmentInfo
         {

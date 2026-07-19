@@ -14,5 +14,6 @@ VkPipelineVertexInputStateCreateInfo CreatePipeline_VertexDefinition();
 VkPipelineVertexInputStateCreateInfo CreatePipeline_PostProcessVertexDefinition();
 VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Vertex(const VulkanContext& ctx, const std::string &shaderName);
 VkPipelineShaderStageCreateInfo CreatePipeline_ShaderStange_Fragment(const VulkanContext& ctx, const std::string &shaderName);
+VkPipelineColorBlendAttachmentState CreatePipeline_ColorBlend(bool enableBlending);
 
 #endif

@@ -39,6 +39,7 @@ struct VulkanContext
     bool firstFrame = true;
     bool isCommandRecording = false;
     bool rtSupported = true;
+    bool editorMode = false;
 
     Vulkan_Lighting lighting{};
 };

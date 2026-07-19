@@ -13,6 +13,9 @@ shader:
     # Whether the shader should perform depth opertations, true by default, can be left out.
     depthTest: true
 
+    # Whether the shader is transparent, false by default, can be left out.
+    transparent : false
+
     # This dictates how many materials can be derived from this shader. For example, one fancy wall shader
     # could only ever create about one or two materials, while a general purpose PBR shader may have 
     # hundreds of materials. This dicates how many get created.

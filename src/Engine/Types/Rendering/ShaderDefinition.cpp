@@ -75,6 +75,8 @@ void ShaderDefinition::ParseMaterialShader(const YAML::Node &shader)
 
     if (shader["depthTest"])
         depthTest = shader["depthTest"].as<bool>();
+    if (shader["transparent"])
+        transparent = shader["transparent"].as<bool>();
 
     const YAML::Node fragInfoNode = shader["fragmentInfo"];
 

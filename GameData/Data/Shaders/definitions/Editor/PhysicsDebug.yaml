@@ -1,0 +1,14 @@
+shader:
+    isCompute: false
+    shaderName: Editor/PhysicsDebug
+    abundance: 1
+
+    transparent: true
+
+    vertexCode: basic
+    fragmentCode: physicsDebug
+
+    fragmentInfo:
+        expectTextureCount: 0
+
+        expectParams: ~

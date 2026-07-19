@@ -44,6 +44,11 @@
 static VulkanContext ctx;
 static VulkanStatistics stats;
 
+void Iris::SETTING_EnableEditorMode()
+{
+    ctx.editorMode = true;
+}
+
 bool Iris::SETTING_InitGPUApi(SDL_Window *window)
 {
     if (!SetupVkInstance(ctx))
@@ -178,6 +183,15 @@ WEngine::Nullable<WEngine::ShaderDefinition> Iris::GetShaderDef(const std::strin
     WEngine::Shader shHandle = ctx.loadedShadersHandles[shaderName];
     Vulkan_Shader shader = GetLoadedShader(ctx, shHandle);
     return WEngine::Nullable<WEngine::ShaderDefinition>(shader.shaderDefinition);
+}
+
+WEngine::Nullable<WEngine::ShaderDefinition> Iris::GetShaderDef(WEngine::Material matQuery)
+{
+    if (ctx.loadedMaterials.size() < matQuery)
+        return {};
+    Vulkan_Material mat = GetLoadedMaterial(ctx, matQuery);
+    Vulkan_Shader shader = GetLoadedShader(ctx, mat.materialShaderHandle);
+    return shader.shaderDefinition;
 }
 
 WEngine::Nullable<WEngine::Material> Iris::GetMaterial(const std::string &matName)

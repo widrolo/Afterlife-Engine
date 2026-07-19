@@ -184,7 +184,7 @@ namespace WEngine
 
 		void InsertModelIntoShaderGroup(RenderMission& mission, MaterialGroup& materialGroup);
 
-		void SortMissions();
+		void SortMissions(bool transparentPass);
 		void CleanSortedMissions();
 
 		void InitSDL();

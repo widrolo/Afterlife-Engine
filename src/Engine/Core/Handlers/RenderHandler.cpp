@@ -141,7 +141,8 @@ void RenderHandler::RenderFrame()
 
 	Iris::SETTING_SetLighting(m_lighting);
 	RenderSkybox();
-	SortMissions();
+	SortMissions(false);
+	SortMissions(true);
 
 	for (auto& materialGroup : m_sortedMissions)
 	{
@@ -444,10 +445,31 @@ void RenderHandler::InsertModelIntoShaderGroup(RenderMission &mission, MaterialG
 	}
 }
 
-void RenderHandler::SortMissions()
+/*
+ * As clarification because the rationale might not be obvious: we need to draw opaque objects first.
+ * That is because every transparent object also writes to the stencil buffer, so any opaque object that
+ * would have been drawn after does not get drawn.
+ */
+void RenderHandler::SortMissions(bool transparentPass)
 {
 	for (auto& mission : m_renderQueue)
 	{
+		if (transparentPass)
+		{
+			auto def = Iris::GetShaderDef(mission.material);
+			if (!def.HasValue())
+				continue;
+			if (!def.GetValue().transparent)
+				continue;
+		}
+		if (!transparentPass)
+		{
+			auto def = Iris::GetShaderDef(mission.material);
+			if (!def.HasValue())
+				continue;
+			if (def.GetValue().transparent)
+				continue;
+		}
 		if (mission.isStationary)
 		{
 			SortStationary(mission);
