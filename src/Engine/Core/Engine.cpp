@@ -71,7 +71,7 @@ void Engine::ParseCommandLine(sizeT argc, char* argv[])
 				return;
 			}
 		}
-		if (arg == "-testing")
+		if (arg == "-texless")
 		{
 			m_cla.testMode = true;
 		}

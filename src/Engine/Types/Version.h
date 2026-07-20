@@ -3,6 +3,8 @@
 #include <Engine/Types/CommonTypes.h>
 #include <string>
 
+
+
 namespace WEngine
 {
 	/**
@@ -29,6 +31,7 @@ namespace WEngine
 	 */
 	struct Version
 	{
+#include "Testing/Types/Testable.h"
 	public:
 		constexpr Version() : major(0), minor(0), patch(0), kind(VersionKind::Unknown) {}
 		/**
@@ -146,5 +149,6 @@ namespace WEngine
 		 * @return The string representation of this version object.
 		 */
 		std::string ToString() const;
+#include "Testing/Types/EndTestable.h"
 	};
 }

@@ -24,9 +24,19 @@ namespace WEngine
 			const std::source_location& location = std::source_location::current())
 		{
 			PrintInfo(location);
+#ifndef TESTING
+			std::cout << msg << '\n';
+#endif
+			SetConsoleMessage();
+		}
+
+#ifdef TESTING
+		static void LogTest(const std::string& msg)
+		{
 			std::cout << msg << '\n';
 			SetConsoleMessage();
 		}
+#endif
 
 		/**
 		 * Sets the console text color to a default message color.

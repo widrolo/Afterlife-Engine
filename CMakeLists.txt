@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 4.0)
 project(Afterlife_Engine)
 include(FetchContent)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Packaging" CACHE STRING "" FORCE)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Packaging;Testing;" CACHE STRING "" FORCE)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
@@ -346,6 +346,18 @@ add_executable(Afterlife_Engine
         src/Engine/Components/Physics/Shapes/BoxCollisionComponent.h
         src/Editor/MenubarItems/File/Menubar_RunTest.cpp
         src/Editor/MenubarItems/File/Menubar_RunTest.h
+        src/Testing/TestingDefines.h
+        src/Testing/Core/Tester.cpp
+        src/Testing/Core/Tester.h
+        src/Testing/Types/Test.h
+        src/Testing/Types/TestCollection.cpp
+        src/Testing/Types/TestCollection.h
+        src/Testing/Types/Testable.h
+        src/Testing/Tests/Types/Version_Test.cpp
+        src/Testing/Tests/Types/Version_Test.h
+        src/Testing/Types/Testable.h
+        src/Testing/Types/EndTestable.h
+        src/Testing/Types/TestStatistics.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

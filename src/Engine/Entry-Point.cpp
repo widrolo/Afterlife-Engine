@@ -10,11 +10,7 @@
 #include <iomanip>
 #include <iostream>
 
-#ifdef DEBUG // i should never accidentally ship only the editor...
-#define Force_Editor false
-#else
-#define Force_Editor false
-#endif
+#include "Testing/Core/Tester.h"
 
 #ifdef DEBUG
 int main(int argc, char* argv[])
@@ -22,6 +18,7 @@ int main(int argc, char* argv[])
     // Yes, engine is in heap, kill me!
     WAllocator::BootAllocator();
 
+#ifndef TESTING
     bool launchEditor = false;
     for (sizeT i = 1; i < argc; ++i)
     {
@@ -36,10 +33,15 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (launchEditor || Force_Editor)
+    if (launchEditor)
         auto* editor = WAllocator::Construct<WEditor::Editor>(argc, argv);
     else
         auto* engine = WAllocator::Construct<WEngine::Engine>(argc, argv);
+
+#else
+    auto* test = WAllocator::Construct<WTest::Tester>();
+#endif
+
 
     return 0;
 }
@@ -57,7 +59,7 @@ int main(int argc, char* argv[])
             launchEditor = true;
     }
 
-    if (launchEditor || Force_Editor)
+    if (launchEditor)
         auto* editor = WAllocator::Construct<WEditor::Editor>(argc, argv);
     else
         auto* engine = WAllocator::Construct<WEngine::Engine>(argc, argv);
@@ -103,7 +105,7 @@ extern int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, 
             launchEditor = true;
     }
 
-    if (launchEditor || Force_Editor)
+    if (launchEditor)
         auto* editor = WAllocator::Construct<WEditor::Editor>(argc, argv.data());
     else
         auto* engine = WAllocator::Construct<WEngine::Engine>(argc, argv.data());
@@ -122,7 +124,7 @@ int main(int argc, char* argv[])
             launchEditor = true;
     }
 
-    if (launchEditor || Force_Editor)
+    if (launchEditor)
         auto* editor = WAllocator::Construct<WEditor::Editor>(argc, argv);
     else
         auto* engine = WAllocator::Construct<WEngine::Engine>(argc, argv);
