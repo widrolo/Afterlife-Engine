@@ -70,7 +70,7 @@ entities:
       c0:
         component-type: 5
         meshName: Cube
-        materialName: PBR/WoodMat
+        materialName: Toon/Wood
         instance: false
       c1:
         component-type: 7

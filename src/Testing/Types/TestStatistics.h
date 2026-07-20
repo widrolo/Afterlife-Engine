@@ -1,3 +1,6 @@
+#ifdef TESTING
+
+
 #pragma once
 
 #include <Engine/Types/CommonTypes.h>
@@ -36,3 +39,4 @@ namespace WTest
     };
 }
 
+#endif

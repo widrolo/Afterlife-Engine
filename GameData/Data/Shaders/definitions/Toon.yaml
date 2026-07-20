@@ -1,12 +1,12 @@
 shader:
     isCompute: false
-    shaderName: BasicPBR
+    shaderName: Toon
     abundance: 3
 
     vertexCode: basic
-    fragmentCode: pbr
+    fragmentCode: lit
 
     fragmentInfo:
-        expectTextureCount: 2
+        expectTextureCount: 1
 
         expectParams: ~

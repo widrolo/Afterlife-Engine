@@ -1,3 +1,6 @@
+#ifdef TESTING
+
+
 #pragma once
 #include <string>
 
@@ -26,3 +29,5 @@ namespace WTest
 }
 
 #define failTest(point) do { m_failurePoint = (point); return false; } while(0)
+
+#endif

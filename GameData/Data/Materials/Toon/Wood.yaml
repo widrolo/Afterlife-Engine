@@ -1,0 +1,6 @@
+material:
+    materialName: Toon/Wood
+    shader: Toon
+
+    textures:
+        color: ProtoTexture.dds

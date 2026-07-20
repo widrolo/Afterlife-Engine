@@ -1,3 +1,6 @@
+#ifdef TESTING
+
+
 #include "Tester.h"
 
 #include "Engine/Util/Log.h"
@@ -48,3 +51,5 @@ void Tester::Run()
     for (auto& test : m_collections)
         test->RunAllTests();
 }
+
+#endif

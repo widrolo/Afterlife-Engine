@@ -1,3 +1,5 @@
+#ifdef TESTING
+
 #include "TestCollection.h"
 
 #include "TestStatistics.h"
@@ -36,3 +38,5 @@ void TestCollection::RunAllTests()
         }
     }
 }
+
+#endif

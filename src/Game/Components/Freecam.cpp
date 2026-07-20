@@ -3,7 +3,6 @@
 #include "Engine/Core/Handlers/Input.h"
 #include "Engine/Core/System/Haptic.h"
 
-const bool enabledByDefault = false;
 
 REGISTER_COMPONENT(Freecam)
 
@@ -15,13 +14,10 @@ Freecam::Freecam(WEngine::Entity *e)
 void Freecam::Awake(WEngine::ComponentArgs ca)
 {
     m_speed = 3.0f;
-    m_focused = enabledByDefault;
 }
 
 void Freecam::Start()
 {
-    //m_oldMousePos = input->GetMousePosition();
-    //WEngine::CoreSystems::GetInputHandler()->SetMouseRelativeMode(enabledByDefault);
 
 }
 
@@ -34,14 +30,6 @@ void Freecam::Tick(float32 dt)
         return;
     }
 
-    //if (input->GetActionInput(WKey::DEBUG5, WEngine::Press))
-    //{
-    //    m_focused = !m_focused;
-    //    WEngine::CoreSystems::GetInputHandler()->SetMouseRelativeMode(m_focused);
-    //    firstFrame = true; // hacky solution, but it works; so meh
-    //    return;
-    //}
-
     if (dt > 10.0f)
         return;
 
@@ -53,7 +41,10 @@ void Freecam::Tick(float32 dt)
     if (Input::GetAction("camSpeed", PressType::Hold))
         speed *= 2.0f;
 
-    entity->transform.position = entity->transform.position + entity->transform.Forward() * move.y * speed
+    WEngine::Vector3 moveForward = entity->transform.Forward();
+    moveForward.y = -moveForward.y;
+
+    entity->transform.position = entity->transform.position + moveForward * move.y * speed
         + entity->transform.Right() * move.x * speed;
 
 
@@ -61,9 +52,6 @@ void Freecam::Tick(float32 dt)
         entity->transform.position.y += speed;
     if (Input::GetAction("camLower", PressType::Hold))
         entity->transform.position.y -= speed;
-
-    //if (!m_focused)
-    //    return;
 
     m_yaw += look.x;
     m_pitch +=  look.y / 1.5f;

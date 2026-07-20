@@ -1,3 +1,6 @@
+#ifdef TESTING
+
+
 #pragma once
 #include <memory>
 
@@ -30,3 +33,4 @@ namespace WTest
     };
 }
 
+#endif
