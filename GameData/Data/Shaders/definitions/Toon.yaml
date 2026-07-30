@@ -4,7 +4,7 @@ shader:
     abundance: 3
 
     vertexCode: basic
-    fragmentCode: lit
+    fragmentCode: toon
 
     fragmentInfo:
         expectTextureCount: 1

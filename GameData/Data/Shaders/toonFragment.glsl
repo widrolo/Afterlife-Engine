@@ -19,6 +19,13 @@ layout(location = 0) out vec4 outColor;
 const float ambientLight = 0.1;
 const vec3 lightColor = vec3(1.0, 1.0, 1.0);
 
+float toonEase(float x) 
+{
+    if (x < 0.485) return 0.2;
+    if (x > 0.525) return 1.0;
+    return 20 * (x - 0.485);
+}
+
 void main()
 {
     vec2 realUV = inUV0;
@@ -26,8 +33,10 @@ void main()
     vec3 norm = normalize(inNormal);
     vec3 lighDir = normalize(world.sunDir);
     float diff = max(dot(norm, lighDir), 0.0);
+
+    diff = toonEase(diff);
+
     vec3 diffuse = diff * world.sunCol;
-    
 
     outColor = texture(tex, realUV) * vec4(world.ambIntensity + diffuse, 1.0);
 }
