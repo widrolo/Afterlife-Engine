@@ -57,6 +57,8 @@ RenderHandler::RenderHandler()
 	m_lighting.cameraPos = Vector3::Zero;
 
 	Iris::SETTING_SetLighting(m_lighting);
+
+	m_normalPassMat = Iris::ALLOC_CompileMaterial("NormalsMat").GetValue();
 }
 
 void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)
@@ -178,6 +180,7 @@ void RenderHandler::RenderFrame()
 		else
 		{
 			Iris::SETTING_FinishFramebufferRender();
+			NormalsPass();
 			RenderPostProcessingShaders();
 		}
 	}
@@ -189,6 +192,7 @@ void RenderHandler::RenderFrame()
 
 
 	Iris::DRAWCALL_DrawToDisplay(m_window);
+
 
 	m_renderQueue.clear();
 	CleanSortedMissions();
@@ -278,6 +282,11 @@ void RenderHandler::PreparePPFramebuffers()
 	if (fbN.HasValue())
 		m_ppFramebuffers[1] = fbN.GetValue();
 
+	fbN = Iris::ALLOC_CreateFramebuffer(EngineSettings::resolution, true);
+	if (fbN.HasValue())
+		m_normalsFb = fbN.GetValue();
+
+
 	auto shN = Iris::GetShader("PP_Screen");
 	if (shN.HasValue())
 		m_screenShader = shN.GetValue();
@@ -294,13 +303,36 @@ void RenderHandler::PrepareSkybox()
 	mission.name = "Skysphere";
 	CoreSystems::GetAssetRepo()->GetAsset(mission);
 
-	auto modelN = Iris::ALLOC_CreateModel(mission.model, false);
+	auto modelN = Iris::ALLOC_CreateModel(mission.model);
 	if (modelN.HasValue())
 		m_skyboxInfo.skyModel = modelN.GetValue();
 
 	auto matN = Iris::ALLOC_CompileMaterial("Skybox");
 	if (matN.HasValue())
 		m_skyboxInfo.skyMaterial = matN.GetValue();
+}
+
+void RenderHandler::NormalsPass()
+{
+	Iris::SETTING_SelectFramebufferForRender(m_normalsFb);
+	Iris::DRAWCALL_ClearFrame(Color::Black);
+	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
+	for (auto& materialGroup : m_sortedMissions)
+	{
+		for (auto& modelGroup : materialGroup.models)
+		{
+			RenderModelGroup(modelGroup, m_normalPassMat);
+		}
+	}
+
+	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
+
+	for (auto& stat : m_stationaryMissions)
+	{
+		for (auto& ref : stat.references)
+			Iris::DRAWCALL_DrawModelInstancedStationary(ref, stat.model, stat.material, vp, m_normalPassMat);
+	}
+	Iris::SETTING_FinishFramebufferRender();
 }
 
 void RenderHandler::RenderSkybox()

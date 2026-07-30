@@ -13,6 +13,8 @@ void CreateImage(VulkanContext& ctx, VulkanStatistics& stat, const WEngine::Text
                  VkImageView& outView, VmaAllocation& outAlloc);
 void CreateImageRenderTarget(VulkanContext& ctx, VulkanStatistics &stat, const WEngine::Vector2& size,
     VkImage& outImg, VkImageView& outView, VmaAllocation& outAlloc);
+void CreateImageRenderTargetDepth(VulkanContext& ctx, VulkanStatistics &stat, const WEngine::Vector2& size,
+    VkImage& outImg, VkImageView& outView, VmaAllocation& outAlloc);
 Vulkan_Texture CreateTexture(VulkanContext& ctx, VulkanStatistics& stat, const WEngine::TextureInfoDDS& texInfo);
 void BeginTextureUpload(VulkanContext& ctx);
 void QueueTexture(VulkanContext& ctx, const Vulkan_Texture& tex, const WEngine::TextureInfoDDS &texInfo);

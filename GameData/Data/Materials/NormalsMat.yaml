@@ -1,0 +1,3 @@
+material:
+    materialName: NormalsMat
+    shader: Normals

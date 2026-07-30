@@ -26,6 +26,13 @@ namespace WEngine
             wtl::vector<std::pair<std::string, ShaderSettingType>> expectedParams;
         } fragInfo;
 
+        struct PPShaderInfo
+        {
+            bool useColorAttachment;
+            bool useDepthAttachment;
+            bool useNormalAttachment;
+        } ppInfo;
+
         void Parse(const YAML::Node& root);
 
         void ParseMaterialShader(const YAML::Node& shader);

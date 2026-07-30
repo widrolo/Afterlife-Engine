@@ -137,13 +137,19 @@ struct Vulkan_RenderTarget
     wtl::vector<VkImage> targetImages;
     wtl::vector<VkImageView> targetImageViews;
     wtl::vector<VkSampler> targetSampler;
+    wtl::vector<VkImage> depthImages;
+    wtl::vector<VkImageView> depthImageViews;
+    wtl::vector<VkSampler> depthSampler;
     wtl::vector<VmaAllocation> targetImageAlloc;
+    wtl::vector<VmaAllocation> depthImageAlloc;
     wtl::vector<VkSemaphore> imageAvailableSems;
     wtl::vector<VkSemaphore> renderFinishedSems;
     wtl::vector<VkFence> endOfFrameFences;
     wtl::vector<VkCommandBuffer> cmdBuffs;
     wtl::vector<VkDescriptorSet> descSets;
     wtl::vector<VkImageLayout> currentLayouts;
+    wtl::vector<VkImageLayout> currentDepthLayouts;
+    bool hasDepth;
 };
 
 struct RawLighting

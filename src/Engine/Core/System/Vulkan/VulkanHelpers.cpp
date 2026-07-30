@@ -202,6 +202,34 @@ VkImageView& GetFbImageView(const VulkanContext &ctx, Vulkan_RenderTarget &rt)
         rt.targetImageViews[ctx.screen.currentFrame];
 }
 
+VkImage& GetFbDepthImage(const VulkanContext &ctx)
+{
+    bool isSwapchainImage = ctx.currentRenderTarget == &ctx.displayTarget;
+    return isSwapchainImage ? ctx.currentRenderTarget->depthImages[ctx.screen.swapchainCurrentImage] :
+        ctx.currentRenderTarget->depthImages[ctx.screen.currentFrame];
+}
+
+VkImage& GetFbDepthImage(const VulkanContext &ctx, Vulkan_RenderTarget &rt)
+{
+    bool isSwapchainImage = &rt == &ctx.displayTarget;
+    return isSwapchainImage ? rt.depthImages[ctx.screen.swapchainCurrentImage] :
+        rt.depthImages[ctx.screen.currentFrame];
+}
+
+VkImageView& GetFbDepthImageView(const VulkanContext &ctx)
+{
+    bool isSwapchainImage = ctx.currentRenderTarget == &ctx.displayTarget;
+    return isSwapchainImage ? ctx.currentRenderTarget->depthImageViews[ctx.screen.swapchainCurrentImage] :
+        ctx.currentRenderTarget->depthImageViews[ctx.screen.currentFrame];
+}
+
+VkImageView& GetFbDepthImageView(const VulkanContext &ctx, Vulkan_RenderTarget &rt)
+{
+    bool isSwapchainImage = &rt == &ctx.displayTarget;
+    return isSwapchainImage ? rt.depthImageViews[ctx.screen.swapchainCurrentImage] :
+        rt.depthImageViews[ctx.screen.currentFrame];
+}
+
 VkSemaphore& GetFbImageAvailSem(const VulkanContext &ctx)
 {
     return ctx.currentRenderTarget->imageAvailableSems[ctx.screen.currentFrame];
@@ -238,6 +266,30 @@ VkImageLayout& GetFbLayout(const VulkanContext &ctx, Vulkan_RenderTarget &rt)
     bool isSwapchainImage = &rt == &ctx.displayTarget;
     return isSwapchainImage ? rt.currentLayouts[ctx.screen.swapchainCurrentImage] :
         rt.currentLayouts[ctx.screen.currentFrame];
+}
+
+VkImageLayout& GetFbDepthLayout(const VulkanContext &ctx)
+{
+    bool isSwapchainImage = ctx.currentRenderTarget == &ctx.displayTarget;
+    return isSwapchainImage ? ctx.currentRenderTarget->currentDepthLayouts[ctx.screen.swapchainCurrentImage] :
+        ctx.currentRenderTarget->currentLayouts[ctx.screen.currentFrame];
+}
+
+VkImageLayout& GetFbDepthLayout(const VulkanContext &ctx, Vulkan_RenderTarget &rt)
+{
+    bool isSwapchainImage = &rt == &ctx.displayTarget;
+    return isSwapchainImage ? rt.currentDepthLayouts[ctx.screen.swapchainCurrentImage] :
+        rt.currentLayouts[ctx.screen.currentFrame];
+}
+
+bool GetFbDepthAvail(const VulkanContext &ctx)
+{
+    return ctx.currentRenderTarget->hasDepth;
+}
+
+bool GetFbDepthAvail(const VulkanContext &ctx, Vulkan_RenderTarget &rt)
+{
+    return rt.hasDepth;
 }
 
 Vulkan_StatBuf& GetStatBuf(VulkanContext &ctx, WEngine::StatBufKey key)

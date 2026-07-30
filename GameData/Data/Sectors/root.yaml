@@ -18,9 +18,9 @@
         bounds-type: init
         logic-def:
             logic-type: 1
-            sector: testworld
+            sector: testtoon
     showselector:
         bounds-type: init
         logic-def:
             logic-type: 3
-            sector: testworld
+            sector: testtoon

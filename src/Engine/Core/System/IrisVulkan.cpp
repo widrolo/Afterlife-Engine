@@ -39,7 +39,6 @@
 #include "Vulkan/VulkanBuffers.h"
 #include "Vulkan/VulkanCommands.h"
 #include "Vulkan/VulkanImages.h"
-#include "Vulkan/VulkanRaytracing.h"
 
 static VulkanContext ctx;
 static VulkanStatistics stats;
@@ -255,7 +254,7 @@ WEngine::Nullable<WEngine::Model> Iris::GetModel(const std::string &modelName)
     return {};
 }
 
-WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::MeshInfo &model, bool addToBVH)
+WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::MeshInfo &model)
 {
     Vulkan_Model vkModel{};
     vkModel.vertexCount = model.vertices.size();
@@ -281,9 +280,6 @@ WEngine::Nullable<WEngine::Model> Iris::ALLOC_CreateModel(const WEngine::MeshInf
     vkModel.instanceAllocation = instBuf.second;
 
     vkModel.instanceBufferSize = GPUSettingsVulkan::maxInstanceBufferSize;
-
-    if (addToBVH && ctx.rtSupported)
-        AddModelToBLAS(ctx, stats, vkModel);
 
     ctx.loadedModels.push_back(vkModel);
     WEngine::Model modelHandle = ctx.loadedModels.size();
@@ -322,7 +318,14 @@ void Iris::DRAWCALL_ClearFrame(WEngine::Color clearColor)
 
     // never trusting vulkan with things passed in as reference!
     VkImageMemoryBarrier depthBarrier = colBarrier;
-    depthBarrier.image = ctx.screen.depthImage;
+    if (GetFbDepthAvail(ctx))
+    {
+        depthBarrier.image = GetFbDepthImage(ctx);
+    }
+    else
+    {
+        depthBarrier.image = ctx.screen.depthImage;
+    }
     depthBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     depthBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
     depthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
@@ -341,10 +344,19 @@ void Iris::DRAWCALL_ClearFrame(WEngine::Color clearColor)
     VkRenderingAttachmentInfo depthAttachmentInfo{};
     depthAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
     depthAttachmentInfo.clearValue = clearValues[1];
-    depthAttachmentInfo.imageView = ctx.screen.depthImageView;
     depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     depthAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    depthAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    if (GetFbDepthAvail(ctx))
+    {
+        depthAttachmentInfo.imageView = GetFbDepthImageView(ctx);
+        depthAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    }
+    else
+    {
+        depthAttachmentInfo.imageView = ctx.screen.depthImageView;
+        depthAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    }
+
 
     VkRenderingInfo renderingInfo{};
     renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
@@ -484,6 +496,48 @@ void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, 
     stats.drawCallsThisFrame++;
 }
 
+void Iris::DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, WEngine::Model model,
+    WEngine::Material material, const WEngine::Mat4x4 &vp, WEngine::Material override)
+{
+    if (!ctx.isCommandRecording)
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Tried render model while no framebuffer was selected!");
+        return;
+    }
+
+    auto alloc = GetStatBuf(ctx, sectorKey).statBookkeep->FindNode(model, material);
+    if (alloc.first == 0 && alloc.second == 0)
+        return;
+
+    Vulkan_Material& vkMat = GetLoadedMaterial(ctx, override);
+    Vulkan_Shader& vkShader = GetLoadedShader(ctx, vkMat.materialShaderHandle);
+    Vulkan_Model& vkModel = GetLoadedModel(ctx, model);
+
+    if (ctx.currentBoundShader != vkMat.materialShaderHandle)
+    {
+        vkCmdBindPipeline(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipeline);
+        ctx.currentBoundShader = vkMat.materialShaderHandle;
+    }
+
+    vkCmdBindDescriptorSets(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout,
+        0, 1, &ctx.lighting.descriptorSet, 0, nullptr);
+
+    uint64 count = alloc.second / sizeof(WEngine::InstanceData);
+
+    std::array<VkDeviceSize, 2> offsets{0, alloc.first};
+    if (vkMat.hasTextures)
+        vkCmdBindDescriptorSets(GetFbCmdBuff(ctx), VK_PIPELINE_BIND_POINT_GRAPHICS, vkShader.pipelineLayout,
+            1, 1, &vkMat.materialDescriptorSet, 0, nullptr);
+    vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 0, 1, &vkModel.vertexBuffer, &offsets[0]);
+    vkCmdBindVertexBuffers(GetFbCmdBuff(ctx), 1, 1, &GetStatBuf(ctx, sectorKey).statBuffer, &offsets[1]);
+    vkCmdBindIndexBuffer(GetFbCmdBuff(ctx), vkModel.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+    PopulatePushConstants(ctx, vkShader, vp);
+
+    vkCmdDrawIndexed(GetFbCmdBuff(ctx), vkModel.indexCount, count, 0, 0, 0);
+    stats.drawCallsThisFrame++;
+}
+
 void Iris::DRAWCALL_DrawPostProcess(WEngine::Shader ppShader, WEngine::Framebuffer sampleFrameBuffer)
 {
     if (!ctx.isCommandRecording)
@@ -556,9 +610,10 @@ void Iris::DRAWCALL_DrawToDisplay(SDL_Window *window)
     ctx.firstFrame = false;
 }
 
-WEngine::Nullable<WEngine::Framebuffer> Iris::ALLOC_CreateFramebuffer(const WEngine::Vector2 &resolution)
+WEngine::Nullable<WEngine::Framebuffer> Iris::ALLOC_CreateFramebuffer(const WEngine::Vector2 &resolution,
+        bool enableDepthStore)
 {
-    Vulkan_RenderTarget target = CreateRenderTarget(ctx, stats, resolution);
+    Vulkan_RenderTarget target = CreateRenderTarget(ctx, stats, resolution, enableDepthStore);
 
     ctx.renderTargets.push_back(target);
     WEngine::Framebuffer handle = ctx.renderTargets.size();
@@ -683,7 +738,7 @@ void Iris::SETTING_FinishFramebufferRender()
 
 void Iris::SETTING_PrepareFramebufferForSampling(WEngine::Framebuffer framebuffer)
 {
-    Vulkan_RenderTarget& vkFb = GetLoadedRenderTarget(ctx, framebuffer);;
+    Vulkan_RenderTarget& vkFb = GetLoadedRenderTarget(ctx, framebuffer);
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -707,6 +762,26 @@ void Iris::SETTING_PrepareFramebufferForSampling(WEngine::Framebuffer framebuffe
     );
 
     GetFbLayout(ctx, vkFb) = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+    if (GetFbDepthAvail(ctx))
+    {
+        barrier.oldLayout = GetFbDepthLayout(ctx, vkFb);
+        barrier.image = GetFbDepthImage(ctx, vkFb);
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        barrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+        vkCmdPipelineBarrier(
+            GetFbCmdBuff(ctx),
+            VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            0,
+            0, nullptr,
+            0, nullptr,
+            1, &barrier
+        );
+
+        GetFbDepthLayout(ctx, vkFb) = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    }
 }
 
 uint64 Iris::GetVramUsage()
@@ -782,11 +857,6 @@ void Iris::AddStationaryObjects(WEngine::StatBufKey key, WEngine::Model model, W
         memcpy(data + trueOffset + trueOldSize, instanceMats.data(), size);
     }
     vmaUnmapMemory(ctx.vcore.vmaAllocator, GetStatBuf(ctx, key).statAllocation);
-}
-
-void Iris::SETTING_AddModelInstanceToBVH(WEngine::Model model, const WEngine::InstanceData& instance)
-{
-
 }
 
 void Iris::AssetIrisCommunication(WEngine::AssetIrisCommunication &mission)

@@ -64,10 +64,10 @@ bool SetupDisplayRenderTarget(VulkanContext &ctx, VulkanStatistics& stat)
     return true;
 }
 
-Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &stat, const WEngine::Vector2& resolution)
+Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &stat, const WEngine::Vector2& resolution,
+    bool enableDepthStore)
 {
     Vulkan_RenderTarget target;
-    //VkFormat format = FindBestSwapchainFormat(ctx);
 
     target.resolution = resolution;
 
@@ -76,12 +76,23 @@ Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &sta
     target.targetImageViews.resize(ctx.screen.swapchainImageCount);
     target.targetSampler.resize(ctx.screen.swapchainImageCount);
     target.targetImageAlloc.resize(ctx.screen.swapchainImageCount);
+    target.depthImages.resize(ctx.screen.swapchainImageCount);
+    target.depthImageViews.resize(ctx.screen.swapchainImageCount);
+    target.depthSampler.resize(ctx.screen.swapchainImageCount);
+    target.depthImageAlloc.resize(ctx.screen.swapchainImageCount);
     target.descSets.resize(ctx.screen.swapchainImageCount);
     target.currentLayouts.resize(ctx.screen.swapchainImageCount);
+    target.currentDepthLayouts.resize(ctx.screen.swapchainImageCount);
 
     for (sizeT i = 0; i < ctx.screen.swapchainImageCount; i++)
     {
         CreateImageRenderTarget(ctx, stat, resolution, target.targetImages[i], target.targetImageViews[i], target.targetImageAlloc[i]);
+
+        if (enableDepthStore)
+        {
+            CreateImageRenderTargetDepth(ctx, stat, resolution, target.depthImages[i], target.depthImageViews[i],
+                target.depthImageAlloc[i]);
+        }
 
         target.cmdBuffs[i] = CreateCommandBuffer(ctx);
 
@@ -122,6 +133,22 @@ Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &sta
             return {};
         }
 
+        samplerInfo.magFilter = VK_FILTER_NEAREST;
+        samplerInfo.minFilter = VK_FILTER_NEAREST;
+        samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+        samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+
+        res = vkCreateSampler(ctx.vcore.gpuDevice, &samplerInfo, ctx.vcore.allocator, &target.depthSampler[i]);
+
+        if (!ParseVkResult(res))
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog("Unable to create sampler for render depth target!");
+            return {};
+        }
+
         VkDescriptorImageInfo imageInfo{};
         imageInfo.imageView   = target.targetImageViews[i];
         imageInfo.sampler     = target.targetSampler[i];
@@ -139,9 +166,12 @@ Vulkan_RenderTarget CreateRenderTarget(VulkanContext &ctx, VulkanStatistics &sta
         vkUpdateDescriptorSets(ctx.vcore.gpuDevice, 1, &write, 0, nullptr);
 
         target.currentLayouts[i] = VK_IMAGE_LAYOUT_UNDEFINED;
+        target.currentDepthLayouts[i] = VK_IMAGE_LAYOUT_UNDEFINED;
     }
 
     PopulateSemsAndFences(ctx, target);
+
+    target.hasDepth = enableDepthStore;
 
     return target;
 }

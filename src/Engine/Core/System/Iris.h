@@ -131,7 +131,7 @@ public:
      * @param addToBVH Whether the model should be included in the BVH. This is synonymous with shadow casting.
      * @return A handle to the model which can be null.
      */
-    static WEngine::Nullable<WEngine::Model> ALLOC_CreateModel(const WEngine::MeshInfo& model, bool addToBVH = true);
+    static WEngine::Nullable<WEngine::Model> ALLOC_CreateModel(const WEngine::MeshInfo& model);
 
     // ----------------------- Drawing -----------------------
 
@@ -173,6 +173,10 @@ public:
     static void DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, WEngine::Model model,
         WEngine::Material material, const WEngine::Mat4x4& vp);
 
+    // material override
+    static void DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, WEngine::Model model,
+        WEngine::Material material, const WEngine::Mat4x4& vp, WEngine::Material override);
+
     /**
      * Invokes a draw call and copies over a framebuffer to the selected framebuffer using a shader that may or may not perform post processing on it.
      * @param ppShader A handle to the post processing shader to be used.
@@ -192,9 +196,11 @@ public:
     /**
      * Creates a framebuffer.
      * @param resolution The resolution of the framebuffer,
+     * @param enableDepthStore Enables the framebuffer to store the depth buffer.
      * @return A handle to the framebuffer which can be null.
      */
-    static WEngine::Nullable<WEngine::Framebuffer> ALLOC_CreateFramebuffer(const WEngine::Vector2& resolution);
+    static WEngine::Nullable<WEngine::Framebuffer> ALLOC_CreateFramebuffer(const WEngine::Vector2& resolution,
+        bool enableDepthStore = false);
 
     /**
      * Selects a framebuffer for rendering.
@@ -259,16 +265,6 @@ public:
      */
     static void AddStationaryObjects(WEngine::StatBufKey key, WEngine::Model model, WEngine::Material material,
         const wtl::vector<WEngine::InstanceData>& instanceMats);
-
-    // --------------------- Ray Tracing ---------------------
-
-    /**
-     * Adds a model to the BVH for ray tracing.
-     * @param model A handle to the model to be added to the BVH.
-     * @param instance Instance data.
-     * @note The model must have been created as a BVH model.
-     */
-    static void SETTING_AddModelInstanceToBVH(WEngine::Model model, const WEngine::InstanceData& instance);
 
     // ------------------------- ImGui -----------------------
 

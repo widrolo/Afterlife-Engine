@@ -169,6 +169,7 @@ namespace WEngine
 
 		void PrepareSkybox();
 	private:
+		void NormalsPass();
 		void PreparePPFramebuffers();
 		void RenderSkybox();
 		void LoadPPShaderSingle(const std::string& name);
@@ -190,6 +191,7 @@ namespace WEngine
 		void InitSDL();
 		void InitImGui();
 
+
 	private:
 		Vector2 m_windowResolution;
 		SDL_DisplayMode* m_displayMode = nullptr;
@@ -208,12 +210,15 @@ namespace WEngine
 
 		bool m_isEditor = false;
 		Framebuffer m_viewportFb{};
+		Framebuffer m_normalsFb{};
 		std::array<Framebuffer, 2> m_ppFramebuffers{};
 		uint8 m_currentPPFramebuffer = 0;
 		Vector2 m_viewportResolution{};
 
 		SkyboxInfo m_skyboxInfo;
 		LightingInfo m_lighting;
+
+		Material m_normalPassMat;
 
 		Shader m_screenShader;
 		// Make it work first, make a pretty later ahh code

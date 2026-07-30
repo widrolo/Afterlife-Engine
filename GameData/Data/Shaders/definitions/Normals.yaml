@@ -1,12 +1,12 @@
 shader:
     isCompute: false
-
-    shaderName: NormalPrint
+    shaderName: Normals
     abundance: 0
 
     vertexCode: basic
-    fragmentCode: normalPrint
+    fragmentCode: normals
 
     fragmentInfo:
         expectTextureCount: 0
+
         expectParams: ~

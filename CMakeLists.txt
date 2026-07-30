@@ -315,8 +315,6 @@ add_executable(Afterlife_Engine
         src/Engine/EngineWidgets/TimeWatchWidget.h
         src/Engine/Core/System/Vulkan/VulkanPipeline.cpp
         src/Engine/Core/System/Vulkan/VulkanPipeline.h
-        src/Engine/Core/System/Vulkan/VulkanRaytracing.cpp
-        src/Engine/Core/System/Vulkan/VulkanRaytracing.h
         src/Engine/Types/Rendering/GPU/StatBufKey.h
         src/Engine/Core/System/Haptic.h
         src/Engine/Types/Input/InputPatch.h

@@ -73,6 +73,9 @@ shader:
     # A post processing shader only ever needs a fragment pass.
     fragmentCode: post
 
+    attachments:
+        
+
 
 # The following is a compute shader
 #shader:
