@@ -365,6 +365,21 @@ add_executable(Afterlife_Engine
         src/Engine/Core/System/Iris/Vulkan/IrisCommands.cpp
         src/Engine/Core/System/Iris/Vulkan/IrisImGui.cpp
         src/Engine/Core/System/Iris/Vulkan/IrisStatistics.cpp
+        src/Engine/Core/System/Iris/Vulkan/Helpers/InitHelp.cpp
+        src/Engine/Core/System/Iris/Vulkan/Helpers/InitHelp.h
+        src/Engine/Core/System/Iris/Vulkan/IrisInit.cpp
+        src/Engine/Core/System/Iris/Vulkan/IrisGlobals.h
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Types.h
+        src/Engine/Types/Rendering/Iris/Handles.h
+        src/Engine/Types/Rendering/Iris/Formats.h
+        src/Engine/Types/Rendering/Iris/FixedFunction.h
+        src/Engine/Types/Rendering/Iris/Descriptors.h
+        src/Engine/Types/Rendering/Iris/Usage.h
+        src/Engine/Types/Rendering/Iris/Resource.h
+        src/Engine/Types/Rendering/Iris/Pipeline.h
+        src/Engine/Types/Rendering/Iris/Framebuffer.h
+        src/Engine/Types/Rendering/Iris/RenderCompute.h
+        src/Engine/Types/Rendering/Iris/Init.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

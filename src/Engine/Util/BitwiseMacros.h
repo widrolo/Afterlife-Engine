@@ -41,8 +41,7 @@ inline bool CheckBitSet(const T field, const uint64 bit)
 	return (field & BIT(bit)) != 0;
 }
 
-#define DEFINE_ENUM_BITWISE(EnumType)	\
-inline EnumType operator|(EnumType a, EnumType b)	\
+#define DEFINE_ENUM_BITWISE(EnumType) inline EnumType operator|(EnumType a, EnumType b)	\
 {	\
 	return (EnumType)((uint64)(a) | (uint64)(b));	\
 }	\

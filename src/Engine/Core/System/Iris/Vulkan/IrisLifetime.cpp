@@ -4,16 +4,6 @@
 
 using namespace Iris;
 
-bool Init(const InitDesc& desc)
-{
-
-}
-
-void Shutdown()
-{
-
-}
-
 uint32 GetCurrentFrameIndex()
 {
 
