@@ -147,6 +147,7 @@ struct Vulkan_RenderTarget
     wtl::vector<VkFence> endOfFrameFences;
     wtl::vector<VkCommandBuffer> cmdBuffs;
     wtl::vector<VkDescriptorSet> descSets;
+    wtl::vector<VkDescriptorSet> depthDescSets;
     wtl::vector<VkImageLayout> currentLayouts;
     wtl::vector<VkImageLayout> currentDepthLayouts;
     bool hasDepth;
