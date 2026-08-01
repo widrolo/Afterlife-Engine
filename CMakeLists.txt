@@ -357,6 +357,14 @@ add_executable(Afterlife_Engine
         src/Testing/Types/EndTestable.h
         src/Testing/Types/TestStatistics.h
         src/Engine/Util/Handles.h
+        src/Engine/Core/System/Iris/Vulkan/IrisLifetime.cpp
+        src/Engine/Core/System/Iris/Vulkan/IrisResources.cpp
+        src/Engine/Core/System/Iris/Vulkan/IrisSwapchain.cpp
+        src/Engine/Core/System/Iris/Vulkan/IrisRecording.cpp
+        src/Engine/Core/System/Iris/Vulkan/IrisBinding.cpp
+        src/Engine/Core/System/Iris/Vulkan/IrisCommands.cpp
+        src/Engine/Core/System/Iris/Vulkan/IrisImGui.cpp
+        src/Engine/Core/System/Iris/Vulkan/IrisStatistics.cpp
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

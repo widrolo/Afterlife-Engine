@@ -178,7 +178,7 @@ namespace Iris
         SamplerAddressMode addressV = SamplerAddressMode::Repeat;
         float32 mipLodBias = 0.0f;
         float32 minLod = 0.0f;
-        float32 maxLod = 1e30f;
+        float32 maxLod = 0.0f;
         float32 maxAnisotropy = 1.0f;
         bool anisotropyEnable = false;
         CompareOp compareOp = CompareOp::Never;
@@ -287,7 +287,6 @@ namespace Iris
         ShaderStage stages;
         ResourceTableEntryType type;
         uint32 count = 1;
-        bool partiallyBound = false;
     };
 
     struct ResourceTableLayoutDesc
@@ -460,14 +459,6 @@ namespace Iris
     void SubmitCommandBuffer(CommandBufferHandle cmd);
     void SubmitCommandBuffers(const CommandBufferHandle* cmds, sizeT count);
 
-    // --- Buffer operations ---
-    void CopyBufferToBuffer(CommandBufferHandle cmd, BufferHandle dst, sizeT dstOffset, BufferHandle src,
-        sizeT srcOffset, sizeT size);
-
-    // generally, the only use for this is a staging buffer. Doesn't need much.
-    void CopyBufferToTexture(CommandBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst,
-        WEngine::Vector2 extent);
-
     // ----- Render Passes -----
     void BeginRenderPass(CommandBufferHandle cmd, const RenderPassBeginDesc& desc);
     void EndRenderPass(CommandBufferHandle cmd);
@@ -475,41 +466,52 @@ namespace Iris
     void BeginComputePass(CommandBufferHandle cmd);
     void EndComputePass(CommandBufferHandle cmd);
 
+    void BeginCopyPass(CommandBufferHandle cmd);
+    void EndCopyPass(CommandBufferHandle cmd);
+
     // ----------------------------------- Resource Binding ------------------------------------
-    void BindGraphicsPipeline (CommandBufferHandle cmd, GraphicsPipelineHandle pipeline);
-    void BindComputePipeline (CommandBufferHandle cmd, ComputePipelineHandle  pipeline);
+    void BindGraphicsPipeline(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline);
+    void BindComputePipeline(CommandBufferHandle cmd, ComputePipelineHandle  pipeline);
     void BindResourceTable(CommandBufferHandle cmd, uint32 slot, ResourceTableHandle table);
-    void SetPushConstants(CommandBufferHandle cmd, uint32 slot, const byte* data, sizeT size);
+    void SetPushConstants(CommandBufferHandle cmd, const byte* data, sizeT size);
     void BindVertexBuffers(CommandBufferHandle cmd, uint32 firstBinding, const BufferHandle* buffers,
         const sizeT* offsets, sizeT count);
-    void BindIndexBuffer(CommandBufferHandle cmd, BufferHandle buffer, sizeT offset, IndexFormat format);
+    void BindIndexBuffer(CommandBufferHandle cmd, BufferHandle buffer, sizeT offset);
 
 
     // --------------------------------------- Commands ----------------------------------------
     // -------- Dynamic --------
     void SetViewport(CommandBufferHandle cmd, const Viewport& viewport);
-    void SetScissor (CommandBufferHandle cmd, const Scissor& scissor);
+    void SetScissor(CommandBufferHandle cmd, const Scissor& scissor);
 
     // ------- Draw call -------
     void Draw(CommandBufferHandle cmd, sizeT vertexCount, sizeT instanceCount, sizeT firstVertex, sizeT firstInstance);
-    void DrawIndexed(CommandBufferHandle cmd, uint32 indexCount, uint32 instanceCount, uint32 firstIndex, int32 vertexOffset,
-        uint32 firstInstance);
+    void DrawIndexed(CommandBufferHandle cmd, sizeT indexCount, sizeT instanceCount, sizeT firstIndex, sizeT vertexOffset,
+        sizeT firstInstance);
     void DrawIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset, sizeT drawCount, sizeT stride);
-    void DrawIndexedIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, uint64 offset, uint32 drawCount, uint32 stride);
+    void DrawIndexedIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset, sizeT drawCount, sizeT stride);
 
     // ------- Dispatch --------
-    void Dispatch(CommandBufferHandle cmd, uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ);
+    void Dispatch(CommandBufferHandle cmd, sizeT groupCountX, sizeT groupCountY, sizeT groupCountZ);
     void DispatchIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset);
 
+    // --------- Copy ----------
+    void CopyBufferToBuffer(CommandBufferHandle cmd, BufferHandle dst, sizeT dstOffset, BufferHandle src,
+            sizeT srcOffset, sizeT size);
+
+    // generally, the only use for this is a staging buffer. Doesn't need much.
+    void CopyBufferToTexture(CommandBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst,
+        WEngine::Vector2 extent);
+
     // ---------------------------------------- ImGui ------------------------------------------
-    void ConfigureImGui(SDL_Window* window);
+    void ConfigureImGui();
     void ImGuiNewFrame();
     void ImGuiEndFrame();
     void ImGuiRenderDrawData(CommandBufferHandle cmd);
     WEngine::Nullable<ImTextureID> TextureToImGui(TextureHandle texture);
 
     // ---------------------------------------- Stats ------------------------------------------
-    uint64 GetVRAMUsage();
-    uint32 GetDrawCallCountLastFrame();
+    sizeT GetVRAMUsage();
+    sizeT GetDrawCallCountLastFrame();
 }
 
