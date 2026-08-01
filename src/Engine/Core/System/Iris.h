@@ -2,301 +2,514 @@
 
 // This file does not contain LLM generated documentation
 
-#include <Engine/Types/Rendering/GPU/Shader.h>
-#include <Engine/Types/Nullable.h>
-#include <SDL3/SDL.h>
+#include <Engine/Util/Handles.h>
+#include <Engine/Util/BitwiseMacros.h>
 
-#include <Engine/Types/Rendering/Color.h>
-#include <Engine/Types/Rendering/GPU/Framebuffer.h>
-#include <Engine/imgui/imgui.h>
-#include <Engine/Types/Rendering/InstanceData.h>
-#include <Engine/Types/Rendering/LightingInfo.h>
-#include <Engine/Types/Rendering/LineInfo.h>
-#include <Engine/Types/Rendering/GPU/Line.h>
-#include <Engine/Types/Rendering/MeshInfo.h>
-#include <Engine/Types/Rendering/ShaderDefinition.h>
-#include <Engine/Types/Rendering/ShaderSettings.h>
-#include <Engine/Types/Rendering/TextureInfo.h>
-#include <Engine/Types/Rendering/GPU/Material.h>
-#include <Engine/Types/Rendering/GPU/Model.h>
-#include <Engine/Types/Rendering/GPU/StatBufKey.h>
-#include <Engine/Types/Rendering/Iris/InstThreadedList.h>
-#include <Engine/Types/Rendering/Iris/IrisAssetComms.h>
+#include "Engine/imgui/imgui.h"
+#include "Engine/Types/Nullable.h"
 
-/**
- * This class is the primary interface to talk to the GPU.
- * The different APIs implement it themselves, and are selected in the engine defines.
- * @note All types used are strictly API independent.
- * @see EngineDefines.h
- */
-class Iris
+namespace Iris
 {
-public:
-    /**
-     * If called, the behavior of the editor changes to accommodate the editors needs.
-     */
-    static void SETTING_EnableEditorMode();
+    DEFINE_OPAQUE_HANDLE(BufferHandle);
+    DEFINE_OPAQUE_HANDLE(TextureHandle);
+    DEFINE_OPAQUE_HANDLE(SamplerHandle);
+    DEFINE_OPAQUE_HANDLE(ShaderHandle);
+    DEFINE_OPAQUE_HANDLE(ResourceTableLayoutHandle)
+    DEFINE_OPAQUE_HANDLE(ResourceTableHandle)
+    DEFINE_OPAQUE_HANDLE(GraphicsPipelineHandle);
+    DEFINE_OPAQUE_HANDLE(ComputePipelineHandle);
+    DEFINE_OPAQUE_HANDLE(FramebufferHandle);
+    DEFINE_OPAQUE_HANDLE(CommandBufferHandle);
 
-    /**
-     * Initializes the GPU API for rendering.
-     * @param window Pointer to a windows which will be used to create a Surface.
-     * @return True on success.
-     */
-    static bool SETTING_InitGPUApi(SDL_Window* window);
+    enum class ImgFormat : uint8
+    {
+        Unknown,
 
-    /**
-     * Sets up things that a given GPU API might need for the duration of the tick frame.
-     * @note For example: Vulkan Starts the texture upload buffer.
-     */
-    static void SETTING_BeginNewPreFrame();
+        // -------- Render Targets Only --------
+        RGBA8_UNorm,
+        BGRA8_UNorm,
+        RGBA8_SRGB,
+        BGRA8_SRGB,
 
-    /**
-     * Sets up things that a given GPU API might need for the duration of the draw frame.
-     */
-    static void SETTING_BeginNewFrame();
+        // ------------ Depth Only -------------
+        D24_UNorm_S8_UInt,
 
-    /**
-     * Sets the Viewport size/resolution of the actively selected framebuffer.
-     * @param size New size of the Viewport.
-     */
-    static void SETTING_SetViewportSize(WEngine::Vector2 size);
+        // ----------- Texture Only ------------
+        BC1,    // Albedo
+        BC4,    // Heightmaps and single channel stuff
+        BC5,    // Dual channel normal maps
 
-    /**
-     * Updates the lighting info on the GPU that is later used by shaders.
-     * @param light World lighting information.
-     */
-    static void SETTING_SetLighting(const WEngine::LightingInfo& light);
+        ImgFormat_Count
+    };
+
+    // Its obvious i dislike the idea that Khronos had about merging image formats and vertex formats
+    enum class VertFormat : uint8
+    {
+        Float1,
+        Float2,
+        Float3,
+        Float4,
+        VertFormat_Count
+    };
+
+    enum class BufferUsage : uint8
+    {
+        None            = 0,
+        Vertex          = BIT(0),
+        Index           = BIT(1),
+        Uniform         = BIT(2),
+        Storage         = BIT(3),
+        Indirect        = BIT(4),
+        TransferSrc     = BIT(5),
+        TransferDst     = BIT(6),
+    };
+    DEFINE_ENUM_BITWISE(BufferUsage)
+
+    enum class TextureUsage : uint8
+    {
+        None           = 0,
+        Sampled        = BIT(0),
+        Storage        = BIT(1),
+        ColorTarget    = BIT(2),
+        DepthTarget    = BIT(3),
+        TransferSrc    = BIT(4),
+        TransferDst    = BIT(5),
+    };
+    DEFINE_ENUM_BITWISE(TextureUsage)
+
+    // In theory, there are also 3D textures. However, im not keep on experimenting with it just yet.
+    // But I am keeping this an Enum instead of a using for the future.
+    enum class TextureType : uint8
+    {
+        Texture2D,
+    };
+
+    enum class SampleCount : uint8
+    {
+        Samples1        = 1,
+        Samples2        = 2,
+        Samples4        = 4,
+        Samples8        = 8,
+    };
+
+    // Yes, mesh shaders exist; no im never ever using them ever.
+    enum class ShaderStage : uint8
+    {
+        Vertex          = BIT(0),
+        Fragment        = BIT(1),
+        Compute         = BIT(2),
+        Geometry        = BIT(3),
+        TessControl     = BIT(4),
+        TessEval        = BIT(5),
+    };
+    DEFINE_ENUM_BITWISE(ShaderStage)
+
+    enum class TopologyType : uint8
+    {
+        Point_List,
+        Line_List,
+        Triangle_List,
+
+        Line_Strip,
+        Triangle_Strip,
+
+        // Really only useful for 2D, but Ui exists so we might as well.
+        Triangle_Fan,
+    };
+
+    using IndexFormat = uint32;
+
+    // AI copy-paste begin; no way im writing this myself.
+    enum class CompareOp : uint8
+    {
+        Never, Less, Equal, LessEqual, Greater, NotEqual, GreaterEqual, Always
+    };
+    enum class CullMode : uint8 { None, Front, Back };
+    enum class FrontFace : uint8 { CounterClockwise, Clockwise };
+    enum class FillMode : uint8 { Solid, Wireframe };
+    enum class BlendFactor : uint8
+    {
+        Zero, One, SrcColor, OneMinusSrcColor, DstColor, OneMinusDstColor, SrcAlpha, OneMinusSrcAlpha, DstAlpha,
+        OneMinusDstAlpha, ConstantColor, OneMinusConstantColor, ConstantAlpha, OneMinusConstantAlpha, SrcAlphaSaturate,
+        Src1Color, OneMinusSrc1Color, Src1Alpha, OneMinusSrc1Alpha
+    };
+    enum class BlendOp : uint8 { Add, Subtract, ReverseSubtract, Min, Max };
+    enum class StencilOp : uint8 { Keep, Zero, Replace, IncrementClamp, DecrementClamp, IncrementWrap, DecrementWrap, Invert };
+    enum class LogicOp : uint8
+    {
+        Clear, Set, Copy, CopyInverted, Noop, Inverted, And, Nand, Or, Nor, Xor, Equiv, AndReverse, AndInverted,
+        OrReverse, OrInverted
+    };
+    enum class FilterMode : uint8 { Nearest, Linear };
+    enum class MipFilterMode : uint8 { None, Nearest, Linear };
+    enum class SamplerAddressMode : uint8 { Repeat, MirrorRepeat, ClampToEdge, ClampToBorder };
+    enum class BorderColor : uint8 { TransparentBlack, OpaqueBlack, OpaqueWhite };
+    enum class LoadOp : uint8 { Load, Clear, DontCare };
+    enum class StoreOp : uint8 { Store, DontCare };
+    enum class QueueType : uint8 { Graphics, Compute, Copy };
+    // AI copy-paste end
+
+    struct BufferDesc
+    {
+        sizeT size;
+        BufferUsage usage;
+        std::string debugName;
+    };
+
+    struct TextureDesc
+    {
+        TextureType type = TextureType::Texture2D;
+        ImgFormat format = ImgFormat::Unknown;
+        uint32 width = 1;
+        uint32 height = 1;
+        uint32 mipLevels = 1;
+        uint32 arrayLayers = 1;
+        SampleCount  sampleCount = SampleCount::Samples1;
+        TextureUsage usage = TextureUsage::None;
+        std::string debugName;
+    };
+
+    struct SamplerDesc
+    {
+        FilterMode magFilter = FilterMode::Linear;
+        FilterMode minFilter = FilterMode::Linear;
+        MipFilterMode mipFilter = MipFilterMode::Linear;
+        SamplerAddressMode addressU = SamplerAddressMode::Repeat;
+        SamplerAddressMode addressV = SamplerAddressMode::Repeat;
+        float32 mipLodBias = 0.0f;
+        float32 minLod = 0.0f;
+        float32 maxLod = 1e30f;
+        float32 maxAnisotropy = 1.0f;
+        bool anisotropyEnable = false;
+        CompareOp compareOp = CompareOp::Never;
+        bool compareEnable = false;
+        BorderColor borderColor = BorderColor::TransparentBlack;
+        std::string debugName;
+    };
+
+    struct ShaderStageDesc
+    {
+        ShaderStage stage;
+        const byte* bytecode;
+        sizeT bytecodeSize;
+        std::string entryPoint = "main";
+        std::string debugName;
+    };
 
 
-    // ----------------------- Shaders -----------------------
+    struct VertexAttributeDesc
+    {
+        uint32 location;
+        uint32 binding;
+        VertFormat format;
+        sizeT offset;
+    };
 
-    /**
-     * Retrieves the definition for a shader by its name.
-     * @param shaderName Name of the shader.
-     * @return The definition of the shader which can be null.
-     * @note The file path and shader name are usually synonymous, please name the shader after the file path.
-     */
-    static WEngine::Nullable<WEngine::ShaderDefinition> GetShaderDef(const std::string& shaderName);
+    struct VertexBindingDesc
+    {
+        uint32 binding;
+        uint32 stride;
+        bool perInstance;
+    };
 
-    /**
-     * Retrieves the definition for a shader by quering a material that uses it.
-     * @param matQuery The material which uses the shader.
-     * @return The definition of the shader which can be null.
-     */
-    static WEngine::Nullable<WEngine::ShaderDefinition> GetShaderDef(WEngine::Material matQuery);
+    struct VertexLayoutDesc
+    {
+        wtl::vector<VertexAttributeDesc> attributes;
+        wtl::vector<VertexBindingDesc> bindings;
+    };
 
-    /**
-     * Retrieves a material handle by its name.
-     * @param matName Name of the material.
-     * @return A handle to the material which can be null.
-     * @note The file path and material name are usually synonymous, please name the material after the file path.
-     */
-    static WEngine::Nullable<WEngine::Material> GetMaterial(const std::string &matName);
+    struct RasterizerDesc
+    {
+        CullMode cullMode = CullMode::Back;
+        FrontFace frontFace = FrontFace::CounterClockwise;
+        FillMode fillMode = FillMode::Solid;
+        bool depthClampEnable = false;
+        bool depthBiasEnable = false;
+        float32 depthBiasConstant = 0.0f;
+        float32 depthBiasClamp = 0.0f;
+        float32 depthBiasSlope = 0.0f;
+        float32 lineWidth = 1.0f;
+    };
 
-    /**
-     * Retrieves a shader handle by its name.
-     * @param shaderName Name of the shader.
-     * @return A handle to the shader which can be null.
-     * @note The file path and shader name are usually synonymous, please name the shader after the file path.
-     */
-    static WEngine::Nullable<WEngine::Shader> GetShader(const std::string &shaderName);
+    struct StencilFaceDesc
+    {
+        StencilOp failOp = StencilOp::Keep;
+        StencilOp passOp = StencilOp::Keep;
+        StencilOp depthFailOp = StencilOp::Keep;
+        CompareOp compareOp = CompareOp::Always;
+        byte writeMask = max_byte;
+        byte compareMask = max_byte;
+    };
 
-    /**
-     * Retrieves a shader handle by quering a material that uses it.
-     * @param matQuery The material which uses the shader.
-     * @return A handle to the shader which can be null.
-     */
-    static WEngine::Nullable<WEngine::Shader> GetShader(WEngine::Material matQuery);
+    struct DepthStencilDesc
+    {
+        bool depthTestEnable = false;
+        bool depthWriteEnable = true;
+        CompareOp depthCompareOp = CompareOp::Less;
+        bool stencilTestEnable = false;
+        StencilFaceDesc front;
+        StencilFaceDesc back;
+    };
 
-    /**
-     * Finds a material in the materials path and compiles it.
-     * @param matName File path of the material.
-     * @return A handle to the material which can be null.
-     * @note The file path and material name are usually synonymous, please name the material after the file path.
-     */
-    static WEngine::Nullable<WEngine::Material> ALLOC_CompileMaterial(const std::string& matName);
+    struct BlendAttachmentDesc
+    {
+        bool blendEnable = false;
+        BlendFactor srcColorFactor = BlendFactor::One;
+        BlendFactor dstColorFactor = BlendFactor::Zero;
+        BlendOp colorOp = BlendOp::Add;
+        BlendFactor srcAlphaFactor = BlendFactor::One;
+        BlendFactor dstAlphaFactor = BlendFactor::Zero;
+        BlendOp alphaOp = BlendOp::Add;
+        byte colorWriteMask  = 0xF;  // 0 | 0 | 0 | 0 | R | G | B | A
+    };
 
-    // ----------------------- Models ------------------------
+    struct BlendDesc
+    {
+        bool logicOpEnable = false;
+        LogicOp logicOp = LogicOp::Noop;
+        wtl::vector<BlendAttachmentDesc> attachments;
+        float32 blendConstants[4] = {0,0,0,0};
+    };
 
-    /**
-     * Retrieves a model handle by its name.
-     * @param modelName Name of the model.
-     * @return A handle to the model which can be null.
-     */
-    static WEngine::Nullable<WEngine::Model> GetModel(const std::string& modelName);
+    enum class ResourceTableEntryType : uint8
+    {
+        UniformBuffer,
+        StorageBuffer,
+        Texture,
+        Sampler,
+        StorageTexture,
+    };
 
-    /**
-     * Takes the provided mesh data and loads it onto the GPU for rendering later.
-     * @param model Mesh data to be loaded onto the GPU.
-     * @param addToBVH Whether the model should be included in the BVH. This is synonymous with shadow casting.
-     * @return A handle to the model which can be null.
-     */
-    static WEngine::Nullable<WEngine::Model> ALLOC_CreateModel(const WEngine::MeshInfo& model);
 
-    // ----------------------- Drawing -----------------------
+    struct ResourceTableLayoutEntry
+    {
+        uint32 binding;
+        ShaderStage stages;
+        ResourceTableEntryType type;
+        uint32 count = 1;
+        bool partiallyBound = false;
+    };
 
-    /**
-     * Clears a framebuffer with a specific color and begins rendering on it.
-     * @param clearColor The color that the framebuffer is cleared at.
-     * @note This function begins rendering on the selected framebuffer.
-     */
-    static void DRAWCALL_ClearFrame(WEngine::Color clearColor);
+    struct ResourceTableLayoutDesc
+    {
+        wtl::vector<ResourceTableLayoutEntry> entries;
+        std::string debugName;
+    };
 
-    /**
-     * Invokes a drawcall and draws a single model to the screen.
-     * @param model A handle to the model to be drawn.
-     * @param material A handle to the material and hence the shader that is used for drawing.
-     * @param mvp The Model View Projection matrix.
-     */
-    static void DRAWCALL_DrawModel(WEngine::Model model, WEngine::Material material, const WEngine::Mat4x4& mvp);
+    struct ResourceTableWrite
+    {
+        uint32 binding;
+        uint32 arrayIndex = 0;
+        ResourceTableEntryType type;
+        BufferHandle buffer;
+        sizeT bufferOffset = 0;
+        sizeT bufferRange = max_sizeT;
+        TextureHandle texture;
+        SamplerHandle sampler;
+    };
 
-    /**
-     * Invokes a drawcall and draws a collection of models to the screen.
-     * @param model A handle to the model to be drawn.
-     * @param material A handle to the material and hence the shader that is used for drawing.
-     * @param vp The View Projection matrix.
-     * @param instanceMats A collection of model matrices that will be used for instanced drawing.
-     * @note Use this function when drawing lots of object that change transform every frame.
-     */
-    static void DRAWCALL_DrawModelInstanced(WEngine::Model model, WEngine::Material material,
-        const WEngine::Mat4x4& vp, const wtl::vector<WEngine::InstanceData>& instanceMats);
+    struct ResourceTableUpdateDesc
+    {
+        wtl::vector<ResourceTableWrite> writes;
+    };
 
-    /**
-     * Invokes a drawcall and draws a collection of models to the screen. The collection is a preloaded buffer on the GPU.
-     * @param sectorKey The sector that invoked the draw.
-     * @param model A handle to the model to be drawn.
-     * @param material A handle to the material and hence the shader that is used for drawing.
-     * @param vp The View Projection matrix.
-     * @note Use this function when drawing lots of object that never change transform.
-     * @see Iris::AddStationaryObjects
-     */
-    static void DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, WEngine::Model model,
-        WEngine::Material material, const WEngine::Mat4x4& vp);
+    struct GraphicsPipelineDesc
+    {
+        wtl::vector<ShaderStageDesc> stages;
+        VertexLayoutDesc vertexLayout;
+        TopologyType topology = TopologyType::Triangle_List;
+        bool primitiveRestartEnable = false;
+        uint32 patchControlPoints = 0;
+        RasterizerDesc rasterizer;
+        DepthStencilDesc depthStencil;
+        BlendDesc blend;
 
-    // material override
-    static void DRAWCALL_DrawModelInstancedStationary(WEngine::StatBufKey sectorKey, WEngine::Model model,
-        WEngine::Material material, const WEngine::Mat4x4& vp, WEngine::Material override);
+        std::array<ResourceTableLayoutHandle, 8> tableLayouts;
+        uint32 colorAttachmentCount = 1;
 
-    /**
-     * Invokes a draw call and copies over a framebuffer to the selected framebuffer using a shader that may or may not perform post processing on it.
-     * @param ppShader A handle to the post processing shader to be used.
-     * @param sampleFrameBuffer A handle to the framebuffer that will be sampled for use by the shader.
-     */
-    static void DRAWCALL_DrawPostProcess(WEngine::Shader ppShader, WEngine::Framebuffer sampleFrameBuffer);
+        uint32 pushConstantsSize = 0;
+        ShaderStage pushConstantsStages = ShaderStage::Vertex;
 
-    /**
-     * Draws the screen framebuffer to the monitor and finishes up the rendering pass.
-     * @param window The window which it will render to.
-     * @note This function should be the last time Iris would be getting called for the iteration of the game loop.
-     */
-    static void DRAWCALL_DrawToDisplay(SDL_Window* window);
+        ImgFormat colorAttachmentFormat = ImgFormat::BGRA8_UNorm;
+        ImgFormat depthStencilFormat = ImgFormat::D24_UNorm_S8_UInt;
+        SampleCount sampleCount = SampleCount::Samples1;
 
-    // --------------------- Framebuffers --------------------
+        std::string debugName;
+    };
 
-    /**
-     * Creates a framebuffer.
-     * @param resolution The resolution of the framebuffer,
-     * @param enableDepthStore Enables the framebuffer to store the depth buffer.
-     * @return A handle to the framebuffer which can be null.
-     */
-    static WEngine::Nullable<WEngine::Framebuffer> ALLOC_CreateFramebuffer(const WEngine::Vector2& resolution,
-        bool enableDepthStore = false);
+    struct ComputePipelineDesc
+    {
+        ShaderStageDesc stage;
+        std::array<ResourceTableLayoutHandle, 8> tableLayouts;
+        uint32 colorAttachmentCount = 1;
+        uint32 pushConstantsSize = 0;
+        ShaderStage pushConstantsStages = ShaderStage::Compute;
+        std::string debugName;
+    };
 
-    /**
-     * Selects a framebuffer for rendering.
-     * @param framebuffer The framebuffer which will be selected for rendering.
-     * @note This does not start rendering, it merely selects it in Iris.
-     * @see Iris::DRAWCALL_ClearFrame
-     */
-    static void SETTING_SelectFramebufferForRender(WEngine::Framebuffer framebuffer);
+    struct FramebufferDesc
+    {
+        wtl::vector<TextureHandle> colorAttachments;
+        TextureHandle depthStencilAttachment;
+        uint32 width;
+        uint32 height;
+        uint32 layers = 1;
+        std::string debugName;
+    };
 
-    /**
-     * Selects the screen framebuffer, aka the buffer which is later used to draw to the monitor.
-     * @note This does not start rendering, it merely selects it in Iris.
-     * @see Iris::DRAWCALL_ClearFrame
-     */
-    static void SETTING_SelectFramebufferScreenForRender();
+    struct AttachmentOps
+    {
+        LoadOp  loadOp = LoadOp::Clear;
+        StoreOp storeOp = StoreOp::Store;
+        LoadOp  stencilLoadOp = LoadOp::DontCare;
+        StoreOp stencilStoreOp = StoreOp::DontCare;
+        WEngine::Color clearColor = WEngine::Color::Black;
+        float32 clearDepth = 1.0f;
+        uint8 clearStencil = 0;
+    };
 
-    /**
-     * Finishes the rendering for a framebuffer.
-     * @note This ends rendering and deselects the framebuffer.
-     */
-    static void SETTING_FinishFramebufferRender();
+    struct RenderPassBeginDesc
+    {
+        FramebufferHandle framebuffer;
+        std::array<AttachmentOps, 8> colorAttachments;
+        uint8 colorAttachmentCount = 0;
+        AttachmentOps depthStencil;
+        bool hasDepthStencil = false;
+    };
 
-    /**
-     * Prepares a framebuffer to be sampled by a shader.
-     * @param framebuffer The framebuffer to be sampled.
-     */
-    static void SETTING_PrepareFramebufferForSampling(WEngine::Framebuffer framebuffer);
+    struct Viewport
+    {
+        WEngine::Vector2 pos;
+        WEngine::Vector2 extent;
+        float32 minDepth;
+        float32 maxDepth;
+    };
 
-    // ------------------------ Memory -----------------------
+    struct Scissor
+    {
+        WEngine::Vector2 pos;
+        WEngine::Vector2 extent;
+    };
 
-    /**
-     * Returns the internally counted VRAM usage.
-     * @return VRAM usage in bytes.
-     */
-    static uint64 GetVramUsage();
+    enum class WindowServer : uint8
+    {
+        SDL,
+        GLFW,
+        Win32,
+        Apple,
+        PlayStation,
+        Nintendo
+    };
 
-    /**
-     * Returns the internally counted drawcall count.
-     * @return Drawcall count.
-     * @note ImGui does not get counted.
-     */
-    static uint32 GetDrawCallCountLastFrame();
+    struct InitDesc
+    {
+        // This will be cast and treated to the proper window type based on the window server
+        void* window = nullptr;
+        WindowServer windowServer = WindowServer::SDL;
 
-    /**
-     * Whether the current frame is the first frame in the game loop.
-     * @return True is the frame is the first frame.
-     */
-    static bool IsFirstFrame();
+        bool enableDebug = false;
+        bool enableEditorMode = false;
+        uint32 framesInFlight = 2;
+        bool vsync = true;
+        WEngine::Vector2 preferredSwapchainSize = { 800, 600 };
+    };
 
-    /**
-     * Finds a free stationary buffer that can be used by a game sector to populate with model instances.
-     * @return A handle to a stationary buffer key which can be null.
-     */
-    static WEngine::Nullable<WEngine::StatBufKey> RequestStationaryBufferKey();
+    bool Init(const InitDesc& desc);
+    void Shutdown();
+    uint32 GetCurrentFrameIndex();
+    uint32 GetFramesInFlight();
+    bool IsFirstFrame();
 
-    /**
-     * Adds a collection of instances to a sector owned stationary buffer.
-     * @param key A handle to the key to the sector owned stationary buffer.
-     * @param model A handle to the model to be stored.
-     * @param material A handle to the material to be stored.
-     * @param instanceMats A collection of model instances to be stored for instancing.
-     */
-    static void AddStationaryObjects(WEngine::StatBufKey key, WEngine::Model model, WEngine::Material material,
-        const wtl::vector<WEngine::InstanceData>& instanceMats);
+    // ------------------------------------ Frame Lifecycle ------------------------------------
+    void BeginFrame();
+    void EndFrame();
 
-    // ------------------------- ImGui -----------------------
+    // --------------------------------------- Resources ---------------------------------------
+    // ------- Creation --------
+    BufferHandle CreateBuffer(const BufferDesc& desc);
+    BufferHandle CreateBuffer(const BufferDesc& desc, const void* initialData, sizeT initialDataSize);
 
-    /**
-     * Sets up and configures ImGui.
-     * @param window The window which it will render to.
-     */
-    static void SETTING_ConfigureImGui(SDL_Window* window);
+    TextureHandle CreateTexture(const TextureDesc& desc);
+    TextureHandle CreateTexture(const TextureDesc& desc, const byte* texData);
 
-    /**
-     * Calls reset on ImGui.
-     */
-    static void DRAWCALL_ResetImGui();
+    SamplerHandle CreateSampler(const SamplerDesc& desc);
 
-    /**
-     * Draws ImGui.
-     */
-    static void DRAWCALL_DrawImGui();
+    ShaderHandle CreateShader(const ShaderStageDesc& desc);
 
-    /**
-     * Casts a framebuffer into an ImGui Texture.
-     * @param framebuffer A handle to the framebuffer.
-     * @return An ImGui texture which can be null.
-     */
-    static WEngine::Nullable<ImTextureID> FramebufferToImGui(WEngine::Framebuffer framebuffer);
+    ResourceTableLayoutHandle CreateResourceTableLayout(const ResourceTableLayoutDesc& desc);
+    ResourceTableHandle CreateResourceTable(ResourceTableLayoutHandle layout);
 
-    // --------------------- Asset Repo ----------------------
+    GraphicsPipelineHandle CreateGraphicsPipeline(const GraphicsPipelineDesc& desc);
+    ComputePipelineHandle CreateComputePipeline(const ComputePipelineDesc& desc);
 
-    /**
-     * Asset repostory to Iris communication channel.
-     * @param mission Communication mission.
-     * @warning This function shall only be called by AssetRepo.
-     */
-    static void AssetIrisCommunication(WEngine::AssetIrisCommunication& mission);
-};
+    FramebufferHandle CreateFramebuffer(const FramebufferDesc& desc);
+
+    // -------- Updates --------
+    void UpdateBuffer(BufferHandle buffer, sizeT dstOffset, const byte* data, sizeT size);
+    void UpdateResourceTable(ResourceTableHandle table, const ResourceTableUpdateDesc& update);
+
+
+    // --------------------------------------- Swapchain ---------------------------------------
+    TextureHandle AcquireSwapchainTexture();
+    FramebufferHandle GetSwapchainFramebuffer();
+    void Present();
+
+    // ----------------------------------- Command Recording -----------------------------------
+    CommandBufferHandle BeginCommandBuffer(QueueType queue = QueueType::Graphics);
+    void EndCommandBuffer(CommandBufferHandle cmd);
+    void SubmitCommandBuffer(CommandBufferHandle cmd);
+    void SubmitCommandBuffers(const CommandBufferHandle* cmds, sizeT count);
+
+    // --- Buffer operations ---
+    void CopyBufferToBuffer(CommandBufferHandle cmd, BufferHandle dst, sizeT dstOffset, BufferHandle src,
+        sizeT srcOffset, sizeT size);
+
+    // generally, the only use for this is a staging buffer. Doesn't need much.
+    void CopyBufferToTexture(CommandBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst,
+        WEngine::Vector2 extent);
+
+    // ----- Render Passes -----
+    void BeginRenderPass(CommandBufferHandle cmd, const RenderPassBeginDesc& desc);
+    void EndRenderPass(CommandBufferHandle cmd);
+
+    void BeginComputePass(CommandBufferHandle cmd);
+    void EndComputePass(CommandBufferHandle cmd);
+
+    // ----------------------------------- Resource Binding ------------------------------------
+    void BindGraphicsPipeline (CommandBufferHandle cmd, GraphicsPipelineHandle pipeline);
+    void BindComputePipeline (CommandBufferHandle cmd, ComputePipelineHandle  pipeline);
+    void BindResourceTable(CommandBufferHandle cmd, uint32 slot, ResourceTableHandle table);
+    void SetPushConstants(CommandBufferHandle cmd, uint32 slot, const byte* data, sizeT size);
+    void BindVertexBuffers(CommandBufferHandle cmd, uint32 firstBinding, const BufferHandle* buffers,
+        const sizeT* offsets, sizeT count);
+    void BindIndexBuffer(CommandBufferHandle cmd, BufferHandle buffer, sizeT offset, IndexFormat format);
+
+
+    // --------------------------------------- Commands ----------------------------------------
+    // -------- Dynamic --------
+    void SetViewport(CommandBufferHandle cmd, const Viewport& viewport);
+    void SetScissor (CommandBufferHandle cmd, const Scissor& scissor);
+
+    // ------- Draw call -------
+    void Draw(CommandBufferHandle cmd, sizeT vertexCount, sizeT instanceCount, sizeT firstVertex, sizeT firstInstance);
+    void DrawIndexed(CommandBufferHandle cmd, uint32 indexCount, uint32 instanceCount, uint32 firstIndex, int32 vertexOffset,
+        uint32 firstInstance);
+    void DrawIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset, sizeT drawCount, sizeT stride);
+    void DrawIndexedIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, uint64 offset, uint32 drawCount, uint32 stride);
+
+    // ------- Dispatch --------
+    void Dispatch(CommandBufferHandle cmd, uint32 groupCountX, uint32 groupCountY, uint32 groupCountZ);
+    void DispatchIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset);
+
+    // ---------------------------------------- ImGui ------------------------------------------
+    void ConfigureImGui(SDL_Window* window);
+    void ImGuiNewFrame();
+    void ImGuiEndFrame();
+    void ImGuiRenderDrawData(CommandBufferHandle cmd);
+    WEngine::Nullable<ImTextureID> TextureToImGui(TextureHandle texture);
+
+    // ---------------------------------------- Stats ------------------------------------------
+    uint64 GetVRAMUsage();
+    uint32 GetDrawCallCountLastFrame();
+}
+

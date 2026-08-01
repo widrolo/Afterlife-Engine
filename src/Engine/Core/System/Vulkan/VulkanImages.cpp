@@ -5,6 +5,7 @@
 
 #include <cstring>
 #include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
 
 #include "VulkanHelpers.h"
 #include "Engine/Util/Log.h"

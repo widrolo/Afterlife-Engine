@@ -133,8 +133,8 @@ void Engine::InitHandlers()
 	StartHandlerSingle<JobHandler>(&CoreSystems::jobHandler, "Job Handler");
 	StartHandlerSingle<TimeHandler>(&CoreSystems::timeHandler, "Time Handler");
 
-	Iris::SETTING_BeginNewPreFrame();
-	Iris::ALLOC_CompileMaterial("Unlit/MissingMat");
+	//Iris::SETTING_BeginNewPreFrame();
+	//Iris::ALLOC_CompileMaterial("Unlit/MissingMat");
 	CoreSystems::renderHandler->PrepareSkybox();
 	Input::LoadInputMap();
 	m_rootSector = new Sector("root");
@@ -229,8 +229,8 @@ void Engine::Loop_Begin(std::chrono::steady_clock::time_point& last, StopWatch& 
 
 	m_physicsTickTimer += m_deltaTime;
 
-	if (!Iris::IsFirstFrame())
-		Iris::SETTING_BeginNewPreFrame();
+	//if (!Iris::IsFirstFrame())
+	//	Iris::SETTING_BeginNewPreFrame();
 
 	CoreSystems::timeHandler->Update(m_deltaTime * CoreSystems::GetTimeScale());
 

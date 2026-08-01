@@ -376,7 +376,8 @@ WEngine::Material CompileMaterial(VulkanContext &ctx, const std::string &matName
         return 0;
 
     // lets hope iris never calls this function through GetShader
-    auto shaderN = Iris::GetShader(matDef.shaderName);
+    //auto shaderN = Iris::GetShader(matDef.shaderName);
+    auto shaderN = WEngine::Nullable<WEngine::Shader>();
 
     if (!shaderN.HasValue())
         return 0;

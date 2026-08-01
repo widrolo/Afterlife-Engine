@@ -10,6 +10,7 @@
 #include "Engine/Util/Log.h"
 #include "Game/GameDefines.h"
 #include "SDL3/SDL_vulkan.h"
+#include <vk_mem_alloc.h>
 
 void* VulkanAllocate(void*, size_t size, size_t alignment, VkSystemAllocationScope scope)
 {

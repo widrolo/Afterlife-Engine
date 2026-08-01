@@ -11,6 +11,7 @@
 
 #include "VulkanDescriptors.h"
 #include "VulkanPipeline.h"
+#include <vk_mem_alloc.h>
 
 bool SetupStationaryInstanceBuffers(VulkanContext &ctx, VulkanStatistics &stat)
 {

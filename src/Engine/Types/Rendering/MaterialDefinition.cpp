@@ -37,55 +37,55 @@ void MaterialDefinition::Parse(const YAML::Node &root)
 
     shaderName = material["shader"].as<std::string>();
 
-    auto shaderN = Iris::GetShaderDef(shaderName);
-    if (!shaderN.HasValue())
-        return; // Iris already prints an error message
-
-    const auto& fragInfo = shaderN.GetValue().fragInfo;
-
+    //auto shaderN = Iris::GetShaderDef(shaderName);
+    //if (!shaderN.HasValue())
+    //    return; // Iris already prints an error message
+//
+    //const auto& fragInfo = shaderN.GetValue().fragInfo;
+//
     bool disableStrictCheck = false;
     if (material["disableStrictCheck"])
         disableStrictCheck = material["disableStrictCheck"].as<bool>();
 
     // reading this unironically sounds like im praying on the materials' downfall.
-    if (fragInfo.expectTextureCount != 0)
-    {
-        // since we have textures now, we have to ensure proper sanity checks.
-        if (!material["textures"])
-        {
-            WLog::SetConsoleError();
-            WLog::ConsoleLog(std::format("Material \"{}\" is missing the following field:\n"
-                "\t textures.", name));
-            return;
-        }
-
-        for (const auto& tex : material["textures"])
-            texturesPackaging.push_back(tex.second.as<std::string>());
-
-        if (texturesPackaging.size() != fragInfo.expectTextureCount)
-        {
-            WLog::SetConsoleError();
-            WLog::ConsoleLog(std::format("Material sanity test tripped in \"{}\":\n"
-                "\t unexpected texture count!", name));
-            return;
-        }
-
-    }
-
-    if (!fragInfo.expectedParams.empty())
-    {
-        if (!material["params"])
-        {
-            WLog::SetConsoleError();
-            WLog::ConsoleLog(std::format("Material \"{}\" is missing one of the following fields:\n"
-                "\t params", name));
-            return;
-        }
-
-        ProcessParams(fragInfo, material);
-    }
-
-    valid = true;
+    //if (fragInfo.expectTextureCount != 0)
+    //{
+    //    // since we have textures now, we have to ensure proper sanity checks.
+    //    if (!material["textures"])
+    //    {
+    //        WLog::SetConsoleError();
+    //        WLog::ConsoleLog(std::format("Material \"{}\" is missing the following field:\n"
+    //            "\t textures.", name));
+    //        return;
+    //    }
+//
+    //    for (const auto& tex : material["textures"])
+    //        texturesPackaging.push_back(tex.second.as<std::string>());
+//
+    //    if (texturesPackaging.size() != fragInfo.expectTextureCount)
+    //    {
+    //        WLog::SetConsoleError();
+    //        WLog::ConsoleLog(std::format("Material sanity test tripped in \"{}\":\n"
+    //            "\t unexpected texture count!", name));
+    //        return;
+    //    }
+//
+    //}
+//
+    //if (!fragInfo.expectedParams.empty())
+    //{
+    //    if (!material["params"])
+    //    {
+    //        WLog::SetConsoleError();
+    //        WLog::ConsoleLog(std::format("Material \"{}\" is missing one of the following fields:\n"
+    //            "\t params", name));
+    //        return;
+    //    }
+//
+    //    ProcessParams(fragInfo, material);
+    //}
+//
+    //valid = true;
 }
 
 bool MaterialDefinition::ProcessParams(const ShaderDefinition::FragmentInfo& fragInfo, const YAML::Node& matRoot)

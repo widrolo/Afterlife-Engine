@@ -249,14 +249,14 @@ void Sector::LoadArgsFromFile(const std::string& sectorName)
 		}
 	}
 
-	auto statN = Iris::RequestStationaryBufferKey();
-	if (statN.HasValue())
-		m_irisKey = statN.GetValue();
-	else
-	{
-		WLog::SetConsoleError();
-		WLog::ConsoleLog("Stat buffer request failed!");
-	}
+	//auto statN = Iris::RequestStationaryBufferKey();
+	//if (statN.HasValue())
+	//	m_irisKey = statN.GetValue();
+	//else
+	//{
+	//	WLog::SetConsoleError();
+	//	WLog::ConsoleLog("Stat buffer request failed!");
+	//}
 
 	for (const auto& arg : args)
 	{

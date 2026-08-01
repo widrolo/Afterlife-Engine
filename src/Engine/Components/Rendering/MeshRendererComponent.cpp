@@ -26,39 +26,37 @@ void MeshRendererComponent::Awake(ComponentArgs ca)
     auto modelN = ca.GetStringFromParams("meshName");
     auto matN = ca.GetStringFromParams("materialName");
 
-    if (modelN.HasValue())
-    {
-        auto modelNN = Iris::GetModel(modelN.GetValue());
-        if (!modelNN.HasValue())
-        {
-            MeshAssetMission mission;
-            mission.name = modelN.GetValue();
-            CoreSystems::GetAssetRepo()->GetAsset(mission);
-
-            modelNN = Iris::ALLOC_CreateModel(mission.model);
-            if (modelNN.HasValue())
-                m_model = modelNN.GetValue();
-        }
-        else
-        {
-            m_model = modelNN.GetValue();
-        }
-    }
-
-    if (matN.HasValue())
-    {
-        auto matNN = Iris::GetMaterial(matN.GetValue());
-        if (!matNN.HasValue())
-        {
-            matNN = Iris::ALLOC_CompileMaterial(matN.GetValue());
-            if (matNN.HasValue())
-                m_material = matNN.GetValue();
-        }
-        else
-        {
-            m_material = matNN.GetValue();
-        }
-    }
+    //if (modelN.HasValue())
+    //{
+    //    auto modelNN = Iris::GetModel(modelN.GetValue());
+    //    if (!modelNN.HasValue())
+    //    {
+    //        MeshAssetMission mission;
+    //        mission.name = modelN.GetValue();
+    //        CoreSystems::GetAssetRepo()->GetAsset(mission);
+    //        modelNN = Iris::ALLOC_CreateModel(mission.model);
+    //        if (modelNN.HasValue())
+    //            m_model = modelNN.GetValue();
+    //    }
+    //    else
+    //    {
+    //        m_model = modelNN.GetValue();
+    //    }
+    //}
+    //if (matN.HasValue())
+    //{
+    //    auto matNN = Iris::GetMaterial(matN.GetValue());
+    //    if (!matNN.HasValue())
+    //    {
+    //        matNN = Iris::ALLOC_CompileMaterial(matN.GetValue());
+    //        if (matNN.HasValue())
+    //            m_material = matNN.GetValue();
+    //    }
+    //    else
+    //    {
+    //        m_material = matNN.GetValue();
+    //    }
+    //}
 }
 
 void MeshRendererComponent::LateAwake()

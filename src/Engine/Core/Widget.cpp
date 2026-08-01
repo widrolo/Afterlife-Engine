@@ -14,7 +14,7 @@ Widget::Widget()
 
 void Widget::RenderWidget()
 {
-	if (!m_open)
+	if (!m_open || true)
 		return;
 	ImGui::Begin(m_widgetName.c_str(), &m_open, m_windowFlags);
 

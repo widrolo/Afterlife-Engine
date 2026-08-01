@@ -491,7 +491,7 @@ void AssetRepo::IrisCommsRetMat(IrisAssetCommunication &mission)
 			AssetIrisCommunication comms{};
 			comms.commType = AssetIrisCommunicationType::UnloadTexture;
 			comms.texReferenceIn = ref;
-			Iris::AssetIrisCommunication(comms);
+			//Iris::AssetIrisCommunication(comms);
 
 			m_textureRepo.erase(request);
 		}
@@ -511,7 +511,7 @@ void AssetRepo::IrisCommsGetMatPackage(IrisAssetCommunication &mission)
 			AssetIrisCommunication comms{};
 			comms.commType = AssetIrisCommunicationType::StoreTexture;
 			comms.textureData = info;
-			Iris::AssetIrisCommunication(comms);
+			//Iris::AssetIrisCommunication(comms);
 
 			// since it was allocated by STB image, its not within our control so we need to call delete instead of wFree.
 			//delete info.data;

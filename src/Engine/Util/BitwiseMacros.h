@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Engine/Types/CommonTypes.h>
+
 // bitmask maker
 #define BIT(bit) (1<<(bit))
 
@@ -37,4 +39,23 @@ inline bool CheckBitSet(const T field, const uint64 bit)
 {
 	// Real black magic territory
 	return (field & BIT(bit)) != 0;
+}
+
+#define DEFINE_ENUM_BITWISE(EnumType)	\
+inline EnumType operator|(EnumType a, EnumType b)	\
+{	\
+	return (EnumType)((uint64)(a) | (uint64)(b));	\
+}	\
+inline EnumType operator&(EnumType a, EnumType b)	\
+{	\
+	return (EnumType)((uint64)(a) & (uint64)(b));	\
+}	\
+inline EnumType operator~(EnumType a)	\
+{	\
+	return (EnumType)(~(uint64)(a));	\
+}	\
+inline EnumType& operator|=(EnumType& a, EnumType b)	\
+{	\
+	a = (EnumType)((uint64)(a) | (uint64)(b));	\
+	return a;	\
 }

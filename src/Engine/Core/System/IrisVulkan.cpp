@@ -1,5 +1,9 @@
 #include <Engine/EngineDefines.h>
-#if GPU_BACKEND == GPU_VULKAN
+//#if GPU_BACKEND == GPU_VULKAN
+
+#define VMA_IMPLEMENTATION
+#include <vk_mem_alloc.h>
+#if fsaoiubfbesoubfesoui
 
 #include "Iris.h"
 
@@ -21,8 +25,6 @@
 
 #include "Engine/Core/Handlers/AssetRepo.h"
 #include "Engine/Types/CoreSystems.h"
-#define VMA_IMPLEMENTATION
-#include <vk_mem_alloc.h>
 
 #include "Engine/Types/Rendering/InstanceData.h"
 #include "Engine/Types/Rendering/Iris/InstThreadedList.h"

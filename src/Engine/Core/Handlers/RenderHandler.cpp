@@ -28,12 +28,12 @@ using namespace WEngine;
 RenderHandler::RenderHandler()
 {
 	InitSDL();
-	if (!Iris::SETTING_InitGPUApi(m_window))
-	{
-		WLog::SetConsoleError();
-		WLog::ConsoleLog("FATAL ERROR! GPU failed to initialize, aborting!");
-		abort();
-	}
+	//if (!Iris::SETTING_InitGPUApi(m_window))
+	//{
+	//	WLog::SetConsoleError();
+	//	WLog::ConsoleLog("FATAL ERROR! GPU failed to initialize, aborting!");
+	//	abort();
+	//}
 	InitImGui();
 
 	if (!Engine::GetCla().testMode)
@@ -56,9 +56,9 @@ RenderHandler::RenderHandler()
 	m_lighting.ambient.ambientColor = {164, 199, 247, 255};
 	m_lighting.cameraPos = Vector3::Zero;
 
-	Iris::SETTING_SetLighting(m_lighting);
-
-	m_normalPassMat = Iris::ALLOC_CompileMaterial("NormalsMat").GetValue();
+	//Iris::SETTING_SetLighting(m_lighting);
+//
+	//m_normalPassMat = Iris::ALLOC_CompileMaterial("NormalsMat").GetValue();
 }
 
 void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)
@@ -66,16 +66,16 @@ void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)
 	m_isEditor = true;
 	m_viewportResolution = viewportResolution;
 
-	auto fbN = Iris::ALLOC_CreateFramebuffer(viewportResolution);
-
-	if (fbN.HasValue())
-		m_viewportFb = fbN.GetValue();
-	else
-	{
-		WLog::SetConsoleError();
-		WLog::ConsoleLog("Could not create a new Framebuffer for the viewport, falling back!");
-		m_isEditor = false;
-	}
+	//auto fbN = Iris::ALLOC_CreateFramebuffer(viewportResolution);
+//
+	//if (fbN.HasValue())
+	//	m_viewportFb = fbN.GetValue();
+	//else
+	//{
+	//	WLog::SetConsoleError();
+	//	WLog::ConsoleLog("Could not create a new Framebuffer for the viewport, falling back!");
+	//	m_isEditor = false;
+	//}
 
 	m_projection = glm::perspective(
 		glm::radians(90.0f),
@@ -92,46 +92,46 @@ Framebuffer RenderHandler::EditorGetViewportFramebuffer()
 
 void RenderHandler::BeginFrame()
 {
-	Iris::SETTING_BeginNewFrame();
-
-	m_currentPPFramebuffer = 0;
-
-	if (!Engine::GetCla().testMode)
-	{
-		if (m_isEditor)
-			Iris::SETTING_SelectFramebufferForRender(m_viewportFb);
-		else
-			Iris::SETTING_SelectFramebufferForRender(m_ppFramebuffers[m_currentPPFramebuffer]);
-	}
-	else
-	{
-		Iris::SETTING_SelectFramebufferScreenForRender();
-	}
-
-
-	Iris::DRAWCALL_ResetImGui();
-	if (m_camera == nullptr)
-		Iris::DRAWCALL_ClearFrame(Color::Black);
-	else
-		Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
-	if (m_isEditor)
-		Iris::SETTING_SetViewportSize(m_viewportResolution);
-	else
-		Iris::SETTING_SetViewportSize(EngineSettings::resolution);
-
-
-	if (m_camera == nullptr)
-		m_viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	else
-	{
-		Vector3 camPos = m_camera->GetPosition();
-		Quaternion camRot = m_camera->GetRotation();
-
-		glm::quat q(camRot.w, camRot.x, camRot.y, camRot.z);
-
-		m_viewMatrix = glm::mat4_cast(glm::conjugate(q));
-		m_viewMatrix = glm::translate(m_viewMatrix, glm::vec3(-camPos.x, camPos.y, -camPos.z));
-	}
+	//Iris::SETTING_BeginNewFrame();
+//
+	//m_currentPPFramebuffer = 0;
+//
+	//if (!Engine::GetCla().testMode)
+	//{
+	//	if (m_isEditor)
+	//		Iris::SETTING_SelectFramebufferForRender(m_viewportFb);
+	//	else
+	//		Iris::SETTING_SelectFramebufferForRender(m_ppFramebuffers[m_currentPPFramebuffer]);
+	//}
+	//else
+	//{
+	//	Iris::SETTING_SelectFramebufferScreenForRender();
+	//}
+//
+//
+	//Iris::DRAWCALL_ResetImGui();
+	//if (m_camera == nullptr)
+	//	Iris::DRAWCALL_ClearFrame(Color::Black);
+	//else
+	//	Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
+	//if (m_isEditor)
+	//	Iris::SETTING_SetViewportSize(m_viewportResolution);
+	//else
+	//	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
+//
+//
+	//if (m_camera == nullptr)
+	//	m_viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	//else
+	//{
+	//	Vector3 camPos = m_camera->GetPosition();
+	//	Quaternion camRot = m_camera->GetRotation();
+//
+	//	glm::quat q(camRot.w, camRot.x, camRot.y, camRot.z);
+//
+	//	m_viewMatrix = glm::mat4_cast(glm::conjugate(q));
+	//	m_viewMatrix = glm::translate(m_viewMatrix, glm::vec3(-camPos.x, camPos.y, -camPos.z));
+	//}
 }
 
 void RenderHandler::RenderFrame()
@@ -141,7 +141,7 @@ void RenderHandler::RenderFrame()
 	else
 		m_lighting.cameraPos = m_camera->GetPosition();
 
-	Iris::SETTING_SetLighting(m_lighting);
+	//Iris::SETTING_SetLighting(m_lighting);
 	RenderSkybox();
 	SortMissions(false);
 	SortMissions(true);
@@ -156,42 +156,42 @@ void RenderHandler::RenderFrame()
 
 	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
 
-	for (auto& stat : m_stationaryMissions)
-	{
-		for (auto& ref : stat.references)
-			Iris::DRAWCALL_DrawModelInstancedStationary(ref, stat.model, stat.material, vp);
-	}
+	//for (auto& stat : m_stationaryMissions)
+	//{
+	//	for (auto& ref : stat.references)
+	//		Iris::DRAWCALL_DrawModelInstancedStationary(ref, stat.model, stat.material, vp);
+	//}
 
 
-	if (!Engine::GetCla().testMode)
-	{
-		if (m_isEditor)
-		{
-			Iris::SETTING_FinishFramebufferRender();
-			Iris::SETTING_SelectFramebufferScreenForRender();
-			if (m_camera == nullptr)
-				Iris::DRAWCALL_ClearFrame(Color::Black);
-			else
-				Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
-
-			Iris::DRAWCALL_DrawImGui();
-			Iris::SETTING_FinishFramebufferRender();
-		}
-		else
-		{
-			Iris::SETTING_FinishFramebufferRender();
-			NormalsPass();
-			RenderPostProcessingShaders();
-		}
-	}
-	else
-	{
-		Iris::DRAWCALL_DrawImGui();
-		Iris::SETTING_FinishFramebufferRender();
-	}
-
-
-	Iris::DRAWCALL_DrawToDisplay(m_window);
+	//if (!Engine::GetCla().testMode)
+	//{
+	//	if (m_isEditor)
+	//	{
+	//		Iris::SETTING_FinishFramebufferRender();
+	//		Iris::SETTING_SelectFramebufferScreenForRender();
+	//		if (m_camera == nullptr)
+	//			Iris::DRAWCALL_ClearFrame(Color::Black);
+	//		else
+	//			Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
+//
+	//		Iris::DRAWCALL_DrawImGui();
+	//		Iris::SETTING_FinishFramebufferRender();
+	//	}
+	//	else
+	//	{
+	//		Iris::SETTING_FinishFramebufferRender();
+	//		NormalsPass();
+	//		RenderPostProcessingShaders();
+	//	}
+	//}
+	//else
+	//{
+	//	Iris::DRAWCALL_DrawImGui();
+	//	Iris::SETTING_FinishFramebufferRender();
+	//}
+//
+//
+	//Iris::DRAWCALL_DrawToDisplay(m_window);
 
 
 	m_renderQueue.clear();
@@ -231,8 +231,8 @@ void RenderHandler::RecordStationaryAdd(StatBufKey key, Model model, Material ma
 
 void RenderHandler::PushStationaryData()
 {
-	for (auto& object : m_stationaryAddQueue)
-		Iris::AddStationaryObjects(object.key, object.model, object.material, object.instData);
+	//for (auto& object : m_stationaryAddQueue)
+	//	Iris::AddStationaryObjects(object.key, object.model, object.material, object.instData);
 
 	m_stationaryAddQueue.clear();
 }
@@ -274,27 +274,27 @@ float32 RenderHandler::GetLightTime() const
 
 void RenderHandler::PreparePPFramebuffers()
 {
-	auto fbN = Iris::ALLOC_CreateFramebuffer(EngineSettings::resolution);
-	if (fbN.HasValue())
-		m_ppFramebuffers[0] = fbN.GetValue();
-
-	fbN = Iris::ALLOC_CreateFramebuffer(EngineSettings::resolution);
-	if (fbN.HasValue())
-		m_ppFramebuffers[1] = fbN.GetValue();
-
-	fbN = Iris::ALLOC_CreateFramebuffer(EngineSettings::resolution, true);
-	if (fbN.HasValue())
-		m_normalsFb = fbN.GetValue();
-
-
-	auto shN = Iris::GetShader("PP_Screen");
-	if (shN.HasValue())
-		m_screenShader = shN.GetValue();
-	else
-	{
-		WLog::SetConsoleError();
-		WLog::ConsoleLog("Could not pull screen shader!");
-	}
+	//auto fbN = Iris::ALLOC_CreateFramebuffer(EngineSettings::resolution);
+	//if (fbN.HasValue())
+	//	m_ppFramebuffers[0] = fbN.GetValue();
+//
+	//fbN = Iris::ALLOC_CreateFramebuffer(EngineSettings::resolution);
+	//if (fbN.HasValue())
+	//	m_ppFramebuffers[1] = fbN.GetValue();
+//
+	//fbN = Iris::ALLOC_CreateFramebuffer(EngineSettings::resolution, true);
+	//if (fbN.HasValue())
+	//	m_normalsFb = fbN.GetValue();
+//
+//
+	//auto shN = Iris::GetShader("PP_Screen");
+	//if (shN.HasValue())
+	//	m_screenShader = shN.GetValue();
+	//else
+	//{
+	//	WLog::SetConsoleError();
+	//	WLog::ConsoleLog("Could not pull screen shader!");
+	//}
 }
 
 void RenderHandler::PrepareSkybox()
@@ -303,36 +303,36 @@ void RenderHandler::PrepareSkybox()
 	mission.name = "Skysphere";
 	CoreSystems::GetAssetRepo()->GetAsset(mission);
 
-	auto modelN = Iris::ALLOC_CreateModel(mission.model);
-	if (modelN.HasValue())
-		m_skyboxInfo.skyModel = modelN.GetValue();
-
-	auto matN = Iris::ALLOC_CompileMaterial("Skybox");
-	if (matN.HasValue())
-		m_skyboxInfo.skyMaterial = matN.GetValue();
+	//auto modelN = Iris::ALLOC_CreateModel(mission.model);
+	//if (modelN.HasValue())
+	//	m_skyboxInfo.skyModel = modelN.GetValue();
+//
+	//auto matN = Iris::ALLOC_CompileMaterial("Skybox");
+	//if (matN.HasValue())
+	//	m_skyboxInfo.skyMaterial = matN.GetValue();
 }
 
 void RenderHandler::NormalsPass()
 {
-	Iris::SETTING_SelectFramebufferForRender(m_normalsFb);
-	Iris::DRAWCALL_ClearFrame(Color::Black);
-	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
-	for (auto& materialGroup : m_sortedMissions)
-	{
-		for (auto& modelGroup : materialGroup.models)
-		{
-			RenderModelGroup(modelGroup, m_normalPassMat);
-		}
-	}
-
-	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
-
-	for (auto& stat : m_stationaryMissions)
-	{
-		for (auto& ref : stat.references)
-			Iris::DRAWCALL_DrawModelInstancedStationary(ref, stat.model, stat.material, vp, m_normalPassMat);
-	}
-	Iris::SETTING_FinishFramebufferRender();
+	//Iris::SETTING_SelectFramebufferForRender(m_normalsFb);
+	//Iris::DRAWCALL_ClearFrame(Color::Black);
+	//Iris::SETTING_SetViewportSize(EngineSettings::resolution);
+	//for (auto& materialGroup : m_sortedMissions)
+	//{
+	//	for (auto& modelGroup : materialGroup.models)
+	//	{
+	//		RenderModelGroup(modelGroup, m_normalPassMat);
+	//	}
+	//}
+//
+	//Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
+//
+	//for (auto& stat : m_stationaryMissions)
+	//{
+	//	for (auto& ref : stat.references)
+	//		Iris::DRAWCALL_DrawModelInstancedStationary(ref, stat.model, stat.material, vp, m_normalPassMat);
+	//}
+	//Iris::SETTING_FinishFramebufferRender();
 }
 
 void RenderHandler::RenderSkybox()
@@ -353,15 +353,15 @@ void RenderHandler::RenderSkybox()
 
 	wtl::vector<InstanceData> modelStorage{instanceData};
 
-	Iris::DRAWCALL_DrawModelInstanced(m_skyboxInfo.skyModel, m_skyboxInfo.skyMaterial, vp, modelStorage);
+	//Iris::DRAWCALL_DrawModelInstanced(m_skyboxInfo.skyModel, m_skyboxInfo.skyMaterial, vp, modelStorage);
 }
 
 void RenderHandler::LoadPPShaderSingle(const std::string& name)
 {
-	auto shN = Iris::GetShader(name);
+	//auto shN = Iris::GetShader(name);
 
-	if (shN.HasValue())
-		m_ppShaders.push_back(shN.GetValue());
+	//if (shN.HasValue())
+	//	m_ppShaders.push_back(shN.GetValue());
 
 }
 
@@ -398,35 +398,35 @@ void RenderHandler::RenderModelGroup(const ModelGroup &group, Material material)
 
 	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
 
-	Iris::DRAWCALL_DrawModelInstanced(group.groupID, material, vp, instances);
+	//Iris::DRAWCALL_DrawModelInstanced(group.groupID, material, vp, instances);
 }
 
 void RenderHandler::RenderPostProcessingShaders()
 {
-	for (auto ppShader : m_ppShaders)
-	{
-		uint8 target = !m_currentPPFramebuffer;
-		uint8 origin = m_currentPPFramebuffer;
-		Iris::SETTING_SelectFramebufferForRender(m_ppFramebuffers[target]);
-		Iris::SETTING_PrepareFramebufferForSampling(m_ppFramebuffers[origin]);
-		Iris::DRAWCALL_ClearFrame(Color::Black);
-		Iris::SETTING_SetViewportSize(EngineSettings::resolution);
+	//for (auto ppShader : m_ppShaders)
+	//{
+	//	uint8 target = !m_currentPPFramebuffer;
+	//	uint8 origin = m_currentPPFramebuffer;
+	//	Iris::SETTING_SelectFramebufferForRender(m_ppFramebuffers[target]);
+	//	Iris::SETTING_PrepareFramebufferForSampling(m_ppFramebuffers[origin]);
+	//	Iris::DRAWCALL_ClearFrame(Color::Black);
+	//	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
+//
+	//	Iris::DRAWCALL_DrawPostProcess(ppShader, m_ppFramebuffers[origin]);
+//
+	//	Iris::SETTING_FinishFramebufferRender();
+//
+	//	m_currentPPFramebuffer = !m_currentPPFramebuffer;
+	//}
 
-		Iris::DRAWCALL_DrawPostProcess(ppShader, m_ppFramebuffers[origin]);
-
-		Iris::SETTING_FinishFramebufferRender();
-
-		m_currentPPFramebuffer = !m_currentPPFramebuffer;
-	}
-
-	uint8 origin = m_currentPPFramebuffer;
-	Iris::SETTING_SelectFramebufferScreenForRender();
-	Iris::SETTING_PrepareFramebufferForSampling(m_ppFramebuffers[origin]);
-	Iris::DRAWCALL_ClearFrame(Color::White);
-	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
-	Iris::DRAWCALL_DrawPostProcess(m_screenShader, m_ppFramebuffers[origin]);
-	Iris::DRAWCALL_DrawImGui();
-	Iris::SETTING_FinishFramebufferRender();
+	//uint8 origin = m_currentPPFramebuffer;
+	//Iris::SETTING_SelectFramebufferScreenForRender();
+	//Iris::SETTING_PrepareFramebufferForSampling(m_ppFramebuffers[origin]);
+	//Iris::DRAWCALL_ClearFrame(Color::White);
+	//Iris::SETTING_SetViewportSize(EngineSettings::resolution);
+	//Iris::DRAWCALL_DrawPostProcess(m_screenShader, m_ppFramebuffers[origin]);
+	//Iris::DRAWCALL_DrawImGui();
+	//Iris::SETTING_FinishFramebufferRender();
 }
 
 void RenderHandler::SortStationary(RenderMission &mission)
@@ -484,47 +484,47 @@ void RenderHandler::InsertModelIntoShaderGroup(RenderMission &mission, MaterialG
  */
 void RenderHandler::SortMissions(bool transparentPass)
 {
-	for (auto& mission : m_renderQueue)
-	{
-		if (transparentPass)
-		{
-			auto def = Iris::GetShaderDef(mission.material);
-			if (!def.HasValue())
-				continue;
-			if (!def.GetValue().transparent)
-				continue;
-		}
-		if (!transparentPass)
-		{
-			auto def = Iris::GetShaderDef(mission.material);
-			if (!def.HasValue())
-				continue;
-			if (def.GetValue().transparent)
-				continue;
-		}
-		if (mission.isStationary)
-		{
-			SortStationary(mission);
-			continue;
-		}
-		bool foundShader = false;
-		for (auto& m_sortedMission : m_sortedMissions)
-		{
-			if (m_sortedMission.groupID == mission.material)
-			{
-				foundShader = true;
-				InsertModelIntoShaderGroup(mission, m_sortedMission);
-				continue;
-			}
-		}
-		if (!foundShader)
-		{
-			MaterialGroup group;
-			group.groupID = mission.material;
-			InsertModelIntoShaderGroup(mission, group);
-			m_sortedMissions.push_back(group);
-		}
-	}
+	//for (auto& mission : m_renderQueue)
+	//{
+	//	if (transparentPass)
+	//	{
+	//		auto def = Iris::GetShaderDef(mission.material);
+	//		if (!def.HasValue())
+	//			continue;
+	//		if (!def.GetValue().transparent)
+	//			continue;
+	//	}
+	//	if (!transparentPass)
+	//	{
+	//		auto def = Iris::GetShaderDef(mission.material);
+	//		if (!def.HasValue())
+	//			continue;
+	//		if (def.GetValue().transparent)
+	//			continue;
+	//	}
+	//	if (mission.isStationary)
+	//	{
+	//		SortStationary(mission);
+	//		continue;
+	//	}
+	//	bool foundShader = false;
+	//	for (auto& m_sortedMission : m_sortedMissions)
+	//	{
+	//		if (m_sortedMission.groupID == mission.material)
+	//		{
+	//			foundShader = true;
+	//			InsertModelIntoShaderGroup(mission, m_sortedMission);
+	//			continue;
+	//		}
+	//	}
+	//	if (!foundShader)
+	//	{
+	//		MaterialGroup group;
+	//		group.groupID = mission.material;
+	//		InsertModelIntoShaderGroup(mission, group);
+	//		m_sortedMissions.push_back(group);
+	//	}
+	//}
 }
 
 void RenderHandler::CleanSortedMissions()
@@ -607,7 +607,7 @@ void RenderHandler::InitImGui()
 
 	ImGui::StyleColorsDark();
 
-	Iris::SETTING_ConfigureImGui(m_window);
+	//Iris::SETTING_ConfigureImGui(m_window);
 
 	ImGuiStyle& style = ImGui::GetStyle();
 

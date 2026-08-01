@@ -38,20 +38,20 @@ void Viewport::RenderInternal()
     freecam->Tick(EditorSystems::GetDt());
 
     WEngine::Framebuffer fb = WEngine::CoreSystems::GetRenderHandler()->EditorGetViewportFramebuffer();
-    auto textureNullable = Iris::FramebufferToImGui(fb);
+    //auto textureNullable = Iris::FramebufferToImGui(fb);
 
-    if (textureNullable.HasValue())
-    {
-        ImGui::Image(
-            textureNullable.GetValue(),
-            size
-            //ImVec2(0, 1), ImVec2(1, 0) // flip vertically due to weird stuffs
-        );
-    }
-    else
-    {
-        ImGui::Text("Viewport is currently unavailable :(");
-    }
+    //if (textureNullable.HasValue())
+    //{
+    //    ImGui::Image(
+    //        textureNullable.GetValue(),
+    //        size
+    //        //ImVec2(0, 1), ImVec2(1, 0) // flip vertically due to weird stuffs
+    //    );
+    //}
+    //else
+    //{
+    //    ImGui::Text("Viewport is currently unavailable :(");
+    //}
 
     //EditorState::ViewportSelected = ImGui::IsWindowFocused();
     //ImVec2 winSize = ImGui::GetWindowSize();

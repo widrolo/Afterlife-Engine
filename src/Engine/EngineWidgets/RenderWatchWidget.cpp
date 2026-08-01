@@ -3,6 +3,7 @@
 #include "Engine/EngineDefines.h"
 #include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Core/System/Iris.h"
+#include <Engine/Types/Rendering/Iris/InstThreadedList.h>
 #include "Engine/Types/CoreSystems.h"
 #include <Engine/Types/Rendering/LightingInfo.h>
 

@@ -36,7 +36,7 @@ using namespace WEditor;
 
 Editor::Editor(int argc, char *argv[])
 {
-	Iris::SETTING_EnableEditorMode();
+	//Iris::SETTING_EnableEditorMode();
 	StartEditor();
 }
 
@@ -102,9 +102,9 @@ void Editor::InitHandlers()
     StartHandlerSingleEditor<MenubarHandler>(&EditorSystems::menubarHandler, "Menubar Handler");
     StartHandlerSingleEditor<CompSettingsRepo>(&EditorSystems::compSettingsRepo, "Component Settings Repo");
 
-	Iris::SETTING_BeginNewPreFrame();
-	Iris::ALLOC_CompileMaterial("Unlit/MissingMat");
-	Iris::ALLOC_CompileMaterial("Editor/PhysicsDebug");
+	//Iris::SETTING_BeginNewPreFrame();
+	//Iris::ALLOC_CompileMaterial("Unlit/MissingMat");
+	//Iris::ALLOC_CompileMaterial("Editor/PhysicsDebug");
 	EditorSystems::renderHandler->PrepareSkybox();
 	AnyComponent::SetupPhysicsData();
 	WAllocator::Construct<WEngine::Sector, const std::string&>("root");
@@ -136,8 +136,8 @@ void Editor::Run()
 		auto frameStart = std::chrono::steady_clock::now();
 
 		Haptic::FetchInput();
-		if (!Iris::IsFirstFrame())
-			Iris::SETTING_BeginNewPreFrame();
+		//if (!Iris::IsFirstFrame())
+		//	Iris::SETTING_BeginNewPreFrame();
 
 		WEngine::Sector::m_root->Tick(dt);
 

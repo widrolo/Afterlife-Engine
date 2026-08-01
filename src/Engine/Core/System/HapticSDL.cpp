@@ -33,7 +33,7 @@ void Haptic::PollEvents()
 {
     while (SDL_PollEvent(&ctx.event))
     {
-        ImGui_ImplSDL3_ProcessEvent(&ctx.event);
+        //ImGui_ImplSDL3_ProcessEvent(&ctx.event);
         if (ctx.event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
         {
             if (!ctx.isEditor)

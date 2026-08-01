@@ -32,13 +32,13 @@ AnyComponent::AnyComponent(WEngine::Entity *e)
 
 void AnyComponent::SetupPhysicsData()
 {
-    physics.material = Iris::GetMaterial("Editor/PhysicsDebug").GetValue();
-
-    WEngine::MeshAssetMission mission;
-    mission.name = "../EditorData/Meshes/Physics/Cube";
-    EditorSystems::GetAssetRepo()->GetAsset(mission);
-
-    physics.modelCube = Iris::ALLOC_CreateModel(mission.model).GetValue();
+    //physics.material = Iris::GetMaterial("Editor/PhysicsDebug").GetValue();
+//
+    //WEngine::MeshAssetMission mission;
+    //mission.name = "../EditorData/Meshes/Physics/Cube";
+    //EditorSystems::GetAssetRepo()->GetAsset(mission);
+//
+    //physics.modelCube = Iris::ALLOC_CreateModel(mission.model).GetValue();
 }
 
 void AnyComponent::Init(uint16 ID, uint8 dataSize, WEngine::ComponentArgs args)
@@ -249,73 +249,73 @@ void AnyComponent::UpdateMeshComp()
         hasMat = true;
     }
 
-    if (hasMat)
-    {
-        if (m_nameCache[1] != matName)
-        {
-            m_nameCache[1] = matName;
-            auto matN = Iris::GetMaterial(matName);
-
-            if (matN.HasValue())
-            {
-                material = matN.GetValue();
-                return;
-            }
-
-            matN = Iris::ALLOC_CompileMaterial(matName);
-
-            if (!matN.HasValue())
-            {
-                material = 0;
-                return;
-            }
-            material = matN.GetValue();
-        }
-    }
-    else
-    {
-        auto matN = Iris::GetMaterial(missingMatName);
-        if (matN.HasValue())
-            material = matN.GetValue();
-        else
-            material = 0;
-    }
-
-    if (material == 0)
-        material = Iris::GetMaterial(missingMatName).GetValue();
-
-    if (m_nameCache[0] != modelName)
-    {
-        m_nameCache[0] = modelName;
-        auto modelN = Iris::GetModel(modelName);
-        WEngine::WLog::ConsoleLog(std::format("Updated Model to {}", modelName));
-
-        if (modelN.HasValue())
-        {
-            model = modelN.GetValue();
-            return;
-        }
-
-        WEngine::MeshAssetMission mission{};
-
-        mission.name = modelName;
-        EditorSystems::GetAssetRepo()->GetAsset(mission);
-
-        if (!mission.model.valid)
-        {
-            model = 0;
-            return;
-        }
-
-        modelN = Iris::ALLOC_CreateModel(mission.model);
-
-        if (!modelN.HasValue())
-        {
-            model = 0;
-            return;
-        }
-        model = modelN.GetValue();
-    }
+    //if (hasMat)
+    //{
+    //    if (m_nameCache[1] != matName)
+    //    {
+    //        m_nameCache[1] = matName;
+    //        auto matN = Iris::GetMaterial(matName);
+//
+    //        if (matN.HasValue())
+    //        {
+    //            material = matN.GetValue();
+    //            return;
+    //        }
+//
+    //        matN = Iris::ALLOC_CompileMaterial(matName);
+//
+    //        if (!matN.HasValue())
+    //        {
+    //            material = 0;
+    //            return;
+    //        }
+    //        material = matN.GetValue();
+    //    }
+    //}
+    //else
+    //{
+    //    auto matN = Iris::GetMaterial(missingMatName);
+    //    if (matN.HasValue())
+    //        material = matN.GetValue();
+    //    else
+    //        material = 0;
+    //}
+//
+    //if (material == 0)
+    //    material = Iris::GetMaterial(missingMatName).GetValue();
+//
+    //if (m_nameCache[0] != modelName)
+    //{
+    //    m_nameCache[0] = modelName;
+    //    auto modelN = Iris::GetModel(modelName);
+    //    WEngine::WLog::ConsoleLog(std::format("Updated Model to {}", modelName));
+//
+    //    if (modelN.HasValue())
+    //    {
+    //        model = modelN.GetValue();
+    //        return;
+    //    }
+//
+    //    WEngine::MeshAssetMission mission{};
+//
+    //    mission.name = modelName;
+    //    EditorSystems::GetAssetRepo()->GetAsset(mission);
+//
+    //    if (!mission.model.valid)
+    //    {
+    //        model = 0;
+    //        return;
+    //    }
+//
+    //    modelN = Iris::ALLOC_CreateModel(mission.model);
+//
+    //    if (!modelN.HasValue())
+    //    {
+    //        model = 0;
+    //        return;
+    //    }
+    //    model = modelN.GetValue();
+    //}
 }
 
 void AnyComponent::TryDrawBoxCollision()

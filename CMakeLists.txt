@@ -356,6 +356,7 @@ add_executable(Afterlife_Engine
         src/Testing/Types/Testable.h
         src/Testing/Types/EndTestable.h
         src/Testing/Types/TestStatistics.h
+        src/Engine/Util/Handles.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE
