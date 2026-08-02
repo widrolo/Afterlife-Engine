@@ -1,5 +1,6 @@
 #include <Engine/EngineDefines.h>
-#if GPU_BACKEND == GPU_VULKAN
+//#if GPU_BACKEND == GPU_VULKAN
+#ifdef ehbwfaj
 #include "VulkanCommands.h"
 
 #include "VulkanHelpers.h"

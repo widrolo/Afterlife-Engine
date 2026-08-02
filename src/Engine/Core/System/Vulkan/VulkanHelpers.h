@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/EngineDefines.h>
-#if GPU_BACKEND == GPU_VULKAN
+//#if GPU_BACKEND == GPU_VULKAN
+#ifdef ehbwfaj
 
 #include <vulkan/vulkan.h>
 #include "VulkanContext.h"
@@ -9,18 +10,10 @@
 #include "Engine/Types/Rendering/GPU/Framebuffer.h"
 #include "Engine/Types/Rendering/GPU/StatBufKey.h"
 
-bool ParseVkResult(VkResult result);
-VkBool32 ValidationCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes,
-    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void*);
-void PerformInvalidHandleAction();
-uint64 CalcTextureSize(uint8 bytesPerPixel, uint32 width, uint32 height);
-sizeT BCBlockSize(BC format);
-sizeT BCMipSize(uint32 width, uint32 height, BC format);
-uint64 CalcModelSize(uint8 bytesPerVertex, uint32 vertexCount);
+
 VkFormat FindBestDepthFormat(const VulkanContext& ctx);
 VkFormat FindBestSwapchainFormat(const VulkanContext& ctx);
-uint64 GetSizeOfImageInBytes(WEngine::Vector2 imageSize, uint8 channelCount);
-uint32 GetVulkanVersion();
+uint32 GetVulkanVersionabfj();
 
 WEngine::Vector2& GetFbResolution(const VulkanContext& ctx);
 VkCommandBuffer& GetFbCmdBuff(const VulkanContext& ctx);

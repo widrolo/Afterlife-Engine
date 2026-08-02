@@ -1,7 +1,8 @@
 #pragma once
 
 #include <Engine/EngineDefines.h>
-#if GPU_BACKEND == GPU_VULKAN
+//#if GPU_BACKEND == GPU_VULKAN
+#ifdef ehbwfaj
 
 #include <vulkan/vulkan.h>
 #include "VulkanContext.h"

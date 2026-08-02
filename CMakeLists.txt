@@ -365,8 +365,8 @@ add_executable(Afterlife_Engine
         src/Engine/Core/System/Iris/Vulkan/IrisCommands.cpp
         src/Engine/Core/System/Iris/Vulkan/IrisImGui.cpp
         src/Engine/Core/System/Iris/Vulkan/IrisStatistics.cpp
-        src/Engine/Core/System/Iris/Vulkan/Helpers/InitHelp.cpp
-        src/Engine/Core/System/Iris/Vulkan/Helpers/InitHelp.h
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Init.cpp
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Init.h
         src/Engine/Core/System/Iris/Vulkan/IrisInit.cpp
         src/Engine/Core/System/Iris/Vulkan/IrisGlobals.h
         src/Engine/Core/System/Iris/Vulkan/Helpers/Types.h
@@ -380,6 +380,16 @@ add_executable(Afterlife_Engine
         src/Engine/Types/Rendering/Iris/Framebuffer.h
         src/Engine/Types/Rendering/Iris/RenderCompute.h
         src/Engine/Types/Rendering/Iris/Init.h
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Helpers.h
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Helpers.cpp
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Allocators.cpp
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Allocators.h
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Queues.cpp
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Queues.h
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Swapchain.cpp
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Swapchain.h
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Sync.h
+        src/Engine/Core/System/Iris/Vulkan/Helpers/Sync.cpp
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

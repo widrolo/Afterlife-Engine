@@ -2,56 +2,60 @@
 
 #include <Engine/Core/System/Iris.h>
 
-using namespace Iris;
+#include "Helpers/Helpers.h"
 
-CommandBufferHandle BeginCommandBuffer(QueueType queue = QueueType::Graphics)
+namespace Iris
 {
+    CommandBufferHandle BeginCommandBuffer(QueueType queue)
+    {
+        PrintNotImplemented("BeginCommandBuffer");
+        return 0;
+    }
 
-}
+    void EndCommandBuffer(CommandBufferHandle cmd)
+    {
+        PrintNotImplemented("EndCommandBuffer");
+    }
 
-void EndCommandBuffer(CommandBufferHandle cmd)
-{
+    void SubmitCommandBuffer(CommandBufferHandle cmd)
+    {
+        PrintNotImplemented("SubmitCommandBuffer");
+    }
 
-}
+    void SubmitCommandBuffers(const CommandBufferHandle* cmds, sizeT count)
+    {
+        PrintNotImplemented("SubmitCommandBuffers");
+    }
 
-void SubmitCommandBuffer(CommandBufferHandle cmd)
-{
+    void BeginRenderPass(CommandBufferHandle cmd, const RenderPassBeginDesc& desc)
+    {
+        PrintNotImplemented("BeginRenderPass");
+    }
 
-}
+    void EndRenderPass(CommandBufferHandle cmd)
+    {
+        PrintNotImplemented("EndRenderPass");
+    }
 
-void SubmitCommandBuffers(const CommandBufferHandle* cmds, sizeT count)
-{
+    void BeginComputePass(CommandBufferHandle cmd)
+    {
+        PrintNotImplemented("BeginComputePass");
+    }
 
-}
+    void EndComputePass(CommandBufferHandle cmd)
+    {
+        PrintNotImplemented("EndComputePass");
+    }
 
-void BeginRenderPass(CommandBufferHandle cmd, const RenderPassBeginDesc& desc)
-{
+    void BeginCopyPass(CommandBufferHandle cmd)
+    {
+        PrintNotImplemented("BeginCopyPass");
+    }
 
-}
-
-void EndRenderPass(CommandBufferHandle cmd)
-{
-
-}
-
-void BeginComputePass(CommandBufferHandle cmd)
-{
-
-}
-
-void EndComputePass(CommandBufferHandle cmd)
-{
-
-}
-
-void BeginCopyPass(CommandBufferHandle cmd)
-{
-
-}
-
-void EndCopyPass(CommandBufferHandle cmd)
-{
-
+    void EndCopyPass(CommandBufferHandle cmd)
+    {
+        PrintNotImplemented("EndCopyPass");
+    }
 }
 
 #endif

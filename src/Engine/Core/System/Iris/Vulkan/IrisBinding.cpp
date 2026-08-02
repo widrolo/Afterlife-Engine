@@ -2,37 +2,40 @@
 
 #include <Engine/Core/System/Iris.h>
 
-using namespace Iris;
+#include "Helpers/Helpers.h"
 
-void BindGraphicsPipeline(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline)
+namespace Iris
 {
+    void BindGraphicsPipeline(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline)
+    {
+        PrintNotImplemented("BindGraphicsPipeline");
+    }
 
-}
+    void BindComputePipeline(CommandBufferHandle cmd, ComputePipelineHandle  pipeline)
+    {
+        PrintNotImplemented("BindComputePipeline");
+    }
 
-void BindComputePipeline(CommandBufferHandle cmd, ComputePipelineHandle  pipeline)
-{
+    void BindResourceTable(CommandBufferHandle cmd, uint32 slot, ResourceTableHandle table)
+    {
+        PrintNotImplemented("BindResourceTable");
+    }
 
-}
+    void SetPushConstants(CommandBufferHandle cmd, const byte* data, sizeT size)
+    {
+        PrintNotImplemented("SetPushConstants");
+    }
 
-void BindResourceTable(CommandBufferHandle cmd, uint32 slot, ResourceTableHandle table)
-{
+    void BindVertexBuffers(CommandBufferHandle cmd, uint32 firstBinding, const BufferHandle* buffers,
+        const sizeT* offsets, sizeT count)
+    {
+        PrintNotImplemented("BindVertexBuffers");
+    }
 
-}
-
-void SetPushConstants(CommandBufferHandle cmd, const byte* data, sizeT size)
-{
-
-}
-
-void BindVertexBuffers(CommandBufferHandle cmd, uint32 firstBinding, const BufferHandle* buffers,
-    const sizeT* offsets, sizeT count)
-{
-
-}
-
-void BindIndexBuffer(CommandBufferHandle cmd, BufferHandle buffer, sizeT offset)
-{
-
+    void BindIndexBuffer(CommandBufferHandle cmd, BufferHandle buffer, sizeT offset)
+    {
+        PrintNotImplemented("BindIndexBuffer");
+    }
 }
 
 #endif

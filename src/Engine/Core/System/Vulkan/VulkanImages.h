@@ -1,6 +1,7 @@
 #pragma once
 
-#if GPU_BACKEND == GPU_VULKAN
+//#if GPU_BACKEND == GPU_VULKAN
+#ifdef ehbwfaj
 #include "VulkanContext.h"
 #include "VulkanStatistics.h"
 #include "Engine/Types/Rendering/TextureInfo.h"

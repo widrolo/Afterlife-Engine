@@ -2,31 +2,37 @@
 
 #include <Engine/Core/System/Iris.h>
 
-using namespace Iris;
+#include "Helpers/Helpers.h"
 
-uint32 GetCurrentFrameIndex()
+namespace Iris
 {
+    uint32 GetCurrentFrameIndex()
+    {
+        PrintNotImplemented("GetCurrentFrameIndex");
+        return 0;
+    }
 
-}
+    uint32 GetFramesInFlight()
+    {
+        PrintNotImplemented("GetFramesInFlight");
+        return 0;
+    }
 
-uint32 GetFramesInFlight()
-{
+    bool IsFirstFrame()
+    {
+        PrintNotImplemented("IsFirstFrame");
+        return false;
+    }
 
-}
+    void BeginFrame()
+    {
+        PrintNotImplemented("BeginFrame");
+    }
 
-bool IsFirstFrame()
-{
-
-}
-
-void BeginFrame()
-{
-
-}
-
-void EndFrame()
-{
-
+    void EndFrame()
+    {
+        PrintNotImplemented("EndFrame");
+    }
 }
 
 #endif

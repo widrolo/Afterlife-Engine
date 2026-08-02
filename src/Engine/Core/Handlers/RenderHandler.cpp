@@ -28,12 +28,16 @@ using namespace WEngine;
 RenderHandler::RenderHandler()
 {
 	InitSDL();
-	//if (!Iris::SETTING_InitGPUApi(m_window))
-	//{
-	//	WLog::SetConsoleError();
-	//	WLog::ConsoleLog("FATAL ERROR! GPU failed to initialize, aborting!");
-	//	abort();
-	//}
+
+	Iris::InitDesc desc{};
+	desc.window = m_window;
+
+	if (!Iris::Init(desc))
+	{
+		WLog::SetConsoleError();
+		WLog::ConsoleLog("FATAL ERROR! GPU failed to initialize, aborting!");
+		abort();
+	}
 	InitImGui();
 
 	if (!Engine::GetCla().testMode)

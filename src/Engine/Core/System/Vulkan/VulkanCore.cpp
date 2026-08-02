@@ -1,5 +1,6 @@
 #include <Engine/EngineDefines.h>
-#if GPU_BACKEND == GPU_VULKAN
+//#if GPU_BACKEND == GPU_VULKAN
+#ifdef ehbwfaj
 
 #include "VulkanCore.h"
 
@@ -55,7 +56,7 @@ void SetupVmaAllocator(VulkanContext& ctx)
 
     VmaAllocatorCreateInfo allocatorCreateInfo = {};
     allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT | VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
-    allocatorCreateInfo.vulkanApiVersion = GetVulkanVersion();
+    allocatorCreateInfo.vulkanApiVersion = GetVulkanVersionabfj();
     allocatorCreateInfo.physicalDevice = ctx.vcore.gpuPhysicalDevice;
     allocatorCreateInfo.device = ctx.vcore.gpuDevice;
     allocatorCreateInfo.instance = ctx.vcore.instance;
@@ -127,7 +128,7 @@ bool SetupVkInstance(VulkanContext& ctx)
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = GameSettings::gameName.c_str();
     appInfo.pEngineName = EngineSettings::engineName.c_str();
-    appInfo.apiVersion = GetVulkanVersion();
+    appInfo.apiVersion = GetVulkanVersionabfj();
 
     wtl::vector<std::string> extensions = GetExtensionsToLoad(ctx);
     std::vector<const char*> extensionsData;

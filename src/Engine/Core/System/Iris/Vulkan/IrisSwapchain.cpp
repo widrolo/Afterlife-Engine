@@ -2,21 +2,25 @@
 
 #include <Engine/Core/System/Iris.h>
 
-using namespace Iris;
+#include "Helpers/Helpers.h"
 
-TextureHandle AcquireSwapchainTexture()
+namespace Iris
 {
+    TextureHandle AcquireSwapchainTexture()
+    {
+        PrintNotImplemented("AcquireSwapchainTexture");
+        return 0;
+    }
 
+    FramebufferHandle GetSwapchainFramebuffer()
+    {
+        PrintNotImplemented("GetSwapchainFramebuffer");
+        return 0;
+    }
+
+    void Present()
+    {
+        PrintNotImplemented("Present");
+    }
 }
-
-FramebufferHandle GetSwapchainFramebuffer()
-{
-
-}
-
-void Present()
-{
-
-}
-
 #endif

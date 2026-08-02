@@ -2,16 +2,21 @@
 
 #include <Engine/Core/System/Iris.h>
 
-using namespace Iris;
+#include "Helpers/Helpers.h"
 
-sizeT GetVRAMUsage()
+namespace Iris
 {
+    sizeT GetVRAMUsage()
+    {
+        PrintNotImplemented("GetVRAMUsage");
+        return 0;
+    }
 
-}
-
-sizeT GetDrawCallCountLastFrame()
-{
-
+    sizeT GetDrawCallCountLastFrame()
+    {
+        PrintNotImplemented("GetDrawCallCountLastFrame");
+        return 0;
+    }
 }
 
 #endif

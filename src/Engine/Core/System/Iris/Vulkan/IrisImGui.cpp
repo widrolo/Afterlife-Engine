@@ -2,31 +2,35 @@
 
 #include <Engine/Core/System/Iris.h>
 
-using namespace Iris;
+#include "Helpers/Helpers.h"
 
-void ConfigureImGui()
+namespace Iris
 {
+    void ConfigureImGui()
+    {
+        PrintNotImplemented("ConfigureImGui");
+    }
 
-}
+    void ImGuiNewFrame()
+    {
+        PrintNotImplemented("ImGuiNewFrame");
+    }
 
-void ImGuiNewFrame()
-{
+    void ImGuiEndFrame()
+    {
+        PrintNotImplemented("ImGuiEndFrame");
+    }
 
-}
+    void ImGuiRenderDrawData(CommandBufferHandle cmd)
+    {
+        PrintNotImplemented("ImGuiRenderDrawData");
+    }
 
-void ImGuiEndFrame()
-{
-
-}
-
-void ImGuiRenderDrawData(CommandBufferHandle cmd)
-{
-
-}
-
-WEngine::Nullable<ImTextureID> TextureToImGui(TextureHandle texture)
-{
-
+    WEngine::Nullable<ImTextureID> TextureToImGui(TextureHandle texture)
+    {
+        PrintNotImplemented("TextureToImGui");
+        return {};
+    }
 }
 
 

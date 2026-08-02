@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/EngineDefines.h>
-#if GPU_BACKEND == GPU_VULKAN
+//#if GPU_BACKEND == GPU_VULKAN
+#ifdef ehbwfaj
 
 #include "VulkanTypes.h"
 #include "Engine/Types/Rendering/LightingInfo.h"

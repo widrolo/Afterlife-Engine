@@ -3,59 +3,62 @@
 #include <Engine/Core/System/Iris.h>
 #include <Engine/Math/Vector.h>
 
-using namespace Iris;
+#include "Helpers/Helpers.h"
 
-void SetViewport(CommandBufferHandle cmd, const Viewport& viewport)
+namespace Iris
 {
+    void SetViewport(CommandBufferHandle cmd, const Viewport& viewport)
+    {
+        PrintNotImplemented("SetViewport");
+    }
 
-}
+    void SetScissor(CommandBufferHandle cmd, const Scissor& scissor)
+    {
+        PrintNotImplemented("SetScissor");
+    }
 
-void SetScissor(CommandBufferHandle cmd, const Scissor& scissor)
-{
+    void Draw(CommandBufferHandle cmd, sizeT vertexCount, sizeT instanceCount, sizeT firstVertex, sizeT firstInstance)
+    {
+        PrintNotImplemented("Draw");
+    }
 
-}
+    void DrawIndexed(CommandBufferHandle cmd, sizeT indexCount, sizeT instanceCount, sizeT firstIndex, sizeT vertexOffset,
+        sizeT firstInstance)
+    {
+        PrintNotImplemented("DrawIndexed");
+    }
 
-void Draw(CommandBufferHandle cmd, sizeT vertexCount, sizeT instanceCount, sizeT firstVertex, sizeT firstInstance)
-{
+    void DrawIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset, sizeT drawCount, sizeT stride)
+    {
+        PrintNotImplemented("DrawIndirect");
+    }
 
-}
+    void DrawIndexedIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset, sizeT drawCount, sizeT stride)
+    {
+        PrintNotImplemented("DrawIndexedIndirect");
+    }
 
-void DrawIndexed(CommandBufferHandle cmd, sizeT indexCount, sizeT instanceCount, sizeT firstIndex, sizeT vertexOffset,
-    sizeT firstInstance)
-{
+    void Dispatch(CommandBufferHandle cmd, sizeT groupCountX, sizeT groupCountY, sizeT groupCountZ)
+    {
+        PrintNotImplemented("Dispatch");
+    }
 
-}
+    void DispatchIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset)
+    {
+        PrintNotImplemented("DispatchIndirect");
+    }
 
-void DrawIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset, sizeT drawCount, sizeT stride)
-{
+    void CopyBufferToBuffer(CommandBufferHandle cmd, BufferHandle dst, sizeT dstOffset, BufferHandle src, sizeT srcOffset,
+        sizeT size)
+    {
+        PrintNotImplemented("CopyBufferToBuffer");
+    }
 
-}
-
-void DrawIndexedIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset, sizeT drawCount, sizeT stride)
-{
-
-}
-
-void Dispatch(CommandBufferHandle cmd, sizeT groupCountX, sizeT groupCountY, sizeT groupCountZ)
-{
-
-}
-
-void DispatchIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset)
-{
-
-}
-
-void CopyBufferToBuffer(CommandBufferHandle cmd, BufferHandle dst, sizeT dstOffset, BufferHandle src, sizeT srcOffset,
-    sizeT size)
-{
-
-}
-
-void CopyBufferToTexture(CommandBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst,
-    WEngine::Vector2 extent)
-{
-
+    void CopyBufferToTexture(CommandBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst,
+        WEngine::Vector2 extent)
+    {
+        PrintNotImplemented("CopyBufferToTexture");
+    }
 }
 
 #endif
