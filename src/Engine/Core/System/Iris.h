@@ -31,7 +31,7 @@ namespace Iris
     // --------------------------------------- Resources ---------------------------------------
     // ------- Creation --------
     BufferHandle CreateBuffer(const BufferDesc& desc);
-    BufferHandle CreateBuffer(const BufferDesc& desc, const void* initialData, sizeT initialDataSize);
+    BufferHandle CreateBuffer(const BufferDesc& desc, const byte* initialData, sizeT initialDataSize);
 
     TextureHandle CreateTexture(const TextureDesc& desc);
     TextureHandle CreateTexture(const TextureDesc& desc, const byte* texData);

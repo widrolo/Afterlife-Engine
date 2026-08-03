@@ -3,25 +3,23 @@
 #include <Engine/Core/System/Iris.h>
 
 #include "Helpers/Helpers.h"
+#include "IrisGlobals.h"
 
 namespace Iris
 {
     uint32 GetCurrentFrameIndex()
     {
-        PrintNotImplemented("GetCurrentFrameIndex");
-        return 0;
+        return screen.currentFrame;
     }
 
     uint32 GetFramesInFlight()
     {
-        PrintNotImplemented("GetFramesInFlight");
-        return 0;
+        return screen.swapchainImageCount;
     }
 
     bool IsFirstFrame()
     {
-        PrintNotImplemented("IsFirstFrame");
-        return false;
+        return irisCtx.firstFrame;
     }
 
     void BeginFrame()
@@ -31,7 +29,8 @@ namespace Iris
 
     void EndFrame()
     {
-        PrintNotImplemented("EndFrame");
+        irisCtx.firstFrame = false;
+        PrintNotImplemented("BeginFrame");
     }
 }
 

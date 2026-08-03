@@ -29,6 +29,7 @@ namespace Iris
             return false;
         }
 
+        if (!SetupDepthImage()) return false;
         if (!SetupSwapchain()) return false;
 
         return true;

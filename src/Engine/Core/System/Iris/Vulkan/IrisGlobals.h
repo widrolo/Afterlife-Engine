@@ -8,6 +8,7 @@
 #include "Engine/Util/BitwiseMacros.h"
 #include "Engine/Math/Vector.h"
 #include "Engine/WTL/vector.h"
+#include "Helpers/Types.h"
 
 //using namespace Iris;
 
@@ -94,12 +95,18 @@ struct VulkanStatistics
 
 using BufferCollection = wtl::vector<std::pair<VkBuffer, VmaAllocation>>;
 
+struct IrisContext
+{
+    bool firstFrame = true;
+};
 
+inline IrisContext irisCtx{};
 inline VulkanCore vcore{};
 inline Vulkan_Queues queues{};
 inline Vulkan_Screen screen{};
 inline Vulkan_RenderTarget displayTarget{};
 inline VulkanStatistics stats{};
-inline std::vector<BufferCollection> bufferGraveyard{};
+inline wtl::vector<BufferCollection> bufferGraveyard{};
+inline wtl::vector<Vulkan_Buffer> loadedBuffers{};
 
 #endif

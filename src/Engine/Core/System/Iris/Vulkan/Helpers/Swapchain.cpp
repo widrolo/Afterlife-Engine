@@ -5,6 +5,7 @@
 #include "Sync.h"
 #include "Engine/EngineDefines.h"
 #include "Engine/Core/System/Iris/Vulkan/IrisGlobals.h"
+#include "Engine/Util/Log.h"
 #include "Engine/WTL/vector.h"
 
 VkPresentModeKHR FindBestPresentMode()
@@ -86,6 +87,60 @@ bool SetupSwapchain()
     }
 
     return ParseVkResult(res);
+}
+
+bool SetupDepthImage()
+{
+    VkImageCreateInfo info{};
+    info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    info.imageType = VK_IMAGE_TYPE_2D;
+    info.extent = { (uint32)EngineSettings::resolution.x, (uint32)EngineSettings::resolution.y, 1 };
+    info.mipLevels = 1;
+    info.arrayLayers = 1;
+    info.format = FindBestDepthFormat();
+    info.tiling = VK_IMAGE_TILING_OPTIMAL;
+    info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    info.samples = VK_SAMPLE_COUNT_1_BIT;
+
+    VmaAllocationCreateInfo allocInfo{};
+    allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+    allocInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+
+    VmaAllocationInfo allocationInfo{};
+
+    auto res = vmaCreateImage(vcore.vmaAllocator, &info, &allocInfo, &screen.depthImage, &screen.depthAllocation, &allocationInfo);
+
+    stats.vramUsage += allocationInfo.size;
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Unable to create depth image.");
+        return false;
+    }
+
+    VkImageViewCreateInfo depthViewInfo{};
+    depthViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    depthViewInfo.image = screen.depthImage;
+    depthViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    depthViewInfo.format = FindBestDepthFormat();
+    depthViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+    depthViewInfo.subresourceRange.baseMipLevel = 0;
+    depthViewInfo.subresourceRange.levelCount = 1;
+    depthViewInfo.subresourceRange.baseArrayLayer = 0;
+    depthViewInfo.subresourceRange.layerCount = 1;
+
+    res = vkCreateImageView(vcore.gpuDevice, &depthViewInfo, vcore.allocator, &screen.depthImageView);
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Unable to create depth image view.");
+        return false;
+    }
+
+    return true;
 }
 
 #endif

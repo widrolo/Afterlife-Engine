@@ -131,6 +131,26 @@ uint32 GetVulkanVersion()
     return VK_API_VERSION_1_4;
 }
 
+VkBufferUsageFlags IrisBuffUsageToVulkan(Iris::BufferUsage usage)
+{
+    uint32 flags = 0;
+
+    if ((uint8)usage & (uint8)Iris::BufferUsage::Vertex)
+        flags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    if ((uint8)usage & (uint8)Iris::BufferUsage::Index)
+        flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    if ((uint8)usage & (uint8)Iris::BufferUsage::Uniform)
+        flags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    if ((uint8)usage & (uint8)Iris::BufferUsage::Storage)
+        flags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+    if ((uint8)usage & (uint8)Iris::BufferUsage::TransferSrc)
+        flags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    if ((uint8)usage & (uint8)Iris::BufferUsage::TransferDst)
+        flags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+
+    return (VkBufferUsageFlags)flags;
+}
+
 VkFormat FindBestSwapchainFormat()
 {
     wtl::vector<VkFormat> candidates =
@@ -145,6 +165,27 @@ VkFormat FindBestSwapchainFormat()
         vkGetPhysicalDeviceFormatProperties(vcore.gpuPhysicalDevice, format, &props);
 
         if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT)
+            return format;
+    }
+
+    return VK_FORMAT_UNDEFINED;
+}
+
+VkFormat FindBestDepthFormat()
+{
+    wtl::vector<VkFormat> candidates =
+    {
+        VK_FORMAT_D32_SFLOAT,
+        VK_FORMAT_D32_SFLOAT_S8_UINT,
+        VK_FORMAT_D24_UNORM_S8_UINT
+    };
+
+    for (VkFormat format : candidates)
+    {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(vcore.gpuPhysicalDevice, format, &props);
+
+        if (props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
             return format;
     }
 

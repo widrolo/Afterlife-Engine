@@ -5,5 +5,6 @@
 
 VkPresentModeKHR FindBestPresentMode();
 bool SetupSwapchain();
+bool SetupDepthImage();
 
 #endif

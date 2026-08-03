@@ -6,6 +6,7 @@
 #include "Engine/WTL/vector.h"
 #include <vulkan/vulkan.h>
 #include "Engine/Math/Vector.h"
+#include "Engine/Types/Rendering/Iris/Usage.h"
 
 void PrintNotImplemented(const std::string& functionName);
 bool ParseVkResult(VkResult result);
@@ -18,8 +19,10 @@ sizeT BCMipSize(uint32 width, uint32 height, BC format);
 uint64 CalcModelSize(uint8 bytesPerVertex, uint32 vertexCount);
 uint64 GetSizeOfImageInBytes(WEngine::Vector2 imageSize, uint8 channelCount);
 uint32 GetVulkanVersion();
+VkBufferUsageFlags IrisBuffUsageToVulkan(Iris::BufferUsage usage);
 
 VkFormat FindBestSwapchainFormat();
+VkFormat FindBestDepthFormat();
 
 wtl::vector<std::string> GetExtensionsToLoad();
 

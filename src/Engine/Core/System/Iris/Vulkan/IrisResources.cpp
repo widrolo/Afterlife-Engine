@@ -1,21 +1,62 @@
 #if GPU_BACKEND == GPU_VULKAN
 
+#include <vk_mem_alloc.h>
 #include <Engine/Core/System/Iris.h>
 
+#include "IrisGlobals.h"
+#include "Engine/Util/Log.h"
 #include "Helpers/Helpers.h"
+#include "Helpers/Types.h"
 
 namespace Iris
 {
     BufferHandle CreateBuffer(const BufferDesc& desc)
     {
-        PrintNotImplemented("CreateBuffer");
-        return 0;
+        return CreateBuffer(desc, nullptr, 0);
     }
 
-    BufferHandle CreateBuffer(const BufferDesc& desc, const void* initialData, sizeT initialDataSize)
+    BufferHandle CreateBuffer(const BufferDesc& desc, const byte* initialData, sizeT initialDataSize)
     {
-        PrintNotImplemented("CreateBuffer");
-        return 0;
+        Vulkan_Buffer buff;
+        VkBufferCreateInfo info{};
+        info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        info.size = desc.size;
+        info.usage = IrisBuffUsageToVulkan(desc.usage);
+
+        VmaAllocationCreateInfo allocInfo{};
+        // Due to the fact that we never unload data, we can just do this and never unmap it.
+        allocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+        allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
+        allocInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+        auto ret = vmaCreateBuffer(vcore.vmaAllocator, &info, &allocInfo, &buff.buffer, &buff.alloc, &buff.allocInfo);
+
+        if (ParseVkResult(ret))
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog(std::format("Unable to create buffer \"{}\"!", desc.debugName));
+            return 0;
+        }
+
+        stats.vramUsage += buff.allocInfo.size;
+
+        loadedBuffers.push_back(buff);
+        const BufferHandle handle = loadedBuffers.size();
+
+        if (initialData == nullptr || initialDataSize == 0)
+            return handle;
+
+        const sizeT size = std::min(initialDataSize, (sizeT)buff.allocInfo.size);
+
+        if (size != initialDataSize)
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog(std::format("Unable to copy the entire initial data into buffer \"{}\"!", desc.debugName));
+        }
+
+        memcpy(buff.allocInfo.pMappedData, initialData, size);
+
+        return handle;
     }
 
     TextureHandle CreateTexture(const TextureDesc& desc)
@@ -74,7 +115,29 @@ namespace Iris
 
     void UpdateBuffer(BufferHandle buffer, sizeT dstOffset, const byte* data, sizeT size)
     {
-        PrintNotImplemented("UpdateBuffer");
+        if (buffer == 0 || buffer > loadedBuffers.size())
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog(std::format("Invalid buffer handle, refusing to Update!"));
+            return;
+        }
+        const Vulkan_Buffer& buff = loadedBuffers[buffer - 1]; // cause handle was gotten by taking size of vector
+
+        sizeT copyExtent = dstOffset + size;
+        if (dstOffset > buff.allocInfo.size)
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog(std::format("Unable to copy data into the buffer, as the offset is beyond buffer \"{}\"!", buff.debugName));
+            return;
+        }
+        if (copyExtent > buff.allocInfo.size)
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog(std::format("Unable to copy the entire data into buffer \"{}\"!", buff.debugName));
+            size = buff.allocInfo.size - dstOffset; // at least to the very end
+        }
+
+        memcpy((byte*)buff.allocInfo.pMappedData + dstOffset, data, size);
     }
 
     void UpdateResourceTable(ResourceTableHandle table, const ResourceTableUpdateDesc& update)

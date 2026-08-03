@@ -10,9 +10,8 @@ namespace Iris
         Index           = BIT(1),
         Uniform         = BIT(2),
         Storage         = BIT(3),
-        Indirect        = BIT(4),
-        TransferSrc     = BIT(5),
-        TransferDst     = BIT(6),
+        TransferSrc     = BIT(4),
+        TransferDst     = BIT(5),
     };
     DEFINE_ENUM_BITWISE(BufferUsage)
 
