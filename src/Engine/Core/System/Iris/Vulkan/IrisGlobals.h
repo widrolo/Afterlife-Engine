@@ -62,6 +62,7 @@ struct Vulkan_Screen
     VkImage depthImage;
     VkImageView depthImageView;
     VmaAllocation depthAllocation;
+    void* window;
 };
 
 struct Vulkan_RenderTarget

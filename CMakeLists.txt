@@ -390,6 +390,8 @@ add_executable(Afterlife_Engine
         src/Engine/Core/System/Iris/Vulkan/Helpers/Swapchain.h
         src/Engine/Core/System/Iris/Vulkan/Helpers/Sync.h
         src/Engine/Core/System/Iris/Vulkan/Helpers/Sync.cpp
+        src/Engine/Core/System/Iris/Vulkan/Helpers/ImGui.cpp
+        src/Engine/Core/System/Iris/Vulkan/Helpers/ImGui.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

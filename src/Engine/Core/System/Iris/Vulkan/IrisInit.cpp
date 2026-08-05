@@ -28,6 +28,7 @@ namespace Iris
             WEngine::WLog::ConsoleLog(std::format("Failed to create a Vulkan surface for the screen, {}", SDL_GetError()));
             return false;
         }
+        screen.window = desc.window;
 
         if (!SetupDepthImage()) return false;
         if (!SetupSwapchain()) return false;

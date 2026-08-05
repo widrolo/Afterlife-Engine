@@ -39,6 +39,7 @@ RenderHandler::RenderHandler()
 		abort();
 	}
 	InitImGui();
+	Iris::ConfigureImGui();
 
 	if (!Engine::GetCla().testMode)
 		PreparePPFramebuffers();
@@ -98,7 +99,7 @@ void RenderHandler::BeginFrame()
 {
 	//Iris::SETTING_BeginNewFrame();
 //
-	//m_currentPPFramebuffer = 0;
+	m_currentPPFramebuffer = 0;
 //
 	//if (!Engine::GetCla().testMode)
 	//{
@@ -113,7 +114,7 @@ void RenderHandler::BeginFrame()
 	//}
 //
 //
-	//Iris::DRAWCALL_ResetImGui();
+	Iris::ImGuiNewFrame();
 	//if (m_camera == nullptr)
 	//	Iris::DRAWCALL_ClearFrame(Color::Black);
 	//else
@@ -167,32 +168,32 @@ void RenderHandler::RenderFrame()
 	//}
 
 
-	//if (!Engine::GetCla().testMode)
-	//{
-	//	if (m_isEditor)
-	//	{
-	//		Iris::SETTING_FinishFramebufferRender();
-	//		Iris::SETTING_SelectFramebufferScreenForRender();
-	//		if (m_camera == nullptr)
-	//			Iris::DRAWCALL_ClearFrame(Color::Black);
-	//		else
-	//			Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
-//
-	//		Iris::DRAWCALL_DrawImGui();
-	//		Iris::SETTING_FinishFramebufferRender();
-	//	}
-	//	else
-	//	{
-	//		Iris::SETTING_FinishFramebufferRender();
-	//		NormalsPass();
-	//		RenderPostProcessingShaders();
-	//	}
-	//}
-	//else
-	//{
-	//	Iris::DRAWCALL_DrawImGui();
-	//	Iris::SETTING_FinishFramebufferRender();
-	//}
+	if (!Engine::GetCla().testMode)
+	{
+		if (m_isEditor)
+		{
+			//Iris::SETTING_FinishFramebufferRender();
+			//Iris::SETTING_SelectFramebufferScreenForRender();
+			//if (m_camera == nullptr)
+			//	Iris::DRAWCALL_ClearFrame(Color::Black);
+			//else
+			//	Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
+			//
+			Iris::ImGuiRenderDrawData(0);
+			//Iris::SETTING_FinishFramebufferRender();
+		}
+		else
+		{
+			//Iris::SETTING_FinishFramebufferRender();
+			NormalsPass();
+			RenderPostProcessingShaders();
+		}
+	}
+	else
+	{
+		Iris::ImGuiRenderDrawData(0);
+		//Iris::SETTING_FinishFramebufferRender();
+	}
 //
 //
 	//Iris::DRAWCALL_DrawToDisplay(m_window);
@@ -429,7 +430,7 @@ void RenderHandler::RenderPostProcessingShaders()
 	//Iris::DRAWCALL_ClearFrame(Color::White);
 	//Iris::SETTING_SetViewportSize(EngineSettings::resolution);
 	//Iris::DRAWCALL_DrawPostProcess(m_screenShader, m_ppFramebuffers[origin]);
-	//Iris::DRAWCALL_DrawImGui();
+	Iris::ImGuiRenderDrawData(0);
 	//Iris::SETTING_FinishFramebufferRender();
 }
 

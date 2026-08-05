@@ -110,7 +110,6 @@ namespace Iris
     // ---------------------------------------- ImGui ------------------------------------------
     void ConfigureImGui();
     void ImGuiNewFrame();
-    void ImGuiEndFrame();
     void ImGuiRenderDrawData(CommandBufferHandle cmd);
     WEngine::Nullable<ImTextureID> TextureToImGui(TextureHandle texture);
 
