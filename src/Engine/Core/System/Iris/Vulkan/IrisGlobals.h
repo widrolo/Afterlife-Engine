@@ -108,5 +108,10 @@ inline Vulkan_RenderTarget displayTarget{};
 inline VulkanStatistics stats{};
 inline wtl::vector<BufferCollection> bufferGraveyard{};
 inline wtl::vector<Vulkan_Buffer> loadedBuffers{};
+inline wtl::vector<Vulkan_Texture> loadedTextures{};
+inline wtl::vector<Vulkan_Sampler> loadedSamplers{};
+inline wtl::vector<Vulkan_Shader> loadedShaders{};
+inline wtl::vector<Vulkan_ResourceTableLayout> loadedResourceTableLayouts{};
+inline wtl::vector<Vulkan_ResourceTable> loadedResourceTables{};
 
 #endif

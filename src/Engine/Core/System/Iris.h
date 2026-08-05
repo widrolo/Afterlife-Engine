@@ -34,7 +34,6 @@ namespace Iris
     BufferHandle CreateBuffer(const BufferDesc& desc, const byte* initialData, sizeT initialDataSize);
 
     TextureHandle CreateTexture(const TextureDesc& desc);
-    TextureHandle CreateTexture(const TextureDesc& desc, const byte* texData);
 
     SamplerHandle CreateSampler(const SamplerDesc& desc);
 

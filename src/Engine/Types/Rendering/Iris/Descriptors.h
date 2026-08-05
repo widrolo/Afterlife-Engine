@@ -24,7 +24,7 @@ namespace Iris
         uint32 height = 1;
         uint32 mipLevels = 1;
         uint32 arrayLayers = 1;
-        SampleCount  sampleCount = SampleCount::Samples1;
+        SampleCount sampleCount = SampleCount::Samples1;
         TextureUsage usage = TextureUsage::None;
         std::string debugName;
     };
@@ -37,8 +37,10 @@ namespace Iris
         SamplerAddressMode addressU = SamplerAddressMode::Repeat;
         SamplerAddressMode addressV = SamplerAddressMode::Repeat;
         float32 mipLodBias = 0.0f;
-        float32 minLod = 0.0f;
-        float32 maxLod = 0.0f;
+        // Not relevant, would cause more issues than it fixed otherwise I only speak
+        // for Vulkan here, maybe DX12, Metal or AGC are starving for this info?
+        //float32 minLod = 0.0f;
+        //float32 maxLod = 0.0f;
         float32 maxAnisotropy = 1.0f;
         bool anisotropyEnable = false;
         CompareOp compareOp = CompareOp::Never;

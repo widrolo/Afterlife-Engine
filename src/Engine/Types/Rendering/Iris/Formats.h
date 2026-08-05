@@ -14,7 +14,7 @@ namespace Iris
         BGRA8_SRGB,
 
         // ------------ Depth Only -------------
-        D24_UNorm_S8_UInt,
+        D32_SFloat_S8_UInt,
 
         // ----------- Texture Only ------------
         BC1,    // Albedo

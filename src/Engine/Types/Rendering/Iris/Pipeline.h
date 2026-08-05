@@ -25,7 +25,7 @@ namespace Iris
         ShaderStage pushConstantsStages = ShaderStage::Vertex;
 
         ImgFormat colorAttachmentFormat = ImgFormat::BGRA8_UNorm;
-        ImgFormat depthStencilFormat = ImgFormat::D24_UNorm_S8_UInt;
+        ImgFormat depthStencilFormat = ImgFormat::D32_SFloat_S8_UInt;
         SampleCount sampleCount = SampleCount::Samples1;
 
         std::string debugName;

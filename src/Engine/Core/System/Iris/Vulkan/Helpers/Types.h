@@ -6,6 +6,8 @@
 #include <vk_mem_alloc.h>
 #include <Engine/Types/Rendering/Iris/Usage.h>
 
+#include "Engine/Types/Rendering/Iris/Handles.h"
+
 struct Vulkan_Buffer
 {
     std::string debugName;
@@ -13,6 +15,48 @@ struct Vulkan_Buffer
     VkBuffer buffer;
     VmaAllocation alloc;
     VmaAllocationInfo allocInfo;
+};
+
+struct Vulkan_Texture
+{
+    std::string debugName;
+    VkImage image;
+    VkImageView imageView;
+    VmaAllocation alloc;
+    VmaAllocationInfo allocInfo;
+    uint32 width;
+    uint32 height;
+    uint8 mipCount;
+    VkFormat format;
+};
+
+struct Vulkan_Sampler
+{
+    std::string debugName;
+    VkSampler sampler;
+};
+
+struct Vulkan_Shader
+{
+    std::string debugName;
+    VkShaderModule shader;
+    VkShaderStageFlags stage;
+};
+
+struct Vulkan_ResourceTableLayout
+{
+    std::string debugName;
+    VkDescriptorSetLayout layout;
+    wtl::vector<VkDescriptorSetLayoutBinding> bindings;
+    wtl::vector<VkDescriptorPoolSize> poolSizes;
+};
+
+struct Vulkan_ResourceTable
+{
+    std::string debugName;
+    Iris::ResourceTableLayoutHandle layoutHandle;
+    VkDescriptorPool pool;
+    VkDescriptorSet set;
 };
 
 #endif
