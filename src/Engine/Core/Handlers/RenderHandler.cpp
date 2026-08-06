@@ -95,6 +95,8 @@ Framebuffer RenderHandler::EditorGetViewportFramebuffer()
 	return m_viewportFb;
 }
 
+Iris::CommandBufferHandle tempHandle;
+
 void RenderHandler::BeginFrame()
 {
 	//Iris::SETTING_BeginNewFrame();
@@ -114,7 +116,11 @@ void RenderHandler::BeginFrame()
 	//}
 //
 //
+	Iris::BeginFrame();
+	Iris::AcquireSwapchainTexture();
 	Iris::ImGuiNewFrame();
+	tempHandle = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
+	Iris::BeginRenderPass(tempHandle, {}); // description is for now ignored
 	//if (m_camera == nullptr)
 	//	Iris::DRAWCALL_ClearFrame(Color::Black);
 	//else
@@ -198,7 +204,10 @@ void RenderHandler::RenderFrame()
 //
 	//Iris::DRAWCALL_DrawToDisplay(m_window);
 
-
+	Iris::EndRenderPass(tempHandle);
+	Iris::EndCommandBuffer(tempHandle);
+	Iris::SubmitCommandBuffer(tempHandle);
+	Iris::Present();
 	m_renderQueue.clear();
 	CleanSortedMissions();
 }

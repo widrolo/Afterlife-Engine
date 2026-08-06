@@ -78,4 +78,26 @@ void SetupDeviceQueues()
     }
 }
 
+VkQueue QueueFor(Iris::QueueType type)
+{
+    switch (type)
+    {
+        case Iris::QueueType::Graphics: return queues.primaryDrawQueue;
+        case Iris::QueueType::Compute:  return queues.primaryComputeQueue;
+        case Iris::QueueType::Copy:     return queues.primaryTransferQueue;
+    }
+    return VK_NULL_HANDLE;
+}
+
+uint32 QueueFamilyFor(Iris::QueueType type)
+{
+    switch (type)
+    {
+        case Iris::QueueType::Graphics: return queues.primaryDrawQueueFamilyIndex;
+        case Iris::QueueType::Compute:  return queues.primaryComputeQueueFamilyIndex;
+        case Iris::QueueType::Copy:     return queues.primaryTransferQueueFamilyIndex;
+    }
+    return 0;
+}
+
 #endif

@@ -9,6 +9,7 @@
 #include "IrisGlobals.h"
 #include "Engine/Util/Log.h"
 #include "Helpers/Allocators.h"
+#include "Helpers/CmdBuffs.h"
 #include "Helpers/Swapchain.h"
 
 namespace Iris
@@ -32,6 +33,18 @@ namespace Iris
 
         if (!SetupDepthImage()) return false;
         if (!SetupSwapchain()) return false;
+
+        for (uint32 i = 0; i < screen.swapchainImageCount; i++)
+        {
+            Vulkan_Texture tex{};
+            tex.image = displayTarget.targetImages[i];
+            tex.imageView  = displayTarget.targetImageViews[i];
+            tex.debugName = "SwapchainImage" + std::to_string(i);
+            loadedTextures.push_back(tex);
+            swapchainTextureHandles.push_back(loadedTextures.size());
+        }
+
+        if (!SetupCommandBuffers()) return false;
 
         return true;
     }

@@ -7,6 +7,7 @@
 #include <Engine/Types/Rendering/Iris/Usage.h>
 
 #include "Engine/Types/Rendering/Iris/Handles.h"
+#include "Engine/WTL/vector.h"
 
 struct Vulkan_Buffer
 {
@@ -58,5 +59,18 @@ struct Vulkan_ResourceTable
     VkDescriptorPool pool;
     VkDescriptorSet set;
 };
+
+struct Vulkan_CmdBuff
+{
+    VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+    VkQueue queue = VK_NULL_HANDLE;
+};
+
+struct Vulkan_FramePools
+{
+    VkCommandPool pool[3] = {};
+    VkFence fence = VK_NULL_HANDLE;
+};
+
 
 #endif

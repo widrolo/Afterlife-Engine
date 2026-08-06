@@ -48,6 +48,10 @@ struct Vulkan_Queues
     // if no dedicated transfer queue was found, then this will be the same as the graphics queue
     uint32 primaryTransferQueueFamilyIndex = 0;
     VkQueue primaryTransferQueue = VK_NULL_HANDLE;
+
+    // if no dedicated compute queue was found, then this will be the same as the graphics queue
+    uint32 primaryComputeQueueFamilyIndex = 0;
+    VkQueue primaryComputeQueue = VK_NULL_HANDLE;
 };
 
 struct Vulkan_Screen
@@ -101,6 +105,8 @@ struct IrisContext
     bool firstFrame = true;
 };
 
+inline wtl::vector<Iris::TextureHandle> swapchainTextureHandles{};
+
 inline IrisContext irisCtx{};
 inline VulkanCore vcore{};
 inline Vulkan_Queues queues{};
@@ -114,5 +120,8 @@ inline wtl::vector<Vulkan_Sampler> loadedSamplers{};
 inline wtl::vector<Vulkan_Shader> loadedShaders{};
 inline wtl::vector<Vulkan_ResourceTableLayout> loadedResourceTableLayouts{};
 inline wtl::vector<Vulkan_ResourceTable> loadedResourceTables{};
+inline uint32 commandBufferFrameIndex = 0;
+inline wtl::vector<Vulkan_FramePools> framePools{};
+inline wtl::vector<Vulkan_CmdBuff> loadedCommandBuffers{};
 
 #endif

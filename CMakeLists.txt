@@ -392,6 +392,8 @@ add_executable(Afterlife_Engine
         src/Engine/Core/System/Iris/Vulkan/Helpers/Sync.cpp
         src/Engine/Core/System/Iris/Vulkan/Helpers/ImGui.cpp
         src/Engine/Core/System/Iris/Vulkan/Helpers/ImGui.h
+        src/Engine/Core/System/Iris/Vulkan/Helpers/CmdBuffs.cpp
+        src/Engine/Core/System/Iris/Vulkan/Helpers/CmdBuffs.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE
