@@ -29,6 +29,8 @@ struct Vulkan_Texture
     uint32 height;
     uint8 mipCount;
     VkFormat format;
+
+    VkDescriptorSet imGuiDescriptorSet;
 };
 
 struct Vulkan_Sampler
@@ -70,6 +72,13 @@ struct Vulkan_FramePools
 {
     VkCommandPool pool[3] = {};
     VkFence fence = VK_NULL_HANDLE;
+};
+
+struct Vulkan_Pipeline
+{
+    std::string debugName;
+    VkPipeline pipeline;
+    VkPipelineLayout layout;
 };
 
 

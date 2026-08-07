@@ -412,6 +412,44 @@ VkDescriptorType IrisResourceTableEntryTypeToVulkan(Iris::ResourceTableEntryType
     }
 }
 
+VkPrimitiveTopology IrisTopologyToVulkan(Iris::TopologyType topology)
+{
+    switch (topology)
+    {
+        case Iris::TopologyType::Point_List:      return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+        case Iris::TopologyType::Line_List:       return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        case Iris::TopologyType::Line_Strip:      return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+        case Iris::TopologyType::Triangle_List:   return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        case Iris::TopologyType::Triangle_Strip:  return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+        case Iris::TopologyType::Triangle_Fan:    return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+        default:                                  return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    }
+}
+
+VkFormat IrisVertFormatToVulkan(Iris::VertFormat format)
+{
+    switch (format)
+    {
+        case Iris::VertFormat::Float1: return VK_FORMAT_R32_SFLOAT;
+        case Iris::VertFormat::Float2: return VK_FORMAT_R32G32_SFLOAT;
+        case Iris::VertFormat::Float3: return VK_FORMAT_R32G32B32_SFLOAT;
+        case Iris::VertFormat::Float4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+        default:                       return VK_FORMAT_UNDEFINED;
+    }
+}
+
+sizeT IrisVertFormatSize(Iris::VertFormat format)
+{
+    switch (format)
+    {
+        case Iris::VertFormat::Float1: return 1;
+        case Iris::VertFormat::Float2: return 2;
+        case Iris::VertFormat::Float3: return 3;
+        case Iris::VertFormat::Float4: return 4;
+        default:                       return 0;
+    }
+}
+
 VkFormat FindBestSwapchainFormat()
 {
     wtl::vector<VkFormat> candidates =

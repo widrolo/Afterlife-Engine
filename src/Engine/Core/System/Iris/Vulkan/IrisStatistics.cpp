@@ -2,20 +2,19 @@
 
 #include <Engine/Core/System/Iris.h>
 
+#include "IrisGlobals.h"
 #include "Helpers/Helpers.h"
 
 namespace Iris
 {
     sizeT GetVRAMUsage()
     {
-        PrintNotImplemented("GetVRAMUsage");
-        return 0;
+        return stats.vramUsage;
     }
 
     sizeT GetDrawCallCountLastFrame()
     {
-        PrintNotImplemented("GetDrawCallCountLastFrame");
-        return 0;
+        return stats.drawCallsLastFrame;
     }
 }
 

@@ -43,6 +43,10 @@ VkShaderStageFlags IrisShaderStageToVulkan(Iris::ShaderStage stage);
 VkSampleCountFlagBits IrisSampleCountToVulkan(Iris::SampleCount count);
 VkImageUsageFlags IrisTextureUsageToVulkan(Iris::TextureUsage usage);
 VkDescriptorType IrisResourceTableEntryTypeToVulkan(Iris::ResourceTableEntryType type);
+VkPrimitiveTopology IrisTopologyToVulkan(Iris::TopologyType topology);
+VkFormat IrisVertFormatToVulkan(Iris::VertFormat format);
+sizeT IrisVertFormatSize(Iris::VertFormat format);
+
 
 VkFormat FindBestSwapchainFormat();
 VkFormat FindBestDepthFormat();

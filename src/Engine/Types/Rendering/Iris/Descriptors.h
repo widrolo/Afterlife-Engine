@@ -64,7 +64,6 @@ namespace Iris
         uint32 location;
         uint32 binding;
         VertFormat format;
-        sizeT offset;
     };
 
     struct VertexBindingDesc
@@ -85,12 +84,12 @@ namespace Iris
         CullMode cullMode = CullMode::Back;
         FrontFace frontFace = FrontFace::CounterClockwise;
         FillMode fillMode = FillMode::Solid;
+        float32 lineWidth = 1.0f;
         bool depthClampEnable = false;
         bool depthBiasEnable = false;
         float32 depthBiasConstant = 0.0f;
         float32 depthBiasClamp = 0.0f;
         float32 depthBiasSlope = 0.0f;
-        float32 lineWidth = 1.0f;
     };
 
     struct StencilFaceDesc
@@ -127,9 +126,13 @@ namespace Iris
 
     struct BlendDesc
     {
-        bool logicOpEnable = false;
-        LogicOp logicOp = LogicOp::Noop;
-        wtl::vector<BlendAttachmentDesc> attachments;
-        float32 blendConstants[4] = {0,0,0,0};
+        // "An idiot admires complexity, a genius admires simplicity" - Terry Davis
+        bool enableBlending = false;
+
+
+        //bool logicOpEnable = false;
+        //LogicOp logicOp = LogicOp::Noop;
+        //wtl::vector<BlendAttachmentDesc> attachments;
+        //float32 blendConstants[4] = {0,0,0,0};
     };
 }

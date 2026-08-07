@@ -63,8 +63,31 @@ namespace Iris
 
     WEngine::Nullable<ImTextureID> TextureToImGui(TextureHandle texture)
     {
-        PrintNotImplemented("TextureToImGui");
-        return {};
+        if (texture == 0 || texture > loadedTextures.size())
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog("Invalid texture handle, refusing to create ImGui texture!");
+            return {};
+        }
+
+        Vulkan_Texture& tex = loadedTextures[texture - 1];
+
+        if (tex.imGuiDescriptorSet != VK_NULL_HANDLE)
+            return (ImTextureID)tex.imGuiDescriptorSet;
+
+        VkDescriptorSet descriptorSet = ImGui_ImplVulkan_AddTexture(imGuiSampler, tex.imageView,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+        if (descriptorSet == VK_NULL_HANDLE)
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog(std::format("Failed to create ImGui texture from {}!", tex.debugName));
+            return {};
+        }
+
+        tex.imGuiDescriptorSet = descriptorSet;
+
+        return (ImTextureID)descriptorSet;
     }
 }
 

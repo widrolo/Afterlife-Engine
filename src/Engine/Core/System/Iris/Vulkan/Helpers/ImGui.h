@@ -4,5 +4,6 @@
 #include <vulkan/vulkan.h>
 
 VkDescriptorPool SetupImGuiDescriptorPool();
+void SetupImGuiSampler();
 
 #endif

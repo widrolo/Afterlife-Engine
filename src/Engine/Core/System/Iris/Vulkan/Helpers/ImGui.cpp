@@ -4,6 +4,7 @@
 #include "Helpers.h"
 #include "Engine/Core/System/Iris/Vulkan/IrisGlobals.h"
 #include "Engine/imgui/backends/imgui_impl_vulkan.h"
+#include "Engine/Types/Rendering/Iris/Descriptors.h"
 #include "Engine/Util/Log.h"
 
 VkDescriptorPool SetupImGuiDescriptorPool()
@@ -32,6 +33,37 @@ VkDescriptorPool SetupImGuiDescriptorPool()
         return VK_NULL_HANDLE;
     }
     return pool;
+}
+
+void SetupImGuiSampler()
+{
+    // hacky way to abuse defaults.
+    Iris::SamplerDesc desc{};
+
+    VkSamplerCreateInfo samplerInfo{};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = IrisFilterToVulkan(desc.magFilter);
+    samplerInfo.minFilter = IrisFilterToVulkan(desc.minFilter);
+    samplerInfo.mipmapMode = IrisMipFilterToVulkan(desc.mipFilter);
+    samplerInfo.addressModeU = IrisSamAddrModeToVulkan(desc.addressU);
+    samplerInfo.addressModeV = IrisSamAddrModeToVulkan(desc.addressV);
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.mipLodBias = desc.mipLodBias;
+    samplerInfo.anisotropyEnable = desc.anisotropyEnable;
+    samplerInfo.maxAnisotropy = desc.maxAnisotropy;
+    samplerInfo.minLod = 0.0f;
+    samplerInfo.maxLod = VK_LOD_CLAMP_NONE;
+    samplerInfo.compareEnable = desc.compareEnable;
+    samplerInfo.compareOp = IrisCompareOpToVulkan(desc.compareOp);
+    samplerInfo.borderColor = IrisBorderColorToVulkan(desc.borderColor);
+
+    auto res = vkCreateSampler(vcore.gpuDevice, &samplerInfo, vcore.allocator, &imGuiSampler);
+
+    if (!ParseVkResult(res))
+    {
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog("Unable to create ImGui sampler.");
+    }
 }
 
 #endif

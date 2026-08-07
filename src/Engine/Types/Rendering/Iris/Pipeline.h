@@ -9,20 +9,20 @@ namespace Iris
 {
     struct GraphicsPipelineDesc
     {
-        wtl::vector<ShaderStageDesc> stages;
+        ShaderHandle vertexShader;
+        ShaderHandle fragmentShader;
+
         VertexLayoutDesc vertexLayout;
         TopologyType topology = TopologyType::Triangle_List;
-        bool primitiveRestartEnable = false;
-        uint32 patchControlPoints = 0;
         RasterizerDesc rasterizer;
         DepthStencilDesc depthStencil;
         BlendDesc blend;
 
         std::array<ResourceTableLayoutHandle, 8> tableLayouts;
-        uint32 colorAttachmentCount = 1;
+        uint32 tableAttachmentCount = 1;
 
         uint32 pushConstantsSize = 0;
-        ShaderStage pushConstantsStages = ShaderStage::Vertex;
+        ShaderStage pushConstantsStage = ShaderStage::Vertex;
 
         ImgFormat colorAttachmentFormat = ImgFormat::BGRA8_UNorm;
         ImgFormat depthStencilFormat = ImgFormat::D32_SFloat_S8_UInt;
@@ -33,11 +33,10 @@ namespace Iris
 
     struct ComputePipelineDesc
     {
-        ShaderStageDesc stage;
+        ShaderHandle computeShader;
         std::array<ResourceTableLayoutHandle, 8> tableLayouts;
-        uint32 colorAttachmentCount = 1;
+        uint32 tableAttachmentCount = 1;
         uint32 pushConstantsSize = 0;
-        ShaderStage pushConstantsStages = ShaderStage::Compute;
         std::string debugName;
     };
 }
