@@ -59,6 +59,7 @@ namespace Iris
 
     // ----------------------------------- Command Recording -----------------------------------
     CommandBufferHandle CreateCommandBuffer(QueueType queue = QueueType::Graphics);
+    void BeginCommandBuffer(CommandBufferHandle cmd);
     void EndCommandBuffer(CommandBufferHandle cmd);
     void SubmitCommandBuffer(CommandBufferHandle cmd);
 

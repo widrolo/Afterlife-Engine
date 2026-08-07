@@ -25,6 +25,7 @@
 
 using namespace WEngine;
 
+wtl::vector<Iris::CommandBufferHandle> tempHandle;
 RenderHandler::RenderHandler()
 {
 	InitSDL();
@@ -61,26 +62,14 @@ RenderHandler::RenderHandler()
 	m_lighting.ambient.ambientColor = {164, 199, 247, 255};
 	m_lighting.cameraPos = Vector3::Zero;
 
-	//Iris::SETTING_SetLighting(m_lighting);
-//
-	//m_normalPassMat = Iris::ALLOC_CompileMaterial("NormalsMat").GetValue();
+	for (int i = 0; i < Iris::GetFramesInFlight(); i++)
+		tempHandle.push_back(Iris::CreateCommandBuffer(Iris::QueueType::Graphics));
 }
 
 void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)
 {
 	m_isEditor = true;
 	m_viewportResolution = viewportResolution;
-
-	//auto fbN = Iris::ALLOC_CreateFramebuffer(viewportResolution);
-//
-	//if (fbN.HasValue())
-	//	m_viewportFb = fbN.GetValue();
-	//else
-	//{
-	//	WLog::SetConsoleError();
-	//	WLog::ConsoleLog("Could not create a new Framebuffer for the viewport, falling back!");
-	//	m_isEditor = false;
-	//}
 
 	m_projection = glm::perspective(
 		glm::radians(90.0f),
@@ -95,26 +84,29 @@ Framebuffer RenderHandler::EditorGetViewportFramebuffer()
 	return m_viewportFb;
 }
 
-Iris::CommandBufferHandle tempHandle;
 
 void RenderHandler::BeginFrame()
 {
 	//m_currentPPFramebuffer = 0;
 
+	int frame = Iris::GetCurrentFrameIndex();
+	WLog::ConsoleLog(std::format("Starting frame {}", frame));
+
 	Iris::BeginFrame();
 	Iris::AcquireSwapchainTexture();
 	Iris::ImGuiNewFrame();
-	tempHandle = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
-	Iris::BeginRenderPass(tempHandle, {}); // description is for now ignored
+	Iris::BeginCommandBuffer(tempHandle[frame]);
+	Iris::BeginRenderPass(tempHandle[frame], {}); // description is for now ignored
 
 	Iris::Viewport vp{};
 	vp.extent = {1920.0f, 1080.0f};
-	Iris::SetViewport(tempHandle, vp);
+	Iris::SetViewport(tempHandle[frame], vp);
 
 }
 
 void RenderHandler::RenderFrame()
 {
+	int frame = Iris::GetCurrentFrameIndex();
 	if (m_camera == nullptr)
 		m_lighting.cameraPos = Vector3::Zero;
 	else
@@ -139,25 +131,24 @@ void RenderHandler::RenderFrame()
 		// temp until we have proper drawing again
 		if (m_isEditor)
 		{
-			Iris::ImGuiRenderDrawData(tempHandle);
+			Iris::ImGuiRenderDrawData(tempHandle[frame]);
 		}
 		else
 		{
-			Iris::ImGuiRenderDrawData(tempHandle);
+			Iris::ImGuiRenderDrawData(tempHandle[frame]);
 		}
 	}
 	else
 	{
-		Iris::ImGuiRenderDrawData(tempHandle);
+		Iris::ImGuiRenderDrawData(tempHandle[frame]);
 	}
 
-	Iris::EndRenderPass(tempHandle);
-	Iris::EndCommandBuffer(tempHandle);
-	Iris::SubmitCommandBuffer(tempHandle);
+	Iris::EndRenderPass(tempHandle[frame]);
+	Iris::EndCommandBuffer(tempHandle[frame]);
+	Iris::SubmitCommandBuffer(tempHandle[frame]);
 	Iris::Present();
 	m_renderQueue.clear();
 	CleanSortedMissions();
-	//WLog::ConsoleLog("Yo");
 }
 
 void RenderHandler::RegisterCamera(CameraComponent *camera)

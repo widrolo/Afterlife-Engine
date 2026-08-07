@@ -62,7 +62,7 @@ struct Vulkan_ResourceTable
 
 struct Vulkan_CmdBuff
 {
-    VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+    wtl::vector<VkCommandBuffer> commandBuffers;
     VkQueue queue = VK_NULL_HANDLE;
 };
 

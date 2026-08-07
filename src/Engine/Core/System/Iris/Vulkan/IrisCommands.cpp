@@ -24,14 +24,14 @@ namespace Iris
         vp.height = viewport.extent.y;
         vp.minDepth = viewport.minDepth;
         vp.maxDepth = viewport.maxDepth;
-        vkCmdSetViewport(loadedCommandBuffers[cmd - 1].commandBuffer, 0, 1, &vp);
+        vkCmdSetViewport(GetCurrentCmdBuff(cmd), 0, 1, &vp);
 
         VkRect2D scissor{};
         scissor.offset.x = viewport.pos.x;
         scissor.offset.y = viewport.pos.y;
         scissor.extent.width = viewport.extent.x;
         scissor.extent.height = viewport.extent.y;
-        vkCmdSetScissor(loadedCommandBuffers[cmd - 1].commandBuffer, 0, 1, &scissor);
+        vkCmdSetScissor(GetCurrentCmdBuff(cmd), 0, 1, &scissor);
     }
 
     void Draw(CommandBufferHandle cmd, sizeT vertexCount, sizeT instanceCount, sizeT firstVertex, sizeT firstInstance)

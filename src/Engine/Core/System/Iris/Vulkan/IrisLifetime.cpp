@@ -36,7 +36,6 @@ namespace Iris
     void EndFrame()
     {
         irisCtx.firstFrame = false;
-        PrintNotImplemented("BeginFrame");
     }
 }
 

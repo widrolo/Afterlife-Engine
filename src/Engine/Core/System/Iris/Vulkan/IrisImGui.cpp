@@ -58,7 +58,7 @@ namespace Iris
             return;
         }
         ImGui::Render();
-        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), loadedCommandBuffers[cmd - 1].commandBuffer);
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), GetCurrentCmdBuff(cmd));
     }
 
     WEngine::Nullable<ImTextureID> TextureToImGui(TextureHandle texture)

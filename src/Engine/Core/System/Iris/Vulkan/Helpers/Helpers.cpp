@@ -453,6 +453,12 @@ VkFormat FindBestDepthFormat()
     return VK_FORMAT_UNDEFINED;
 }
 
+VkCommandBuffer GetCurrentCmdBuff(Iris::CommandBufferHandle cmd)
+{
+    const uint32 slot = commandBufferFrameIndex % (uint32)framePools.size();
+    return loadedCommandBuffers[cmd - 1].commandBuffers[slot];
+}
+
 wtl::vector<std::string> GetExtensionsToLoad()
 {
     wtl::vector<std::string> extensions = {VK_EXT_DEBUG_UTILS_EXTENSION_NAME};

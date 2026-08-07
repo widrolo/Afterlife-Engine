@@ -11,42 +11,47 @@ namespace Iris
 {
     CommandBufferHandle CreateCommandBuffer(QueueType queue)
     {
-        const uint32 slot = commandBufferFrameIndex % (uint32)framePools.size();
-        VkCommandPool pool = framePools[slot].pool[(uint8)queue];
-
         Vulkan_CmdBuff entry{};
         entry.queue = QueueFor(queue);
 
+        const uint32 frameCount = (uint32)framePools.size();
+
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = pool;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = 1;
 
-        auto res = vkAllocateCommandBuffers(vcore.gpuDevice, &allocInfo, &entry.commandBuffer);
-
-        if (!ParseVkResult(res))
+        entry.commandBuffers.resize(frameCount);
+        for (uint32 i = 0; i < frameCount; ++i)
         {
-            WEngine::WLog::SetConsoleError();
-            WEngine::WLog::ConsoleLog("Unable to create command buffer");
-            return false;
+            allocInfo.commandPool = framePools[i].pool[(uint8)queue];
+            auto res = vkAllocateCommandBuffers(vcore.gpuDevice, &allocInfo, &entry.commandBuffers[i]);
+            if (!ParseVkResult(res))
+            {
+                WEngine::WLog::SetConsoleError();
+                WEngine::WLog::ConsoleLog("Unable to create command buffer");
+                return 0;
+            }
+        }
+
+        loadedCommandBuffers.push_back(entry);
+        return loadedCommandBuffers.size();
+    }
+
+    void BeginCommandBuffer(CommandBufferHandle cmd)
+    {
+        if (cmd == 0 || cmd > loadedCommandBuffers.size())
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog("Invalid command buffer handle, refusing to end!");
+            return;
         }
 
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-        res = vkBeginCommandBuffer(entry.commandBuffer, &beginInfo);
-
-        if (!ParseVkResult(res))
-        {
-            WEngine::WLog::SetConsoleError();
-            WEngine::WLog::ConsoleLog("Unable to begin command buffer");
-            return false;
-        }
-
-        loadedCommandBuffers.push_back(entry);
-        return loadedCommandBuffers.size();
+        vkBeginCommandBuffer(GetCurrentCmdBuff(cmd), &beginInfo);
     }
 
     void EndCommandBuffer(CommandBufferHandle cmd)
@@ -57,7 +62,7 @@ namespace Iris
             WEngine::WLog::ConsoleLog("Invalid command buffer handle, refusing to end!");
             return;
         }
-        vkEndCommandBuffer(loadedCommandBuffers[cmd - 1].commandBuffer);
+        vkEndCommandBuffer(GetCurrentCmdBuff(cmd));
     }
 
     void SubmitCommandBuffer(CommandBufferHandle cmd)
@@ -84,7 +89,7 @@ namespace Iris
         submit.signalSemaphoreCount = 1;
         submit.pSignalSemaphores    = &renderFinished;
         submit.commandBufferCount   = 1;
-        submit.pCommandBuffers      = &cmdBuff.commandBuffer;
+        submit.pCommandBuffers      = &cmdBuff.commandBuffers[slot];
 
         vkQueueSubmit(cmdBuff.queue, 1, &submit, framePools[slot].fence);
     }
@@ -122,7 +127,7 @@ namespace Iris
         colBarrier.subresourceRange.baseArrayLayer = 0;
         colBarrier.subresourceRange.layerCount = 1;
 
-        vkCmdPipelineBarrier(cmdBuff.commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        vkCmdPipelineBarrier(GetCurrentCmdBuff(cmd), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, nullptr, 0, nullptr, 1, &colBarrier);
 
         // never trusting vulkan with things passed in as reference!
@@ -132,7 +137,7 @@ namespace Iris
         depthBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         depthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-        vkCmdPipelineBarrier(cmdBuff.commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        vkCmdPipelineBarrier(GetCurrentCmdBuff(cmd), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
             VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, 0, nullptr, 0, nullptr, 1, &depthBarrier);
 
         VkRenderingAttachmentInfo colorAttachmentInfo{};
@@ -161,7 +166,7 @@ namespace Iris
         renderingInfo.pColorAttachments = &colorAttachmentInfo;
         renderingInfo.pDepthAttachment = &depthAttachmentInfo;
 
-        vkCmdBeginRendering(cmdBuff.commandBuffer, &renderingInfo);
+        vkCmdBeginRendering(GetCurrentCmdBuff(cmd), &renderingInfo);
     }
 
     void EndRenderPass(CommandBufferHandle cmd)
@@ -175,7 +180,7 @@ namespace Iris
 
         const Vulkan_CmdBuff& cmdBuff = loadedCommandBuffers[cmd - 1];
 
-        vkCmdEndRendering(cmdBuff.commandBuffer);
+        vkCmdEndRendering(GetCurrentCmdBuff(cmd));
 
         VkImageLayout newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
@@ -193,7 +198,7 @@ namespace Iris
         imgBarrier.subresourceRange.baseArrayLayer = 0;
         imgBarrier.subresourceRange.layerCount = 1;
 
-        vkCmdPipelineBarrier(cmdBuff.commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        vkCmdPipelineBarrier(GetCurrentCmdBuff(cmd), VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imgBarrier);
     }
 

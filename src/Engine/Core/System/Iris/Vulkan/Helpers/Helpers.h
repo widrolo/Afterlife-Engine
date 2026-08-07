@@ -47,6 +47,8 @@ VkDescriptorType IrisResourceTableEntryTypeToVulkan(Iris::ResourceTableEntryType
 VkFormat FindBestSwapchainFormat();
 VkFormat FindBestDepthFormat();
 
+VkCommandBuffer GetCurrentCmdBuff(Iris::CommandBufferHandle cmd);
+
 wtl::vector<std::string> GetExtensionsToLoad();
 
 #endif
