@@ -99,50 +99,18 @@ Iris::CommandBufferHandle tempHandle;
 
 void RenderHandler::BeginFrame()
 {
-	//Iris::SETTING_BeginNewFrame();
-//
-	m_currentPPFramebuffer = 0;
-//
-	//if (!Engine::GetCla().testMode)
-	//{
-	//	if (m_isEditor)
-	//		Iris::SETTING_SelectFramebufferForRender(m_viewportFb);
-	//	else
-	//		Iris::SETTING_SelectFramebufferForRender(m_ppFramebuffers[m_currentPPFramebuffer]);
-	//}
-	//else
-	//{
-	//	Iris::SETTING_SelectFramebufferScreenForRender();
-	//}
-//
-//
+	//m_currentPPFramebuffer = 0;
+
 	Iris::BeginFrame();
 	Iris::AcquireSwapchainTexture();
 	Iris::ImGuiNewFrame();
 	tempHandle = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
 	Iris::BeginRenderPass(tempHandle, {}); // description is for now ignored
-	//if (m_camera == nullptr)
-	//	Iris::DRAWCALL_ClearFrame(Color::Black);
-	//else
-	//	Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
-	//if (m_isEditor)
-	//	Iris::SETTING_SetViewportSize(m_viewportResolution);
-	//else
-	//	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
-//
-//
-	//if (m_camera == nullptr)
-	//	m_viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	//else
-	//{
-	//	Vector3 camPos = m_camera->GetPosition();
-	//	Quaternion camRot = m_camera->GetRotation();
-//
-	//	glm::quat q(camRot.w, camRot.x, camRot.y, camRot.z);
-//
-	//	m_viewMatrix = glm::mat4_cast(glm::conjugate(q));
-	//	m_viewMatrix = glm::translate(m_viewMatrix, glm::vec3(-camPos.x, camPos.y, -camPos.z));
-	//}
+
+	Iris::Viewport vp{};
+	vp.extent = {1920.0f, 1080.0f};
+	Iris::SetViewport(tempHandle, vp);
+
 }
 
 void RenderHandler::RenderFrame()
@@ -152,57 +120,36 @@ void RenderHandler::RenderFrame()
 	else
 		m_lighting.cameraPos = m_camera->GetPosition();
 
-	//Iris::SETTING_SetLighting(m_lighting);
-	RenderSkybox();
-	SortMissions(false);
-	SortMissions(true);
-
-	for (auto& materialGroup : m_sortedMissions)
-	{
-		for (auto& modelGroup : materialGroup.models)
-		{
-			RenderModelGroup(modelGroup, materialGroup.groupID);
-		}
-	}
-
-	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
-
-	//for (auto& stat : m_stationaryMissions)
+	//RenderSkybox();
+	//SortMissions(false);
+	//SortMissions(true);
+//
+	//for (auto& materialGroup : m_sortedMissions)
 	//{
-	//	for (auto& ref : stat.references)
-	//		Iris::DRAWCALL_DrawModelInstancedStationary(ref, stat.model, stat.material, vp);
+	//	for (auto& modelGroup : materialGroup.models)
+	//	{
+	//		RenderModelGroup(modelGroup, materialGroup.groupID);
+	//	}
 	//}
 
+	//Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
 
 	if (!Engine::GetCla().testMode)
 	{
+		// temp until we have proper drawing again
 		if (m_isEditor)
 		{
-			//Iris::SETTING_FinishFramebufferRender();
-			//Iris::SETTING_SelectFramebufferScreenForRender();
-			//if (m_camera == nullptr)
-			//	Iris::DRAWCALL_ClearFrame(Color::Black);
-			//else
-			//	Iris::DRAWCALL_ClearFrame(m_camera->GetBackColor());
-			//
-			Iris::ImGuiRenderDrawData(0);
-			//Iris::SETTING_FinishFramebufferRender();
+			Iris::ImGuiRenderDrawData(tempHandle);
 		}
 		else
 		{
-			//Iris::SETTING_FinishFramebufferRender();
-			NormalsPass();
-			RenderPostProcessingShaders();
+			Iris::ImGuiRenderDrawData(tempHandle);
 		}
 	}
 	else
 	{
-		Iris::ImGuiRenderDrawData(0);
-		//Iris::SETTING_FinishFramebufferRender();
+		Iris::ImGuiRenderDrawData(tempHandle);
 	}
-//
-//
-	//Iris::DRAWCALL_DrawToDisplay(m_window);
 
 	Iris::EndRenderPass(tempHandle);
 	Iris::EndCommandBuffer(tempHandle);
@@ -210,6 +157,7 @@ void RenderHandler::RenderFrame()
 	Iris::Present();
 	m_renderQueue.clear();
 	CleanSortedMissions();
+	//WLog::ConsoleLog("Yo");
 }
 
 void RenderHandler::RegisterCamera(CameraComponent *camera)

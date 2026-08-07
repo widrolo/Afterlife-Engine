@@ -61,7 +61,6 @@ namespace Iris
     CommandBufferHandle CreateCommandBuffer(QueueType queue = QueueType::Graphics);
     void EndCommandBuffer(CommandBufferHandle cmd);
     void SubmitCommandBuffer(CommandBufferHandle cmd);
-    void SubmitCommandBuffers(const CommandBufferHandle* cmds, sizeT count);
 
     // ----- Render Passes -----
     void BeginRenderPass(CommandBufferHandle cmd, const RenderPassBeginDesc& desc);
@@ -86,7 +85,6 @@ namespace Iris
     // --------------------------------------- Commands ----------------------------------------
     // -------- Dynamic --------
     void SetViewport(CommandBufferHandle cmd, const Viewport& viewport);
-    void SetScissor(CommandBufferHandle cmd, const Scissor& scissor);
 
     // ------- Draw call -------
     void Draw(CommandBufferHandle cmd, sizeT vertexCount, sizeT instanceCount, sizeT firstVertex, sizeT firstInstance);

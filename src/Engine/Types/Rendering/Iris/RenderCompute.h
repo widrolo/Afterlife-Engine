@@ -33,13 +33,7 @@ namespace Iris
     {
         WEngine::Vector2 pos;
         WEngine::Vector2 extent;
-        float32 minDepth;
-        float32 maxDepth;
-    };
-
-    struct Scissor
-    {
-        WEngine::Vector2 pos;
-        WEngine::Vector2 extent;
+        float32 minDepth = 0.0f;
+        float32 maxDepth = 0.0f;
     };
 }

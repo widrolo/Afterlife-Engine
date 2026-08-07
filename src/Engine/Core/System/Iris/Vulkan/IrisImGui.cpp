@@ -51,9 +51,14 @@ namespace Iris
 
     void ImGuiRenderDrawData(CommandBufferHandle cmd)
     {
+        if (cmd == 0 || cmd > loadedCommandBuffers.size())
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog("Invalid command buffer handle, refusing to draw ImGui!");
+            return;
+        }
         ImGui::Render();
-        // command buffers arent set up yet
-        //ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), GetFbCmdBuff(ctx));
+        ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), loadedCommandBuffers[cmd - 1].commandBuffer);
     }
 
     WEngine::Nullable<ImTextureID> TextureToImGui(TextureHandle texture)

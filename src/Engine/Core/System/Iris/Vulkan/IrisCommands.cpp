@@ -3,18 +3,35 @@
 #include <Engine/Core/System/Iris.h>
 #include <Engine/Math/Vector.h>
 
+#include "IrisGlobals.h"
+#include "Engine/Util/Log.h"
 #include "Helpers/Helpers.h"
 
 namespace Iris
 {
     void SetViewport(CommandBufferHandle cmd, const Viewport& viewport)
     {
-        PrintNotImplemented("SetViewport");
-    }
+        if (cmd == 0 || cmd > loadedCommandBuffers.size())
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog("Invalid command buffer handle, refusing to set viewport!");
+            return;
+        }
+        VkViewport vp{};
+        vp.x = viewport.pos.x;
+        vp.y = viewport.pos.y;
+        vp.width = viewport.extent.x;
+        vp.height = viewport.extent.y;
+        vp.minDepth = viewport.minDepth;
+        vp.maxDepth = viewport.maxDepth;
+        vkCmdSetViewport(loadedCommandBuffers[cmd - 1].commandBuffer, 0, 1, &vp);
 
-    void SetScissor(CommandBufferHandle cmd, const Scissor& scissor)
-    {
-        PrintNotImplemented("SetScissor");
+        VkRect2D scissor{};
+        scissor.offset.x = viewport.pos.x;
+        scissor.offset.y = viewport.pos.y;
+        scissor.extent.width = viewport.extent.x;
+        scissor.extent.height = viewport.extent.y;
+        vkCmdSetScissor(loadedCommandBuffers[cmd - 1].commandBuffer, 0, 1, &scissor);
     }
 
     void Draw(CommandBufferHandle cmd, sizeT vertexCount, sizeT instanceCount, sizeT firstVertex, sizeT firstInstance)

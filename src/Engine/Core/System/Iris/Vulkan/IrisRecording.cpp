@@ -89,11 +89,6 @@ namespace Iris
         vkQueueSubmit(cmdBuff.queue, 1, &submit, framePools[slot].fence);
     }
 
-    void SubmitCommandBuffers(const CommandBufferHandle* cmds, sizeT count)
-    {
-        PrintNotImplemented("SubmitCommandBuffers");
-    }
-
     void BeginRenderPass(CommandBufferHandle cmd, const RenderPassBeginDesc& desc)
     {
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
