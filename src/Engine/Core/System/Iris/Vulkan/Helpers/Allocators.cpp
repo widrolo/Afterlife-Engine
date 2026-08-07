@@ -13,6 +13,11 @@ void* VulkanAllocate(void*, size_t size, size_t alignment, VkSystemAllocationSco
 }
 void* VulkanReallocate(void*, void* ptr, size_t newSize, size_t alignment, VkSystemAllocationScope scope)
 {
+    if (newSize == 0)
+    {
+        WAllocator::Free(ptr);
+        return nullptr;
+    }
     return WAllocator::ReallocateAligned(ptr, newSize, alignment);
 }
 void VulkanFree(void*, void* ptr)

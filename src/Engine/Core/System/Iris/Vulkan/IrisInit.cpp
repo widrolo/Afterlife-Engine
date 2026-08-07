@@ -16,6 +16,7 @@ namespace Iris
 {
     bool Init(const InitDesc& desc)
     {
+        SetupAllocator();
         if (!SetupInstance()) return false;
 #ifndef PACKAGE
         SetupValidation();

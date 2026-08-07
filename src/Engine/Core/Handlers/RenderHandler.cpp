@@ -25,7 +25,7 @@
 
 using namespace WEngine;
 
-wtl::vector<Iris::CommandBufferHandle> tempHandle;
+Iris::CommandBufferHandle tempHandle;
 RenderHandler::RenderHandler()
 {
 	InitSDL();
@@ -62,8 +62,7 @@ RenderHandler::RenderHandler()
 	m_lighting.ambient.ambientColor = {164, 199, 247, 255};
 	m_lighting.cameraPos = Vector3::Zero;
 
-	for (int i = 0; i < Iris::GetFramesInFlight(); i++)
-		tempHandle.push_back(Iris::CreateCommandBuffer(Iris::QueueType::Graphics));
+	tempHandle = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
 }
 
 void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)
@@ -90,17 +89,16 @@ void RenderHandler::BeginFrame()
 	//m_currentPPFramebuffer = 0;
 
 	int frame = Iris::GetCurrentFrameIndex();
-	WLog::ConsoleLog(std::format("Starting frame {}", frame));
 
 	Iris::BeginFrame();
 	Iris::AcquireSwapchainTexture();
 	Iris::ImGuiNewFrame();
-	Iris::BeginCommandBuffer(tempHandle[frame]);
-	Iris::BeginRenderPass(tempHandle[frame], {}); // description is for now ignored
+	Iris::BeginCommandBuffer(tempHandle);
+	Iris::BeginRenderPass(tempHandle, {}); // description is for now ignored
 
 	Iris::Viewport vp{};
 	vp.extent = {1920.0f, 1080.0f};
-	Iris::SetViewport(tempHandle[frame], vp);
+	Iris::SetViewport(tempHandle, vp);
 
 }
 
@@ -131,21 +129,21 @@ void RenderHandler::RenderFrame()
 		// temp until we have proper drawing again
 		if (m_isEditor)
 		{
-			Iris::ImGuiRenderDrawData(tempHandle[frame]);
+			Iris::ImGuiRenderDrawData(tempHandle);
 		}
 		else
 		{
-			Iris::ImGuiRenderDrawData(tempHandle[frame]);
+			Iris::ImGuiRenderDrawData(tempHandle);
 		}
 	}
 	else
 	{
-		Iris::ImGuiRenderDrawData(tempHandle[frame]);
+		Iris::ImGuiRenderDrawData(tempHandle);
 	}
 
-	Iris::EndRenderPass(tempHandle[frame]);
-	Iris::EndCommandBuffer(tempHandle[frame]);
-	Iris::SubmitCommandBuffer(tempHandle[frame]);
+	Iris::EndRenderPass(tempHandle);
+	Iris::EndCommandBuffer(tempHandle);
+	Iris::SubmitCommandBuffer(tempHandle);
 	Iris::Present();
 	m_renderQueue.clear();
 	CleanSortedMissions();
