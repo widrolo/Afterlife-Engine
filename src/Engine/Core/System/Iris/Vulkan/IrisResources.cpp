@@ -541,7 +541,7 @@ namespace Iris
             WEngine::WLog::ConsoleLog(std::format("Invalid buffer handle, refusing to Update!"));
             return;
         }
-        const Vulkan_Buffer& buff = loadedBuffers[buffer - 1]; // cause handle was gotten by taking size of vector
+        const Vulkan_Buffer& buff = loadedBuffers[buffer - 1];
 
         sizeT copyExtent = dstOffset + size;
         if (dstOffset > buff.allocInfo.size)

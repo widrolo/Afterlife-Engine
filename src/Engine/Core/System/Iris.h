@@ -76,10 +76,10 @@ namespace Iris
     // ----------------------------------- Resource Binding ------------------------------------
     void BindGraphicsPipeline(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline);
     void BindComputePipeline(CommandBufferHandle cmd, ComputePipelineHandle  pipeline);
-    void BindResourceTable(CommandBufferHandle cmd, uint32 slot, ResourceTableHandle table);
-    void SetPushConstants(CommandBufferHandle cmd, const byte* data, sizeT size);
-    void BindVertexBuffers(CommandBufferHandle cmd, uint32 firstBinding, const BufferHandle* buffers,
-        const sizeT* offsets, sizeT count);
+    void BindResourceTable(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, uint32 slot, ResourceTableHandle table);
+    void SetPushConstants(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, const byte* data, sizeT size);
+    void BindVertexBuffers(CommandBufferHandle cmd, uint32 firstBinding, const wtl::vector<BufferHandle>& buffers,
+        const wtl::vector<sizeT>& offsets);
     void BindIndexBuffer(CommandBufferHandle cmd, BufferHandle buffer, sizeT offset);
 
 
@@ -103,8 +103,7 @@ namespace Iris
             sizeT srcOffset, sizeT size);
 
     // generally, the only use for this is a staging buffer. Doesn't need much.
-    void CopyBufferToTexture(CommandBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst,
-        WEngine::Vector2 extent);
+    void CopyBufferToTexture(CommandBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst);
 
     // ---------------------------------------- ImGui ------------------------------------------
     void ConfigureImGui();

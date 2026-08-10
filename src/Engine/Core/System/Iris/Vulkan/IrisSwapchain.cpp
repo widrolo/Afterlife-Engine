@@ -26,7 +26,8 @@ namespace Iris
 
     FramebufferHandle GetSwapchainFramebuffer()
     {
-        PrintNotImplemented("GetSwapchainFramebuffer");
+        // The Framebuffer handle is the only handle where 0 is not invalid, in this case the swapchain.
+        // The user should not ever use 0 though but rather this function in case i change my mind.
         return 0;
     }
 

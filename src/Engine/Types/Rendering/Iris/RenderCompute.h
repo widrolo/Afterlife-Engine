@@ -23,8 +23,7 @@ namespace Iris
     struct RenderPassBeginDesc
     {
         FramebufferHandle framebuffer;
-        std::array<AttachmentOps, 8> colorAttachments;
-        uint8 colorAttachmentCount = 0;
+        AttachmentOps colorAttachment;
         AttachmentOps depthStencil;
         bool hasDepthStencil = false;
     };

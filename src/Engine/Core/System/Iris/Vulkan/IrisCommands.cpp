@@ -161,8 +161,7 @@ namespace Iris
         vkCmdCopyBuffer(GetCurrentCmdBuff(cmd), srcBuff.buffer, dstBuff.buffer, 1, &copyInfo);
     }
 
-    void CopyBufferToTexture(CommandBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst,
-        WEngine::Vector2 extent)
+    void CopyBufferToTexture(CommandBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst)
     {
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
@@ -225,11 +224,15 @@ namespace Iris
             0, 0, nullptr, 0, nullptr, 1, &pipeBarrier);
 
         std::vector<VkBufferImageCopy> regions;
-        VkDeviceSize offset = 0;
         uint32 mw = dstImg.width;
         uint32 mh = dstImg.height;
 
-        for (uint32 mip = 0; mip < dstImg.mipCount; ++mip)
+        // This right here is the prime example of the "safety is on the burden of the user" that Iris establishes and is
+        // one of the more dangerous parts of the API. In reality there is just simply little we can do to check for
+        // correctness. The user should just be very sure they are correct or simply just always pass 0.
+        VkDeviceSize offset = srcOffset;
+
+        for (sizeT mip = 0; mip < dstImg.mipCount; ++mip)
         {
             VkBufferImageCopy region{};
             region.bufferOffset = offset;

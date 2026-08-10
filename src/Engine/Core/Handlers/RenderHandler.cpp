@@ -94,12 +94,14 @@ void RenderHandler::BeginFrame()
 	Iris::AcquireSwapchainTexture();
 	Iris::ImGuiNewFrame();
 	Iris::BeginCommandBuffer(tempHandle);
-	Iris::BeginRenderPass(tempHandle, {}); // description is for now ignored
+
+	Iris::RenderPassBeginDesc desc{};
+	desc.colorAttachment.clearColor = m_camera->GetBackColor();
+	Iris::BeginRenderPass(tempHandle, desc);
 
 	Iris::Viewport vp{};
 	vp.extent = {1920.0f, 1080.0f};
 	Iris::SetViewport(tempHandle, vp);
-
 }
 
 void RenderHandler::RenderFrame()

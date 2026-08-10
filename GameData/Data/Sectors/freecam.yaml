@@ -7,7 +7,7 @@ entities:
     components:
       c0:
         component-type: 2
-        backColor: [135, 206, 235, 255]
+        backColor: [24, 24, 24, 255]
         offset: [0, 0, 0]
       c1:
         component-type: 1024

@@ -34,7 +34,7 @@ namespace Iris
         initInfo.Queue = queues.primaryDrawQueue;
         initInfo.ImageCount = screen.swapchainImageCount;
         initInfo.MinImageCount = screen.swapchainImageCount;
-        initInfo.DescriptorPoolSize = 8;
+        initInfo.DescriptorPoolSize = 2048;
         initInfo.UseDynamicRendering = true;
         initInfo.PipelineInfoMain.PipelineRenderingCreateInfo = pipeInfo;
         initInfo.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
@@ -55,6 +55,7 @@ namespace Iris
         {
             WEngine::WLog::SetConsoleError();
             WEngine::WLog::ConsoleLog("Invalid command buffer handle, refusing to draw ImGui!");
+            ImGui::Render(); // still gotta render something.
             return;
         }
         ImGui::Render();

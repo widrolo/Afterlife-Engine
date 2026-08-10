@@ -94,6 +94,8 @@ namespace Iris
         vkQueueSubmit(cmdBuff.queue, 1, &submit, framePools[slot].fence);
     }
 
+    // We conveniently ignore most of the attachment information of the description as of now because for now,
+    // it doesnt bring anything to the table.
     void BeginRenderPass(CommandBufferHandle cmd, const RenderPassBeginDesc& desc)
     {
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
@@ -102,16 +104,13 @@ namespace Iris
             WEngine::WLog::ConsoleLog("Invalid command buffer handle, refusing to begin rendering!");
             return;
         }
-
-        const Vulkan_CmdBuff& cmdBuff = loadedCommandBuffers[cmd - 1];
-
-        VkClearColorValue clearCol{};
-        WEngine::Colorf col = WEngine::Color::Black;
+        VkClearColorValue clearCol;
+        WEngine::Colorf col = desc.colorAttachment.clearColor;
         clearCol = { col.red, col.green, col.blue, col.alpha };
 
         std::array<VkClearValue, 2> clearValues{};
         clearValues[0].color = clearCol;
-        clearValues[1].depthStencil = { 1.0f, 0 };
+        clearValues[1].depthStencil = { desc.depthStencil.clearDepth, desc.depthStencil.clearStencil };
 
         VkImageMemoryBarrier colBarrier{};
         colBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -160,7 +159,7 @@ namespace Iris
         VkRenderingInfo renderingInfo{};
         renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
         renderingInfo.renderArea.offset = {0, 0};
-        renderingInfo.renderArea.extent = {1920, 1080}; // temporary max res
+        renderingInfo.renderArea.extent = {1920, 1080}; // temporary max resolution until i can figure this out.
         renderingInfo.layerCount = 1;
         renderingInfo.colorAttachmentCount = 1;
         renderingInfo.pColorAttachments = &colorAttachmentInfo;
@@ -177,9 +176,6 @@ namespace Iris
             WEngine::WLog::ConsoleLog("Invalid command buffer handle, refusing to end rendering!");
             return;
         }
-
-        const Vulkan_CmdBuff& cmdBuff = loadedCommandBuffers[cmd - 1];
-
         vkCmdEndRendering(GetCurrentCmdBuff(cmd));
 
         VkImageLayout newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
@@ -212,14 +208,13 @@ namespace Iris
         PrintNotImplemented("EndComputePass");
     }
 
+    // I mean copy passes technically arent needed in vulkan. This is just visual fluff
     void BeginCopyPass(CommandBufferHandle cmd)
     {
-        PrintNotImplemented("BeginCopyPass");
     }
 
     void EndCopyPass(CommandBufferHandle cmd)
     {
-        PrintNotImplemented("EndCopyPass");
     }
 }
 
