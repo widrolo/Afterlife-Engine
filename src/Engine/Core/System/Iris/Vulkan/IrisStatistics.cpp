@@ -7,14 +7,21 @@
 
 namespace Iris
 {
-    sizeT GetVRAMUsage()
+    GPUInfo GetGPUInfo()
     {
-        return stats.vramUsage;
+        return stats.gpuInfo;
     }
-
-    sizeT GetDrawCallCountLastFrame()
+    VramStats GetVRAMStats()
     {
-        return stats.drawCallsLastFrame;
+        return stats.vramStats;
+    }
+    DrawStats GetDrawCallStats()
+    {
+        return stats.drawStatsLastFrame;
+    }
+    BindStats GetBindingStats()
+    {
+        return stats.bindStatsLastFrame;
     }
 }
 

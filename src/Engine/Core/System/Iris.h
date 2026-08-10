@@ -15,6 +15,8 @@
 #include <Engine/Types/Rendering/Iris/Framebuffer.h>
 #include <Engine/Types/Rendering/Iris/RenderCompute.h>
 
+#include "Engine/Types/Rendering/Iris/Statistics.h"
+
 
 namespace Iris
 {
@@ -112,7 +114,9 @@ namespace Iris
     WEngine::Nullable<ImTextureID> TextureToImGui(TextureHandle texture);
 
     // ---------------------------------------- Stats ------------------------------------------
-    sizeT GetVRAMUsage();
-    sizeT GetDrawCallCountLastFrame();
+    GPUInfo GetGPUInfo();
+    VramStats GetVRAMStats();
+    DrawStats GetDrawCallStats();
+    BindStats GetBindingStats();
 }
 

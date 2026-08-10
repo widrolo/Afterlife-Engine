@@ -149,6 +149,7 @@ void RenderHandler::RenderFrame()
 	Iris::Present();
 	m_renderQueue.clear();
 	CleanSortedMissions();
+	Iris::EndFrame();
 }
 
 void RenderHandler::RegisterCamera(CameraComponent *camera)

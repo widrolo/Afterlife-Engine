@@ -3,9 +3,6 @@
 #include "Engine/EngineDefines.h"
 #include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Core/System/Iris.h"
-#include <Engine/Types/Rendering/Iris/InstThreadedList.h>
-#include "Engine/Types/CoreSystems.h"
-#include <Engine/Types/Rendering/LightingInfo.h>
 
 using namespace WEngine;
 
@@ -16,107 +13,224 @@ void RenderWatchWidget::Setup()
 
 void RenderWatchWidget::RenderInternal()
 {
-    SetSize({300, 400});
-    ImGui::Text("%s", GetHeader().c_str());
-    ImGui::Separator();
-
-    ShowSunlightSettings();
-    ShowAmbientSettings();
-    ShowTimeSettings();
+    SetSize({800, 600});
+    Header();
+    ImGui::SeparatorText("Vram Statistics");
+    VramDisplay();
+    ImGui::SeparatorText("Rendering Statistics");
+    RenderDisplay();
 }
 
-std::string RenderWatchWidget::GetHeader() const
+void RenderWatchWidget::Header() const
 {
-    std::string header = "Rendering Info (";
-
-    switch (GPU_BACKEND)
+    if (ImGui::BeginTable("gpuInfoTable", 3))
     {
-        case GPU_OPENGL:    header += "OpenGL";     break;
-        case GPU_VULKAN:    header += "Vulkan";     break;
-        case GPU_D3D12:     header += "D3D12";      break;
-        case GPU_METAL:     header += "Metal";      break;
-        case GPU_AGC:       header += "GNM";        break;
-        case GPU_NVN:       header += "NVN";        break;
-        default:
-            header += "Unknown Backend";
-            break;
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        switch (GPU_BACKEND)
+        {
+            case GPU_OPENGL:    ImGui::Text("Renderer: OPENGL");    break;
+            case GPU_VULKAN:    ImGui::Text("Renderer: VULKAN");    break;
+            case GPU_D3D12:     ImGui::Text("Renderer: D3D12");     break;
+            case GPU_METAL:     ImGui::Text("Renderer: METAL");     break;
+            case GPU_AGC:       ImGui::Text("Renderer: AGC");       break;
+            case GPU_NVN:       ImGui::Text("Renderer: NVN");       break;
+            default:
+                ImGui::Text("Renderer: Unknown");
+                break;
+        }
+        ImGui::TableNextColumn();
+        static auto gpu = Iris::GetGPUInfo();
+        ImGui::Text("Total VRAM: %.1fGB", (float64)gpu.totalVram / (float64)GB);
+        ImGui::TableNextColumn();
+        ImGui::Text("%s", gpu.gpuName.c_str());
+        ImGui::EndTable();
     }
-
-    header += ")";
-    return header;
 }
 
-std::string RenderWatchWidget::StatInstInfoToString(const MemListDebugInfo& info) const
+void RenderWatchWidget::VramDisplay() const
 {
-    std::string text = "";
-    if (info.model == 0 || info.material == 0)
-        text += "FREE:\t";
-    else
-        text += "USED:\t";
+    auto vram = Iris::GetVRAMStats();
 
-    text += std::to_string(info.size) + 'B';
-    return text;
+    ImGui::Text("Vram Used: %.2fGB", (float64)vram.total / (float64)GB);
+
+    const uint32 height = 150;
+    uint64 bufferTotal = vram.vertexBuffers + vram.indexBuffers + vram.uniformBuffer +
+        vram.storageBuffers + vram.transferBuffers;
+    uint64 texTotal = vram.colorTextures + vram.depthTextures + vram.framebuffers;
+    uint64 shaderTotal = vram.vertexShader + vram.geometryShader + vram.tesselationShader +
+        vram.fragmentShaders + vram.computeShaders;
+
+    ImGui::BeginChild("buffUsage", ImVec2(ImGui::GetContentRegionAvail().x * 0.3f, height));
+    ImGui::Text("Buffers");
+    ImGui::Text("Total: %.2fMB", (float64)bufferTotal / (float64)MB);
+    VramDisplayBuffers();
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    ImGui::BeginChild("texUsage", ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, height));
+    ImGui::Text("Textures");
+    ImGui::Text("Total: %.2fMB", (float64)texTotal / (float64)MB);
+    VramDisplayTextures();
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    ImGui::BeginChild("shaUsage", ImVec2(ImGui::GetContentRegionAvail().x, height));
+    ImGui::Text("Shaders");
+    ImGui::Text("Total: %.2fMB", (float64)shaderTotal / (float64)MB);
+    VramDisplayShaders();
+    ImGui::EndChild();
 }
 
-void RenderWatchWidget::ShowSunlightSettings()
+void RenderWatchWidget::PrintVramUsage(const std::string& category, sizeT sizeInBytes) const
 {
-    ImGui::Text("Sunlight");
-    float32* sunDir;
-    float32 sunCol[4];
-    auto sunDirV = CoreSystems::GetRenderHandler()->GetSunlight();
-
-    sunDir = (float32*)&sunDirV.direction;
-    sunCol[0] = sunDirV.lightColor.red / 255.0f;
-    sunCol[1] = sunDirV.lightColor.green / 255.0f;
-    sunCol[2] = sunDirV.lightColor.blue / 255.0f;
-    sunCol[3] = sunDirV.lightColor.alpha / 255.0f;
-
-    ImGui::DragFloat3("Sun Direction", sunDir, 0.001f);
-    ImGui::ColorEdit4("Sun Color", sunCol);
-
-    sunDirV.lightColor.red = sunCol[0] * 255.0f;
-    sunDirV.lightColor.green = sunCol[1] * 255.0f;
-    sunDirV.lightColor.blue = sunCol[2] * 255.0f;
-    sunDirV.lightColor.alpha = sunCol[3] * 255.0f;
-
-    CoreSystems::GetRenderHandler()->SetSunlight(sunDirV);
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    ImGui::Text("%s", category.c_str());
+    ImGui::TableNextColumn();
+    ImGui::Text("%.2fMB", (float64)sizeInBytes / (float64)MB);
 }
 
-void RenderWatchWidget::ShowAmbientSettings()
+void RenderWatchWidget::VramDisplayBuffers() const
 {
-    ImGui::Text("Ambient Light");
+    auto vram = Iris::GetVRAMStats();
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+    if (ImGui::BeginTable("buffUsageTable", 2, flags))
+    {
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("Buffer Type");
+        ImGui::TableNextColumn();
+        ImGui::Text("Memory");
 
-    float32 ambCol[4];
-    auto ambient = CoreSystems::GetRenderHandler()->GetAmbientLight();
+        PrintVramUsage("Vertex", vram.vertexBuffers);
+        PrintVramUsage("Index", vram.indexBuffers);
+        PrintVramUsage("Uniform", vram.uniformBuffer);
+        PrintVramUsage("Storage", vram.storageBuffers);
+        PrintVramUsage("Transfer", vram.transferBuffers);
 
-    ambCol[0] = ambient.ambientColor.red / 255.0f;
-    ambCol[1] = ambient.ambientColor.green / 255.0f;
-    ambCol[2] = ambient.ambientColor.blue / 255.0f;
-    ambCol[3] = ambient.ambientColor.alpha / 255.0f;
-
-    ImGui::DragFloat("Intensity", &ambient.intensity, 0.001f, 0.0f, 1.0f);
-    ImGui::ColorEdit4("Ambient Color", ambCol);
-
-    ambient.ambientColor.red = ambCol[0] * 255.0f;
-    ambient.ambientColor.green = ambCol[1] * 255.0f;
-    ambient.ambientColor.blue = ambCol[2] * 255.0f;
-    ambient.ambientColor.alpha = ambCol[3] * 255.0f;
-
-    CoreSystems::GetRenderHandler()->SetAmbientLight(ambient);
+        ImGui::EndTable();
+    }
 }
 
-void RenderWatchWidget::ShowTimeSettings()
+void RenderWatchWidget::VramDisplayTextures() const
 {
-    ImGui::Text("Time");
+    auto vram = Iris::GetVRAMStats();
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+    if (ImGui::BeginTable("texUsageTable", 2, flags))
+    {
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("Texture Type");
+        ImGui::TableNextColumn();
+        ImGui::Text("Memory");
 
-    auto time = CoreSystems::GetRenderHandler()->GetLightTime();
+        PrintVramUsage("Color", vram.colorTextures);
+        PrintVramUsage("Depth Stencil", vram.depthTextures);
+        PrintVramUsage("Framebuffers", vram.framebuffers);
 
-    ImGui::DragFloat("Global Time", &time, 0.001f);
-
-    if (time > 1.0f)
-        time -= 1.0f;
-    if (time < 0.0f)
-        time += 1.0f;
-
-    CoreSystems::GetRenderHandler()->SetLightTime(time);
+        ImGui::EndTable();
+    }
 }
+
+void RenderWatchWidget::VramDisplayShaders() const
+{
+    auto vram = Iris::GetVRAMStats();
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+    if (ImGui::BeginTable("shaUsageTable", 2, flags))
+    {
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("Shader Stage");
+        ImGui::TableNextColumn();
+        ImGui::Text("Memory");
+
+        PrintVramUsage("Vertex", vram.vertexShader);
+        PrintVramUsage("Geometry", vram.geometryShader);
+        PrintVramUsage("Tesselation", vram.tesselationShader);
+        PrintVramUsage("Fragment", vram.fragmentShaders);
+        PrintVramUsage("Compute", vram.computeShaders);
+
+        ImGui::EndTable();
+    }
+}
+
+void RenderWatchWidget::RenderDisplay() const
+{
+    auto draw = Iris::GetDrawCallStats();
+    auto bind = Iris::GetBindingStats();
+    const uint32 height = 190;
+
+    ImGui::BeginChild("drawcalls", ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, height));
+    ImGui::Text("Drawcalls");
+    ImGui::Text("Total: %llu", draw.total);
+    RenderDisplayDrawcall();
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    ImGui::BeginChild("bindings", ImVec2(ImGui::GetContentRegionAvail().x, height));
+    ImGui::Text("Bindings");
+    ImGui::Text("Total: %llu", bind.total);
+    RenderDisplayBindings();
+    ImGui::EndChild();
+}
+
+void RenderWatchWidget::PrintRenderUsage(const std::string &category, sizeT count) const
+{
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    ImGui::Text("%s", category.c_str());
+    ImGui::TableNextColumn();
+    ImGui::Text("%llu", count);
+}
+
+void RenderWatchWidget::RenderDisplayDrawcall() const
+{
+    auto draw = Iris::GetDrawCallStats();
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+    if (ImGui::BeginTable("DrawcallsTable", 2, flags))
+    {
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("Call Type");
+        ImGui::TableNextColumn();
+        ImGui::Text("Call Count");
+
+        PrintRenderUsage("Draw", draw.draw);
+        PrintRenderUsage("DrawIndexed", draw.drawIndexed);
+        PrintRenderUsage("DrawIndirect", draw.drawIndirect);
+        PrintRenderUsage("DrawIndirectIndexed", draw.drawIndirectIndexed);
+        PrintRenderUsage("Dispatch", draw.dispatch);
+        PrintRenderUsage("DispatchIndirect", draw.dispatchIndirect);
+        PrintRenderUsage("Copy Buffer to Buffer", draw.copyBuffToBuff);
+        PrintRenderUsage("Copy Buffer to Texture", draw.copyBuffToTex);
+
+        ImGui::EndTable();
+    }
+}
+
+void RenderWatchWidget::RenderDisplayBindings() const
+{
+    auto bind = Iris::GetBindingStats();
+    ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+    if (ImGui::BeginTable("BindingsTable", 2, flags))
+    {
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("Binding Type");
+        ImGui::TableNextColumn();
+        ImGui::Text("Binding Count");
+
+        PrintRenderUsage("Graphics Pipeline", bind.graphicsPipelineBinds);
+        PrintRenderUsage("Compute Pipeline", bind.computePipelineBinds);
+        PrintRenderUsage("Vertex Buffer", bind.vertexBinds);
+        PrintRenderUsage("Index Buffer", bind.indexBinds);
+        PrintRenderUsage("Resource Table", bind.tableBinds);
+
+        ImGui::EndTable();
+    }
+}
+

@@ -7,6 +7,7 @@
 #include "Engine/Types/CommonTypes.h"
 #include "Engine/Util/BitwiseMacros.h"
 #include "Engine/Math/Vector.h"
+#include "Engine/Types/Rendering/Iris/Statistics.h"
 #include "Engine/WTL/vector.h"
 #include "Helpers/Types.h"
 
@@ -93,9 +94,12 @@ struct Vulkan_RenderTarget
 
 struct VulkanStatistics
 {
-    uint32 drawCallsThisFrame = 0;
-    uint32 drawCallsLastFrame = 0;
-    uint64 vramUsage = 0;
+    Iris::GPUInfo gpuInfo{};
+    Iris::VramStats vramStats{};
+    Iris::BindStats bindStats{};
+    Iris::BindStats bindStatsLastFrame{};
+    Iris::DrawStats drawStats{};
+    Iris::DrawStats drawStatsLastFrame{};
 };
 
 using BufferCollection = wtl::vector<std::pair<VkBuffer, VmaAllocation>>;

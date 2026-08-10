@@ -49,9 +49,6 @@ namespace Iris
 
         if (!ParseVkResult(renderRes))
             WEngine::WLog::ConsoleLog("Something went wrong during rendering!");
-
-        stats.drawCallsLastFrame = stats.drawCallsThisFrame;
-        stats.drawCallsThisFrame = 0;
     }
 }
 #endif

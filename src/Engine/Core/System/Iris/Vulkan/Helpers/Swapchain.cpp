@@ -60,7 +60,9 @@ bool SetupSwapchain()
 
     bufferGraveyard.resize(screen.swapchainImageCount);
 
-    stats.vramUsage += CalcTextureSize(4, EngineSettings::resolution.x, EngineSettings::resolution.y) * screen.swapchainImageCount;
+    sizeT size = CalcTextureSize(4, EngineSettings::resolution.x, EngineSettings::resolution.y) * screen.swapchainImageCount;
+    stats.vramStats.total += size;
+    stats.vramStats.framebuffers += size;
 
     PopulateSemsAndFences(displayTarget);
 
@@ -111,7 +113,8 @@ bool SetupDepthImage()
 
     auto res = vmaCreateImage(vcore.vmaAllocator, &info, &allocInfo, &screen.depthImage, &screen.depthAllocation, &allocationInfo);
 
-    stats.vramUsage += allocationInfo.size;
+    stats.vramStats.total += allocationInfo.size;
+    stats.vramStats.depthTextures += allocationInfo.size;
 
     if (!ParseVkResult(res))
     {

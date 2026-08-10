@@ -110,6 +110,20 @@ bool SetupDevice()
     vkGetPhysicalDeviceProperties2(vcore.gpuPhysicalDevice, &properties);
 
     WEngine::WLog::ConsoleLog(std::format("GPU selected for rendering: {}", properties.properties.deviceName));
+    stats.gpuInfo.gpuName = properties.properties.deviceName;
+
+    VkPhysicalDeviceMemoryProperties2 memProps{};
+    memProps.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
+    vkGetPhysicalDeviceMemoryProperties2(vcore.gpuPhysicalDevice, &memProps);
+
+    VkDeviceSize totalVram = 0;
+    for (sizeT i = 0; i < memProps.memoryProperties.memoryHeapCount; ++i)
+    {
+        const VkMemoryHeap& heap = memProps.memoryProperties.memoryHeaps[i];
+        if (heap.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
+            totalVram += heap.size;
+    }
+    stats.gpuInfo.totalVram = totalVram;
 
     auto queues = FindDeviceQueues();
 

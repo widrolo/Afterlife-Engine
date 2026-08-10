@@ -43,7 +43,8 @@ namespace Iris
             return;
         }
         vkCmdDraw(GetCurrentCmdBuff(cmd), vertexCount, instanceCount, firstVertex, firstInstance);
-        stats.drawCallsThisFrame++;
+        stats.drawStats.total++;
+        stats.drawStats.draw++;
     }
 
     void DrawIndexed(CommandBufferHandle cmd, sizeT indexCount, sizeT instanceCount, sizeT firstIndex, int32 vertexOffset,
@@ -56,7 +57,8 @@ namespace Iris
             return;
         }
         vkCmdDrawIndexed(GetCurrentCmdBuff(cmd), indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
-        stats.drawCallsThisFrame++;
+        stats.drawStats.total++;
+        stats.drawStats.drawIndexed++;
     }
 
     void DrawIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset, sizeT drawCount, sizeT stride)
@@ -75,7 +77,8 @@ namespace Iris
         }
         const Vulkan_Buffer& buff = loadedBuffers[argBuffer - 1];
         vkCmdDrawIndirect(GetCurrentCmdBuff(cmd), buff.buffer, offset, drawCount, stride);
-        stats.drawCallsThisFrame++;
+        stats.drawStats.total++;
+        stats.drawStats.drawIndirect++;
     }
 
     void DrawIndexedIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset, sizeT drawCount, sizeT stride)
@@ -94,7 +97,8 @@ namespace Iris
         }
         const Vulkan_Buffer& buff = loadedBuffers[argBuffer - 1];
         vkCmdDrawIndexedIndirect(GetCurrentCmdBuff(cmd), buff.buffer, offset, drawCount, stride);
-        stats.drawCallsThisFrame++;
+        stats.drawStats.total++;
+        stats.drawStats.drawIndirectIndexed++;
     }
 
     void Dispatch(CommandBufferHandle cmd, sizeT groupCountX, sizeT groupCountY, sizeT groupCountZ)
@@ -106,7 +110,8 @@ namespace Iris
             return;
         }
         vkCmdDispatch(GetCurrentCmdBuff(cmd), groupCountX, groupCountY, groupCountZ);
-        stats.drawCallsThisFrame++;
+        stats.drawStats.total++;
+        stats.drawStats.dispatch++;
     }
 
     void DispatchIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset)
@@ -125,7 +130,8 @@ namespace Iris
         }
         const Vulkan_Buffer& buff = loadedBuffers[argBuffer - 1];
         vkCmdDispatchIndirect(GetCurrentCmdBuff(cmd), buff.buffer, offset);
-        stats.drawCallsThisFrame++;
+        stats.drawStats.total++;
+        stats.drawStats.dispatchIndirect++;
     }
 
     void CopyBufferToBuffer(CommandBufferHandle cmd, BufferHandle dst, sizeT dstOffset, BufferHandle src, sizeT srcOffset,
@@ -159,6 +165,7 @@ namespace Iris
         copyInfo.size = size;
 
         vkCmdCopyBuffer(GetCurrentCmdBuff(cmd), srcBuff.buffer, dstBuff.buffer, 1, &copyInfo);
+        stats.drawStats.copyBuffToBuff++;
     }
 
     void CopyBufferToTexture(CommandBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst)
@@ -262,6 +269,7 @@ namespace Iris
         // This must transition to bottom of pipe, not fragment. This is not on a drawing queue!!
         vkCmdPipelineBarrier(GetCurrentCmdBuff(cmd), VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
             0, 0, nullptr, 0, nullptr, 1, &postBarrier);
+        stats.drawStats.copyBuffToTex++;
     }
 }
 

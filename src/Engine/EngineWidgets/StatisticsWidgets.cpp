@@ -48,9 +48,9 @@ void StatisticsWidgets::BottomRow()
 	ImGui::TableNextColumn();
 	ImGui::Text("Frame Time: %.3fms", Engine::GetDeltaTime() * 1000.0f);
 	ImGui::TableNextColumn();
-	ImGui::Text("Vram Usage: %.2fMB", (float64)Iris::GetVRAMUsage() / MB);
+	ImGui::Text("Vram Usage: %.2fMB", (float64)Iris::GetVRAMStats().total / MB);
 	ImGui::TableNextColumn();
-	ImGui::Text("Draw calls: %u", (uint32)Iris::GetDrawCallCountLastFrame());
+	ImGui::Text("Draw calls: %u", (uint32)Iris::GetDrawCallStats().total);
 }
 
 std::string StatisticsWidgets::UptimeToString(uint64 uptime)

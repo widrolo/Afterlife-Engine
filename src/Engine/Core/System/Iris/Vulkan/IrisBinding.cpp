@@ -26,11 +26,16 @@ namespace Iris
         }
 
         vkCmdBindPipeline(GetCurrentCmdBuff(cmd), VK_PIPELINE_BIND_POINT_GRAPHICS, loadedPipelines[pipeline - 1].pipeline);
+        stats.bindStats.total++;
+        stats.bindStats.graphicsPipelineBinds++;
     }
 
     void BindComputePipeline(CommandBufferHandle cmd, ComputePipelineHandle  pipeline)
     {
         PrintNotImplemented("BindComputePipeline");
+        // not implemented but its fine.
+        stats.bindStats.total++;
+        stats.bindStats.computePipelineBinds++;
     }
 
     void BindResourceTable(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, uint32 slot, ResourceTableHandle table)
@@ -56,6 +61,8 @@ namespace Iris
 
         vkCmdBindDescriptorSets(GetCurrentCmdBuff(cmd), VK_PIPELINE_BIND_POINT_GRAPHICS, loadedPipelines[pipeline - 1].layout,
             slot, 1, &loadedResourceTables[table - 1].set, 0, nullptr);
+        stats.bindStats.total++;
+        stats.bindStats.tableBinds++;
     }
 
     void SetPushConstants(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, const byte* data, sizeT size)
@@ -152,6 +159,8 @@ namespace Iris
         VkDeviceSize* offPtr = offs.data();
 
         vkCmdBindVertexBuffers(GetCurrentCmdBuff(cmd), firstBinding, buffers.size(), buffPtr, offPtr);
+        stats.bindStats.total++;
+        stats.bindStats.vertexBinds++;
     }
 
     void BindIndexBuffer(CommandBufferHandle cmd, BufferHandle buffer, sizeT offset)
@@ -178,6 +187,8 @@ namespace Iris
         }
 
         vkCmdBindIndexBuffer(GetCurrentCmdBuff(cmd), loadedBuffers[buffer - 1].buffer, offset, VK_INDEX_TYPE_UINT32);
+        stats.bindStats.total++;
+        stats.bindStats.indexBinds++;
     }
 }
 

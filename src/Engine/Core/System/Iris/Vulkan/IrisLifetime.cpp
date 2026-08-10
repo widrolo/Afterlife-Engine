@@ -36,6 +36,8 @@ namespace Iris
     void EndFrame()
     {
         irisCtx.firstFrame = false;
+        stats.bindStatsLastFrame = stats.bindStats;
+        stats.drawStatsLastFrame = stats.drawStats;
     }
 }
 

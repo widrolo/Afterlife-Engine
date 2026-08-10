@@ -42,7 +42,26 @@ namespace Iris
             return 0;
         }
 
-        stats.vramUsage += buff.allocInfo.size;
+        stats.vramStats.total += buff.allocInfo.size;
+        switch (desc.usage)
+        {
+            case BufferUsage::Vertex:
+                stats.vramStats.vertexBuffers += buff.allocInfo.size;
+                break;
+            case BufferUsage::Index:
+                stats.vramStats.indexBuffers += buff.allocInfo.size;
+                break;
+            case BufferUsage::Uniform:
+                stats.vramStats.uniformBuffer += buff.allocInfo.size;
+                break;
+            case BufferUsage::Storage:
+                stats.vramStats.storageBuffers += buff.allocInfo.size;
+                break;
+            case BufferUsage::TransferSrc:
+            case BufferUsage::TransferDst:
+                stats.vramStats.transferBuffers += buff.allocInfo.size;
+                break;
+        }
 
         loadedBuffers.push_back(buff);
         const BufferHandle handle = loadedBuffers.size();
@@ -97,8 +116,6 @@ namespace Iris
             return 0;
         }
 
-        stats.vramUsage += tex.allocInfo.size;
-
         VkImageViewCreateInfo imageViewInfo{};
         imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         imageViewInfo.image = tex.image;
@@ -114,13 +131,14 @@ namespace Iris
 
         if (!ParseVkResult(res))
         {
-            stats.vramUsage -= tex.allocInfo.size;
             vmaDestroyImage(vcore.vmaAllocator, tex.image, tex.alloc);
             WEngine::WLog::SetConsoleError();
             WEngine::WLog::ConsoleLog(std::format("Unable to create image view for texture \"{}\".", tex.debugName));
             return 0;
         }
 
+        stats.vramStats.total += tex.allocInfo.size;
+        stats.vramStats.colorTextures += tex.allocInfo.size;
         loadedTextures.push_back(tex);
         return loadedTextures.size();
     }
@@ -180,6 +198,28 @@ namespace Iris
             WEngine::WLog::SetConsoleError();
             WEngine::WLog::ConsoleLog(std::format("Unable to create shader \"{}\"!", shader.debugName));
             return 0;
+        }
+
+        stats.vramStats.total += desc.bytecodeSize;
+
+        switch (desc.stage)
+        {
+            case ShaderStage::Vertex:
+                stats.vramStats.vertexShader += desc.bytecodeSize;
+                break;
+            case ShaderStage::Fragment:
+                stats.vramStats.fragmentShaders += desc.bytecodeSize;
+                break;
+            case ShaderStage::Compute:
+                stats.vramStats.computeShaders += desc.bytecodeSize;
+                break;
+            case ShaderStage::Geometry:
+                stats.vramStats.geometryShader += desc.bytecodeSize;
+                break;
+            case ShaderStage::TessControl:
+            case ShaderStage::TessEval:
+                stats.vramStats.tesselationShader += desc.bytecodeSize;
+                break;
         }
 
         loadedShaders.push_back(shader);
