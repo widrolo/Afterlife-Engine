@@ -1,0 +1,16 @@
+Table:
+  1:
+    Offset: 0
+    Size: 11064
+  2:
+    Offset: 11064
+    Size: 699192
+  3:
+    Offset: 710256
+    Size: 699192
+  4:
+    Offset: 1409448
+    Size: 699192
+  5:
+    Offset: 2108640
+    Size: 699192

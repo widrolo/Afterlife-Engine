@@ -32,6 +32,7 @@ namespace WEngine
 		 * @tparam T The type of asset mission to handle (e.g., SpriteAssetMission, ShaderAssetMission, etc.).
 		 * @param mission A reference to the asset mission object containing information about the requested asset.
 		 */
+		void LoadAllGPUAssets();
 		template<class T = AssetMissionBase>
 		void GetAsset(T& mission);
 		/**
@@ -39,8 +40,6 @@ namespace WEngine
 		 * @return A string containing the data path.
 		 */
 		std::string GetDataPath() const { return m_dataPath; }
-
-		void IrisAssetComms(IrisAssetCommunication& mission);
 
 	private:
 		TextureInfo LoadTexturePNG(const std::string& path);
@@ -51,14 +50,9 @@ namespace WEngine
 		void LoadSpirVFromGlsl(SpirVAssetMission& mission);
 		void LoadSpirVFromSpv(SpirVAssetMission& mission);
 
-
-		// ---------------------------------- [IRIS COMMS] ----------------------------------
-
-		void IrisCommsGetMat(IrisAssetCommunication& mission);
-		void IrisCommsRetMat(IrisAssetCommunication& mission);
-
-		void IrisCommsGetMatDevel(IrisAssetCommunication& mission);
-		void IrisCommsGetMatPackage(IrisAssetCommunication& mission);
+		// ----- GPU Preloading -----
+		bool CheckForPackages();
+		void ParsePackageTable(wtl::vector<std::pair<sizeT, sizeT>>& container, const std::string& tableName);
 
 	};
 };

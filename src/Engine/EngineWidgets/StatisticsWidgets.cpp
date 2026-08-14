@@ -43,6 +43,7 @@ void StatisticsWidgets::TopRow()
 	ImGui::TableNextColumn();
 	ImGui::Text("Uptime: %s", UptimeToString(Engine::GetUptime()).c_str());
 }
+
 void StatisticsWidgets::BottomRow()
 {
 	ImGui::TableNextColumn();

@@ -1,0 +1,64 @@
+Assets:
+  0:
+    Dir: /Engine/Missing
+    Data:
+      0:
+        Name: MissMesh
+        Type: 1
+        UID: 1
+      1:
+        Name: MissTex
+        Type: 2
+        UID: 1
+      2:
+        Name: MissSnd
+        Type: 3
+        UID: 0
+      3:
+        Name: MissMus
+        Type: 4
+        UID: 0
+  1:
+    Dir: /Testing/Floor
+    Data:
+      0:
+        Name: Mesh
+        Type: 1
+        UID: 3
+      1:
+        Name: Texture
+        Type: 2
+        UID: 4
+  2:
+    Dir: /Testing/Cube
+    Data:
+      0:
+        Name: Mesh
+        Type: 1
+        UID: 2
+      1:
+        Name: Texture
+        Type: 2
+        UID: 5
+  3:
+    Dir: /Testing/Bread
+    Data:
+      0:
+        Name: Mesh
+        Type: 1
+        UID: 4
+      1:
+        Name: Texture
+        Type: 2
+        UID: 2
+  4:
+    Dir: /Testing/Monkey
+    Data:
+      0:
+        Name: Mesh
+        Type: 1
+        UID: 5
+      1:
+        Name: Texture
+        Type: 2
+        UID: 3

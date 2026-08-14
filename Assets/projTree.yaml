@@ -1,0 +1,87 @@
+BeginAssets:
+  Name: Root
+  Data: ~
+  Children:
+    c0:
+      Name: Engine
+      Data: ~
+      Children:
+        c0:
+          Name: Missing
+          Data:
+            d0:
+              SubName: MissMesh
+              Type: 1
+              Asset: Meshes/Engine/Missing.blend
+              Info: Pyramid
+            d1:
+              SubName: MissTex
+              Type: 2
+              Asset: Images/Engine/Missing.png
+              Info: ""
+            d2:
+              SubName: MissSnd
+              Type: 3
+              Asset: Sound/error.wav
+              Info: ""
+            d3:
+              SubName: MissMus
+              Type: 4
+              Asset: Music/error.ogg
+              Info: ""
+    c1:
+      Name: Testing
+      Data: ~
+      Children:
+        c0:
+          Name: Floor
+          Data:
+            d0:
+              SubName: Mesh
+              Type: 1
+              Asset: Meshes/Proto/Plane.blend
+              Info: Plane
+            d1:
+              SubName: Texture
+              Type: 2
+              Asset: Images/Testing/DirtGround.png
+              Info: ""
+        c1:
+          Name: Cube
+          Data:
+            d0:
+              SubName: Mesh
+              Type: 1
+              Asset: Meshes/Proto/Cube.blend
+              Info: Cube
+            d1:
+              SubName: Texture
+              Type: 2
+              Asset: Images/Testing/Wood.png
+              Info: ""
+        c2:
+          Name: Bread
+          Data:
+            d0:
+              SubName: Mesh
+              Type: 1
+              Asset: Meshes/Testing/Bread.blend
+              Info: Bread
+            d1:
+              SubName: Texture
+              Type: 2
+              Asset: Images/Testing/Bread.png
+              Info: ""
+        c3:
+          Name: Monkey
+          Data:
+            d0:
+              SubName: Mesh
+              Type: 1
+              Asset: Meshes/Testing/Monkey.blend
+              Info: Suzanne
+            d1:
+              SubName: Texture
+              Type: 2
+              Asset: Images/Testing/Concrete.png
+              Info: ""

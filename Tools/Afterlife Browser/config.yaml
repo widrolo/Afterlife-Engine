@@ -1,0 +1,6 @@
+config:
+    outputDir: "../../GameData/Data/Packages"
+    projectDir: "../../Assets"
+    blenderCmd: "/home/filip/Apps/blender-4.5.3-linux-x64/blender"
+    audacityCmd: "audacity"
+    vlcCmd: "vlc"

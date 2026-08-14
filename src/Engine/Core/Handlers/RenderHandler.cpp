@@ -42,6 +42,8 @@ RenderHandler::RenderHandler()
 	InitImGui();
 	Iris::ConfigureImGui();
 
+	CoreSystems::GetAssetRepo()->LoadAllGPUAssets();
+
 	if (!Engine::GetCla().testMode)
 		PreparePPFramebuffers();
 
@@ -253,9 +255,9 @@ void RenderHandler::PreparePPFramebuffers()
 
 void RenderHandler::PrepareSkybox()
 {
-	MeshAssetMission mission;
-	mission.name = "Skysphere";
-	CoreSystems::GetAssetRepo()->GetAsset(mission);
+	//MeshAssetMission mission;
+	//mission.name = "Skysphere";
+	//CoreSystems::GetAssetRepo()->GetAsset(mission);
 
 	//auto modelN = Iris::ALLOC_CreateModel(mission.model);
 	//if (modelN.HasValue())

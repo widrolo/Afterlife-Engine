@@ -9,6 +9,7 @@
 #include <Engine/gl/include/stb_image.h>
 #define TINYGLTF_IMPLEMENTATION
 #include <chrono>
+#include <filesystem>
 #include <Engine/gl/gltf/tiny_gltf_v3.h>
 #include <yaml-cpp/yaml.h>
 #include <tinyxml2.h>
@@ -103,169 +104,6 @@ void AssetRepo::GetAsset<UISheetAssetMission>(UISheetAssetMission& mission)
 }
 
 template<>
-void AssetRepo::GetAsset<MeshAssetMission>(MeshAssetMission& mission)
-{
-	const std::string file = GetDataPath() + EngineSettings::meshPath + mission.name + ".glb";
-
-	tg3_parse_options opts;
-	tg3_error_stack errors;
-	tg3_model model;
-
-	tg3_parse_options_init(&opts);
-	tg3_error_stack_init(&errors);
-
-	tg3_error_code err = tg3_parse_file(&model, &errors, file.c_str(), 10, &opts);
-	if (err != TG3_OK) {
-		for (sizeT i = 0; i < errors.count; i++) {
-			WLog::SetConsoleError();
-			WLog::ConsoleLog("Could not load glb model:");
-			fprintf(stderr, "[%d] %s\n", (int)errors.entries[i].severity,
-					errors.entries[i].message ? errors.entries[i].message : "(null)");
-		}
-		return;
-	}
-
-	mission.model.name = mission.name;
-
-	// TODO: fix up this vibe coded mess so it fits within the project nicely.
-
-	auto GetAccessorData = [&](int accessorIdx, sizeT componentSize) -> std::pair<const uint8_t*, sizeT>
-	{
-		auto& acc     = model.accessors[accessorIdx];
-		auto& bufView = model.buffer_views[acc.buffer_view];
-		auto& buf     = model.buffers[bufView.buffer];
-
-		const uint8_t* data = buf.data.data + bufView.byte_offset + acc.byte_offset;
-		sizeT stride = (bufView.byte_stride != 0) ? bufView.byte_stride : componentSize;
-		return { data, stride };
-	};
-
-	auto FindAttribute = [](const tg3_primitive& prim, const char* name) -> int
-	{
-		for (sizeT i = 0; i < prim.attributes_count; i++)
-			if (strcmp(prim.attributes[i].key.data, name) == 0)
-				return prim.attributes[i].value;
-		return -1;
-	};
-
-	MeshInfo& out = mission.model;
-
-    for (sizeT mi = 0; mi < model.meshes_count; mi++)
-    {
-        auto& mesh = model.meshes[mi];
-        for (sizeT pi = 0; pi < mesh.primitives_count; pi++)
-        {
-            auto& prim = mesh.primitives[pi];
-
-            // ── Indices ──────────────────────────────────────────────────────
-            {
-                auto& acc            = model.accessors[prim.indices];
-                auto [data, stride]  = GetAccessorData(prim.indices, 0 /*unused*/);
-                sizeT indexStart    = out.indices.size();
-                out.indices.resize(indexStart + acc.count);
-
-                for (sizeT i = 0; i < acc.count; i++)
-                {
-                    uint32 idx = 0;
-                    if      (acc.component_type == TG3_COMPONENT_TYPE_UNSIGNED_BYTE)
-                        idx = *reinterpret_cast<const uint8_t*> (data + i * sizeof(uint8_t));
-                    else if (acc.component_type == TG3_COMPONENT_TYPE_UNSIGNED_SHORT)
-                        idx = *reinterpret_cast<const uint16_t*>(data + i * sizeof(uint16_t));
-                    else if (acc.component_type == TG3_COMPONENT_TYPE_UNSIGNED_INT)
-                        idx = *reinterpret_cast<const uint32_t*>(data + i * sizeof(uint32_t));
-
-                    out.indices[indexStart + i] = idx;
-                }
-            }
-
-            // ── Vertex count (driven by POSITION) ────────────────────────────
-            int posIdx   = FindAttribute(prim, "POSITION");
-            int colIdx   = FindAttribute(prim, "COLOR_0");
-        	int normIdx  = FindAttribute(prim, "NORMAL");
-            int uv0Idx   = FindAttribute(prim, "TEXCOORD_0");
-            int uv1Idx   = FindAttribute(prim, "TEXCOORD_1");
-
-            if (posIdx == -1) continue; // no positions = skip
-
-            sizeT vertCount  = model.accessors[posIdx].count;
-            sizeT vertStart  = out.vertices.size();
-            out.vertices.resize(vertStart + vertCount);
-
-            // ── POSITION (vec3 float) ─────────────────────────────────────────
-            {
-                auto [data, stride] = GetAccessorData(posIdx, sizeof(float) * 3);
-                for (sizeT i = 0; i < vertCount; i++)
-                {
-                    const float* v = reinterpret_cast<const float*>(data + i * stride);
-                    out.vertices[vertStart + i].position = { v[0], v[1], v[2] };
-                }
-            }
-
-            // ── COLOR_0 (vec3 or vec4 float, default white if missing) ────────
-            if (colIdx != -1)
-            {
-                auto& acc           = model.accessors[colIdx];
-                bool isVec4         = (acc.type == TG3_TYPE_VEC4);
-                sizeT compSize     = isVec4 ? sizeof(float) * 4 : sizeof(float) * 3;
-                auto [data, stride] = GetAccessorData(colIdx, compSize);
-
-                for (sizeT i = 0; i < vertCount; i++)
-                {
-                    const float* v = reinterpret_cast<const float*>(data + i * stride);
-                    out.vertices[vertStart + i].vertColor = { v[0], v[1], v[2] };
-                }
-            }
-            else
-            {
-                for (sizeT i = 0; i < vertCount; i++)
-                {
-                    out.vertices[vertStart + i].vertColor = { 1.0 , 1.0 , 1.0 };
-                }
-            }
-
-        	// ── NORMAL (vec3 float) ───────────────────────────────────────────
-        	if (normIdx != -1)
-        	{
-        		auto [data, stride] = GetAccessorData(normIdx, sizeof(float) * 3);
-        		for (sizeT i = 0; i < vertCount; i++)
-        		{
-        			const float* v = reinterpret_cast<const float*>(data + i * stride);
-        			out.vertices[vertStart + i].normal = { v[0], v[1], v[2] };
-        		}
-        	}
-
-            // ── TEXCOORD_0 (vec2 float) ───────────────────────────────────────
-            if (uv0Idx != -1)
-            {
-                auto [data, stride] = GetAccessorData(uv0Idx, sizeof(float) * 2);
-                for (sizeT i = 0; i < vertCount; i++)
-                {
-                    const float* v = reinterpret_cast<const float*>(data + i * stride);
-                    out.vertices[vertStart + i].uv0Coord = { v[0], v[1] };
-                }
-            }
-
-            // ── TEXCOORD_1 (vec2 float) ───────────────────────────────────────
-            if (uv1Idx != -1)
-            {
-                auto [data, stride] = GetAccessorData(uv1Idx, sizeof(float) * 2);
-                for (sizeT i = 0; i < vertCount; i++)
-                {
-                    const float* v = reinterpret_cast<const float*>(data + i * stride);
-                    out.vertices[vertStart + i].uv1Coord = { v[0], v[1] };
-                }
-            }
-        }
-    }
-
-	tg3_model_free(&model);
-	tg3_error_stack_free(&errors);
-
-	WLog::ConsoleLog(std::format("Loaded model \"{}\"", mission.name));
-	mission.model.valid = true;
-}
-
-template<>
 void AssetRepo::GetAsset<SpirVAssetMission>(SpirVAssetMission& mission)
 {
 #ifdef PACKAGE
@@ -277,18 +115,7 @@ void AssetRepo::GetAsset<SpirVAssetMission>(SpirVAssetMission& mission)
 
 }
 
-void AssetRepo::IrisAssetComms(IrisAssetCommunication &mission)
-{
-	switch (mission.commType)
-	{
-		case IrisAssetCommunicationType::GetMaterial:
-			IrisCommsGetMat(mission);
-			break;
-		case IrisAssetCommunicationType::RetireMaterial:
-			IrisCommsRetMat(mission);
-			break;
-	}
-}
+
 
 TextureInfo AssetRepo::LoadTexturePNG(const std::string& path)
 {
@@ -469,60 +296,76 @@ void AssetRepo::LoadSpirVFromSpv(SpirVAssetMission &mission)
 	file.close();
 }
 
-void AssetRepo::IrisCommsGetMat(IrisAssetCommunication &mission)
+void AssetRepo::LoadAllGPUAssets()
 {
-	// This is only here because I don't trust myself.
-	mission.texReferences.resize(mission.matDef.texturesPackaging.size());
+	if (!CheckForPackages())
+		return;
 
-	IrisCommsGetMatPackage(mission);
+	wtl::vector<std::pair<sizeT, sizeT>> textureTable;
+	wtl::vector<std::pair<sizeT, sizeT>> meshTable;
+
+	ParsePackageTable(meshTable, "Meshes.yaml");
+	ParsePackageTable(textureTable, "Textures.yaml");
+
+
 }
 
-void AssetRepo::IrisCommsRetMat(IrisAssetCommunication &mission)
+bool AssetRepo::CheckForPackages()
 {
-	for (const auto& request : mission.matDef.texturesPackaging)
+	std::string packPath = GetDataPath() + "/Packages/";
+	std::string texPack = packPath + "Textures.pkg";
+	std::string texPackTable = packPath + "Textures.yaml";
+	std::string meshPack = packPath + "Meshes.pkg";
+	std::string meshPackTable = packPath + "Meshes.yaml";
+
+	if (!std::filesystem::exists(texPack))
 	{
-		// We can kinda guarantee that it exists. Proof is because i said so; q.e.d. :)
-		bool isUnused = m_textureRepo.at(request).Remove();
-
-		if (isUnused)
-		{
-			uint64 ref = m_textureRepo.at(request).Get();
-
-			AssetIrisCommunication comms{};
-			comms.commType = AssetIrisCommunicationType::UnloadTexture;
-			comms.texReferenceIn = ref;
-			//Iris::AssetIrisCommunication(comms);
-
-			m_textureRepo.erase(request);
-		}
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog("Texture package not found");
+		return false;
 	}
+	if (!std::filesystem::exists(texPackTable))
+	{
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog("Texture table not found");
+		return false;
+	}
+	if (!std::filesystem::exists(meshPack))
+	{
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog("Mesh package not found");
+		return false;
+	}
+	if (!std::filesystem::exists(meshPackTable))
+	{
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog("Mesh table not found");
+		return false;
+	}
+	return true;
 }
 
-
-void AssetRepo::IrisCommsGetMatPackage(IrisAssetCommunication &mission)
+void AssetRepo::ParsePackageTable(wtl::vector<std::pair<sizeT, sizeT>>& container, const std::string& tableName)
 {
-	int32 i = 0;
-	for (const auto& request : mission.matDef.texturesPackaging)
+	std::string tablePath = GetDataPath() + "/Packages/" + tableName;
+	std::string table = LoadTextFile(tablePath);
+
+	YAML::Node root = YAML::Load(table);
+
+	if (!root["Table"])
 	{
-		if (!m_textureRepo.contains(request))
-		{
-			TextureInfoDDS info = LoadTextureDDS(m_dataPath + EngineSettings::texturePath + request);
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog(std::format("Package table {} is missing Table definition", tableName));
+		return;
+	}
 
-			AssetIrisCommunication comms{};
-			comms.commType = AssetIrisCommunicationType::StoreTexture;
-			comms.textureData = info;
-			//Iris::AssetIrisCommunication(comms);
+	for (const auto& entry : root["Table"])
+	{
+		const YAML::Node& location = entry.second;
 
-			// since it was allocated by STB image, its not within our control so we need to call delete instead of wFree.
-			//delete info.data;
-			//uint32 size = info.height * info.width * info.channels;
-			//WAllocator::ReportExternalFree(size);
-
-			m_textureRepo.try_emplace(request, comms.texReferenceOut);
-		}
-
-		mission.texReferences[i] = m_textureRepo.at(request).Get();
-		m_textureRepo.at(request).Add();
-		i++;
+		std::pair<sizeT, sizeT> res;
+		res.first = location["Offset"].as<sizeT>();
+		res.second = location["Size"].as<sizeT>();
+		container.push_back(res);
 	}
 }
