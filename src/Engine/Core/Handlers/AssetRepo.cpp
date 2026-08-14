@@ -298,6 +298,11 @@ void AssetRepo::LoadSpirVFromSpv(SpirVAssetMission &mission)
 
 void AssetRepo::LoadAllGPUAssets()
 {
+	static bool everRan = false;
+	if (everRan)
+		return;
+	everRan = true;
+
 	if (!CheckForPackages())
 		return;
 
@@ -307,7 +312,12 @@ void AssetRepo::LoadAllGPUAssets()
 	ParsePackageTable(meshTable, "Meshes.yaml");
 	ParsePackageTable(textureTable, "Textures.yaml");
 
+	wtl::vector<byte*> texFiles;
+	wtl::vector<byte*> meshFiles;
 
+	ExtractPackage(textureTable, texFiles, "Textures.pkg");
+	ExtractPackage(meshTable, meshFiles, "Meshes.pkg");
+	ParseAndUploadMeshes(meshFiles);
 }
 
 bool AssetRepo::CheckForPackages()
@@ -368,4 +378,96 @@ void AssetRepo::ParsePackageTable(wtl::vector<std::pair<sizeT, sizeT>>& containe
 		res.second = location["Size"].as<sizeT>();
 		container.push_back(res);
 	}
+}
+
+void AssetRepo::ExtractPackage(const wtl::vector<std::pair<sizeT, sizeT>>& locations, wtl::vector<byte*>& files,
+	const std::string& package)
+{
+	files.reserve(locations.size());
+
+	std::string packPath = GetDataPath() + "/Packages/" + package;
+	std::ifstream pack(packPath, std::ios::binary);
+	if (!pack)
+	{
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog(std::format("Cant load package, unable to open {}!", package));
+		return;
+	}
+
+	// The package table has been validated a bajillion times on export. if we have an unexpected EOF,
+	// then its the fault of the user.
+	for (const auto& loc : locations) // first is offset, second is size. both in bytes
+	{
+		char* file = wNewArr(char, loc.second);
+		files.push_back((byte*)file);
+
+		pack.clear();
+		pack.seekg(loc.first, std::ios::beg);
+		pack.read(file, loc.second);
+		std::streamsize got = pack.gcount();
+		if (got < loc.second)
+		{
+			WLog::SetConsoleWarning();
+			WLog::ConsoleLog("Something went wrong while unpacking. Verify game files on steam.");
+		}
+	}
+}
+
+AssetRepo::ASMFHeader AssetRepo::ReadASMFHeader(const byte *data)
+{
+	ASMFHeader h{};
+	std::memcpy(h.identifier, data + 0, 4);
+	std::memcpy(&h.vertCount, data + 4, 8);
+	std::memcpy(&h.indCount,  data + 12, 8);
+	return h;
+}
+
+void AssetRepo::ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles)
+{
+	wtl::vector<ASMFHeader> meshFileHeaders;
+	meshFileHeaders.reserve(meshFiles.size());
+
+	const sizeT headerSize = 20;
+	const sizeT vertSize = 32;
+	const sizeT indexSize = 4;
+	sizeT totalVertCount = 0;
+	sizeT totalIndCount = 0;
+	for (const auto* mesh : meshFiles)
+	{
+		ASMFHeader header = ReadASMFHeader(mesh);
+		meshFileHeaders.push_back(header);
+		totalVertCount += header.vertCount;
+		totalIndCount += header.indCount;
+	}
+
+	// the idea is: we combine all meshes into one payload that we send to the GPU.
+	byte* vertexPayload = wNewArr(byte, totalVertCount * vertSize);
+	byte* indexPayload = wNewArr(byte, totalIndCount * indexSize);
+	sizeT vertHead = 0;
+	sizeT indHead = 0;
+
+	for (sizeT i = 0; i < meshFiles.size(); i++)
+	{
+		std::memcpy(vertexPayload + vertHead, meshFiles[i] + headerSize, meshFileHeaders[i].vertCount * vertSize);
+		sizeT indexOffset = meshFileHeaders[i].vertCount * vertSize + headerSize;
+		std::memcpy(indexPayload + indHead, meshFiles[i] + indexOffset, meshFileHeaders[i].indCount * indexSize);
+		vertHead += meshFileHeaders[i].vertCount * vertSize;
+		indHead += meshFileHeaders[i].indCount * indexSize;
+	}
+
+	for (auto* mesh : meshFiles)
+		wFree(mesh);
+
+	Iris::BufferDesc desc{};
+	desc.debugName = "Mesh Vertex Payload";
+	desc.size = vertHead;
+	desc.usage = Iris::BufferUsage::Vertex;
+	vertexBuffer = Iris::CreateBuffer(desc, vertexPayload, vertHead);
+	desc.debugName = "Mesh Index Payload";
+	desc.size = indHead;
+	desc.usage = Iris::BufferUsage::Index;
+	indexBuffer = Iris::CreateBuffer(desc, indexPayload, indHead);
+
+	wFree(vertexPayload);
+	wFree(indexPayload);
 }

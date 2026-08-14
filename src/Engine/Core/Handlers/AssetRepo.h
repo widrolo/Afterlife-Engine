@@ -5,6 +5,7 @@
 #include <string>
 #include <Engine/Types/Refcounted.h>
 
+#include "Engine/Types/Rendering/Iris/Handles.h"
 #include "Engine/Types/Rendering/Iris/IrisAssetComms.h"
 
 namespace WEngine
@@ -15,6 +16,12 @@ namespace WEngine
 	 */
 	class AssetRepo
 	{
+		struct ASMFHeader
+		{
+			char identifier[4];
+			uint64 vertCount;
+			uint64 indCount;
+		};
 	public:
 		/**
 		 * Constructs an AssetRepo object and initializes the data path.
@@ -25,6 +32,8 @@ namespace WEngine
 		std::string m_dataPath;
 		std::unordered_map<std::string, AudioClip> m_audioRepo;
 		std::unordered_map<std::string, Ref<uint64>> m_textureRepo;
+		Iris::BufferHandle vertexBuffer;
+		Iris::BufferHandle indexBuffer;
 
 	public:
 		/**
@@ -53,7 +62,10 @@ namespace WEngine
 		// ----- GPU Preloading -----
 		bool CheckForPackages();
 		void ParsePackageTable(wtl::vector<std::pair<sizeT, sizeT>>& container, const std::string& tableName);
-
+		void ExtractPackage(const wtl::vector<std::pair<sizeT, sizeT>>& locations, wtl::vector<byte*>& files,
+			const std::string& package);
+		ASMFHeader ReadASMFHeader(const byte* data);
+		void ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles);
 	};
 };
 
