@@ -25,7 +25,7 @@ namespace Iris
         uint32 mipLevels = 1;
         uint32 arrayLayers = 1;
         SampleCount sampleCount = SampleCount::Samples1;
-        TextureUsage usage = TextureUsage::None;
+        TextureUsage usage = TextureUsage::Sampled;
         std::string debugName;
     };
 

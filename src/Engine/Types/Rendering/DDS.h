@@ -21,3 +21,4 @@ struct DDSFile
 };
 
 DDSFile LoadDDS(const std::string& path);
+DDSFile ParseDDS(const byte* data);

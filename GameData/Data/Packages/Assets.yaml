@@ -9,7 +9,7 @@ Assets:
       1:
         Name: MissTex
         Type: 2
-        UID: 1
+        UID: 3
       2:
         Name: MissSnd
         Type: 3
@@ -19,6 +19,13 @@ Assets:
         Type: 4
         UID: 0
   1:
+    Dir: /Testing
+    Data:
+      0:
+        Name: 256Test
+        Type: 2
+        UID: 1
+  2:
     Dir: /Testing/Floor
     Data:
       0:
@@ -28,8 +35,8 @@ Assets:
       1:
         Name: Texture
         Type: 2
-        UID: 4
-  2:
+        UID: 6
+  3:
     Dir: /Testing/Cube
     Data:
       0:
@@ -39,8 +46,8 @@ Assets:
       1:
         Name: Texture
         Type: 2
-        UID: 5
-  3:
+        UID: 7
+  4:
     Dir: /Testing/Bread
     Data:
       0:
@@ -50,8 +57,8 @@ Assets:
       1:
         Name: Texture
         Type: 2
-        UID: 2
-  4:
+        UID: 4
+  5:
     Dir: /Testing/Monkey
     Data:
       0:
@@ -61,4 +68,18 @@ Assets:
       1:
         Name: Texture
         Type: 2
-        UID: 3
+        UID: 5
+  6:
+    Dir: /Testing/Sun
+    Data:
+      0:
+        Name: Texture
+        Type: 2
+        UID: 8
+  7:
+    Dir: /Testing/Dirt
+    Data:
+      0:
+        Name: 512Test
+        Type: 2
+        UID: 2

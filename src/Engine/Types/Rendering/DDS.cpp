@@ -1,5 +1,6 @@
 #include "DDS.h"
 
+#include <cstring>
 #include <fstream>
 
 struct DDSPixelFormat
@@ -129,3 +130,76 @@ DDSFile LoadDDS(const std::string& path)
     file.read((char*)dds.data.data(), total);
     return dds;
 }
+
+DDSFile ParseDDS(const byte* data)
+{
+    DDSFile dds{};
+    if (!data)
+        return dds;
+
+    sizeT offset = 0;
+
+    // -- signature --
+    uint32 sig;
+    std::memcpy(&sig, data + offset, sizeof(sig));
+    offset += sizeof(sig);
+
+    if (sig != signature)
+        return dds;
+
+    // -- main header --
+    DDSHeader header{};
+    std::memcpy(&header, data + offset, sizeof(DDSHeader));
+    offset += sizeof(DDSHeader);
+
+    uint32& pixelFlags = header.ddspf.dwFlags;   // kept for parity with LoadDDS (unused)
+    uint32& pixelFourCC = header.ddspf.dwFourCC;
+
+    dds.height = header.dwHeight;
+    dds.width  = header.dwWidth;
+    dds.mips   = header.dwMipMapCount ? header.dwMipMapCount : 1;
+
+    // -- pixel format --
+    if (pixelFourCC == (dword)BCCode::BC1)
+        dds.format = BC::BC1;
+    else if (pixelFourCC == (dword)BCCode::BC4)
+        dds.format = BC::BC4;
+    else if (pixelFourCC == (dword)BCCode::BC5)
+        dds.format = BC::BC5;
+    else if (pixelFourCC == (dword)BCCode::DX10)
+    {
+        DDSHeaderDXT10 dx10{};
+        std::memcpy(&dx10, data + offset, sizeof(DDSHeaderDXT10));
+        offset += sizeof(DDSHeaderDXT10);
+
+        switch (dx10.dxgiFormat)
+        {
+            case (dword)DXGIFormat::BC1: dds.format = BC::BC1; break;
+            case (dword)DXGIFormat::BC4: dds.format = BC::BC4; break;
+            case (dword)DXGIFormat::BC5: dds.format = BC::BC5; break;
+            default: return dds;
+        }
+    }
+    else
+        return dds;
+
+    // -- pixel data (same mip-size math as LoadDDS) --
+    uint32 total = 0;
+    uint32 mipWidth = dds.width;
+    uint32 mipHeight = dds.height;
+    for (sizeT i = 0; i < dds.mips; ++i)
+    {
+        uint32 blocksWide = (mipWidth + 3) / 4;
+        uint32 blocksHigh = (mipHeight + 3) / 4;
+
+        total += blocksWide * blocksHigh * BlockSize(dds.format);
+
+        mipWidth  = std::max(1u, mipWidth  / 2);
+        mipHeight = std::max(1u, mipHeight / 2);
+    }
+
+    dds.data.resize(total);
+    std::memcpy(dds.data.data(), data + offset, total);
+    return dds;
+}
+

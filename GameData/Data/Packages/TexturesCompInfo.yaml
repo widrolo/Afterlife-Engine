@@ -1,11 +1,17 @@
 CompilationInfo:
   1:
-    Asset: Images/Engine/Missing.png
+    Asset: Images/Brick 24 - 256x256.png
   2:
-    Asset: Images/Testing/Bread.png
+    Asset: Images/Dirt_04.png
   3:
-    Asset: Images/Testing/Concrete.png
+    Asset: Images/Engine/Missing.png
   4:
-    Asset: Images/Testing/DirtGround.png
+    Asset: Images/Testing/Bread.png
   5:
+    Asset: Images/Testing/Concrete.png
+  6:
+    Asset: Images/Testing/DirtGround.png
+  7:
     Asset: Images/Testing/Wood.png
+  8:
+    Asset: Images/sun.png

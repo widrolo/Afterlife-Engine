@@ -1,16 +1,25 @@
 Table:
   1:
     Offset: 0
-    Size: 11064
+    Size: 43832
   2:
-    Offset: 11064
-    Size: 699192
+    Offset: 43832
+    Size: 174904
   3:
-    Offset: 710256
-    Size: 699192
+    Offset: 218736
+    Size: 11064
   4:
-    Offset: 1409448
+    Offset: 229800
     Size: 699192
   5:
-    Offset: 2108640
+    Offset: 928992
     Size: 699192
+  6:
+    Offset: 1628184
+    Size: 699192
+  7:
+    Offset: 2327376
+    Size: 699192
+  8:
+    Offset: 3026568
+    Size: 2796344

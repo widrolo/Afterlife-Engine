@@ -31,7 +31,12 @@ BeginAssets:
               Info: ""
     c1:
       Name: Testing
-      Data: ~
+      Data:
+        d0:
+          SubName: 256Test
+          Type: 2
+          Asset: Images/Brick 24 - 256x256.png
+          Info: ""
       Children:
         c0:
           Name: Floor
@@ -84,4 +89,20 @@ BeginAssets:
               SubName: Texture
               Type: 2
               Asset: Images/Testing/Concrete.png
+              Info: ""
+        c4:
+          Name: Sun
+          Data:
+            d0:
+              SubName: Texture
+              Type: 2
+              Asset: Images/sun.png
+              Info: ""
+        c5:
+          Name: Dirt
+          Data:
+            d0:
+              SubName: 512Test
+              Type: 2
+              Asset: Images/Dirt_04.png
               Info: ""

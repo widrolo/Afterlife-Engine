@@ -296,6 +296,7 @@ void AssetRepo::LoadSpirVFromSpv(SpirVAssetMission &mission)
 	file.close();
 }
 
+
 void AssetRepo::LoadAllGPUAssets()
 {
 	static bool everRan = false;
@@ -306,18 +307,87 @@ void AssetRepo::LoadAllGPUAssets()
 	if (!CheckForPackages())
 		return;
 
-	wtl::vector<std::pair<sizeT, sizeT>> textureTable;
+	PrepareTransferBuffers();
+
 	wtl::vector<std::pair<sizeT, sizeT>> meshTable;
+	wtl::vector<std::pair<sizeT, sizeT>> textureTable;
 
 	ParsePackageTable(meshTable, "Meshes.yaml");
 	ParsePackageTable(textureTable, "Textures.yaml");
 
-	wtl::vector<byte*> texFiles;
 	wtl::vector<byte*> meshFiles;
+	wtl::vector<byte*> texFiles;
 
-	ExtractPackage(textureTable, texFiles, "Textures.pkg");
 	ExtractPackage(meshTable, meshFiles, "Meshes.pkg");
+	ExtractPackage(textureTable, texFiles, "Textures.pkg");
 	ParseAndUploadMeshes(meshFiles);
+	ParseTextures(texFiles);
+}
+
+void AssetRepo::TickTextureUpload()
+{
+
+	// if gpu side texture copy not done, return
+
+	// were gonna iterate over m_textures, trying to fit as much into transfer buffers as possible.
+	// if [for example] extra small buffers are full and some larger buffers are empty, then we can
+	// put the 128x128 textures into larger buffers as well if need be.
+
+	// memcpy to the transfer buffer
+
+	// if gpu side texture copy done and all textures uploaded:
+	//		destroy all transfer buffers and unload CPU side texture data
+
+}
+
+void AssetRepo::PrepareTransferBuffers()
+{
+	// BC1 DDS Sizes (according to nvcompress)
+	constexpr sizeT Tex128  =    11*KB + 1*KB;
+	constexpr sizeT Tex256  =    43*KB + 1*KB;
+	constexpr sizeT Tex512  =   171*KB + 1*KB;
+	constexpr sizeT Tex1024 =   683*KB + 1*KB;
+	constexpr sizeT Tex2048 =  2731*KB + 1*KB;
+	// I'm unsure if nvcompress uses 1000 or 1024 for their kilobytes, but we have 1024 so it should
+	// be fine either way. We will also add 1 kilobyte on top just to be on the safe size.
+	Iris::BufferDesc desc{};
+	desc.usage = Iris::BufferUsage::TransferSrc;
+
+	desc.debugName = "Texture Transfer Buffer Extra Small";
+	for (auto& buff : m_transferBuffers_XS)
+	{
+		desc.size = Tex128;
+		buff = Iris::CreateBuffer(desc);
+	}
+
+	desc.debugName = "Texture Transfer Buffer Small";
+	for (auto& buff : m_transferBuffers_S)
+	{
+		desc.size = Tex256;
+		buff = Iris::CreateBuffer(desc);
+	}
+
+	desc.debugName = "Texture Transfer Buffer Medium";
+	for (auto& buff : m_transferBuffers_M)
+	{
+		desc.size = Tex512;
+		buff = Iris::CreateBuffer(desc);
+	}
+
+	desc.debugName = "Texture Transfer Buffer Large";
+	for (auto& buff : m_transferBuffers_L)
+	{
+		desc.size = Tex1024;
+		buff = Iris::CreateBuffer(desc);
+	}
+
+	desc.debugName = "Texture Transfer Buffer Extra Large";
+	for (auto& buff : m_transferBuffers_X)
+	{
+		desc.size = Tex2048;
+		buff = Iris::CreateBuffer(desc);
+	}
+
 }
 
 bool AssetRepo::CheckForPackages()
@@ -462,12 +532,40 @@ void AssetRepo::ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles)
 	desc.debugName = "Mesh Vertex Payload";
 	desc.size = vertHead;
 	desc.usage = Iris::BufferUsage::Vertex;
-	vertexBuffer = Iris::CreateBuffer(desc, vertexPayload, vertHead);
+	m_vertexBuffer = Iris::CreateBuffer(desc, vertexPayload, vertHead);
 	desc.debugName = "Mesh Index Payload";
 	desc.size = indHead;
 	desc.usage = Iris::BufferUsage::Index;
-	indexBuffer = Iris::CreateBuffer(desc, indexPayload, indHead);
+	m_indexBuffer = Iris::CreateBuffer(desc, indexPayload, indHead);
 
 	wFree(vertexPayload);
 	wFree(indexPayload);
+}
+
+void AssetRepo::ParseTextures(const wtl::vector<byte*>& texFiles)
+{
+	m_textures.reserve(texFiles.size());
+	sizeT uidCounter = 1;
+	for (auto* tex : texFiles)
+	{
+		auto dds = ParseDDS(tex);
+		TextureInfoDDS info{};
+		info.data     = dds.data.data();
+		info.width    = dds.width;
+		info.height   = dds.height;
+		info.mipCount = dds.mips;
+		info.format   = dds.format;
+
+		Iris::TextureDesc desc;
+		desc.debugName = std::format("Texture UID:{}", uidCounter);
+		desc.format = Iris::ImgFormat::BC1;
+		desc.width  = dds.width;
+		desc.height = dds.height;
+		desc.mipLevels = dds.mips;
+		auto handle = Iris::CreateTexture(desc);
+
+		m_textures.push_back({info, handle});
+		wFree(tex);
+		uidCounter++;
+	}
 }
