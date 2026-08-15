@@ -37,16 +37,17 @@ namespace WEngine
 		Iris::BufferHandle m_indexBuffer;
 
 		// These should be fine-tuned in the final optimization pass of the game long after the content lock.
-		_GLOBAL_CEX_ sizeT TexturesPerUpload_XS = 64;
-		_GLOBAL_CEX_ sizeT TexturesPerUpload_S = 64;
+		_GLOBAL_CEX_ sizeT TexturesPerUpload_XS = 96;
+		_GLOBAL_CEX_ sizeT TexturesPerUpload_S = 128;
 		_GLOBAL_CEX_ sizeT TexturesPerUpload_M = 64;
 		_GLOBAL_CEX_ sizeT TexturesPerUpload_L = 16;
 		_GLOBAL_CEX_ sizeT TexturesPerUpload_X = 4;
-		std::array<Iris::BufferHandle, TexturesPerUpload_XS> m_transferBuffers_XS;	// for 128 or lower
-		std::array<Iris::BufferHandle, TexturesPerUpload_S> m_transferBuffers_S;	// for 256 or lower
-		std::array<Iris::BufferHandle, TexturesPerUpload_M> m_transferBuffers_M;	// for 512 or lower
-		std::array<Iris::BufferHandle, TexturesPerUpload_L> m_transferBuffers_L;	// for 1024 or lower
-		std::array<Iris::BufferHandle, TexturesPerUpload_X> m_transferBuffers_X;	// for 2048 or lower
+		Iris::CopyBufferHandle m_copyCmdBuffer;
+		std::array<Iris::BufferHandle, TexturesPerUpload_XS>	m_copyBuffers_XS;	// for 128 or lower
+		std::array<Iris::BufferHandle, TexturesPerUpload_S> 	m_copyBuffers_S;	// for 256 or lower
+		std::array<Iris::BufferHandle, TexturesPerUpload_M> 	m_copyBuffers_M;	// for 512 or lower
+		std::array<Iris::BufferHandle, TexturesPerUpload_L> 	m_copyBuffers_L;	// for 1024 or lower
+		std::array<Iris::BufferHandle, TexturesPerUpload_X> 	m_copyBuffers_X;	// for 2048 or lower
 		wtl::vector<std::pair<TextureInfoDDS, Iris::TextureHandle>> m_textures;
 		wtl::vector<bool> m_texturesDone;
 
@@ -84,6 +85,8 @@ namespace WEngine
 		ASMFHeader ReadASMFHeader(const byte* data);
 		void ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles);
 		void ParseTextures(const wtl::vector<byte*>& texFiles);
+		void FillCopyBuffers(Iris::BufferHandle* handles, sizeT handleCount, sizeT textureWidth);
+		void FinalizeTextureCopy();
 	};
 };
 

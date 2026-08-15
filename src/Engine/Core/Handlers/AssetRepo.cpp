@@ -326,22 +326,51 @@ void AssetRepo::LoadAllGPUAssets()
 
 void AssetRepo::TickTextureUpload()
 {
+	static bool finishedUpload = false;
+	if (finishedUpload)
+		return;
 
-	// if gpu side texture copy not done, return
+	if (!Iris::IsCopyPassDone(m_copyCmdBuffer))
+		return;
 
-	// were gonna iterate over m_textures, trying to fit as much into transfer buffers as possible.
-	// if [for example] extra small buffers are full and some larger buffers are empty, then we can
-	// put the 128x128 textures into larger buffers as well if need be.
+	bool allDone = true;
 
-	// memcpy to the transfer buffer
+	for (sizeT i = 0; i < m_texturesDone.size(); i++)
+	{
+		if (m_texturesDone[i])
+			continue;
+		allDone = false;
+		break;
+	}
 
-	// if gpu side texture copy done and all textures uploaded:
-	//		destroy all transfer buffers and unload CPU side texture data
+	if (allDone)
+	{
+		finishedUpload = true;
+		FinalizeTextureCopy();
+		WLog::SetConsoleInfo();
+		WLog::ConsoleLog("Texture copy has finished!");
+		return;
+	}
 
+	Iris::BeginCopyPass(m_copyCmdBuffer);
+
+	FillCopyBuffers(m_copyBuffers_XS.data(), m_copyBuffers_XS.size(), 128);
+	FillCopyBuffers(m_copyBuffers_S.data(), m_copyBuffers_S.size(), 256);
+	FillCopyBuffers(m_copyBuffers_M.data(), m_copyBuffers_M.size(), 512);
+	FillCopyBuffers(m_copyBuffers_L.data(), m_copyBuffers_L.size(), 1024);
+	FillCopyBuffers(m_copyBuffers_X.data(), m_copyBuffers_X.size(), 2048);
+
+	Iris::EndCopyPass(m_copyCmdBuffer);
 }
 
 void AssetRepo::PrepareTransferBuffers()
 {
+	m_texturesDone.resize(m_textures.size());
+	for (sizeT i = 0; i < m_texturesDone.size(); i++)
+		m_texturesDone[i] = false;
+
+	m_copyCmdBuffer = Iris::CreateCopyBuffer();
+
 	// BC1 DDS Sizes (according to nvcompress)
 	constexpr sizeT Tex128  =    11*KB + 1*KB;
 	constexpr sizeT Tex256  =    43*KB + 1*KB;
@@ -354,35 +383,35 @@ void AssetRepo::PrepareTransferBuffers()
 	desc.usage = Iris::BufferUsage::TransferSrc;
 
 	desc.debugName = "Texture Transfer Buffer Extra Small";
-	for (auto& buff : m_transferBuffers_XS)
+	for (auto& buff : m_copyBuffers_XS)
 	{
 		desc.size = Tex128;
 		buff = Iris::CreateBuffer(desc);
 	}
 
 	desc.debugName = "Texture Transfer Buffer Small";
-	for (auto& buff : m_transferBuffers_S)
+	for (auto& buff : m_copyBuffers_S)
 	{
 		desc.size = Tex256;
 		buff = Iris::CreateBuffer(desc);
 	}
 
 	desc.debugName = "Texture Transfer Buffer Medium";
-	for (auto& buff : m_transferBuffers_M)
+	for (auto& buff : m_copyBuffers_M)
 	{
 		desc.size = Tex512;
 		buff = Iris::CreateBuffer(desc);
 	}
 
 	desc.debugName = "Texture Transfer Buffer Large";
-	for (auto& buff : m_transferBuffers_L)
+	for (auto& buff : m_copyBuffers_L)
 	{
 		desc.size = Tex1024;
 		buff = Iris::CreateBuffer(desc);
 	}
 
 	desc.debugName = "Texture Transfer Buffer Extra Large";
-	for (auto& buff : m_transferBuffers_X)
+	for (auto& buff : m_copyBuffers_X)
 	{
 		desc.size = Tex2048;
 		buff = Iris::CreateBuffer(desc);
@@ -550,11 +579,14 @@ void AssetRepo::ParseTextures(const wtl::vector<byte*>& texFiles)
 	{
 		auto dds = ParseDDS(tex);
 		TextureInfoDDS info{};
-		info.data     = dds.data.data();
+		info.data     = wNewArr(byte, dds.data.size());
+		info.dataSize = dds.data.size();
 		info.width    = dds.width;
 		info.height   = dds.height;
 		info.mipCount = dds.mips;
 		info.format   = dds.format;
+
+		memcpy(info.data, dds.data.data(), dds.data.size());
 
 		Iris::TextureDesc desc;
 		desc.debugName = std::format("Texture UID:{}", uidCounter);
@@ -568,4 +600,50 @@ void AssetRepo::ParseTextures(const wtl::vector<byte*>& texFiles)
 		wFree(tex);
 		uidCounter++;
 	}
+
+	m_texturesDone.resize(m_textures.size());
+	for (sizeT i = 0; i < m_texturesDone.size(); i++)
+		m_texturesDone[i] = false;
+}
+
+void AssetRepo::FillCopyBuffers(Iris::BufferHandle* handles, sizeT handleCount, sizeT textureWidth)
+{
+	uint32 handleCursor = 0;
+	for (sizeT i = 0; i < m_textures.size(); i++)
+	{
+		if (m_textures[i].first.width == textureWidth && m_texturesDone[i] == false)
+		{
+			Iris::UpdateBuffer(handles[handleCursor], 0, m_textures[i].first.data, m_textures[i].first.dataSize);
+
+			Iris::CopyBufferToTexture(m_copyCmdBuffer, handles[handleCursor], 0, m_textures[i].second);
+
+			m_texturesDone[i] = true;
+			handleCursor++;
+			if (handleCursor == handleCount)
+				return;
+		}
+	}
+}
+
+void AssetRepo::FinalizeTextureCopy()
+{
+	for (auto& tex : m_textures)
+		wFree(tex.first.data);
+	m_texturesDone.clear();
+
+	for (auto& buff : m_copyBuffers_XS)
+		Iris::DestroyBuffer(buff);
+
+	for (auto& buff : m_copyBuffers_S)
+		Iris::DestroyBuffer(buff);
+
+	for (auto& buff : m_copyBuffers_M)
+		Iris::DestroyBuffer(buff);
+
+	for (auto& buff : m_copyBuffers_L)
+		Iris::DestroyBuffer(buff);
+
+	for (auto& buff : m_copyBuffers_X)
+		Iris::DestroyBuffer(buff);
+
 }

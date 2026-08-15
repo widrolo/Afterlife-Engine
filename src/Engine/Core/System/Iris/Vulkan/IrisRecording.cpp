@@ -38,12 +38,63 @@ namespace Iris
         return loadedCommandBuffers.size();
     }
 
+    CopyBufferHandle CreateCopyBuffer()
+    {
+        Vulkan_CopyBuff buff{};
+        buff.queue = QueueFor(QueueType::Copy);
+
+        VkCommandPoolCreateInfo poolInfo{};
+        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        poolInfo.queueFamilyIndex = QueueFamilyFor(QueueType::Copy);
+        poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+        auto res = vkCreateCommandPool(vcore.gpuDevice, &poolInfo, vcore.allocator, &buff.pool);
+        if (!ParseVkResult(res))
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog("Unable to create copy buffer pool!");
+            return 0;
+        }
+
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandBufferCount = 1;
+        allocInfo.commandPool = buff.pool;
+
+        res = vkAllocateCommandBuffers(vcore.gpuDevice, &allocInfo, &buff.commandBuffer);
+        if (!ParseVkResult(res))
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog("Unable to create copy buffer!");
+            return 0;
+        }
+        VkFenceCreateInfo fenceInfo{};
+        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+        res = vkCreateFence(vcore.gpuDevice, &fenceInfo, vcore.allocator, &buff.fence);
+        if (!ParseVkResult(res))
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog("Unable to create fence for the copy buffer!");
+            return 0;
+        }
+
+        //vkResetFences(vcore.gpuDevice, 1, &buff.fence);
+
+        VkResult st = vkGetFenceStatus(vcore.gpuDevice, buff.fence);
+        WEngine::WLog::ConsoleLog(std::format("fence status immediately after create: {}", (int)st));
+        loadedCopyBuffers.push_back(buff);
+        return loadedCopyBuffers.size();
+    }
+
     void BeginCommandBuffer(CommandBufferHandle cmd)
     {
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
-            WEngine::WLog::ConsoleLog("Invalid command buffer handle, refusing to end!");
+            WEngine::WLog::ConsoleLog("Invalid command buffer handle, refusing to begin!");
             return;
         }
 
@@ -208,13 +259,64 @@ namespace Iris
         PrintNotImplemented("EndComputePass");
     }
 
-    // I mean copy passes technically arent needed in vulkan. This is just visual fluff
-    void BeginCopyPass(CommandBufferHandle cmd)
+    void BeginCopyPass(CopyBufferHandle cmd)
     {
+        if (cmd == 0 || cmd > loadedCopyBuffers.size())
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog("Invalid copy buffer handle, refusing to begin!");
+            return;
+        }
+
+        const Vulkan_CopyBuff& copyBuff = loadedCopyBuffers[cmd - 1];
+
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+        vkResetFences(vcore.gpuDevice, 1, &copyBuff.fence);
+        vkBeginCommandBuffer(copyBuff.commandBuffer, &beginInfo);
     }
 
-    void EndCopyPass(CommandBufferHandle cmd)
+    void EndCopyPass(CopyBufferHandle cmd)
     {
+        if (cmd == 0 || cmd > loadedCopyBuffers.size())
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog("Invalid copy buffer handle, refusing to end!");
+            return;
+        }
+
+        const Vulkan_CopyBuff& copyBuff = loadedCopyBuffers[cmd - 1];
+        vkEndCommandBuffer(copyBuff.commandBuffer);
+
+        VkSubmitInfo submit{};
+        submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submit.commandBufferCount   = 1;
+        submit.pCommandBuffers      = &copyBuff.commandBuffer;
+
+        auto res = vkQueueSubmit(copyBuff.queue, 1, &submit, copyBuff.fence);
+
+        if (!ParseVkResult(res))
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog("Copy submit failed.!");
+        }
+    }
+
+    bool IsCopyPassDone(CopyBufferHandle cmd)
+    {
+        if (cmd == 0 || cmd > loadedCopyBuffers.size())
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog("Invalid copy buffer handle, refusing to end!");
+            return false; // we should rather stall the copy process rather than overriding it mid-copy
+        }
+
+        const Vulkan_CopyBuff& copyBuff = loadedCopyBuffers[cmd - 1];
+        if (vkGetFenceStatus(vcore.gpuDevice, copyBuff.fence) == VK_SUCCESS)
+            return true;
+        return false;
     }
 }
 

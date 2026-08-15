@@ -53,6 +53,7 @@ namespace Iris
     void UpdateBuffer(BufferHandle buffer, sizeT dstOffset, const byte* data, sizeT size);
     void UpdateResourceTable(ResourceTableHandle table, const ResourceTableUpdateDesc& update);
 
+    void DestroyBuffer(BufferHandle buffer);
 
     // --------------------------------------- Swapchain ---------------------------------------
     TextureHandle AcquireSwapchainTexture();
@@ -61,6 +62,7 @@ namespace Iris
 
     // ----------------------------------- Command Recording -----------------------------------
     CommandBufferHandle CreateCommandBuffer(QueueType queue = QueueType::Graphics);
+    CopyBufferHandle CreateCopyBuffer();
     void BeginCommandBuffer(CommandBufferHandle cmd);
     void EndCommandBuffer(CommandBufferHandle cmd);
     void SubmitCommandBuffer(CommandBufferHandle cmd);
@@ -72,8 +74,9 @@ namespace Iris
     void BeginComputePass(CommandBufferHandle cmd);
     void EndComputePass(CommandBufferHandle cmd);
 
-    void BeginCopyPass(CommandBufferHandle cmd);
-    void EndCopyPass(CommandBufferHandle cmd);
+    void BeginCopyPass(CopyBufferHandle cmd);
+    void EndCopyPass(CopyBufferHandle cmd);
+    bool IsCopyPassDone(CopyBufferHandle cmd);
 
     // ----------------------------------- Resource Binding ------------------------------------
     void BindGraphicsPipeline(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline);
@@ -105,7 +108,7 @@ namespace Iris
             sizeT srcOffset, sizeT size);
 
     // generally, the only use for this is a staging buffer. Doesn't need much.
-    void CopyBufferToTexture(CommandBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst);
+    void CopyBufferToTexture(CopyBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst);
 
     // ---------------------------------------- ImGui ------------------------------------------
     void ConfigureImGui();

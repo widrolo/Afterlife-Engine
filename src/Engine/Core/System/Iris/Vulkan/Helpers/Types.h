@@ -68,6 +68,14 @@ struct Vulkan_CmdBuff
     VkQueue queue = VK_NULL_HANDLE;
 };
 
+struct Vulkan_CopyBuff
+{
+    VkCommandBuffer commandBuffer;
+    VkCommandPool pool;
+    VkFence fence;
+    VkQueue queue = VK_NULL_HANDLE;
+};
+
 struct Vulkan_FramePools
 {
     VkCommandPool pool[3] = {};

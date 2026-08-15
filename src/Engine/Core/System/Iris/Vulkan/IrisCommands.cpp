@@ -168,12 +168,12 @@ namespace Iris
         stats.drawStats.copyBuffToBuff++;
     }
 
-    void CopyBufferToTexture(CommandBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst)
+    void CopyBufferToTexture(CopyBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst)
     {
-        if (cmd == 0 || cmd > loadedCommandBuffers.size())
+        if (cmd == 0 || cmd > loadedCopyBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
-            WEngine::WLog::ConsoleLog("Invalid command buffer handle, refusing to copy buffer to texture!");
+            WEngine::WLog::ConsoleLog("Invalid copy buffer handle, refusing to copy buffer to texture!");
             return;
         }
         if (dst == 0 || dst > loadedTextures.size())
@@ -189,6 +189,7 @@ namespace Iris
             return;
         }
 
+        const Vulkan_CopyBuff& copyBuff = loadedCopyBuffers[cmd - 1];
         const Vulkan_Buffer& srcBuff = loadedBuffers[src - 1];
         const Vulkan_Texture& dstImg = loadedTextures[dst - 1];
 
@@ -227,7 +228,7 @@ namespace Iris
         pipeBarrier.srcAccessMask = 0;
         pipeBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
-        vkCmdPipelineBarrier(GetCurrentCmdBuff(cmd), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+        vkCmdPipelineBarrier(copyBuff.commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
             0, 0, nullptr, 0, nullptr, 1, &pipeBarrier);
 
         std::vector<VkBufferImageCopy> regions;
@@ -256,7 +257,7 @@ namespace Iris
             mh = std::max(1u, mh / 2);
         }
 
-        vkCmdCopyBufferToImage(GetCurrentCmdBuff(cmd), srcBuff.buffer, dstImg.image,
+        vkCmdCopyBufferToImage(copyBuff.commandBuffer, srcBuff.buffer, dstImg.image,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, regions.size(), regions.data());
 
         VkImageMemoryBarrier postBarrier = pipeBarrier;
@@ -267,7 +268,7 @@ namespace Iris
         postBarrier.dstAccessMask = 0;
 
         // This must transition to bottom of pipe, not fragment. This is not on a drawing queue!!
-        vkCmdPipelineBarrier(GetCurrentCmdBuff(cmd), VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+        vkCmdPipelineBarrier(copyBuff.commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
             0, 0, nullptr, 0, nullptr, 1, &postBarrier);
         stats.drawStats.copyBuffToTex++;
     }

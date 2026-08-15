@@ -15,6 +15,7 @@ namespace WEngine
     struct TextureInfoDDS
     {
         byte* data;
+        sizeT dataSize;
         uint32 width;
         uint32 height;
         uint32 mipCount;

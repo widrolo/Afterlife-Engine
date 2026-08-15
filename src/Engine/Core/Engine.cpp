@@ -199,7 +199,6 @@ void Engine::Run()
 	m_physicsTickTimer = 0.0f;
 	m_game->PreGameLoop();
 
-
 	while (CoreSystems::isGameRunning)
 	{
 		Loop_Begin(lastUpdate, uptime, frameStart);
@@ -231,6 +230,8 @@ void Engine::Loop_Begin(std::chrono::steady_clock::time_point& last, StopWatch& 
 
 	//if (!Iris::IsFirstFrame())
 	//	Iris::SETTING_BeginNewPreFrame();
+
+	CoreSystems::GetAssetRepo()->TickTextureUpload();
 
 	CoreSystems::timeHandler->Update(m_deltaTime * CoreSystems::GetTimeScale());
 

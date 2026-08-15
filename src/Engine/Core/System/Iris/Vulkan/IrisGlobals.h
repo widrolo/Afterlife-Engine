@@ -127,6 +127,7 @@ inline wtl::vector<Vulkan_ResourceTable> loadedResourceTables{};
 inline uint32 commandBufferFrameIndex = 0;
 inline wtl::vector<Vulkan_FramePools> framePools{};
 inline wtl::vector<Vulkan_CmdBuff> loadedCommandBuffers{};
+inline wtl::vector<Vulkan_CopyBuff> loadedCopyBuffers{};
 inline wtl::vector<Vulkan_Pipeline> loadedPipelines{};
 
 inline VkSampler imGuiSampler;

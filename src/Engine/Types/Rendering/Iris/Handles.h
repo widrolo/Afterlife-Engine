@@ -15,4 +15,5 @@ namespace Iris
     DEFINE_OPAQUE_HANDLE(ComputePipelineHandle);
     DEFINE_OPAQUE_HANDLE(FramebufferHandle);
     DEFINE_OPAQUE_HANDLE(CommandBufferHandle);
+    DEFINE_OPAQUE_HANDLE(CopyBufferHandle);
 }

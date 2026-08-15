@@ -22,6 +22,7 @@ namespace Iris
     {
         Vulkan_Buffer buff;
         buff.debugName = desc.debugName;
+        buff.usage = desc.usage;
         VkBufferCreateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         info.size = desc.size;
@@ -87,6 +88,11 @@ namespace Iris
     {
         Vulkan_Texture tex{};
         tex.debugName = desc.debugName;
+        tex.width = desc.width;
+        tex.height = desc.height;
+        tex.mipCount = desc.mipLevels;
+        tex.format = IrisImgFormatToVulkan(desc.format);
+
         VkImageCreateInfo info{};
         info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         info.imageType = VK_IMAGE_TYPE_2D;
@@ -759,6 +765,40 @@ namespace Iris
             writes.push_back(vkWrite);
         }
         vkUpdateDescriptorSets(vcore.gpuDevice, writes.size(), writes.data(), 0, nullptr);
+    }
+
+    void DestroyBuffer(BufferHandle buffer)
+    {
+        if (buffer == 0 || buffer > loadedBuffers.size())
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog(std::format("Invalid buffer handle, refusing to Update!"));
+            return;
+        }
+        const Vulkan_Buffer& buff = loadedBuffers[buffer - 1];
+
+        stats.vramStats.total -= buff.allocInfo.size;
+        switch (buff.usage)
+        {
+            case BufferUsage::Vertex:
+                stats.vramStats.vertexBuffers -= buff.allocInfo.size;
+                break;
+            case BufferUsage::Index:
+                stats.vramStats.indexBuffers -= buff.allocInfo.size;
+                break;
+            case BufferUsage::Uniform:
+                stats.vramStats.uniformBuffer -= buff.allocInfo.size;
+                break;
+            case BufferUsage::Storage:
+                stats.vramStats.storageBuffers -= buff.allocInfo.size;
+                break;
+            case BufferUsage::TransferSrc:
+            case BufferUsage::TransferDst:
+                stats.vramStats.transferBuffers -= buff.allocInfo.size;
+                break;
+        }
+
+        vmaDestroyBuffer(vcore.vmaAllocator, buff.buffer, buff.alloc);
     }
 }
 
