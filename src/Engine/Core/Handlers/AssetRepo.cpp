@@ -52,13 +52,6 @@ AssetRepo::AssetRepo()
 }
 
 template<>
-void AssetRepo::GetAsset<ShaderAssetMission>(ShaderAssetMission& mission) 
-{
-	mission.vertexShaderSource = LoadTextFile(GetDataPath() + EngineSettings::shaderPath + mission.name + "Vertex.glsl");
-	mission.fragmentShaderSource = LoadTextFile(GetDataPath() + EngineSettings::shaderPath + mission.name + "Fragment.glsl");
-}
-
-template<>
 void AssetRepo::GetAsset<YamlAssetMission>(YamlAssetMission& mission)
 {
 	const std::string file = LoadTextFile(GetDataPath() + EngineSettings::sectorPath + mission.name + ".yaml");
@@ -74,6 +67,7 @@ void AssetRepo::GetAsset<AudioClipAssetMission>(AudioClipAssetMission& mission)
 	mission.clip = clip;
 }
 
+// deprecated???
 template<>
 void AssetRepo::GetAsset<UISheetAssetMission>(UISheetAssetMission& mission)
 {
@@ -107,6 +101,7 @@ template<>
 void AssetRepo::GetAsset<SpirVAssetMission>(SpirVAssetMission& mission)
 {
 #ifdef PACKAGE
+	// we will reenable it later. For now it will remain like this.
 	//LoadSpirVFromSpv(mission);
 	LoadSpirVFromGlsl(mission);
 #else
@@ -114,53 +109,6 @@ void AssetRepo::GetAsset<SpirVAssetMission>(SpirVAssetMission& mission)
 #endif
 
 }
-
-
-
-TextureInfo AssetRepo::LoadTexturePNG(const std::string& path)
-{
-	TextureInfo info{};
-	info.data = stbi_load(path.c_str(), &info.width, &info.height, &info.channels, 4);
-	if (info.data == nullptr)
-	{
-		WLog::SetConsoleError();
-		WLog::ConsoleLog(std::format("Failed to load texture {}", path));
-		return TextureInfo{};
-	}
-	sizeT size = info.width * info.height * 4;
-	WAllocator::ReportExternalAllocation(size);
-	WLog::SetConsoleSuccess();
-	WLog::ConsoleLog(std::format("Loaded texture {}", path));
-	return info;
-}
-
-TextureInfoDDS AssetRepo::LoadTextureDDS(const std::string &path)
-{
-	DDSFile dds = LoadDDS(path);
-	if (dds.data.empty())
-	{
-		WLog::SetConsoleError();
-		WLog::ConsoleLog(std::format("Failed to load texture {}", path));
-		return {};
-	}
-
-	sizeT size = dds.data.size();
-	byte* raw   = new byte[size];
-	std::memcpy(raw, dds.data.data(), size);
-	WAllocator::ReportExternalAllocation(size);
-
-	TextureInfoDDS info{};
-	info.data     = raw;
-	info.width    = dds.width;
-	info.height   = dds.height;
-	info.mipCount = dds.mips;
-	info.format   = dds.format;
-
-	WLog::SetConsoleSuccess();
-	WLog::ConsoleLog(std::format("Loaded texture {}", path));
-	return info;
-}
-
 AudioClip* AssetRepo::LoadAudioWAV(const std::string& name)
 {
 	AudioClip clip{};
@@ -296,6 +244,54 @@ void AssetRepo::LoadSpirVFromSpv(SpirVAssetMission &mission)
 	file.close();
 }
 
+void AssetRepo::LoadAssetTable()
+{
+	std::string tablePath = GetDataPath() + "/Packages/Assets.yaml";
+	std::string table = LoadTextFile(tablePath);
+
+	YAML::Node root = YAML::Load(table);
+
+	if (!root["Assets"])
+	{
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog("Asset Table is missing Assets definition");
+		return;
+	}
+
+	for (const auto& entry : root["Assets"])
+	{
+		const YAML::Node& asset = entry.second;
+
+		if (!asset["Dir"])
+		{
+			WLog::SetConsoleWarning();
+			WLog::ConsoleLog("Asset is missing directory path, skipping this asset!");
+			continue;
+		}
+		std::string dir = asset["Dir"].as<std::string>();
+		wtl::vector<AssetRef> assets;
+
+		for (const auto& dataEntry : asset["Data"])
+		{
+			const YAML::Node& data = dataEntry.second;
+			if (!data["Name"] || !data["Type"] || !data["UID"])
+			{
+				WLog::SetConsoleWarning();
+				WLog::ConsoleLog(std::format("Data within {} is not properly defined", dir));
+				continue;
+			}
+
+			AssetRef ref;
+			ref.name = data["Name"].as<std::string>();
+			// -1 Because Afterlife Browser defines a "None" type which shifts it all over by one.
+			ref.type = (AssetType)(data["Type"].as<sizeT>() - 1);
+			ref.uid = data["UID"].as<sizeT>();
+			assets.push_back(ref);
+		}
+
+		m_assets[dir] = std::move(assets);
+	}
+}
 
 void AssetRepo::LoadAllGPUAssets()
 {
@@ -308,6 +304,7 @@ void AssetRepo::LoadAllGPUAssets()
 		return;
 
 	PrepareTransferBuffers();
+	LoadAssetTable();
 
 	wtl::vector<std::pair<sizeT, sizeT>> meshTable;
 	wtl::vector<std::pair<sizeT, sizeT>> textureTable;
@@ -361,6 +358,63 @@ void AssetRepo::TickTextureUpload()
 	FillCopyBuffers(m_copyBuffers_X.data(), m_copyBuffers_X.size(), 2048);
 
 	Iris::EndCopyPass(m_copyCmdBuffer);
+}
+
+const wtl::vector<AssetRef>& AssetRepo::GetAllAssetsInDir(const std::string &dirName)
+{
+	if (!m_assets.contains(dirName))
+		return {};
+
+	return m_assets[dirName];
+}
+
+wtl::vector<AssetRef> AssetRepo::GetAllAssetsInDirOfType(const std::string &dirName, AssetType type)
+{
+	if (!m_assets.contains(dirName))
+		return {};
+
+	auto& assetRefs = m_assets[dirName];
+
+	wtl::vector<AssetRef> assets;
+	for (auto& ref : assetRefs)
+	{
+		if (ref.type == type)
+			assets.push_back(ref);
+	}
+
+	return assets;
+}
+
+uint64 AssetRepo::GetFirstAssetInDirOfType(const std::string &dirName, AssetType type)
+{
+	if (!m_assets.contains(dirName))
+		return 0;
+
+	auto& assetRefs = m_assets[dirName];
+
+	for (auto& ref : assetRefs)
+	{
+		if (ref.type == type)
+			return ref.uid;
+	}
+
+	return 0;
+}
+
+uint64 AssetRepo::GetAssetInDirByName(const std::string &dirName, const std::string &assetName)
+{
+	if (!m_assets.contains(dirName))
+		return 0;
+
+	auto& assetRefs = m_assets[dirName];
+
+	for (auto& ref : assetRefs)
+	{
+		if (ref.name == assetName)
+			return ref.uid;
+	}
+
+	return 0;
 }
 
 void AssetRepo::PrepareTransferBuffers()
@@ -426,6 +480,7 @@ bool AssetRepo::CheckForPackages()
 	std::string texPackTable = packPath + "Textures.yaml";
 	std::string meshPack = packPath + "Meshes.pkg";
 	std::string meshPackTable = packPath + "Meshes.yaml";
+	std::string assetTable = packPath + "Assets.yaml";
 
 	if (!std::filesystem::exists(texPack))
 	{
@@ -443,6 +498,12 @@ bool AssetRepo::CheckForPackages()
 	{
 		WLog::SetConsoleWarning();
 		WLog::ConsoleLog("Mesh package not found");
+		return false;
+	}
+	if (!std::filesystem::exists(meshPackTable))
+	{
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog("Mesh table not found");
 		return false;
 	}
 	if (!std::filesystem::exists(meshPackTable))

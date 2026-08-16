@@ -169,6 +169,7 @@ namespace WEngine
 
 		void PrepareSkybox();
 	private:
+		void RenderSingleMission();
 		void NormalsPass();
 		void PreparePPFramebuffers();
 		void RenderSkybox();

@@ -115,16 +115,15 @@ void RenderHandler::RenderFrame()
 		m_lighting.cameraPos = m_camera->GetPosition();
 
 	//RenderSkybox();
-	//SortMissions(false);
-	//SortMissions(true);
-//
-	//for (auto& materialGroup : m_sortedMissions)
-	//{
-	//	for (auto& modelGroup : materialGroup.models)
-	//	{
-	//		RenderModelGroup(modelGroup, materialGroup.groupID);
-	//	}
-	//}
+	SortMissions(false);
+	SortMissions(true);
+	for (auto& materialGroup : m_sortedMissions)
+	{
+		for (auto& modelGroup : materialGroup.models)
+		{
+			RenderModelGroup(modelGroup, materialGroup.groupID);
+		}
+	}
 
 	//Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
 
@@ -266,6 +265,11 @@ void RenderHandler::PrepareSkybox()
 	//auto matN = Iris::ALLOC_CompileMaterial("Skybox");
 	//if (matN.HasValue())
 	//	m_skyboxInfo.skyMaterial = matN.GetValue();
+}
+
+void RenderHandler::RenderSingleMission()
+{
+
 }
 
 void RenderHandler::NormalsPass()
@@ -440,47 +444,47 @@ void RenderHandler::InsertModelIntoShaderGroup(RenderMission &mission, MaterialG
  */
 void RenderHandler::SortMissions(bool transparentPass)
 {
-	//for (auto& mission : m_renderQueue)
-	//{
-	//	if (transparentPass)
-	//	{
-	//		auto def = Iris::GetShaderDef(mission.material);
-	//		if (!def.HasValue())
-	//			continue;
-	//		if (!def.GetValue().transparent)
-	//			continue;
-	//	}
-	//	if (!transparentPass)
-	//	{
-	//		auto def = Iris::GetShaderDef(mission.material);
-	//		if (!def.HasValue())
-	//			continue;
-	//		if (def.GetValue().transparent)
-	//			continue;
-	//	}
-	//	if (mission.isStationary)
-	//	{
-	//		SortStationary(mission);
-	//		continue;
-	//	}
-	//	bool foundShader = false;
-	//	for (auto& m_sortedMission : m_sortedMissions)
-	//	{
-	//		if (m_sortedMission.groupID == mission.material)
-	//		{
-	//			foundShader = true;
-	//			InsertModelIntoShaderGroup(mission, m_sortedMission);
-	//			continue;
-	//		}
-	//	}
-	//	if (!foundShader)
-	//	{
-	//		MaterialGroup group;
-	//		group.groupID = mission.material;
-	//		InsertModelIntoShaderGroup(mission, group);
-	//		m_sortedMissions.push_back(group);
-	//	}
-	//}
+	for (auto& mission : m_renderQueue)
+	{
+		//if (transparentPass)
+		//{
+		//	auto def = Iris::GetShaderDef(mission.material);
+		//	if (!def.HasValue())
+		//		continue;
+		//	if (!def.GetValue().transparent)
+		//		continue;
+		//}
+		//if (!transparentPass)
+		//{
+		//	auto def = Iris::GetShaderDef(mission.material);
+		//	if (!def.HasValue())
+		//		continue;
+		//	if (def.GetValue().transparent)
+		//		continue;
+		//}
+		if (mission.isStationary)
+		{
+			SortStationary(mission);
+			continue;
+		}
+		bool foundShader = false;
+		for (auto& m_sortedMission : m_sortedMissions)
+		{
+			if (m_sortedMission.groupID == mission.material)
+			{
+				foundShader = true;
+				InsertModelIntoShaderGroup(mission, m_sortedMission);
+				continue;
+			}
+		}
+		if (!foundShader)
+		{
+			MaterialGroup group;
+			group.groupID = mission.material;
+			InsertModelIntoShaderGroup(mission, group);
+			m_sortedMissions.push_back(group);
+		}
+	}
 }
 
 void RenderHandler::CleanSortedMissions()
