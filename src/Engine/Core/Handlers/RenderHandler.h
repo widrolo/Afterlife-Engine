@@ -13,6 +13,7 @@
 #include "Engine/Types/Rendering/GPU/Material.h"
 #include "Engine/Types/Rendering/GPU/Shader.h"
 #include "Engine/Types/Rendering/GPU/StatBufKey.h"
+#include "Engine/Types/Rendering/Iris/Handles.h"
 #include "Engine/WTL/deque.h"
 
 namespace WEngine
@@ -102,87 +103,17 @@ namespace WEngine
 		 */
 		void AddToRenderQueue(RenderMission& mission);
 
-		/**
-		 * Records a stationary object as a stationary object.
-		 * @param key Handle to the sector key.
-		 * @param model Handle to the model to be added.
-		 * @param material Handle to the material to be added.
-		 * @param transform Position of the stationary object.
-		 */
-		void RecordStationaryAdd(StatBufKey key, Model model, Material material, const Transform& transform);
-
-		/**
-		 * Pushes the recorded stationary data to Iris.
-		 * @warning This should only be called by the game loop.
-		 */
-		void PushStationaryData();
-
-		/**
-		 * Records new sunlight data.
-		 * @param light New sunlight data.
-		 * @note This does not push anything to Iris, it records it for later.
-		 */
-		void SetSunlight(const Sunlight& light);
-
-		/**
-		 * Records new ambient light data.
-		 * @param light New ambient light data.
-		 * @note This does not push anything to Iris, it records it for later.
-		 */
-		void SetAmbientLight(const AmbientLight& light);
-
-		/**
-		 * Records new time of day data.
-		 * @param time New time of day data.
-		 * @note This does not push anything to Iris, it records it for later.
-		 * @note The time is expected to be between 0 and 1. 0 being start of the day, 1 being end of the day.
-		 */
-		void SetLightTime(float32 time);
-
-		/**
-		 * Records the intensity of the sunlight.
-		 * @param factor intensity of the sunlight.
-		 * @note This value does not get used within any shader whatsoever. I have no idea why it exists.
-		 */
-		void SetSunlightColorFactor(float32 factor);
-
-		/**
-		 * Gets the currently recorded sunlight data.
-		 * @return Currently recorded sunlight data.
-		 * @note This has no guarantee of actually being the sunlight data used for rendering later, it's the currently recorded value which is subject to change,
-		 */
-		[[nodiscard]] const Sunlight& GetSunlight() const;
-
-		/**
-		 * Gets the currently recorded ambient light data.
-		 * @return Currently recorded ambient light data.
-		 * @note This has no guarantee of actually being the ambient light data used for rendering later, it's the currently recorded value which is subject to change,
-		 */
-		[[nodiscard]] const AmbientLight& GetAmbientLight() const;
-
-		/**
-		 * Gets the currently recorded time of day data.
-		 * @return Currently recorded time of day data.
-		 * @note This has no guarantee of actually being the time of day data used for rendering later, it's the currently recorded value which is subject to change,
-		 */
-		[[nodiscard]] float32 GetLightTime() const;
-
-		void PrepareSkybox();
 	private:
+		void PrepareRenderingSetup();
+		void LoadShaders();
+		void CreateTables();
+		void CreatePipelines();
+
 		void RenderSingleMission();
-		void NormalsPass();
-		void PreparePPFramebuffers();
-		void RenderSkybox();
-		void LoadPPShaderSingle(const std::string& name);
-		void LoadPPShaders();
 
 		Mat4x4 CalcModelMatrix(const Transform& transform);
 
 		void RenderModelGroup(const ModelGroup& group, Material material);
-
-		void RenderPostProcessingShaders();
-
-		void SortStationary(RenderMission& mission);
 
 		void InsertModelIntoShaderGroup(RenderMission& mission, MaterialGroup& materialGroup);
 
@@ -194,6 +125,13 @@ namespace WEngine
 
 
 	private:
+		// while it was comfy to use the old shader system, a static one makes
+		// more sense considering the style were going after.
+		Iris::ShaderHandle m_vertexShader; // this is in this case the basic one.
+		Iris::ShaderHandle m_fragmentShader; // this is in this case the basic one.
+		Iris::ResourceTableLayoutHandle m_mainTableLayout;
+		Iris::GraphicsPipelineHandle m_mainPipeline;
+
 		Vector2 m_windowResolution;
 		SDL_DisplayMode* m_displayMode = nullptr;
 		SDL_Window* m_window = nullptr;
@@ -201,28 +139,13 @@ namespace WEngine
 		CameraComponent* m_camera = nullptr;
 
 		wtl::deque<RenderMission> m_renderQueue;
-		wtl::deque<StationaryObjStaged> m_stationaryAddQueue;
-
 		wtl::vector<MaterialGroup> m_sortedMissions;
-		wtl::vector<StationaryRenderMission> m_stationaryMissions;
 
 		glm::mat4 m_projection;
 		glm::mat4 m_viewMatrix;
 
 		bool m_isEditor = false;
 		Framebuffer m_viewportFb{};
-		Framebuffer m_normalsFb{};
-		std::array<Framebuffer, 2> m_ppFramebuffers{};
-		uint8 m_currentPPFramebuffer = 0;
 		Vector2 m_viewportResolution{};
-
-		SkyboxInfo m_skyboxInfo;
-		LightingInfo m_lighting;
-
-		Material m_normalPassMat;
-
-		Shader m_screenShader;
-		// Make it work first, make a pretty later ahh code
-		wtl::vector<Shader> m_ppShaders;
 	};
 }

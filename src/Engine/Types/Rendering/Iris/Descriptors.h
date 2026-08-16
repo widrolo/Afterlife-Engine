@@ -52,7 +52,7 @@ namespace Iris
     struct ShaderStageDesc
     {
         ShaderStage stage;
-        const byte* bytecode;
+        const dword* bytecode;
         sizeT bytecodeSize;
         std::string entryPoint = "main";
         std::string debugName;

@@ -41,14 +41,9 @@ RenderHandler::RenderHandler()
 	}
 	InitImGui();
 	Iris::ConfigureImGui();
+	PrepareRenderingSetup();
 
 	CoreSystems::GetAssetRepo()->LoadAllGPUAssets();
-
-	if (!Engine::GetCla().testMode)
-		PreparePPFramebuffers();
-
-	if (!Engine::GetCla().testMode)
-		LoadPPShaders();
 
 	m_projection = glm::perspective(
 		glm::radians(90.0f),
@@ -56,13 +51,6 @@ RenderHandler::RenderHandler()
 		0.01f,
 		1000.0f
 		);
-
-	m_lighting.sun.direction = {0.58f, -0.13f, -0.31f};
-	m_lighting.sun.lightColor = Color::White;
-	m_lighting.ambient.intensity = 0.1f;
-	// A nice looking night color
-	m_lighting.ambient.ambientColor = {164, 199, 247, 255};
-	m_lighting.cameraPos = Vector3::Zero;
 
 	tempHandle = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
 }
@@ -88,10 +76,6 @@ Framebuffer RenderHandler::EditorGetViewportFramebuffer()
 
 void RenderHandler::BeginFrame()
 {
-	//m_currentPPFramebuffer = 0;
-
-	int frame = Iris::GetCurrentFrameIndex();
-
 	Iris::BeginFrame();
 	Iris::AcquireSwapchainTexture();
 	Iris::ImGuiNewFrame();
@@ -108,13 +92,7 @@ void RenderHandler::BeginFrame()
 
 void RenderHandler::RenderFrame()
 {
-	int frame = Iris::GetCurrentFrameIndex();
-	if (m_camera == nullptr)
-		m_lighting.cameraPos = Vector3::Zero;
-	else
-		m_lighting.cameraPos = m_camera->GetPosition();
 
-	//RenderSkybox();
 	SortMissions(false);
 	SortMissions(true);
 	for (auto& materialGroup : m_sortedMissions)
@@ -125,7 +103,7 @@ void RenderHandler::RenderFrame()
 		}
 	}
 
-	//Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
+	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
 
 	if (!Engine::GetCla().testMode)
 	{
@@ -165,106 +143,99 @@ void RenderHandler::AddToRenderQueue(RenderMission& mission)
 	m_renderQueue.push_back(mission);
 }
 
-void RenderHandler::RecordStationaryAdd(StatBufKey key, Model model, Material material, const Transform& transform)
+void RenderHandler::PrepareRenderingSetup()
 {
-	for (auto& objects : m_stationaryAddQueue)
-	{
-		if (objects.model == model && objects.material == material)
-		{
-			objects.instData.push_back({CalcModelMatrix(transform)});
-			return;
-		}
-	}
-
-	StationaryObjStaged obj;
-	obj.key = key;
-	obj.model = model;
-	obj.material = material;
-	obj.instData.push_back({CalcModelMatrix(transform)});
-	m_stationaryAddQueue.push_back(obj);
+	LoadShaders();
+	CreateTables();
+	CreatePipelines();
 }
 
-void RenderHandler::PushStationaryData()
+void RenderHandler::LoadShaders()
 {
-	//for (auto& object : m_stationaryAddQueue)
-	//	Iris::AddStationaryObjects(object.key, object.model, object.material, object.instData);
+	// I just realized that this kills the purpose of Iris but we can revisit this later,
+	SpirVAssetMission mission{};
+	mission.name = "basic";
+	mission.shaderType = SpirVAssetMission::VertexShader;
+	CoreSystems::GetAssetRepo()->GetAsset(mission);
 
-	m_stationaryAddQueue.clear();
+	Iris::ShaderStageDesc desc{};
+	desc.debugName = "Main Vertex Shader";
+	desc.stage = Iris::ShaderStage::Vertex;
+	desc.entryPoint = "main";
+	desc.bytecode = mission.shaderCode;
+	desc.bytecodeSize = mission.shaderSize;
+	m_vertexShader = Iris::CreateShader(desc);
+
+
+	mission.shaderType = SpirVAssetMission::FragmentShader;
+	CoreSystems::GetAssetRepo()->GetAsset(mission);
+
+	desc.debugName = "Main Fragment Shader";
+	desc.stage = Iris::ShaderStage::Fragment;
+	desc.bytecode = mission.shaderCode;
+	desc.bytecodeSize = mission.shaderSize;
+	m_fragmentShader = Iris::CreateShader(desc);
 }
 
-void RenderHandler::SetSunlight(const Sunlight &light)
+void RenderHandler::CreateTables()
 {
-	m_lighting.sun = light;
+	Iris::ResourceTableLayoutDesc desc{};
+	desc.debugName = "Main Table Layout";
+
+	Iris::ResourceTableLayoutEntry texEntry{};
+	texEntry.binding = 0;
+	texEntry.stages = Iris::ShaderStage::Fragment;
+	texEntry.type = Iris::ResourceTableEntryType::Texture;
+	texEntry.count = 9999; // gonna be a lot of them.
+	desc.entries.push_back(texEntry);
+
+	m_mainTableLayout = Iris::CreateResourceTableLayout(desc);
 }
 
-void RenderHandler::SetAmbientLight(const AmbientLight &light)
+void RenderHandler::CreatePipelines()
 {
-	m_lighting.ambient = light;
-}
+	// the asmf file thats loaded in is laid out like this:
+	// |     Name     |  Size  |
+	// |--------------|--------|
+	// |Position      |12 bytes|
+	// |Normal        |12 bytes|
+	// |UV            | 8 bytes|
+	Iris::VertexLayoutDesc vertDesc{};
+	Iris::VertexBindingDesc binding{};
+	binding.binding = 0;
+	binding.perInstance = false;
+	binding.stride = 32;
+	vertDesc.bindings.push_back(binding);
 
-void RenderHandler::SetLightTime(float32 time)
-{
-	m_lighting.timeOfDay = time;
-}
+	Iris::VertexAttributeDesc attribute{};
+	attribute.binding = 0;
+	attribute.location = 0;
+	attribute.format = Iris::VertFormat::Float3;
 
-void RenderHandler::SetSunlightColorFactor(float32 factor)
-{
-	m_lighting.sun.lightFactor = factor;
-}
+	vertDesc.attributes.push_back(attribute);
 
-const Sunlight& RenderHandler::GetSunlight() const
-{
-	return m_lighting.sun;
-}
+	attribute.location = 1;
+	vertDesc.attributes.push_back(attribute);
 
-const AmbientLight& RenderHandler::GetAmbientLight() const
-{
-	return m_lighting.ambient;
-}
+	attribute.location = 2;
+	attribute.format = Iris::VertFormat::Float2;
+	vertDesc.attributes.push_back(attribute);
 
-float32 RenderHandler::GetLightTime() const
-{
-	return m_lighting.timeOfDay;
-}
+	Iris::GraphicsPipelineDesc desc{};
+	desc.debugName = "Main Pipeline";
+	desc.vertexShader = m_vertexShader;
+	desc.fragmentShader = m_fragmentShader;
+	desc.vertexLayout = vertDesc;
+	desc.rasterizer = Iris::RasterizerDesc{}; // default one is good enough
+	desc.depthStencil = Iris::DepthStencilDesc{}; // default one is good enough
+	desc.blend = Iris::BlendDesc{}; // default one is good enough
 
-void RenderHandler::PreparePPFramebuffers()
-{
-	//auto fbN = Iris::ALLOC_CreateFramebuffer(EngineSettings::resolution);
-	//if (fbN.HasValue())
-	//	m_ppFramebuffers[0] = fbN.GetValue();
-//
-	//fbN = Iris::ALLOC_CreateFramebuffer(EngineSettings::resolution);
-	//if (fbN.HasValue())
-	//	m_ppFramebuffers[1] = fbN.GetValue();
-//
-	//fbN = Iris::ALLOC_CreateFramebuffer(EngineSettings::resolution, true);
-	//if (fbN.HasValue())
-	//	m_normalsFb = fbN.GetValue();
-//
-//
-	//auto shN = Iris::GetShader("PP_Screen");
-	//if (shN.HasValue())
-	//	m_screenShader = shN.GetValue();
-	//else
-	//{
-	//	WLog::SetConsoleError();
-	//	WLog::ConsoleLog("Could not pull screen shader!");
-	//}
-}
+	desc.tableLayouts[0] = m_mainTableLayout;
+	desc.tableAttachmentCount = 1;
 
-void RenderHandler::PrepareSkybox()
-{
-	//MeshAssetMission mission;
-	//mission.name = "Skysphere";
-	//CoreSystems::GetAssetRepo()->GetAsset(mission);
+	desc.pushConstantsSize = sizeof(Mat4x4);
 
-	//auto modelN = Iris::ALLOC_CreateModel(mission.model);
-	//if (modelN.HasValue())
-	//	m_skyboxInfo.skyModel = modelN.GetValue();
-//
-	//auto matN = Iris::ALLOC_CompileMaterial("Skybox");
-	//if (matN.HasValue())
-	//	m_skyboxInfo.skyMaterial = matN.GetValue();
+	m_mainPipeline = Iris::CreateGraphicsPipeline(desc);
 }
 
 void RenderHandler::RenderSingleMission()
@@ -272,63 +243,7 @@ void RenderHandler::RenderSingleMission()
 
 }
 
-void RenderHandler::NormalsPass()
-{
-	//Iris::SETTING_SelectFramebufferForRender(m_normalsFb);
-	//Iris::DRAWCALL_ClearFrame(Color::Black);
-	//Iris::SETTING_SetViewportSize(EngineSettings::resolution);
-	//for (auto& materialGroup : m_sortedMissions)
-	//{
-	//	for (auto& modelGroup : materialGroup.models)
-	//	{
-	//		RenderModelGroup(modelGroup, m_normalPassMat);
-	//	}
-	//}
-//
-	//Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
-//
-	//for (auto& stat : m_stationaryMissions)
-	//{
-	//	for (auto& ref : stat.references)
-	//		Iris::DRAWCALL_DrawModelInstancedStationary(ref, stat.model, stat.material, vp, m_normalPassMat);
-	//}
-	//Iris::SETTING_FinishFramebufferRender();
-}
 
-void RenderHandler::RenderSkybox()
-{
-	Transform skyboxTransform = Transform::Zero;
-	if (m_camera == nullptr)
-		skyboxTransform.position = Vector3::Zero;
-	else
-		skyboxTransform.position = m_camera->GetPosition();
-
-	skyboxTransform.position.y = 0.0f;
-
-	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
-
-	auto model = CalcModelMatrix(skyboxTransform);
-
-	InstanceData instanceData{model};
-
-	wtl::vector<InstanceData> modelStorage{instanceData};
-
-	//Iris::DRAWCALL_DrawModelInstanced(m_skyboxInfo.skyModel, m_skyboxInfo.skyMaterial, vp, modelStorage);
-}
-
-void RenderHandler::LoadPPShaderSingle(const std::string& name)
-{
-	//auto shN = Iris::GetShader(name);
-
-	//if (shN.HasValue())
-	//	m_ppShaders.push_back(shN.GetValue());
-
-}
-
-void RenderHandler::LoadPPShaders()
-{
-	LoadPPShaderSingle("PP_Test");
-}
 
 Mat4x4 RenderHandler::CalcModelMatrix(const Transform &transform)
 {
@@ -361,60 +276,6 @@ void RenderHandler::RenderModelGroup(const ModelGroup &group, Material material)
 	//Iris::DRAWCALL_DrawModelInstanced(group.groupID, material, vp, instances);
 }
 
-void RenderHandler::RenderPostProcessingShaders()
-{
-	//for (auto ppShader : m_ppShaders)
-	//{
-	//	uint8 target = !m_currentPPFramebuffer;
-	//	uint8 origin = m_currentPPFramebuffer;
-	//	Iris::SETTING_SelectFramebufferForRender(m_ppFramebuffers[target]);
-	//	Iris::SETTING_PrepareFramebufferForSampling(m_ppFramebuffers[origin]);
-	//	Iris::DRAWCALL_ClearFrame(Color::Black);
-	//	Iris::SETTING_SetViewportSize(EngineSettings::resolution);
-//
-	//	Iris::DRAWCALL_DrawPostProcess(ppShader, m_ppFramebuffers[origin]);
-//
-	//	Iris::SETTING_FinishFramebufferRender();
-//
-	//	m_currentPPFramebuffer = !m_currentPPFramebuffer;
-	//}
-
-	//uint8 origin = m_currentPPFramebuffer;
-	//Iris::SETTING_SelectFramebufferScreenForRender();
-	//Iris::SETTING_PrepareFramebufferForSampling(m_ppFramebuffers[origin]);
-	//Iris::DRAWCALL_ClearFrame(Color::White);
-	//Iris::SETTING_SetViewportSize(EngineSettings::resolution);
-	//Iris::DRAWCALL_DrawPostProcess(m_screenShader, m_ppFramebuffers[origin]);
-	Iris::ImGuiRenderDrawData(0);
-	//Iris::SETTING_FinishFramebufferRender();
-}
-
-void RenderHandler::SortStationary(RenderMission &mission)
-{
-	for (auto& objects : m_stationaryMissions)
-	{
-		if (objects.model == mission.model && objects.material == mission.material)
-		{
-			bool foundRef = false;
-			for (const auto& ref : objects.references)
-			{
-				if (ref == mission.key)
-				{
-					foundRef = true;
-					break;
-				}
-			}
-
-			if (!foundRef)
-			{
-				objects.references.push_back(mission.key);
-			}
-
-			return;
-		}
-	}
-	m_stationaryMissions.push_back({mission.model, mission.material, {mission.key}});
-}
 
 void RenderHandler::InsertModelIntoShaderGroup(RenderMission &mission, MaterialGroup &materialGroup)
 {
@@ -464,7 +325,7 @@ void RenderHandler::SortMissions(bool transparentPass)
 		//}
 		if (mission.isStationary)
 		{
-			SortStationary(mission);
+			//SortStationary(mission);
 			continue;
 		}
 		bool foundShader = false;
@@ -498,7 +359,6 @@ void RenderHandler::CleanSortedMissions()
 		shaderGroup.models.clear();
 	}
 	m_sortedMissions.clear();
-	m_stationaryMissions.clear();
 }
 
 void RenderHandler::InitSDL()

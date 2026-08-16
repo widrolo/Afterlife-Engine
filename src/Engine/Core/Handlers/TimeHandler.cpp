@@ -56,23 +56,23 @@ void TimeHandler::UpdateRenderTime()
     secs += m_time.GetHours() * 60 * 60;
 
     float32 timeFactor = (float32)secs / (float32)secondsInDay;
-    CoreSystems::GetRenderHandler()->SetLightTime(timeFactor);
+    //CoreSystems::GetRenderHandler()->SetLightTime(timeFactor);
 
-    auto sun = CoreSystems::GetRenderHandler()->GetSunlight();
-    sun.direction = CalcSunDir(timeFactor);
-    sun.direction.y = -sun.direction.y;
+    //auto sun = CoreSystems::GetRenderHandler()->GetSunlight();
+    //sun.direction = CalcSunDir(timeFactor);
+    //sun.direction.y = -sun.direction.y;
 
-    CoreSystems::GetRenderHandler()->SetSunlight(sun);
+    //CoreSystems::GetRenderHandler()->SetSunlight(sun);
 
     float32 colorFactor = std::max(-std::pow(timeFactor - 0.533, 4) * 110 + 1, 0.0);
 
-    CoreSystems::GetRenderHandler()->SetSunlightColorFactor(colorFactor);
+    //CoreSystems::GetRenderHandler()->SetSunlightColorFactor(colorFactor);
 
     // pls keep this identical to the shader
     float32 timeFacAmb = tanh(2*sin((timeFactor - 2*std::numbers::pi) * 2*std::numbers::pi)) / 2.1 + (0.524);
-    auto amb = CoreSystems::GetRenderHandler()->GetAmbientLight();
-    amb.intensity = -timeFacAmb / 10.0f + 0.2f;
-    CoreSystems::GetRenderHandler()->SetAmbientLight(amb);
+    //auto amb = CoreSystems::GetRenderHandler()->GetAmbientLight();
+    //amb.intensity = -timeFacAmb / 10.0f + 0.2f;
+    //CoreSystems::GetRenderHandler()->SetAmbientLight(amb);
 }
 
 Vector3 TimeHandler::CalcSunDir(float32 timeFactor)

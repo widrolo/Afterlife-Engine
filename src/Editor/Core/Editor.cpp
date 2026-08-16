@@ -102,10 +102,6 @@ void Editor::InitHandlers()
     StartHandlerSingleEditor<MenubarHandler>(&EditorSystems::menubarHandler, "Menubar Handler");
     StartHandlerSingleEditor<CompSettingsRepo>(&EditorSystems::compSettingsRepo, "Component Settings Repo");
 
-	//Iris::SETTING_BeginNewPreFrame();
-	//Iris::ALLOC_CompileMaterial("Unlit/MissingMat");
-	//Iris::ALLOC_CompileMaterial("Editor/PhysicsDebug");
-	EditorSystems::renderHandler->PrepareSkybox();
 	AnyComponent::SetupPhysicsData();
 	WAllocator::Construct<WEngine::Sector, const std::string&>("root");
 	Haptic::EnableEditorMode();
@@ -123,7 +119,7 @@ void Editor::Run()
 	WEngine::AmbientLight ambLight;
 	ambLight.ambientColor = WEngine::Color::White;
 	ambLight.intensity = 1.0f;
-	EditorSystems::renderHandler->SetAmbientLight(ambLight);
+	//EditorSystems::renderHandler->SetAmbientLight(ambLight);
 
 	while (*EditorSystems::isEditorRunning)
 	{

@@ -81,10 +81,6 @@ namespace Iris
             return 0;
         }
 
-        //vkResetFences(vcore.gpuDevice, 1, &buff.fence);
-
-        VkResult st = vkGetFenceStatus(vcore.gpuDevice, buff.fence);
-        WEngine::WLog::ConsoleLog(std::format("fence status immediately after create: {}", (int)st));
         loadedCopyBuffers.push_back(buff);
         return loadedCopyBuffers.size();
     }

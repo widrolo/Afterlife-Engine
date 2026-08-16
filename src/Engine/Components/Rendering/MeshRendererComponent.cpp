@@ -37,8 +37,8 @@ void MeshRendererComponent::LateAwake()
     if (entity->IsStationary() && m_model != 0 && m_material != 0)
     {
         m_isStationary = true;
-        CoreSystems::GetRenderHandler()->RecordStationaryAdd(entity->parentSector->GetStatBufKey(), m_model, m_material,
-            entity->transform);
+        //CoreSystems::GetRenderHandler()->RecordStationaryAdd(entity->parentSector->GetStatBufKey(), m_model, m_material,
+        //    entity->transform);
     }
 }
 

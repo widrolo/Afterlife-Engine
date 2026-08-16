@@ -133,9 +133,6 @@ void Engine::InitHandlers()
 	StartHandlerSingle<JobHandler>(&CoreSystems::jobHandler, "Job Handler");
 	StartHandlerSingle<TimeHandler>(&CoreSystems::timeHandler, "Time Handler");
 
-	//Iris::SETTING_BeginNewPreFrame();
-	//Iris::ALLOC_CompileMaterial("Unlit/MissingMat");
-	CoreSystems::renderHandler->PrepareSkybox();
 	Input::LoadInputMap();
 	m_rootSector = new Sector("root");
 	m_game = new Game();
@@ -287,7 +284,6 @@ void Engine::Loop_Audio()
 void Engine::Loop_Draw()
 {
 	CoreSystems::renderHandler->BeginFrame();
-	CoreSystems::renderHandler->PushStationaryData();
 
 	StopWatch timings;
 	m_game->GameLoopWidgetEarly();
