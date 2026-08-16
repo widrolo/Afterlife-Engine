@@ -51,11 +51,11 @@
         Name: "Mesh Renderer"
         Description: "Render a mesh with a given shader"
         Settings:
-            Mesh:
-                Name: "Mesh Name"
-                Description: "Name of the mesh."
+            ModelDir:
+                Name: "Model Dir"
+                Description: "Directory of the model in the asset tree."
                 Type: "String"
-                Internal: "meshName"
+                Internal: "modelDir"
             Shader:
                 Name: "Matertial Name"
                 Description: "Name of the matertial to be used for rendering."

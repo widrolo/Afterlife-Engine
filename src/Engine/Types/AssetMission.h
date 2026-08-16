@@ -68,8 +68,9 @@ namespace WEngine
 
 	struct MeshAssetMission : public AssetMissionBase
 	{
+		// name is ignored for the mesh asset mission, we use uid here.
+		uint64 uid = 0;
 		MeshInfo model;
 	};
 
-	// ---------------------------------- [IRIS SPECIFIC] ----------------------------------
 }

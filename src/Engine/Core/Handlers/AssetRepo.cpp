@@ -59,6 +59,19 @@ void AssetRepo::GetAsset<YamlAssetMission>(YamlAssetMission& mission)
 }
 
 template<>
+void AssetRepo::GetAsset<MeshAssetMission>(MeshAssetMission& mission)
+{
+	if (mission.uid == 0 || mission.uid >= m_meshes.size())
+	{
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog("Gave invalid uid.");
+		return;
+	}
+
+	mission.model = m_meshes[mission.uid];
+}
+
+template<>
 void AssetRepo::GetAsset<AudioClipAssetMission>(AudioClipAssetMission& mission)
 {
 	AudioClip* clip = &m_audioRepo[mission.name];
@@ -362,8 +375,9 @@ void AssetRepo::TickTextureUpload()
 
 const wtl::vector<AssetRef>& AssetRepo::GetAllAssetsInDir(const std::string &dirName)
 {
+	static wtl::vector<AssetRef> dummy{};
 	if (!m_assets.contains(dirName))
-		return {};
+		return dummy;
 
 	return m_assets[dirName];
 }
@@ -606,13 +620,24 @@ void AssetRepo::ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles)
 	sizeT vertHead = 0;
 	sizeT indHead = 0;
 
+	MeshInfo dummy{};
+	m_meshes.push_back(dummy);
+
 	for (sizeT i = 0; i < meshFiles.size(); i++)
 	{
 		std::memcpy(vertexPayload + vertHead, meshFiles[i] + headerSize, meshFileHeaders[i].vertCount * vertSize);
 		sizeT indexOffset = meshFileHeaders[i].vertCount * vertSize + headerSize;
 		std::memcpy(indexPayload + indHead, meshFiles[i] + indexOffset, meshFileHeaders[i].indCount * indexSize);
+
+		MeshInfo location;
+		location.vertexOffset = vertHead;
+		location.indexOffset = indHead;
 		vertHead += meshFileHeaders[i].vertCount * vertSize;
 		indHead += meshFileHeaders[i].indCount * indexSize;
+		location.vertexSize = vertHead;
+		location.indexSize = indHead;
+
+		m_meshes.push_back(location);
 	}
 
 	for (auto* mesh : meshFiles)

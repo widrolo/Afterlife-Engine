@@ -117,12 +117,13 @@ namespace WEngine
 		Iris::BufferHandle m_vertexBuffer;
 		Iris::BufferHandle m_indexBuffer;
 
-		// These should be fine-tuned in the final optimization pass of the game long after the content lock.
 		Iris::CopyBufferHandle m_copyCmdBuffer;
 		wtl::vector<std::pair<TextureInfoDDS, Iris::TextureHandle>> m_textures;
-		wtl::vector<bool> m_texturesDone;
+		wtl::vector<MeshInfo> m_meshes;
 
 		// keep this as the bottom so it doesnt pollute the offsets of the rest
+		// These should be fine-tuned in the final optimization pass of the game long after the content lock.
+		wtl::vector<bool> m_texturesDone;
 		_GLOBAL_CEX_ sizeT TexturesPerUpload_XS = 96;
 		_GLOBAL_CEX_ sizeT TexturesPerUpload_S = 128;
 		_GLOBAL_CEX_ sizeT TexturesPerUpload_M = 64;

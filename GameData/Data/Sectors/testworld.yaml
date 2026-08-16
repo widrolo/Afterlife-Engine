@@ -7,7 +7,7 @@ entities:
     components:
       c0:
         component-type: 5
-        meshName: Plane
+        modelDir: /Engine/Missing
         materialName: PBR/DirtGroundMat
         instance: false
   e1:
@@ -18,7 +18,7 @@ entities:
     components:
       c0:
         component-type: 5
-        meshName: Monkey
+        modelDir: /Engine/Missing
         materialName: PBR/ConcreteMat
         instance: false
       c1:
@@ -35,7 +35,7 @@ entities:
     components:
       c0:
         component-type: 5
-        meshName: Bread
+        modelDir: /Engine/Missing
         materialName: PBR/BreadMat
         instance: false
       c1:
@@ -52,7 +52,7 @@ entities:
     components:
       c0:
         component-type: 5
-        meshName: Cube
+        modelDir: /Engine/Missing
         materialName: PBR/WoodMat
         instance: false
       c1:
@@ -69,7 +69,7 @@ entities:
     components:
       c0:
         component-type: 5
-        meshName: Cube
+        modelDir: /Engine/Missing
         materialName: Toon/Wood
         instance: false
       c1:
@@ -86,7 +86,7 @@ entities:
     components:
       c0:
         component-type: 5
-        meshName: Cube
+        modelDir: /Engine/Missing
         materialName: PBR/WoodMat
         instance: false
       c1:
@@ -103,7 +103,7 @@ entities:
     components:
       c0:
         component-type: 5
-        meshName: Cube
+        modelDir: /Engine/Missing
         materialName: PBR/WoodMat
         instance: false
       c1:
@@ -120,7 +120,7 @@ entities:
     components:
       c0:
         component-type: 5
-        meshName: Cube
+        modelDir: /Engine/Missing
         materialName: PBR/WoodMat
         instance: false
       c1:

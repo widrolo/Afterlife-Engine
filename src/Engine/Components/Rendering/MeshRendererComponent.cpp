@@ -27,8 +27,8 @@ void MeshRendererComponent::Awake(ComponentArgs ca)
 
     if (modelN.HasValue())
     {
-        CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType("/Testing/Monkey", AssetType::StaticMesh);
-        CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType("/Testing/Monkey", AssetType::Texture);
+        auto meshUID = CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType(modelN.GetValue(), AssetType::StaticMesh);
+        auto texUID = CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType(modelN.GetValue(), AssetType::Texture);
     }
 }
 

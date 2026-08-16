@@ -9,9 +9,9 @@ namespace WEngine
 
     struct MeshInfo
     {
-        std::string name;
-        wtl::vector<VertexData> vertices;
-        wtl::vector<uint32> indices;
-        bool valid = false;
+        sizeT vertexOffset;
+        sizeT vertexSize;
+        sizeT indexOffset;
+        sizeT indexSize;
     };
 }
