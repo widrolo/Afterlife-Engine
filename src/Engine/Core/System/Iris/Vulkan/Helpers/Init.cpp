@@ -7,7 +7,6 @@
 #include "../IrisGlobals.h"
 #include "Engine/EngineDefines.h"
 #include "Engine/Core/System/GPUSettings.h"
-#include "Engine/Core/System/Vulkan/VulkanCore.h"
 #include "Engine/Util/Log.h"
 #include "Engine/WTL/vector.h"
 #include "Game/GameDefines.h"

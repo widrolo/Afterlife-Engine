@@ -7,6 +7,9 @@
 #include "Engine/Core/System/Memory.h"
 #include "Engine/Core/System/Iris/Vulkan/IrisGlobals.h"
 
+#define VMA_IMPLEMENTATION
+#include <vk_mem_alloc.h>
+
 void* VulkanAllocate(void*, size_t size, size_t alignment, VkSystemAllocationScope scope)
 {
     return WAllocator::AllocateAligned(size, alignment);

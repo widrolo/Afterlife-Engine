@@ -228,7 +228,6 @@ add_executable(Afterlife_Engine
         src/Engine/Types/Rendering/GPU/Line.h
         src/Engine/Types/Rendering/LineInfo.h
         src/Engine/Types/Rendering/TextureInfo.h
-        src/Engine/Core/System/IrisVulkan.cpp
         src/Engine/Types/DebugFlags.h
         src/Engine/EngineWidgets/DebugFlagsWidget.cpp
         src/Engine/EngineWidgets/DebugFlagsWidget.h
@@ -271,25 +270,6 @@ add_executable(Afterlife_Engine
         src/Engine/Types/Rendering/Iris/InstThreadedList.h
         src/Engine/EngineWidgets/RenderWatchWidget.cpp
         src/Engine/EngineWidgets/RenderWatchWidget.h
-        src/Engine/Core/System/Vulkan/VulkanTypes.h
-        src/Engine/Core/System/Vulkan/VulkanContext.h
-        src/Engine/Core/System/Vulkan/VulkanStatistics.h
-        src/Engine/Core/System/Vulkan/VulkanCore.cpp
-        src/Engine/Core/System/Vulkan/VulkanCore.h
-        src/Engine/Core/System/Vulkan/VulkanHelpers.cpp
-        src/Engine/Core/System/Vulkan/VulkanHelpers.h
-        src/Engine/Core/System/Vulkan/VulkanQueues.cpp
-        src/Engine/Core/System/Vulkan/VulkanQueues.h
-        src/Engine/Core/System/Vulkan/VulkanSwapchain.cpp
-        src/Engine/Core/System/Vulkan/VulkanSwapchain.h
-        src/Engine/Core/System/Vulkan/VulkanDescriptors.cpp
-        src/Engine/Core/System/Vulkan/VulkanDescriptors.h
-        src/Engine/Core/System/Vulkan/VulkanShaders.cpp
-        src/Engine/Core/System/Vulkan/VulkanShaders.h
-        src/Engine/Core/System/Vulkan/VulkanBuffers.cpp
-        src/Engine/Core/System/Vulkan/VulkanBuffers.h
-        src/Engine/Core/System/Vulkan/VulkanImages.cpp
-        src/Engine/Core/System/Vulkan/VulkanImages.h
         src/Engine/Types/Rendering/GPU/Material.h
         src/Engine/Types/Rendering/ShaderDefinition.h
         src/Engine/Types/Refcounted.h
@@ -300,8 +280,6 @@ add_executable(Afterlife_Engine
         src/Engine/Util/TextureSwizzler.h
         src/Engine/Types/Rendering/Iris/IrisAssetComms.h
         src/Game/Types/GameSystems.h
-        src/Engine/Core/System/Vulkan/VulkanCommands.cpp
-        src/Engine/Core/System/Vulkan/VulkanCommands.h
         src/Engine/Types/Rendering/LightingInfo.h
         src/Engine/Core/Handlers/TimeHandler.cpp
         src/Engine/Core/Handlers/TimeHandler.h
@@ -313,8 +291,6 @@ add_executable(Afterlife_Engine
         src/Engine/Types/Time/Date.cpp
         src/Engine/EngineWidgets/TimeWatchWidget.cpp
         src/Engine/EngineWidgets/TimeWatchWidget.h
-        src/Engine/Core/System/Vulkan/VulkanPipeline.cpp
-        src/Engine/Core/System/Vulkan/VulkanPipeline.h
         src/Engine/Types/Rendering/GPU/StatBufKey.h
         src/Engine/Core/System/Haptic.h
         src/Engine/Types/Input/InputPatch.h
