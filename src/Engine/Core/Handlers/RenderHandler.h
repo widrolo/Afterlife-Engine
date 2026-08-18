@@ -103,13 +103,15 @@ namespace WEngine
 		 */
 		void AddToRenderQueue(RenderMission& mission);
 
+		void RegisterTexture(Iris::TextureHandle handle);
+
 	private:
 		void PrepareRenderingSetup();
 		void LoadShaders();
 		void CreateTables();
 		void CreatePipelines();
 
-		void RenderSingleMission();
+		void RenderSingleMission(const RenderMission& mission, const Mat4x4& vp);
 
 		Mat4x4 CalcModelMatrix(const Transform& transform);
 
@@ -131,6 +133,9 @@ namespace WEngine
 		Iris::ShaderHandle m_fragmentShader; // this is in this case the basic one.
 		Iris::ResourceTableLayoutHandle m_mainTableLayout;
 		Iris::GraphicsPipelineHandle m_mainPipeline;
+		Iris::SamplerHandle m_sampler;
+
+		wtl::vector<Iris::ResourceTableHandle> m_textureTables;
 
 		Vector2 m_windowResolution;
 		SDL_DisplayMode* m_displayMode = nullptr;

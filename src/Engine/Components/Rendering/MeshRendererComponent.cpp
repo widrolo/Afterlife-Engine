@@ -27,14 +27,14 @@ void MeshRendererComponent::Awake(ComponentArgs ca)
 
     if (modelN.HasValue())
     {
-        auto meshUID = CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType(modelN.GetValue(), AssetType::StaticMesh);
-        auto texUID = CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType(modelN.GetValue(), AssetType::Texture);
+        m_meshUID = CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType(modelN.GetValue(), AssetType::StaticMesh);
+        m_texUID = CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType(modelN.GetValue(), AssetType::Texture);
     }
 }
 
 void MeshRendererComponent::LateAwake()
 {
-    if (entity->IsStationary() && m_model != 0 && m_material != 0)
+    if (entity->IsStationary() && m_meshUID != 0 && m_texUID != 0)
     {
         m_isStationary = true;
         //CoreSystems::GetRenderHandler()->RecordStationaryAdd(entity->parentSector->GetStatBufKey(), m_model, m_material,
@@ -46,8 +46,8 @@ void MeshRendererComponent::Draw()
 {
     RenderMission mission;
     mission.transform = entity->transform;
-    mission.model = m_model;
-    mission.material = m_material;
+    mission.meshUID = m_meshUID;
+    mission.textureUID = m_texUID;
     mission.isStationary = m_isStationary;
     mission.key = entity->parentSector->GetStatBufKey();
 

@@ -17,6 +17,7 @@
 #include "Engine/imgui/imgui.h"
 #include <shaderc/shaderc.hpp>
 
+#include "RenderHandler.h"
 #include "RNGHandler.h"
 #include "Engine/Core/System/Iris.h"
 #include "Engine/Types/CoreSystems.h"
@@ -371,6 +372,17 @@ void AssetRepo::TickTextureUpload()
 	FillCopyBuffers(m_copyBuffers_X.data(), m_copyBuffers_X.size(), 2048);
 
 	Iris::EndCopyPass(m_copyCmdBuffer);
+}
+
+void AssetRepo::RegisterAllTextures()
+{
+	static bool everRan = false;
+	if (everRan)
+		return;
+	everRan = true;
+
+	for (const auto& tex : m_textures)
+		CoreSystems::GetRenderHandler()->RegisterTexture(tex.second);
 }
 
 const wtl::vector<AssetRef>& AssetRepo::GetAllAssetsInDir(const std::string &dirName)

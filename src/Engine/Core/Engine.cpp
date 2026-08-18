@@ -133,6 +133,7 @@ void Engine::InitHandlers()
 	StartHandlerSingle<JobHandler>(&CoreSystems::jobHandler, "Job Handler");
 	StartHandlerSingle<TimeHandler>(&CoreSystems::timeHandler, "Time Handler");
 
+	CoreSystems::assetRepo->RegisterAllTextures();
 	Input::LoadInputMap();
 	m_rootSector = new Sector("root");
 	m_game = new Game();

@@ -41,6 +41,7 @@ namespace WEngine
 		 * @note One done, it turns itself off.
 		 */
 		void TickTextureUpload();
+		void RegisterAllTextures();
 		/**
 		 * Gets the asset specified by the mission parameter.
 		 * @tparam T The type of asset mission to handle (e.g., SpriteAssetMission, ShaderAssetMission, etc.).
@@ -87,7 +88,8 @@ namespace WEngine
 		 */
 		uint64 GetAssetInDirByName(const std::string& dirName, const std::string& assetName);
 
-
+		Iris::BufferHandle GetVertexBuffer() const { return m_vertexBuffer; }
+		Iris::BufferHandle GetIndexBuffer() const { return m_indexBuffer; }
 
 	private:
 		AudioClip* LoadAudioWAV(const std::string& name);

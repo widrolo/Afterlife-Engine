@@ -93,8 +93,8 @@ void RenderHandler::BeginFrame()
 void RenderHandler::RenderFrame()
 {
 
-	SortMissions(false);
-	SortMissions(true);
+	//SortMissions(false);
+	//SortMissions(true);
 	for (auto& materialGroup : m_sortedMissions)
 	{
 		for (auto& modelGroup : materialGroup.models)
@@ -104,6 +104,11 @@ void RenderHandler::RenderFrame()
 	}
 
 	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
+
+	Iris::BindGraphicsPipeline(tempHandle, m_mainPipeline);
+
+	for (const auto& mission : m_renderQueue)
+		RenderSingleMission(mission, vp);
 
 	if (!Engine::GetCla().testMode)
 	{
@@ -131,6 +136,27 @@ void RenderHandler::RenderFrame()
 	Iris::EndFrame();
 }
 
+void RenderHandler::RenderSingleMission(const RenderMission& mission, const Mat4x4& vp)
+{
+	MeshAssetMission meshMission{};
+	meshMission.uid = mission.meshUID;
+	CoreSystems::GetAssetRepo()->GetAsset(meshMission);
+
+	sizeT indexSize = sizeof(uint32) * 3; // cause 3 indexes per triangle (i think)
+	sizeT vertexSize = sizeof(float32) * 3 + sizeof(float32) * 3 + sizeof(float32) * 2;
+
+	sizeT indexCount = meshMission.model.indexSize / indexSize;
+	sizeT indexOffset = meshMission.model.indexOffset / indexSize;
+	sizeT vertOffset = meshMission.model.vertexOffset / vertexSize;
+
+	wtl::vector<Iris::BufferHandle> vertBuffs{CoreSystems::GetAssetRepo()->GetVertexBuffer()};
+	wtl::vector<sizeT> vertOffs{0};
+	Iris::BindVertexBuffers(tempHandle, 0, vertBuffs,vertOffs);
+	Iris::BindIndexBuffer(tempHandle, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
+	Iris::BindResourceTable(tempHandle, m_mainPipeline, 0, m_textureTables[mission.textureUID]);
+	Iris::DrawIndexed(tempHandle, indexCount, 1, indexOffset, vertOffset, 0);
+}
+
 void RenderHandler::RegisterCamera(CameraComponent *camera)
 {
 	m_camera = camera;
@@ -138,9 +164,29 @@ void RenderHandler::RegisterCamera(CameraComponent *camera)
 
 void RenderHandler::AddToRenderQueue(RenderMission& mission)
 {
-	if (mission.model == 0 || mission.material == 0)
+	if (mission.meshUID == 0 || mission.textureUID == 0)
 		return;
 	m_renderQueue.push_back(mission);
+}
+
+void RenderHandler::RegisterTexture(Iris::TextureHandle handle)
+{
+	auto table = Iris::CreateResourceTable(m_mainTableLayout);
+
+	Iris::ResourceTableUpdateDesc desc{};
+	Iris::ResourceTableWrite write{};
+
+	write.binding = 0;
+	write.type = Iris::ResourceTableEntryType::Texture;
+	write.texture = handle;
+	write.sampler = m_sampler;
+
+	desc.writes.push_back(write);
+	Iris::UpdateResourceTable(table, desc);
+
+	// this assumes that the asset repo sends them in order. If not, then we will know exactly when this
+	// needs to be addressed.
+	m_textureTables.push_back(table);
 }
 
 void RenderHandler::PrepareRenderingSetup()
@@ -186,10 +232,14 @@ void RenderHandler::CreateTables()
 	texEntry.binding = 0;
 	texEntry.stages = Iris::ShaderStage::Fragment;
 	texEntry.type = Iris::ResourceTableEntryType::Texture;
-	texEntry.count = 9999; // gonna be a lot of them.
+	texEntry.count = 1; // one texture per table
 	desc.entries.push_back(texEntry);
 
 	m_mainTableLayout = Iris::CreateResourceTableLayout(desc);
+
+	Iris::SamplerDesc samplerDesc{};
+	samplerDesc.debugName = "Main Sampler";
+	m_sampler = Iris::CreateSampler(samplerDesc);
 }
 
 void RenderHandler::CreatePipelines()
@@ -238,13 +288,6 @@ void RenderHandler::CreatePipelines()
 	m_mainPipeline = Iris::CreateGraphicsPipeline(desc);
 }
 
-void RenderHandler::RenderSingleMission()
-{
-
-}
-
-
-
 Mat4x4 RenderHandler::CalcModelMatrix(const Transform &transform)
 {
 	glm::quat q(transform.rotation.w, transform.rotation.x,
@@ -282,7 +325,7 @@ void RenderHandler::InsertModelIntoShaderGroup(RenderMission &mission, MaterialG
 	bool foundModel = false;
 	for (sizeT i = 0; i < materialGroup.models.size(); ++i)
 	{
-		if (materialGroup.models[i].groupID == mission.model)
+		if (materialGroup.models[i].groupID == mission.meshUID)
 		{
 			foundModel = true;
 			materialGroup.models[i].missions.push_back(mission);
@@ -292,7 +335,7 @@ void RenderHandler::InsertModelIntoShaderGroup(RenderMission &mission, MaterialG
 	if (!foundModel)
 	{
 		ModelGroup group;
-		group.groupID = mission.model;
+		group.groupID = mission.meshUID;
 		group.missions.push_back(mission);
 		materialGroup.models.push_back(group);
 	}
@@ -331,7 +374,7 @@ void RenderHandler::SortMissions(bool transparentPass)
 		bool foundShader = false;
 		for (auto& m_sortedMission : m_sortedMissions)
 		{
-			if (m_sortedMission.groupID == mission.material)
+			if (m_sortedMission.groupID == mission.textureUID)
 			{
 				foundShader = true;
 				InsertModelIntoShaderGroup(mission, m_sortedMission);
@@ -341,7 +384,7 @@ void RenderHandler::SortMissions(bool transparentPass)
 		if (!foundShader)
 		{
 			MaterialGroup group;
-			group.groupID = mission.material;
+			group.groupID = mission.textureUID;
 			InsertModelIntoShaderGroup(mission, group);
 			m_sortedMissions.push_back(group);
 		}
@@ -361,116 +404,121 @@ void RenderHandler::CleanSortedMissions()
 	m_sortedMissions.clear();
 }
 
-void RenderHandler::InitSDL()
+// just so i can close this part of code.
+namespace WEngine
 {
-	SDL_InitFlags initFlags = SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD;
-	SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "1");
-
-	if (!SDL_Init(initFlags))
+	void RenderHandler::InitSDL()
 	{
-		WLog::SetConsoleError();
-		WLog::ConsoleLog(std::format("SDL Initialisation failed: {}", SDL_GetError()));
-		abort();
+		SDL_InitFlags initFlags = SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_GAMEPAD;
+		SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "1");
+
+		if (!SDL_Init(initFlags))
+		{
+			WLog::SetConsoleError();
+			WLog::ConsoleLog(std::format("SDL Initialisation failed: {}", SDL_GetError()));
+			abort();
+		}
+
+		SDL_DisplayID display = SDL_GetPrimaryDisplay();
+		m_displayMode = const_cast<SDL_DisplayMode*>(SDL_GetCurrentDisplayMode(display));
+
+		Uint32 windowFlags = SDL_WINDOW_BORDERLESS;
+	#if GPU_BACKEND == GPU_VULKAN
+		windowFlags |= SDL_WINDOW_VULKAN;
+	#endif
+
+
+		if (m_displayMode != nullptr)
+		{
+			m_windowResolution.x = m_displayMode->w;
+			m_windowResolution.y = m_displayMode->h;
+		}
+		else
+		{
+			WLog::SetConsoleWarning();
+			WLog::ConsoleLog(std::format("Couldnt grab display mode, defaulting back to 800x600: {}", SDL_GetError()));
+			m_windowResolution.x = 800;
+			m_windowResolution.y = 600;
+		}
+
+		SDL_PropertiesID props = SDL_CreateProperties();
+		SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, EngineSettings::engineName.c_str());
+		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, 0);
+		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, 0);
+		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, m_windowResolution.x);
+		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, m_windowResolution.y);
+		// As in the migration guide, this isnt optimal, but its ok
+		SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags);
+
+		m_window = SDL_CreateWindowWithProperties(props);
+
+		if (m_window == nullptr)
+		{
+			WLog::SetConsoleError();
+			WLog::ConsoleLog("Window couldnt be opened");
+			abort();
+		}
+		WLog::ConsoleLog(std::format("Window opened at resolution {}x{}", m_windowResolution.x, m_windowResolution.y));
+
+		Haptic::Init(m_window);
 	}
-
-	SDL_DisplayID display = SDL_GetPrimaryDisplay();
-	m_displayMode = const_cast<SDL_DisplayMode*>(SDL_GetCurrentDisplayMode(display));
-
-	Uint32 windowFlags = SDL_WINDOW_BORDERLESS;
-#if GPU_BACKEND == GPU_VULKAN
-	windowFlags |= SDL_WINDOW_VULKAN;
-#endif
-
-
-	if (m_displayMode != nullptr)
+	void RenderHandler::InitImGui()
 	{
-		m_windowResolution.x = m_displayMode->w;
-		m_windowResolution.y = m_displayMode->h;
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImPlot::CreateContext();
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		io.IniFilename = nullptr;
+
+		ImGui::StyleColorsDark();
+
+		//Iris::SETTING_ConfigureImGui(m_window);
+
+		ImGuiStyle& style = ImGui::GetStyle();
+
+		style.FrameRounding = 4;
+		style.WindowBorderSize = 0;
+		style.GrabMinSize = 8;
+		style.ScrollbarSize = 8;
+		style.WindowRounding = 0;
+		style.WindowTitleAlign = { 0.5f, 0.5f };
+
+		ImPlotStyle& ipStyle = ImPlot::GetStyle();
+
+		ipStyle.PlotDefaultSize = {200, 200};
+
+		ImPlot::StyleColorsDark();
+		auto colors = style.Colors;
+
+		colors[ImGuiCol_Border] = ImVec4(0.50f, 0.43f, 0.43f, 0.50f);
+		colors[ImGuiCol_FrameBg] = ImVec4(0.48f, 0.16f, 0.16f, 0.54f);
+		colors[ImGuiCol_FrameBgHovered] = ImVec4(0.98f, 0.26f, 0.26f, 0.40f);
+		colors[ImGuiCol_FrameBgActive] = ImVec4(0.98f, 0.26f, 0.26f, 0.67f);
+		colors[ImGuiCol_TitleBgActive] = ImVec4(0.48f, 0.16f, 0.16f, 1.00f);
+		colors[ImGuiCol_CheckMark] = ImVec4(0.98f, 0.26f, 0.26f, 1.00f);
+		colors[ImGuiCol_SliderGrab] = ImVec4(0.88f, 0.24f, 0.24f, 1.00f);
+		colors[ImGuiCol_SliderGrabActive] = ImVec4(0.98f, 0.26f, 0.26f, 1.00f);
+		colors[ImGuiCol_Button] = ImVec4(0.98f, 0.26f, 0.26f, 0.40f);
+		colors[ImGuiCol_ButtonHovered] = ImVec4(0.98f, 0.26f, 0.26f, 1.00f);
+		colors[ImGuiCol_ButtonActive] = ImVec4(0.98f, 0.06f, 0.06f, 1.00f);
+		colors[ImGuiCol_Header] = ImVec4(0.98f, 0.26f, 0.26f, 0.31f);
+		colors[ImGuiCol_HeaderHovered] = ImVec4(0.98f, 0.26f, 0.26f, 0.80f);
+		colors[ImGuiCol_HeaderActive] = ImVec4(0.98f, 0.26f, 0.26f, 1.00f);
+		colors[ImGuiCol_SeparatorHovered] = ImVec4(0.75f, 0.10f, 0.10f, 0.78f);
+		colors[ImGuiCol_SeparatorActive] = ImVec4(0.75f, 0.10f, 0.10f, 1.00f);
+		colors[ImGuiCol_ResizeGrip] = ImVec4(0.98f, 0.26f, 0.26f, 0.20f);
+		colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.98f, 0.26f, 0.26f, 0.67f);
+		colors[ImGuiCol_ResizeGripActive] = ImVec4(0.98f, 0.26f, 0.26f, 0.95f);
+		colors[ImGuiCol_TabHovered] = ImVec4(0.98f, 0.26f, 0.26f, 0.80f);
+		colors[ImGuiCol_Tab] = ImVec4(0.58f, 0.18f, 0.18f, 0.86f);
+		colors[ImGuiCol_TabSelected] = ImVec4(0.68f, 0.20f, 0.20f, 1.00f);
+		colors[ImGuiCol_TabSelectedOverline] = ImVec4(0.98f, 0.26f, 0.26f, 1.00f);
+		colors[ImGuiCol_TabDimmed] = ImVec4(0.15f, 0.07f, 0.07f, 0.97f);
+		colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.42f, 0.14f, 0.14f, 1.00f);
+		colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.35f, 0.58f, 1.00f, 1.00f);
+
+
 	}
-	else
-	{
-		WLog::SetConsoleWarning();
-		WLog::ConsoleLog(std::format("Couldnt grab display mode, defaulting back to 800x600: {}", SDL_GetError()));
-		m_windowResolution.x = 800;
-		m_windowResolution.y = 600;
-	}
-
-	SDL_PropertiesID props = SDL_CreateProperties();
-	SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, EngineSettings::engineName.c_str());
-	SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, 0);
-	SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, 0);
-	SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, m_windowResolution.x);
-	SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, m_windowResolution.y);
-	// As in the migration guide, this isnt optimal, but its ok
-	SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, windowFlags);
-
-	m_window = SDL_CreateWindowWithProperties(props);
-
-	if (m_window == nullptr)
-	{
-		WLog::SetConsoleError();
-		WLog::ConsoleLog("Window couldnt be opened");
-		abort();
-	}
-	WLog::ConsoleLog(std::format("Window opened at resolution {}x{}", m_windowResolution.x, m_windowResolution.y));
-
-	Haptic::Init(m_window);
 }
-void RenderHandler::InitImGui()
-{
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImPlot::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	io.IniFilename = nullptr;
 
-	ImGui::StyleColorsDark();
-
-	//Iris::SETTING_ConfigureImGui(m_window);
-
-	ImGuiStyle& style = ImGui::GetStyle();
-
-	style.FrameRounding = 4;
-	style.WindowBorderSize = 0;
-	style.GrabMinSize = 8;
-	style.ScrollbarSize = 8;
-	style.WindowRounding = 0;
-	style.WindowTitleAlign = { 0.5f, 0.5f };
-
-	ImPlotStyle& ipStyle = ImPlot::GetStyle();
-
-	ipStyle.PlotDefaultSize = {200, 200};
-
-	ImPlot::StyleColorsDark();
-	auto colors = style.Colors;
-
-	colors[ImGuiCol_Border] = ImVec4(0.50f, 0.43f, 0.43f, 0.50f);
-	colors[ImGuiCol_FrameBg] = ImVec4(0.48f, 0.16f, 0.16f, 0.54f);
-	colors[ImGuiCol_FrameBgHovered] = ImVec4(0.98f, 0.26f, 0.26f, 0.40f);
-	colors[ImGuiCol_FrameBgActive] = ImVec4(0.98f, 0.26f, 0.26f, 0.67f);
-	colors[ImGuiCol_TitleBgActive] = ImVec4(0.48f, 0.16f, 0.16f, 1.00f);
-	colors[ImGuiCol_CheckMark] = ImVec4(0.98f, 0.26f, 0.26f, 1.00f);
-	colors[ImGuiCol_SliderGrab] = ImVec4(0.88f, 0.24f, 0.24f, 1.00f);
-	colors[ImGuiCol_SliderGrabActive] = ImVec4(0.98f, 0.26f, 0.26f, 1.00f);
-	colors[ImGuiCol_Button] = ImVec4(0.98f, 0.26f, 0.26f, 0.40f);
-	colors[ImGuiCol_ButtonHovered] = ImVec4(0.98f, 0.26f, 0.26f, 1.00f);
-	colors[ImGuiCol_ButtonActive] = ImVec4(0.98f, 0.06f, 0.06f, 1.00f);
-	colors[ImGuiCol_Header] = ImVec4(0.98f, 0.26f, 0.26f, 0.31f);
-	colors[ImGuiCol_HeaderHovered] = ImVec4(0.98f, 0.26f, 0.26f, 0.80f);
-	colors[ImGuiCol_HeaderActive] = ImVec4(0.98f, 0.26f, 0.26f, 1.00f);
-	colors[ImGuiCol_SeparatorHovered] = ImVec4(0.75f, 0.10f, 0.10f, 0.78f);
-	colors[ImGuiCol_SeparatorActive] = ImVec4(0.75f, 0.10f, 0.10f, 1.00f);
-	colors[ImGuiCol_ResizeGrip] = ImVec4(0.98f, 0.26f, 0.26f, 0.20f);
-	colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.98f, 0.26f, 0.26f, 0.67f);
-	colors[ImGuiCol_ResizeGripActive] = ImVec4(0.98f, 0.26f, 0.26f, 0.95f);
-	colors[ImGuiCol_TabHovered] = ImVec4(0.98f, 0.26f, 0.26f, 0.80f);
-	colors[ImGuiCol_Tab] = ImVec4(0.58f, 0.18f, 0.18f, 0.86f);
-	colors[ImGuiCol_TabSelected] = ImVec4(0.68f, 0.20f, 0.20f, 1.00f);
-	colors[ImGuiCol_TabSelectedOverline] = ImVec4(0.98f, 0.26f, 0.26f, 1.00f);
-	colors[ImGuiCol_TabDimmed] = ImVec4(0.15f, 0.07f, 0.07f, 0.97f);
-	colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.42f, 0.14f, 0.14f, 1.00f);
-	colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.35f, 0.58f, 1.00f, 1.00f);
-
-
-}

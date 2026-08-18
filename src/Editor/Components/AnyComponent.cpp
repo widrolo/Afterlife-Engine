@@ -221,8 +221,8 @@ void AnyComponent::DrawOnSelected()
 void AnyComponent::TryDrawMeshComp()
 {
     WEngine::RenderMission mission{};
-    mission.model = model;
-    mission.material = material;
+    mission.meshUID = model;
+    mission.textureUID = material;
     mission.isStationary = false;
     mission.transform = entity->transform;
     mission.key = 0;
@@ -336,8 +336,8 @@ void AnyComponent::TryDrawBoxCollision()
     transform.size = size;
 
     WEngine::RenderMission mission{};
-    mission.model = physics.modelCube;
-    mission.material = physics.material;
+    mission.meshUID = physics.modelCube;
+    mission.textureUID = physics.material;
     mission.isStationary = false;
     mission.transform = transform;
     mission.key = 0;

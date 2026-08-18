@@ -24,8 +24,8 @@ namespace WEngine
 
 	struct RenderMission
 	{
-		Material material;
-		Model model;
+		uint64 textureUID;
+		uint64 meshUID;
 		Transform transform;
 		bool isStationary;
 		StatBufKey key;

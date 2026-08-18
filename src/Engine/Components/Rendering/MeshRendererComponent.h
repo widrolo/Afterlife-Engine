@@ -17,8 +17,9 @@ namespace WEngine
         void Draw() override;
 
     private:
-        Model m_model = 0;
-        Material m_material = 0;
+        uint64 m_meshUID = 0;
+        uint64 m_texUID = 0;
+
         bool m_isStationary = false;
 
         COMP_HASH(0xeb113cecf16966)
