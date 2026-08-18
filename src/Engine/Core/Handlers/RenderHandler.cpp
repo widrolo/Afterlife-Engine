@@ -42,6 +42,7 @@ RenderHandler::RenderHandler()
 	InitImGui();
 	Iris::ConfigureImGui();
 	PrepareRenderingSetup();
+	m_textureTables.push_back({}); // dummy because UIDs are 1 ordered
 
 	CoreSystems::GetAssetRepo()->LoadAllGPUAssets();
 
@@ -87,7 +88,21 @@ void RenderHandler::BeginFrame()
 
 	Iris::Viewport vp{};
 	vp.extent = {1920.0f, 1080.0f};
+	vp.maxDepth = 1.0f;
 	Iris::SetViewport(tempHandle, vp);
+
+	if (m_camera == nullptr)
+		m_viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	else
+	{
+		Vector3 camPos = m_camera->GetPosition();
+		Quaternion camRot = m_camera->GetRotation();
+
+		glm::quat q(camRot.w, camRot.x, camRot.y, camRot.z);
+
+		m_viewMatrix = glm::mat4_cast(glm::conjugate(q));
+		m_viewMatrix = glm::translate(m_viewMatrix, glm::vec3(-camPos.x, camPos.y, -camPos.z));
+	}
 }
 
 void RenderHandler::RenderFrame()
@@ -103,7 +118,7 @@ void RenderHandler::RenderFrame()
 		}
 	}
 
-	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
+	auto vp = m_projection * m_viewMatrix;
 
 	Iris::BindGraphicsPipeline(tempHandle, m_mainPipeline);
 
@@ -136,24 +151,28 @@ void RenderHandler::RenderFrame()
 	Iris::EndFrame();
 }
 
-void RenderHandler::RenderSingleMission(const RenderMission& mission, const Mat4x4& vp)
+void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm::mat4& vp)
 {
 	MeshAssetMission meshMission{};
 	meshMission.uid = mission.meshUID;
 	CoreSystems::GetAssetRepo()->GetAsset(meshMission);
 
-	sizeT indexSize = sizeof(uint32) * 3; // cause 3 indexes per triangle (i think)
+	sizeT indexSize = sizeof(uint32);
 	sizeT vertexSize = sizeof(float32) * 3 + sizeof(float32) * 3 + sizeof(float32) * 2;
 
-	sizeT indexCount = meshMission.model.indexSize / indexSize;
+	sizeT indexCount = (meshMission.model.indexSize - meshMission.model.indexOffset) / indexSize;
 	sizeT indexOffset = meshMission.model.indexOffset / indexSize;
 	sizeT vertOffset = meshMission.model.vertexOffset / vertexSize;
 
 	wtl::vector<Iris::BufferHandle> vertBuffs{CoreSystems::GetAssetRepo()->GetVertexBuffer()};
 	wtl::vector<sizeT> vertOffs{0};
+
+	Mat4x4 mvp = Glm4x4ToMat4x4(vp * CalcModelMatrixGLM(mission.transform));
+
 	Iris::BindVertexBuffers(tempHandle, 0, vertBuffs,vertOffs);
 	Iris::BindIndexBuffer(tempHandle, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
 	Iris::BindResourceTable(tempHandle, m_mainPipeline, 0, m_textureTables[mission.textureUID]);
+	Iris::SetPushConstants(tempHandle, m_mainPipeline, (byte*)&mvp, sizeof(mvp));
 	Iris::DrawIndexed(tempHandle, indexCount, 1, indexOffset, vertOffset, 0);
 }
 
@@ -271,13 +290,21 @@ void RenderHandler::CreatePipelines()
 	attribute.format = Iris::VertFormat::Float2;
 	vertDesc.attributes.push_back(attribute);
 
+	Iris::RasterizerDesc rastDesc{};
+	rastDesc.frontFace = Iris::FrontFace::CounterClockwise;
+
+	Iris::DepthStencilDesc depthDesc{};
+	depthDesc.depthTestEnable = true;
+	depthDesc.depthWriteEnable = true;
+	depthDesc.depthCompareOp = Iris::CompareOp::Less;
+
 	Iris::GraphicsPipelineDesc desc{};
 	desc.debugName = "Main Pipeline";
 	desc.vertexShader = m_vertexShader;
 	desc.fragmentShader = m_fragmentShader;
 	desc.vertexLayout = vertDesc;
-	desc.rasterizer = Iris::RasterizerDesc{}; // default one is good enough
-	desc.depthStencil = Iris::DepthStencilDesc{}; // default one is good enough
+	desc.rasterizer = rastDesc;
+	desc.depthStencil = depthDesc;
 	desc.blend = Iris::BlendDesc{}; // default one is good enough
 
 	desc.tableLayouts[0] = m_mainTableLayout;
@@ -290,6 +317,11 @@ void RenderHandler::CreatePipelines()
 
 Mat4x4 RenderHandler::CalcModelMatrix(const Transform &transform)
 {
+	return Glm4x4ToMat4x4(CalcModelMatrixGLM(transform));
+}
+
+glm::mat4 RenderHandler::CalcModelMatrixGLM(const Transform &transform)
+{
 	glm::quat q(transform.rotation.w, transform.rotation.x,
 				transform.rotation.y, transform.rotation.z);
 
@@ -300,8 +332,7 @@ Mat4x4 RenderHandler::CalcModelMatrix(const Transform &transform)
 	modelMatrix[2] *= transform.size.z;
 
 	modelMatrix[3] = glm::vec4(transform.position.x, -transform.position.y, transform.position.z, 1.0f);
-
-	return Glm4x4ToMat4x4(modelMatrix);
+	return modelMatrix;
 }
 
 void RenderHandler::RenderModelGroup(const ModelGroup &group, Material material)

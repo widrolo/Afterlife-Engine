@@ -376,6 +376,7 @@ namespace Iris
         pushConstants[0].stageFlags = IrisShaderStageToVulkan(desc.pushConstantsStage);
         pushConstants[0].offset = 0;
         pushConstants[0].size = desc.pushConstantsSize;
+        pip.pushStageFlags = pushConstants[0].stageFlags;
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;

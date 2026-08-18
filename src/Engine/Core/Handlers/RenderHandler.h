@@ -111,9 +111,10 @@ namespace WEngine
 		void CreateTables();
 		void CreatePipelines();
 
-		void RenderSingleMission(const RenderMission& mission, const Mat4x4& vp);
+		void RenderSingleMission(const RenderMission& mission, const glm::mat4& vp);
 
 		Mat4x4 CalcModelMatrix(const Transform& transform);
+		glm::mat4 CalcModelMatrixGLM(const Transform& transform);
 
 		void RenderModelGroup(const ModelGroup& group, Material material);
 

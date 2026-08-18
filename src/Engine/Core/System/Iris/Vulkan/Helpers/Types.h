@@ -87,6 +87,7 @@ struct Vulkan_Pipeline
     std::string debugName;
     VkPipeline pipeline;
     VkPipelineLayout layout;
+    VkShaderStageFlags pushStageFlags;
 };
 
 

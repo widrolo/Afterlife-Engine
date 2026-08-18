@@ -81,7 +81,7 @@ namespace Iris
 
     struct RasterizerDesc
     {
-        CullMode cullMode = CullMode::Back;
+        CullMode cullMode = CullMode::Front;
         FrontFace frontFace = FrontFace::CounterClockwise;
         FillMode fillMode = FillMode::Solid;
         float32 lineWidth = 1.0f;

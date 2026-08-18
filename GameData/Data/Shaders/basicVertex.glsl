@@ -16,7 +16,7 @@ layout(location = 1) out vec2 outUV0;
 
 void main()
 {
-    outUV0 = uv0;
+    outUV0 = vec2(uv0.x, 1.0 - uv0.y);
 
     //outNormal = mat3(inModel) * inNormal;
 

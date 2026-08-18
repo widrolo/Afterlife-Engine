@@ -92,8 +92,8 @@ namespace Iris
             return;
         }
         // we will later have a push constants function just for compute. Also, 0 offset is okay because we pass all info once.
-        vkCmdPushConstants(GetCurrentCmdBuff(cmd), loadedPipelines[pipeline - 1].layout, VK_SHADER_STAGE_ALL_GRAPHICS, 0,
-            size, data);
+        vkCmdPushConstants(GetCurrentCmdBuff(cmd), loadedPipelines[pipeline - 1].layout,
+            loadedPipelines[pipeline - 1].pushStageFlags, 0, size, data);
     }
 
     void BindVertexBuffers(CommandBufferHandle cmd, uint32 firstBinding, const wtl::vector<BufferHandle>& buffers,
