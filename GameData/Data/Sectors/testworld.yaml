@@ -3,11 +3,11 @@ entities:
     name: Ground
     position: [0, -1.6, 0]
     rotation: [-2.576063e-18, 5.893345e-11, 1, -4.371139e-08]
-    size: [10, 1, 10]
+    size: [3, 3, 3]
     components:
       c0:
         component-type: 5
-        modelDir: /Engine/Missing
+        modelDir: /Testing/Floor
         materialName: PBR/DirtGroundMat
         instance: false
   e1:
@@ -18,7 +18,7 @@ entities:
     components:
       c0:
         component-type: 5
-        modelDir: /Engine/Missing
+        modelDir: /Testing/Monkey
         materialName: PBR/ConcreteMat
         instance: false
       c1:
@@ -35,7 +35,7 @@ entities:
     components:
       c0:
         component-type: 5
-        modelDir: /Engine/Missing
+        modelDir: /Testing/Bread
         materialName: PBR/BreadMat
         instance: false
       c1:
@@ -52,14 +52,14 @@ entities:
     components:
       c0:
         component-type: 5
-        modelDir: /Engine/Missing
+        modelDir: /Testing/Cube
         materialName: PBR/WoodMat
         instance: false
       c1:
         component-type: 7
       c2:
         component-type: 8
-        size: [2, 2, 2]
+        size: [1, 1, 1]
         offset: [0, 0, 0]
   e4:
     name: Cube2
@@ -69,15 +69,15 @@ entities:
     components:
       c0:
         component-type: 5
-        modelDir: /Engine/Missing
+        modelDir: /Testing/Cube
         materialName: Toon/Wood
         instance: false
       c1:
         component-type: 7
       c2:
         component-type: 8
-        size: [2, 2, 2]
-        offset: [0, -2, 0]
+        size: [1, 1, 1]
+        offset: [0, 0, 0]
   e5:
     name: Cube
     position: [-3, 2, 0]
@@ -86,14 +86,14 @@ entities:
     components:
       c0:
         component-type: 5
-        modelDir: /Engine/Missing
+        modelDir: /Testing/Cube
         materialName: PBR/WoodMat
         instance: false
       c1:
         component-type: 7
       c2:
         component-type: 8
-        size: [2, 2, 2]
+        size: [1, 1, 1]
         offset: [0, 0, 0]
   e6:
     name: Cube2
@@ -103,14 +103,14 @@ entities:
     components:
       c0:
         component-type: 5
-        modelDir: /Engine/Missing
+        modelDir: /Testing/Cube
         materialName: PBR/WoodMat
         instance: false
       c1:
         component-type: 7
       c2:
         component-type: 8
-        size: [2, 2, 2]
+        size: [1, 1, 1]
         offset: [0, 0, 0]
   e7:
     name: Cube2
@@ -120,14 +120,14 @@ entities:
     components:
       c0:
         component-type: 5
-        modelDir: /Engine/Missing
+        modelDir: /Testing/Cube
         materialName: PBR/WoodMat
         instance: false
       c1:
         component-type: 7
       c2:
         component-type: 8
-        size: [2, 2, 2]
+        size: [1, 1, 1]
         offset: [0, 0, 0]
   e8:
     name: Ground Physics
@@ -141,3 +141,14 @@ entities:
         component-type: 8
         size: [20, 20, 20]
         offset: [0, 0, 0]
+  e9:
+    name: Missing
+    position: [0.6, 0, -2.2]
+    rotation: [-1, 4.371138e-08, 1.9106853e-15, -4.371139e-08]
+    size: [1, 1, 1]
+    components:
+      c0:
+        component-type: 5
+        modelDir: /Engine/Missing
+        materialName: ""
+        instance: false

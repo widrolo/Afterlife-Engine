@@ -122,6 +122,11 @@ void RenderHandler::RenderFrame()
 
 	Iris::BindGraphicsPipeline(tempHandle, m_mainPipeline);
 
+	wtl::vector<Iris::BufferHandle> vertBuffs{CoreSystems::GetAssetRepo()->GetVertexBuffer()};
+	wtl::vector<sizeT> vertOffs{0};
+	Iris::BindVertexBuffers(tempHandle, 0, vertBuffs, vertOffs);
+	Iris::BindIndexBuffer(tempHandle, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
+
 	for (const auto& mission : m_renderQueue)
 		RenderSingleMission(mission, vp);
 
@@ -149,6 +154,7 @@ void RenderHandler::RenderFrame()
 	m_renderQueue.clear();
 	CleanSortedMissions();
 	Iris::EndFrame();
+	m_currentBoundTexture = 0;
 }
 
 void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm::mat4& vp)
@@ -164,14 +170,11 @@ void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm:
 	sizeT indexOffset = meshMission.model.indexOffset / indexSize;
 	sizeT vertOffset = meshMission.model.vertexOffset / vertexSize;
 
-	wtl::vector<Iris::BufferHandle> vertBuffs{CoreSystems::GetAssetRepo()->GetVertexBuffer()};
-	wtl::vector<sizeT> vertOffs{0};
-
 	Mat4x4 mvp = Glm4x4ToMat4x4(vp * CalcModelMatrixGLM(mission.transform));
 
-	Iris::BindVertexBuffers(tempHandle, 0, vertBuffs,vertOffs);
-	Iris::BindIndexBuffer(tempHandle, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
-	Iris::BindResourceTable(tempHandle, m_mainPipeline, 0, m_textureTables[mission.textureUID]);
+	if (mission.textureUID != m_currentBoundTexture)
+		Iris::BindResourceTable(tempHandle, m_mainPipeline, 0, m_textureTables[mission.textureUID]);
+	m_currentBoundTexture = mission.textureUID;
 	Iris::SetPushConstants(tempHandle, m_mainPipeline, (byte*)&mvp, sizeof(mvp));
 	Iris::DrawIndexed(tempHandle, indexCount, 1, indexOffset, vertOffset, 0);
 }

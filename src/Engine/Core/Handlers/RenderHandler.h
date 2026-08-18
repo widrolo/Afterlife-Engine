@@ -137,6 +137,7 @@ namespace WEngine
 		Iris::SamplerHandle m_sampler;
 
 		wtl::vector<Iris::ResourceTableHandle> m_textureTables;
+		uint64 m_currentBoundTexture = 0;
 
 		Vector2 m_windowResolution;
 		SDL_DisplayMode* m_displayMode = nullptr;

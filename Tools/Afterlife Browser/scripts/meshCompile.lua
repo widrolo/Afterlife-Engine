@@ -199,6 +199,7 @@ import bpy
 import struct
 import sys
 import os
+from mathutils import Matrix
 
 STATUS_PATH = None
 
@@ -280,7 +281,17 @@ def main():
         # Bake the object's world transform into the mesh (static mesh = final
         # positions). Normals get the rotation only, so non-uniform scale does
         # not skew them.
-        mat = obj.matrix_world
+        #
+        # Afterlife wants +Z as the up axis. Source meshes come out with the up
+        # axis along -Y, so rotate the baked transform by (x, y, z) -> (x, z, -y)
+        # to bring the up axis onto +Z.
+        UP_CONV = Matrix((
+            (1.0, 0.0, 0.0, 0.0),
+            (0.0, 0.0, 1.0, 0.0),
+            (0.0, -1.0, 0.0, 0.0),
+            (0.0, 0.0, 0.0, 1.0),
+        ))
+        mat = UP_CONV @ obj.matrix_world
         rot = mat.to_quaternion().to_matrix()
 
         out_verts = []
