@@ -14,7 +14,6 @@
 #include <yaml-cpp/yaml.h>
 #include <tinyxml2.h>
 
-#include "Engine/imgui/imgui.h"
 #include <shaderc/shaderc.hpp>
 
 #include "RenderHandler.h"
@@ -22,10 +21,12 @@
 #include "Engine/Core/System/Iris.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Types/Rendering/TextureInfo.h"
-#include "Engine/Types/Rendering/VertextData.h"
-#include "Engine/Types/Rendering/Iris/IrisAssetComms.h"
 #include "Engine/Util/TextureSwizzler.h"
 #include "Engine/Types/Rendering/DDS.h"
+
+#include <Engine/Core/World/Sector.h>
+
+#include "glm/gtc/quaternion.hpp"
 
 
 using namespace WEngine;
@@ -333,6 +334,26 @@ void AssetRepo::LoadAllGPUAssets()
 	ExtractPackage(textureTable, texFiles, "Textures.pkg");
 	ParseAndUploadMeshes(meshFiles);
 	ParseTextures(texFiles);
+}
+
+wtl::vector<Sector> AssetRepo::LoadAllSectors()
+{
+	auto sectorDefs = OS::GetAllFileNamesInDir(GetDataPath() + EngineSettings::sectorPath);
+
+	wtl::vector<Sector> sectors;
+
+	for (auto& def : sectorDefs)
+	{
+		std::string sectorName = std::filesystem::path(def).stem().string();
+
+		if (sectorName == "$Sample")
+			continue;
+		Sector newSec = Sector(sectorName);
+		LoadSingleSector(newSec);
+		sectors.push_back(newSec);
+	}
+
+	return sectors;
 }
 
 void AssetRepo::TickTextureUpload()
@@ -744,4 +765,65 @@ void AssetRepo::FinalizeTextureCopy()
 	for (auto& buff : m_copyBuffers_X)
 		Iris::DestroyBuffer(buff);
 
+}
+
+void AssetRepo::LoadSingleSector(Sector& storage)
+{
+	std::string defPath = GetDataPath() + EngineSettings::sectorPath + storage.GetName() + ".yaml";
+	std::string sectorDef = LoadTextFile(defPath);
+
+	YAML::Node root = YAML::Load(sectorDef);
+
+	if (!root["sector"])
+	{
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog(std::format("Unable to load sector \"{}\", missing sector identifier", storage.GetName()));
+		return;
+	}
+
+	wtl::vector<Mat4x4> stationaryPayload;
+
+	for (const auto& entry : root["sector"])
+	{
+		const auto& entryDef = entry.second;
+
+		std::string assetPath = entryDef["asset"].as<std::string>();
+		uint32 mesh = GetFirstAssetInDirOfType(assetPath, AssetType::StaticMesh);
+		uint32 tex = GetFirstAssetInDirOfType(assetPath, AssetType::Texture);
+		//uint32 col = GetFirstAssetInDirOfType(assetPath, );
+
+		const YAML::Node& pos = entryDef["position"];
+		const YAML::Node& rot = entryDef["rotation"];
+		const YAML::Node& size = entryDef["size"];
+
+		Transform t;
+		t.position = { pos[0].as<float32>(), pos[1].as<float32>(), pos[2].as<float32>() };
+		t.rotation = { rot[0].as<float32>(), rot[1].as<float32>(), rot[2].as<float32>(), rot[3].as<float32>() };
+		t.size = { size[0].as<float32>(), size[1].as<float32>(), size[2].as<float32>() };
+
+		SectorEntry newEntry = SectorEntry(mesh, tex, 0, t);
+		storage.m_entries.push_back(newEntry);
+
+		// ------------------------------------------------------------------------
+
+		glm::quat q(t.rotation.w, t.rotation.x, t.rotation.y, t.rotation.z);
+
+		glm::mat4 modelMatrix = glm::mat4_cast(q);
+
+		modelMatrix[0] *= t.size.x;
+		modelMatrix[1] *= t.size.y;
+		modelMatrix[2] *= t.size.z;
+
+		modelMatrix[3] = glm::vec4(t.position.x, -t.position.y, t.position.z, 1.0f);
+
+		stationaryPayload.push_back(Glm4x4ToMat4x4(modelMatrix));
+	}
+
+	Iris::BufferDesc desc;
+	desc.debugName = storage.GetName() + " stat buff";
+	desc.size = sizeof(Mat4x4) * stationaryPayload.size();
+	desc.usage = Iris::BufferUsage::Vertex;
+
+	storage.m_statBuffer = Iris::CreateBuffer(desc, (byte*)stationaryPayload.data(),
+		sizeof(Mat4x4) * stationaryPayload.size());
 }

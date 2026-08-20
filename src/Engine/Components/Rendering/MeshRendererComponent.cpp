@@ -49,7 +49,7 @@ void MeshRendererComponent::Draw()
     mission.meshUID = m_meshUID;
     mission.textureUID = m_texUID;
     mission.isStationary = m_isStationary;
-    mission.key = entity->parentSector->GetStatBufKey();
+    //mission.key = entity->parentSector->GetStatBufKey();
 
     CoreSystems::GetRenderHandler()->AddToRenderQueue(mission);
 

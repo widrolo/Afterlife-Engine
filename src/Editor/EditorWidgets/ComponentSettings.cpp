@@ -137,6 +137,6 @@ void ComponentSettings::ShowOption(const ComponentOption& option, uint8 optionNu
 
 	ImGui::SetItemTooltip("%s", option.optionDesctription.c_str());
 
-	if (changed)
-		EditorState::SelectedSector->m_changedInEditor = true;
+	//if (changed)
+	//	EditorState::SelectedSector->m_changedInEditor = true;
 }

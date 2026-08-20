@@ -64,7 +64,7 @@ void ComponentList::RenderInternal()
 	if (ImGui::Button("Rename"))
 	{
 		entity->entityName = m_entityName;
-		EditorState::SelectedSector->m_changedInEditor = true;
+		//EditorState::SelectedSector->m_changedInEditor = true;
 	}
 	ImGui::PopStyleVar();
 
@@ -72,14 +72,14 @@ void ComponentList::RenderInternal()
 	{
 		vec = WEngine::Vector3(m_entityPos[0], m_entityPos[1], m_entityPos[2]);
 		entity->transform.position = vec;
-		EditorState::SelectedSector->m_changedInEditor = true;
+		//EditorState::SelectedSector->m_changedInEditor = true;
 	}
 
 	if (ImGui::DragFloat3("Rotation", m_entityRot.data(), 0.1f))
 	{
 		vec = WEngine::Vector3(glm::radians(m_entityRot[0]), glm::radians(m_entityRot[1]), glm::radians(m_entityRot[2]));
 		entity->transform.rotation = WEngine::Quaternion::EulerToQuaternion(vec);
-		EditorState::SelectedSector->m_changedInEditor = true;
+		//EditorState::SelectedSector->m_changedInEditor = true;
 	}
 	m_rotationActive = ImGui::IsItemActive();
 
@@ -87,7 +87,7 @@ void ComponentList::RenderInternal()
 	{
 		vec = WEngine::Vector3(m_entitySize[0], m_entitySize[1], m_entitySize[2]);
 		entity->transform.size = vec;
-		EditorState::SelectedSector->m_changedInEditor = true;
+		//EditorState::SelectedSector->m_changedInEditor = true;
 	}
 
 	ImGui::SeparatorText("Component Settings");
@@ -110,7 +110,7 @@ void ComponentList::RenderInternal()
 		delete EditorState::SelectedComponent;
 		EditorState::SelectedComponent = nullptr;
 
-		EditorState::SelectedSector->m_changedInEditor = true;
+		//EditorState::SelectedSector->m_changedInEditor = true;
 	}
 	noremove:
 	ImGui::PopStyleVar();
@@ -208,6 +208,6 @@ void ComponentList::ComponentDropdown()
 		int capacity = EditorSystems::GetCompSettingsRepo()->GetSettingCapacity(newCompID);
 		any->Init(newCompID, capacity);
 		entity->m_components.push_back(any);
-		EditorState::SelectedSector->m_changedInEditor = true;
+		//EditorState::SelectedSector->m_changedInEditor = true;
 	}
 }

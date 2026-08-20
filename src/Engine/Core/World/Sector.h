@@ -5,27 +5,15 @@
 #include <Engine/Types/CommonTypes.h>
 
 #include "SectorEntry.h"
-#include "Engine/Types/Rendering/GPU/StatBufKey.h"
+#include "Engine/Types/Rendering/Iris/Handles.h"
 
-namespace WEditor
-{
-	class Editor;
-	class SectorList;
-	class EntityList;
-	class ComponentList;
-	class ComponentSettings;
-}
 
 namespace WEngine
 {
+	class AssetRepo;
 	class Sector
 	{
-		// i mean, at this point i might just make everything public.
-		friend WEditor::Editor;
-		friend WEditor::SectorList;
-		friend WEditor::EntityList;
-		friend WEditor::ComponentList;
-		friend WEditor::ComponentSettings;
+		friend AssetRepo;
 	public:
 		Sector(const std::string& sectorName);
 
@@ -33,16 +21,15 @@ namespace WEngine
 		void Show() { m_showing = true; }
 		void Hide() { m_showing = false; }
 
-		void Draw();
+		void Draw() const;
 
-		[[nodiscard]] StatBufKey GetStatBufKey() const { return m_irisKey; }
+		[[nodiscard]] Iris::BufferHandle GetStatBufKey() const { return m_statBuffer; }
+		[[nodiscard]] const std::string& GetName() const { return m_name; }
 
-	private:
-		void LoadArgsFromFile(const std::string& sectorName);
 	private:
 		std::string m_name;
 		wtl::vector<SectorEntry> m_entries;
-		StatBufKey m_irisKey;
+		Iris::BufferHandle m_statBuffer;
 
 		bool m_showing = false;
 

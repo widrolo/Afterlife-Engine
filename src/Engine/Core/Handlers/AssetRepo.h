@@ -11,6 +11,7 @@
 
 namespace WEngine
 {
+	class Sector;
 	struct TextureInfo;
 	/**
 	 * AssetRepo handles the loading and unloading of game assets such as sprites, shaders, YAML files, atlas info, audio clips, and UI sheets.
@@ -35,6 +36,7 @@ namespace WEngine
 		 * @note This can only be called once.
 		 */
 		void LoadAllGPUAssets();
+		wtl::vector<Sector> LoadAllSectors();
 		/**
 		 * Since textures are a bit special when it comes to uploading to VRAM, we need to do it over time.
 		 * @note This should be called at the beginning of every frame.
@@ -91,6 +93,8 @@ namespace WEngine
 		Iris::BufferHandle GetVertexBuffer() const { return m_vertexBuffer; }
 		Iris::BufferHandle GetIndexBuffer() const { return m_indexBuffer; }
 
+
+
 	private:
 		AudioClip* LoadAudioWAV(const std::string& name);
 		std::string LoadTextFile(const std::string& path);
@@ -111,6 +115,8 @@ namespace WEngine
 		void FillCopyBuffers(Iris::BufferHandle* handles, sizeT handleCount, sizeT textureWidth);
 		void FinalizeTextureCopy();
 
+		void LoadSingleSector(Sector& storage);
+	
 	private:
 		std::string m_dataPath;
 		std::unordered_map<std::string, AudioClip> m_audioRepo;

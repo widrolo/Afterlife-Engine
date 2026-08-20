@@ -9,19 +9,6 @@ namespace WEditor
 
 namespace WEngine
 {
-
-	/*
-		Core Systems
-
-		The core systems provide an easy way for any
-		part of the code to access the core engine
-		features.
-
-		This is specifically made for components, as
-		they usually require access to the engine
-		itself, and only rarely govern game logic.
-	*/
-
 	class AssetRepo;
 	class PhysicsHandler;
 	class RenderHandler;
@@ -56,6 +43,7 @@ namespace WEngine
 		_GLOBAL_ WidgetHandler* widgetHandler;
 		_GLOBAL_ JobHandler* jobHandler;
 		_GLOBAL_ TimeHandler* timeHandler;
+		_GLOBAL_ SectorHandler* sectorHanlder;
 
 		_GLOBAL_ bool isGameRunning; // Setting this to false will stop the game
 
@@ -70,6 +58,7 @@ namespace WEngine
 		static WidgetHandler* GetWidgetHandler() { return widgetHandler; }
 		static JobHandler* GetJobHandler() { return jobHandler; }
 		static TimeHandler* GetTimeHandler() { return timeHandler; }
+		static SectorHandler* GetSectorHandler() { return sectorHanlder; }
 
 		static SteamStore* GetSteamStore() { return steamStore; }
 

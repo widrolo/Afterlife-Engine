@@ -32,7 +32,7 @@ void EntityList::RenderInternal()
 
         //sec->AddEntity(e);
 
-        EditorState::SelectedSector->m_changedInEditor = true;
+        //EditorState::SelectedSector->m_changedInEditor = true;
     }
 
     ImGui::SameLine();
@@ -50,18 +50,18 @@ void EntityList::RenderInternal()
         delete EditorState::SelectedEntity;
         EditorState::SelectedEntity = nullptr;
 
-        EditorState::SelectedSector->m_changedInEditor = true;
+        //EditorState::SelectedSector->m_changedInEditor = true;
     }
     noremove:
     ImGui::PopStyleVar();
 
     auto sector = EditorState::SelectedSector;
 
-    if (ImGui::TreeNodeEx(sector->m_name.c_str(), ImGuiTreeNodeFlags_DrawLinesFull))
-    {
-        ShowEntitiesInSector();
-        ImGui::TreePop();
-    }
+    //if (ImGui::TreeNodeEx(sector->m_name.c_str(), ImGuiTreeNodeFlags_DrawLinesFull))
+    //{
+    //    ShowEntitiesInSector();
+    //    ImGui::TreePop();
+    //}
 }
 
 void EntityList::ShowEntitiesInSector()

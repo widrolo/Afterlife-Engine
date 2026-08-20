@@ -15,6 +15,7 @@
 #include <Engine/Core/Handlers/WidgetHandler.h>
 #include <Engine/Core/Handlers/JobHandler.h>
 #include <Engine/Core/Handlers/TimeHandler.h>
+#include <Engine/Core/Handlers/SectorHandler.h>
 
 #include <Engine/Stores/Steam/SteamStore.h>
 
@@ -128,6 +129,7 @@ void Engine::InitHandlers()
 	StartHandlerSingle<AssetRepo>(&CoreSystems::assetRepo, "Asset Repo");
 	StartHandlerSingle<RenderHandler>(&CoreSystems::renderHandler, "Render Handler");
 	StartHandlerSingle<PhysicsHandler>(&CoreSystems::physicsHandler, "Physics Handler");
+	StartHandlerSingle<SectorHandler>(&CoreSystems::sectorHanlder, "Sector Handler");
 	StartHandlerSingle<AudioHandler>(&CoreSystems::audioHandler, "Audio Handler");
 	StartHandlerSingle<WidgetHandler>(&CoreSystems::widgetHandler, "Widget Handler");
 	StartHandlerSingle<JobHandler>(&CoreSystems::jobHandler, "Job Handler");
@@ -293,6 +295,7 @@ void Engine::Loop_Draw()
 
 	m_game->GameLoopDrawEarly();
 	m_game->GameLoopDraw();
+	CoreSystems::sectorHanlder->DrawSectors();
 	if constexpr (PhysicsSettings::physicsEnabled)
 	{
 		CoreSystems::physicsHandler->Visualize();

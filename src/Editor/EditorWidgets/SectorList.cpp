@@ -125,12 +125,12 @@ void SectorList::SaveSectorToYaml(WEngine::Sector *sector)
 
     // GetDataPath() + EngineSettings::sectorPath + mission.name + ".yaml"
 
-    std::string secName = sector->m_name;
-    std::transform(secName.begin(), secName.end(), secName.begin(), [](unsigned char c) { return std::tolower(c); });
+    //std::string secName = sector->m_name;
+    //std::transform(secName.begin(), secName.end(), secName.begin(), [](unsigned char c) { return std::tolower(c); });
 
     std::string path = EditorSystems::GetAssetRepo()->GetDataPath();
     path += EngineSettings::sectorPath;
-    path += secName;
+    //path += secName;
     path += ".yaml";
 
     std::ofstream fout(path);

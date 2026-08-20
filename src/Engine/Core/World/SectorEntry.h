@@ -11,8 +11,8 @@ namespace WEngine
     class SectorEntry
     {
     public:
-        SectorEntry(uint64 meshUID, uint64 textureUID, uint64 colMeshUID)
-            : m_mesh(meshUID), m_texture(textureUID), m_colMesh(colMeshUID) {}
+        SectorEntry(uint64 meshUID, uint64 textureUID, uint64 colMeshUID, const Transform& transform)
+            : m_mesh(meshUID), m_texture(textureUID), m_colMesh(colMeshUID), m_transform(transform) {}
         SectorEntry(const std::string& assetName);
 
         [[nodiscard]] bool HasVisuals() const { return m_mesh != 0 && m_texture != 0; }
