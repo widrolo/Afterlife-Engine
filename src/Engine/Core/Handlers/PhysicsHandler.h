@@ -2,7 +2,8 @@
 
 #include <box3d/box3d.h>
 
-#include "Engine/Core/World/Entity.h"
+#include "Engine/Math/Transform.h"
+#include "Engine/Math/Other/Quaternion.h"
 #include "Engine/Types/Physics/BodyHandle.h"
 #include "Engine/Types/Physics/BodyType.h"
 #include "Engine/Types/Physics/PhysicsBody.h"
@@ -23,7 +24,7 @@ namespace WEngine
 	public:
 		void Tick();
 
-		PhysicsBodyHandle CreateBody(PhysicsBodyType type, Entity *entity);
+		PhysicsBodyHandle CreateBody(PhysicsBodyType type, Transform *entity);
 		void ChangeBodyPosition(PhysicsBodyHandle body, const Vector3& position);
 		void ChangeBodyRotation(PhysicsBodyHandle body, const Quaternion& rotation);
 		void AttachBox(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset);

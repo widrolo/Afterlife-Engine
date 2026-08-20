@@ -2,17 +2,13 @@
 #include "BehaviourNode.h"
 #include "Engine/Types/Blackboard.h"
 
-namespace WEngine
-{
-    class Entity;
-}
 
 namespace WEngine::Behaviour
 {
     class BehaviourTree
     {
     public:
-        BehaviourTree(Entity* owner);
+        BehaviourTree();
         ~BehaviourTree() = default;
 
     public:

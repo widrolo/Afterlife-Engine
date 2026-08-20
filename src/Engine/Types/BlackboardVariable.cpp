@@ -13,5 +13,4 @@ std::string BlackboardVariableType_Names[(int)BlackboardVariableType::Blackboard
     "Vector2",
     "Vector3",
     "Color",
-    "Entity"
 };

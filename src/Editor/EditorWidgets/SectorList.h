@@ -24,13 +24,6 @@ namespace WEditor
 
     private:
         char m_sectorName[128] = ""; // i really hate this!
-
-    private:
-        void ShowSectorList();
-        void LoadSector();
-        void SaveSectorToYaml(WEngine::Sector* sector);
-        YAML::Node GetEntityInfoYaml(WEngine::Entity* e);
-        YAML::Node GetComponentInfoYaml(WEngine::Component* comp);
     };
 }
 

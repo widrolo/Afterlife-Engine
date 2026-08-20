@@ -1,12 +1,11 @@
 #include "BehaviourTree.h"
 
-#include <Engine/Core/World/Entity.h>
 
 using namespace WEngine::Behaviour;
 
-BehaviourTree::BehaviourTree(Entity* owner)
+BehaviourTree::BehaviourTree()
 {
-    m_blackboard.AddVariable("self", owner);
+    //m_blackboard.AddVariable("self", owner);
 }
 
 void BehaviourTree::TickBrain()

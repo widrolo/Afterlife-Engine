@@ -4,7 +4,6 @@
 #include <Engine/Core/Engine.h>
 
 #include "Engine/Core/Handlers/PhysicsHandler.h"
-#include "Engine/Core/World/Entity.h"
 #include "Engine/Types/CoreSystems.h"
 
 using namespace WEngine;

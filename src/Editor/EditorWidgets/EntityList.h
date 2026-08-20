@@ -13,8 +13,6 @@ namespace WEditor
         void Setup() override;
     protected:
         void RenderInternal() override;
-    private:
-        void ShowEntitiesInSector();
     };
 }
 

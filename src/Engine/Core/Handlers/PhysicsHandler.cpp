@@ -22,7 +22,7 @@ void PhysicsHandler::Tick()
 		UpdateAttachedEntity(body);
 }
 
-PhysicsBodyHandle PhysicsHandler::CreateBody(PhysicsBodyType type, Entity *entity)
+PhysicsBodyHandle PhysicsHandler::CreateBody(PhysicsBodyType type, Transform *entity)
 {
 	b3BodyDef groundBodyDef = b3DefaultBodyDef();
 	if (type == PhysicsBodyType::Dynamic)
@@ -38,7 +38,7 @@ PhysicsBodyHandle PhysicsHandler::CreateBody(PhysicsBodyType type, Entity *entit
 
 	PhysicsBody body{};
 	body.bodyId = bodyId;
-	body.entity = entity;
+	body.transform = entity;
 	body.type = type;
 	m_bodies.push_back(body);
 
@@ -119,12 +119,12 @@ void PhysicsHandler::UpdateAttachedEntity(PhysicsBody& body)
 	if (body.type != PhysicsBodyType::Dynamic)
 		return;
 
-	auto& tra = body.entity->transform;
+	auto* tra = body.transform;
 
 	b3Vec3 pos = b3Body_GetPosition(body.bodyId);
 	b3Quat rot = b3Body_GetRotation(body.bodyId);
 
-	tra.position = Vector3::B3DtoVec(pos);
-	tra.rotation = Quaternion::B3DToQuat(rot);
+	tra->position = Vector3::B3DtoVec(pos);
+	tra->rotation = Quaternion::B3DToQuat(rot);
 
 }

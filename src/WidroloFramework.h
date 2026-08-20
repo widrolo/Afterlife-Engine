@@ -26,7 +26,6 @@
 
 // etc.
 #include <Engine/Core/World/Sector.h>
-#include <Engine/Core/World/Entity.h>
 #include <Engine/UI/UIParser.h>
 
 #include <Engine/Stores/Steam/SteamStore.h>

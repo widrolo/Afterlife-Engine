@@ -17,8 +17,6 @@ set(OPTION_ENABLED 1)
 
 # thank god for CLion
 add_executable(Afterlife_Engine
-        src/Engine/Components/Component.cpp
-        src/Engine/Components/Component.h
         src/Engine/Core/Handlers/AssetRepo.cpp
         src/Engine/Core/Handlers/AssetRepo.h
         src/Engine/Core/Handlers/AudioHandler.cpp
@@ -33,8 +31,6 @@ add_executable(Afterlife_Engine
         src/Engine/Core/Handlers/RNGHandler.h
         src/Engine/Core/Engine.cpp
         src/Engine/Core/Engine.h
-        src/Engine/Core/World/Entity.cpp
-        src/Engine/Core/World/Entity.h
         src/Engine/Core/World/Sector.cpp
         src/Engine/Core/World/Sector.h
         src/Engine/gl/include/glad/glad.h
@@ -95,11 +91,8 @@ add_executable(Afterlife_Engine
         src/Engine/Util/Log.h
         src/Engine/EngineDefines.h
         src/Engine/Entry-Point.cpp
-        src/Engine/Components/Creation/ComponentFactory.cpp
-        src/Engine/Components/Creation/ComponentFactory.h
         src/Game/GameDefines.h
         src/WidroloFramework.h
-        src/Engine/Components/Creation/CompID.h
         src/Engine/Math/Vector.h
         src/Engine/Math/Shapes.h
         src/Engine/Math/Matrix.h
@@ -169,8 +162,6 @@ add_executable(Afterlife_Engine
         src/Editor/EditorDefines.h
         src/Editor/Core/Editor.cpp
         src/Editor/Core/Editor.h
-        src/Editor/Components/AnyComponent.cpp
-        src/Editor/Components/AnyComponent.h
         src/Editor/Types/EditorSystems.h
         src/Editor/Core/Handlers/EditorUIHandler.cpp
         src/Editor/Core/Handlers/EditorUIHandler.h
@@ -199,8 +190,6 @@ add_executable(Afterlife_Engine
         src/Editor/MenubarItems/Help/Menubar_About.cpp
         src/Editor/MenubarItems/Help/Menubar_About.h
         src/Editor/Types/EditorState.h
-        src/Editor/Components/EditorCompFactory.cpp
-        src/Editor/Components/EditorCompFactory.h
         src/Game/Core/Game.cpp
         src/Game/Core/Game.h
         src/Engine/WTL/list.h
@@ -252,8 +241,6 @@ add_executable(Afterlife_Engine
         src/Engine/Types/Rendering/ShaderInfo.h
         src/Game/Gameplay/Freecam.cpp
         src/Game/Gameplay/Freecam.h
-        src/Engine/Components/Rendering/MeshRendererComponent.cpp
-        src/Engine/Components/Rendering/MeshRendererComponent.h
         src/Engine/gl/gltf/tiny_gltf_v3.c
         src/Engine/Types/Rendering/InstanceData.h
         src/Engine/Types/Rendering/Iris/InstThreadedList.cpp
@@ -299,15 +286,9 @@ add_executable(Afterlife_Engine
         src/Engine/Types/Input/InputSense.cpp
         src/Engine/Types/Rendering/DDS.cpp
         src/Engine/Types/Rendering/DDS.h
-        src/Engine/Components/Physics/StaticBodyComponent.cpp
-        src/Engine/Components/Physics/StaticBodyComponent.h
         src/Engine/Types/Physics/BodyHandle.h
         src/Engine/Types/Physics/BodyType.h
         src/Engine/Types/Physics/PhysicsBody.h
-        src/Engine/Components/Physics/DynamicBodyComponent.cpp
-        src/Engine/Components/Physics/DynamicBodyComponent.h
-        src/Engine/Components/Physics/Shapes/BoxCollisionComponent.cpp
-        src/Engine/Components/Physics/Shapes/BoxCollisionComponent.h
         src/Editor/MenubarItems/File/Menubar_RunTest.cpp
         src/Editor/MenubarItems/File/Menubar_RunTest.h
         src/Testing/TestingDefines.h

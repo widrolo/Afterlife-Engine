@@ -26,7 +26,6 @@
 #include <Engine/imgui/backends/imgui_impl_opengl3.h>
 #include <Engine/imgui/implot.h>
 
-#include "Editor/Components/AnyComponent.h"
 #include "Editor/Types/EditorState.h"
 #include "Engine/Core/System/Haptic.h"
 #include "Engine/Core/System/Iris.h"
@@ -102,7 +101,6 @@ void Editor::InitHandlers()
     StartHandlerSingleEditor<MenubarHandler>(&EditorSystems::menubarHandler, "Menubar Handler");
     StartHandlerSingleEditor<CompSettingsRepo>(&EditorSystems::compSettingsRepo, "Component Settings Repo");
 
-	AnyComponent::SetupPhysicsData();
 	WAllocator::Construct<WEngine::Sector, const std::string&>("root");
 	Haptic::EnableEditorMode();
 	Input::LoadInputMap();

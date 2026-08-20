@@ -2,8 +2,6 @@
 
 #include <Engine/Core/Widget.h>
 
-#include "Engine/Core/World/Entity.h"
-#include "Game/Gameplay/Freecam.h"
 
 namespace WEditor
 {
@@ -16,11 +14,7 @@ namespace WEditor
         void Setup() override;
     protected:
         void RenderInternal() override;
-
     private:
-        void CheckForSizeChange(ImVec2 newRes);
-    private:
-        WEngine::Entity* m_viewportEntity;
         bool m_resDecided = false;
     };
 }

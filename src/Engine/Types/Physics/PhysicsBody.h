@@ -7,7 +7,7 @@ namespace WEngine
     struct PhysicsBody
     {
         b3BodyId bodyId;
-        Entity* entity;
+        Transform* transform;
         PhysicsBodyType type;
     };
 }

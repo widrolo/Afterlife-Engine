@@ -5,10 +5,8 @@
 #include <Engine/Types/Rendering/Color.h>
 #include <Engine/Math/Vector.h>
 
-#include "Engine/Components/Component.h"
 #include "Engine/Core/World/Sector.h"
 #include "Engine/Util/Log.h"
-#include <Engine/Core/World/Entity.h>
 
 namespace WEngine
 {
@@ -23,7 +21,6 @@ namespace WEngine
         Vector2,
         Vector3,
         Color,
-        Entity,
 
         BlackboardVariableType_Count
     };
@@ -39,8 +36,7 @@ namespace WEngine
         std::string,
         Vector2,
         Vector3,
-        Color,
-        Entity*
+        Color
     >;
 
     template<typename T>
@@ -58,7 +54,6 @@ namespace WEngine
     template<> struct BlackboardVariableTypeMapper<Vector2>      { static constexpr BlackboardVariableType value = BlackboardVariableType::Vector2; };
     template<> struct BlackboardVariableTypeMapper<Vector3>      { static constexpr BlackboardVariableType value = BlackboardVariableType::Vector3; };
     template<> struct BlackboardVariableTypeMapper<Color>        { static constexpr BlackboardVariableType value = BlackboardVariableType::Color; };
-    template<> struct BlackboardVariableTypeMapper<Entity*>      { static constexpr BlackboardVariableType value = BlackboardVariableType::Entity; };
 
     template<typename T>
     constexpr BlackboardVariableType ToBlackboardVariableType()
@@ -76,8 +71,7 @@ namespace WEngine
         std::is_same<T, std::string>,
         std::is_same<T, Vector2>,
         std::is_same<T, Vector3>,
-        std::is_same<T, Color>,
-        std::is_same<T, Entity*>
+        std::is_same<T, Color>
     >;
 
     struct BlackboardVariable
