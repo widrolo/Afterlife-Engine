@@ -30,7 +30,7 @@ void EntityList::RenderInternal()
         e->transform = WEngine::Transform::Zero;
         e->InitBaseComponents();
 
-        sec->AddEntity(e);
+        //sec->AddEntity(e);
 
         EditorState::SelectedSector->m_changedInEditor = true;
     }
@@ -43,7 +43,7 @@ void EntityList::RenderInternal()
             goto noremove;
         WEngine::Sector* sec = EditorState::SelectedSector;
 
-        std::erase(sec->m_entities, EditorState::SelectedEntity);
+        //std::erase(sec->m_entities, EditorState::SelectedEntity);
 
         EditorState::SelectedEntity->EntityDestroy();
 
@@ -74,25 +74,25 @@ void EntityList::ShowEntitiesInSector()
     treeFlags |= ImGuiTreeNodeFlags_Leaf;
 
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10.f, 10.f));
-    for (auto entity : sector->m_entities)
-    {
-        std::string entName = entity->entityName + "##" + std::to_string(iter);
-        ImGuiTreeNodeFlags leaf = treeFlags;
-
-        if (EditorState::SelectedEntity == entity)
-            leaf |= ImGuiTreeNodeFlags_Selected;
-
-        ImGui::TreeNodeEx(entName.c_str(), leaf);
-
-        if (ImGui::IsItemClicked())
-        {
-            EditorState::SelectedEntity = entity;
-            EditorState::SelectedComponent = nullptr;
-        }
-
-        ImGui::TreePop();
-        iter++;
-    }
+    //for (auto entity : sector->m_entities)
+    //{
+    //    std::string entName = entity->entityName + "##" + std::to_string(iter);
+    //    ImGuiTreeNodeFlags leaf = treeFlags;
+//
+    //    if (EditorState::SelectedEntity == entity)
+    //        leaf |= ImGuiTreeNodeFlags_Selected;
+//
+    //    ImGui::TreeNodeEx(entName.c_str(), leaf);
+//
+    //    if (ImGui::IsItemClicked())
+    //    {
+    //        EditorState::SelectedEntity = entity;
+    //        EditorState::SelectedComponent = nullptr;
+    //    }
+//
+    //    ImGui::TreePop();
+    //    iter++;
+    //}
 
     ImGui::PopStyleVar();
 }

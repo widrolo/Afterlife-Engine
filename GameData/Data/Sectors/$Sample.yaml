@@ -1,0 +1,25 @@
+﻿# This is a sample sector. The purpose of this file is 
+# to demonstrate how a sector can be defined.
+# This definition is explicitly ignored by the engine.
+
+# "Sector" is the top level node and identifies the file as containing a sector
+sector:
+    0: 
+        # This is defined by the Afterlife Browser, and will extract:
+        # 1: The first found mesh
+        # 2: The first found texture
+        # 3: The first found collision mesh.
+        # The engine will handle either of these or the directory itself missing.
+        asset: /Engine/Missing
+        # Position of the object.
+        position: [0, 0, 0]
+        # Rotation of the object in quaternion notation.
+        rotation: [0, 0, 0, 1]
+        # Scale of the object
+        size: [1, 1, 1]
+    1:
+        asset: /Something/Cool
+        position: [5, 0, 2]
+        rotation: [0, 0, 0, 1]
+        size: [1, 1, 1]
+

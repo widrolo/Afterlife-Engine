@@ -30,6 +30,7 @@ namespace WEngine
 	class WidgetHandler;
 	class JobHandler;
 	class TimeHandler;
+	class SectorHandler;
 
 	class SteamStore;
 	class GameMode;

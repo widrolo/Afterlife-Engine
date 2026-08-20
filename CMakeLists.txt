@@ -17,14 +17,8 @@ set(OPTION_ENABLED 1)
 
 # thank god for CLion
 add_executable(Afterlife_Engine
-        src/Engine/Components/AudioComponent.cpp
-        src/Engine/Components/AudioComponent.h
         src/Engine/Components/Component.cpp
         src/Engine/Components/Component.h
-        src/Engine/Components/RNGComponent.cpp
-        src/Engine/Components/RNGComponent.h
-        src/Engine/Components/SectorComponent.cpp
-        src/Engine/Components/SectorComponent.h
         src/Engine/Core/Handlers/AssetRepo.cpp
         src/Engine/Core/Handlers/AssetRepo.h
         src/Engine/Core/Handlers/AudioHandler.cpp
@@ -43,8 +37,6 @@ add_executable(Afterlife_Engine
         src/Engine/Core/World/Entity.h
         src/Engine/Core/World/Sector.cpp
         src/Engine/Core/World/Sector.h
-        src/Engine/Core/World/SectorLogic.cpp
-        src/Engine/Core/World/SectorLogic.h
         src/Engine/gl/include/glad/glad.h
         src/Engine/gl/include/KHR/khrplatform.h
         src/Engine/gl/include/stb_image.cpp
@@ -370,6 +362,10 @@ add_executable(Afterlife_Engine
         src/Engine/Core/System/Iris/Vulkan/Helpers/CmdBuffs.h
         src/Engine/Types/Rendering/Iris/Statistics.h
         src/Engine/Types/Asset.h
+        src/Engine/Core/World/SectorEntry.cpp
+        src/Engine/Core/World/SectorEntry.h
+        src/Engine/Core/Handlers/SectorHandler.cpp
+        src/Engine/Core/Handlers/SectorHandler.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

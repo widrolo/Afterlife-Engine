@@ -135,7 +135,6 @@ void Engine::InitHandlers()
 
 	CoreSystems::assetRepo->RegisterAllTextures();
 	Input::LoadInputMap();
-	m_rootSector = new Sector("root");
 	m_game = new Game();
 }
 
@@ -192,7 +191,6 @@ void Engine::Run()
 	std::chrono::time_point<std::chrono::steady_clock> frameStart;
 	StopWatch uptime;
 
-	m_rootSector->Start();
 	uptime.Reset();
 	m_physicsTickTimer = 0.0f;
 	m_game->PreGameLoop();
@@ -250,7 +248,6 @@ void Engine::Loop_Tick()
 
 	m_game->GameLoopTickEarly();
 	m_game->GameLoopTick();
-	m_rootSector->Tick(m_deltaTime * CoreSystems::GetTimeScale());
 	m_game->GameLoopTickLate();
 	m_entityTick = timings.GetTime<TimeUnit::Microseconds>();
 	timings.Reset();
@@ -267,7 +264,6 @@ void Engine::Loop_Physics()
 	{
 		m_physicsTickTimer -= PhysicsSettings::physicsTickRate;
 		m_game->GameLoopPhysics();
-		m_rootSector->PhysicsTick(PhysicsSettings::physicsTickRate * CoreSystems::GetTimeScale());
 		CoreSystems::physicsHandler->Tick();
 		m_physicsTickCounterLastFrame++;
 	}
@@ -297,7 +293,6 @@ void Engine::Loop_Draw()
 
 	m_game->GameLoopDrawEarly();
 	m_game->GameLoopDraw();
-	m_rootSector->Draw();
 	if constexpr (PhysicsSettings::physicsEnabled)
 	{
 		CoreSystems::physicsHandler->Visualize();

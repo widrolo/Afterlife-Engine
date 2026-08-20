@@ -4,6 +4,7 @@
 
 #include <Engine/Types/CommonTypes.h>
 
+#include "SectorEntry.h"
 #include "Engine/Types/Rendering/GPU/StatBufKey.h"
 
 namespace WEditor
@@ -15,79 +16,36 @@ namespace WEditor
 	class ComponentSettings;
 }
 
-class Game;
 namespace WEngine
 {
-	class Entity;
-	struct SpawnArgs;
-	class SectorLogic;
-	class SectorWatchWidget;
-
-	struct SectorLogicBound
-	{
-		SectorLogic* logic;
-
-	};
 	class Sector
 	{
 		// i mean, at this point i might just make everything public.
-		friend SectorLogic;
-		friend SectorWatchWidget;
 		friend WEditor::Editor;
 		friend WEditor::SectorList;
 		friend WEditor::EntityList;
 		friend WEditor::ComponentList;
 		friend WEditor::ComponentSettings;
-		friend Game; // temp
 	public:
 		Sector(const std::string& sectorName);
+
+	public:
+		void Show() { m_showing = true; }
+		void Hide() { m_showing = false; }
+
+		void Draw();
+
+		[[nodiscard]] StatBufKey GetStatBufKey() const { return m_irisKey; }
+
+	private:
+		void LoadArgsFromFile(const std::string& sectorName);
 	private:
 		std::string m_name;
-		wtl::vector<Entity*> m_entities;
+		wtl::vector<SectorEntry> m_entries;
 		StatBufKey m_irisKey;
 
-		// only available for root sector
-		_GLOBAL_ wtl::vector<Sector*> m_sectors;
-		_GLOBAL_ bool m_anyRootExists;
-		_GLOBAL_ Sector* m_root;
-		bool m_isRoot = false;
+		bool m_showing = false;
 
-		bool m_loaded = false;
-		bool m_ticking = false;
-
-		bool m_unloadRequested = false;
 		bool m_changedInEditor = false;
-	public:
-		void SectorInternalTick();
-
-		void Start();
-		void Stop();
-		void Tick(float32 dt);
-		void PhysicsTick(float32 tr);
-		void Draw();
-		void AddEntityPost(const SpawnArgs& args);
-		void RemoveEntity(Entity* e);
-
-		void RequestUnload();
-
-		void ShowSector();
-
-		static Sector* LoadNewSector(const std::string& name);
-
-		bool IsEntityPresent(Entity* e);
-		bool IsEntityPresent(const std::string& name);
-		void UnloadEntity(Entity* e);
-		void UnloadEntity(const std::string& name);
-
-		StatBufKey GetStatBufKey();
-	private:
-		void AddEntity(Entity* e);
-
-		void LoadArgsFromFile(const std::string& sectorName); // this should be in Asset Repo
-
-		void Unload();
-
-		void Root_StartSector(Sector* sector);
-		void Root_StopSector(Sector* sector);
 	};
 }

@@ -135,7 +135,6 @@ void Editor::Run()
 		//if (!Iris::IsFirstFrame())
 		//	Iris::SETTING_BeginNewPreFrame();
 
-		WEngine::Sector::m_root->Tick(dt);
 
 		EditorSystems::renderHandler->BeginFrame();
 		EditorSystems::menubarHandler->Render();
@@ -143,7 +142,6 @@ void Editor::Run()
 
 		EditorSystems::editorUIHandler->DrawWidgets();
 
-		WEngine::Sector::m_root->Draw();
 
 		EditorSystems::renderHandler->RenderFrame();
 

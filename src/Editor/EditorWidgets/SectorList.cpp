@@ -46,64 +46,64 @@ void SectorList::RenderInternal()
 
 void SectorList::ShowSectorList()
 {
-    auto sectorList = WEngine::Sector::m_root->m_sectors;
+    //auto sectorList = WEngine::Sector::m_root->m_sectors;
 
     int iter = 0;
 
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20.f, 10.f));
-    for (auto sector : sectorList)
-    {
-        if (sector->m_name == "viewport")
-            continue;
-
-        ImGui::SeparatorText(sector->m_name.c_str());
-        std::string selText = "Select##" + std::to_string(iter);
-        std::string logicText = "Logic##" + std::to_string(iter);
-        std::string unloadText = "Unload##" + std::to_string(iter);
-        std::string saveText = "Save";
-        if (sector->m_changedInEditor)
-            saveText += "*";
-        saveText += "##" + std::to_string(iter);
-
-        if (ImGui::Button(selText.c_str()))
-        {
-            EditorState::SelectedSector = sector;
-            EditorState::SelectedEntity = nullptr;
-            EditorState::SelectedComponent = nullptr;
-        }
-
-        ImGui::SameLine();
-        ImGui::Button(logicText.c_str());
-        ImGui::SameLine();
-        if (ImGui::Button(unloadText.c_str()))
-        {
-            if (sector == EditorState::SelectedSector)
-            {
-                EditorState::SelectedSector = nullptr;
-                EditorState::SelectedEntity = nullptr;
-                EditorState::SelectedComponent = nullptr;
-            }
-            sector->RequestUnload();
-            sector->SectorInternalTick();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button(saveText.c_str()))
-        {
-            sector->m_changedInEditor = false;
-            SaveSectorToYaml(sector);
-        }
-
-        iter++;
-
-    }
+    //for (auto sector : sectorList)
+    //{
+    //    if (sector->m_name == "viewport")
+    //        continue;
+//
+    //    ImGui::SeparatorText(sector->m_name.c_str());
+    //    std::string selText = "Select##" + std::to_string(iter);
+    //    std::string logicText = "Logic##" + std::to_string(iter);
+    //    std::string unloadText = "Unload##" + std::to_string(iter);
+    //    std::string saveText = "Save";
+    //    if (sector->m_changedInEditor)
+    //        saveText += "*";
+    //    saveText += "##" + std::to_string(iter);
+//
+    //    if (ImGui::Button(selText.c_str()))
+    //    {
+    //        EditorState::SelectedSector = sector;
+    //        EditorState::SelectedEntity = nullptr;
+    //        EditorState::SelectedComponent = nullptr;
+    //    }
+//
+    //    ImGui::SameLine();
+    //    ImGui::Button(logicText.c_str());
+    //    ImGui::SameLine();
+    //    if (ImGui::Button(unloadText.c_str()))
+    //    {
+    //        if (sector == EditorState::SelectedSector)
+    //        {
+    //            EditorState::SelectedSector = nullptr;
+    //            EditorState::SelectedEntity = nullptr;
+    //            EditorState::SelectedComponent = nullptr;
+    //        }
+    //        sector->RequestUnload();
+    //        sector->SectorInternalTick();
+    //    }
+    //    ImGui::SameLine();
+    //    if (ImGui::Button(saveText.c_str()))
+    //    {
+    //        sector->m_changedInEditor = false;
+    //        SaveSectorToYaml(sector);
+    //    }
+//
+    //    iter++;
+//
+    //}
     ImGui::PopStyleVar();
 }
 
 void SectorList::LoadSector()
 {
     WEngine::Sector* sector = new WEngine::Sector(m_sectorName);
-    WEngine::Sector::m_root->m_sectors.push_back(sector);
-    sector->m_ticking = true;
+    //WEngine::Sector::m_root->m_sectors.push_back(sector);
+    //sector->m_ticking = true;
     m_sectorName[0] = '\0';
 }
 
@@ -113,12 +113,12 @@ void SectorList::SaveSectorToYaml(WEngine::Sector *sector)
     YAML::Node entities;
     root["entities"] = entities;
 
-    for (int i = 0; i < sector->m_entities.size(); i++)
-    {
-        std::string entryName = "e" + std::to_string(i);
-        auto entry = GetEntityInfoYaml(sector->m_entities[i]);
-        entities[entryName] = entry;
-    }
+    //for (int i = 0; i < sector->m_entities.size(); i++)
+    //{
+    //    std::string entryName = "e" + std::to_string(i);
+    //    auto entry = GetEntityInfoYaml(sector->m_entities[i]);
+    //    entities[entryName] = entry;
+    //}
 
     YAML::Emitter out;
     out << root;

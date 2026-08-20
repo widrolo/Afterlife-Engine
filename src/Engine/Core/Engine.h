@@ -23,7 +23,6 @@ namespace WEngine
 	public:
 		Engine(int argc, char* argv[]);
 	private:
-		Sector* m_rootSector;
 		Game* m_game; // you lost it.
 
 		float64 m_physicsTickTimer = 0.0f;
