@@ -5,6 +5,7 @@
 #include <Engine/Core/System/OS.h>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 #include <Engine/gl/include/stb_image.h>
 #define TINYGLTF_IMPLEMENTATION
@@ -350,6 +351,10 @@ wtl::vector<Sector> AssetRepo::LoadAllSectors()
 			continue;
 		Sector newSec = Sector(sectorName);
 		LoadSingleSector(newSec);
+		wtl::vector<SectorEntry> renderable = newSec.m_entries;
+		SortSectorForRender(renderable);
+		UploadTransformsOfSector(newSec, renderable);
+		CreateRenderPlanForSector(newSec, renderable);
 		sectors.push_back(newSec);
 	}
 
@@ -781,8 +786,6 @@ void AssetRepo::LoadSingleSector(Sector& storage)
 		return;
 	}
 
-	wtl::vector<Mat4x4> stationaryPayload;
-
 	for (const auto& entry : root["sector"])
 	{
 		const auto& entryDef = entry.second;
@@ -803,18 +806,40 @@ void AssetRepo::LoadSingleSector(Sector& storage)
 
 		SectorEntry newEntry = SectorEntry(mesh, tex, 0, t);
 		storage.m_entries.push_back(newEntry);
+	}
 
-		// ------------------------------------------------------------------------
+}
 
-		glm::quat q(t.rotation.w, t.rotation.x, t.rotation.y, t.rotation.z);
+void AssetRepo::SortSectorForRender(wtl::vector<SectorEntry>& entries)
+{
+	std::erase_if(entries, [](const SectorEntry& entry) { return !entry.HasVisuals(); });
+
+	std::sort(entries.begin(), entries.end(),
+		[](const SectorEntry& a, const SectorEntry& b)
+		{
+			if (a.GetTexture() != b.GetTexture())
+				return a.GetTexture() < b.GetTexture();
+			return a.GetMesh() < b.GetMesh();
+		});
+}
+
+void AssetRepo::UploadTransformsOfSector(Sector &storage, const wtl::vector<SectorEntry> &renderables)
+{
+	wtl::vector<Mat4x4> stationaryPayload;
+
+	for (const auto& entry : renderables)
+	{
+		glm::quat q(entry.GetTransform().rotation.w, entry.GetTransform().rotation.x,
+			entry.GetTransform().rotation.y, entry.GetTransform().rotation.z);
 
 		glm::mat4 modelMatrix = glm::mat4_cast(q);
 
-		modelMatrix[0] *= t.size.x;
-		modelMatrix[1] *= t.size.y;
-		modelMatrix[2] *= t.size.z;
+		modelMatrix[0] *= entry.GetTransform().size.x;
+		modelMatrix[1] *= entry.GetTransform().size.y;
+		modelMatrix[2] *= entry.GetTransform().size.z;
 
-		modelMatrix[3] = glm::vec4(t.position.x, -t.position.y, t.position.z, 1.0f);
+		modelMatrix[3] = glm::vec4(entry.GetTransform().position.x, -entry.GetTransform().position.y,
+			entry.GetTransform().position.z, 1.0f);
 
 		stationaryPayload.push_back(Glm4x4ToMat4x4(modelMatrix));
 	}
@@ -824,6 +849,39 @@ void AssetRepo::LoadSingleSector(Sector& storage)
 	desc.size = sizeof(Mat4x4) * stationaryPayload.size();
 	desc.usage = Iris::BufferUsage::Vertex;
 
-	storage.m_statBuffer = Iris::CreateBuffer(desc, (byte*)stationaryPayload.data(),
+	storage.m_renderPlan.statBuffer = Iris::CreateBuffer(desc, (byte*)stationaryPayload.data(),
 		sizeof(Mat4x4) * stationaryPayload.size());
+}
+
+void AssetRepo::CreateRenderPlanForSector(Sector& storage, const wtl::vector<SectorEntry> &renderables)
+{
+	if (renderables.empty())
+		return;
+	RenderPlanPart part{};
+	// we need to load it with stuff so it can start going.
+	part.meshUID = renderables[0].GetMesh();
+	part.textureUID = renderables[0].GetTexture();
+	part.count = 0;
+
+	sizeT offsetCounter = 0; // technically not supposed to be sizeT, as RenderPlan doesnt use 64 bits for offset.
+	for (const auto& entry : renderables)
+	{
+		if (entry.GetTexture() == part.textureUID && entry.GetMesh() == part.meshUID)
+		{
+			part.count++;
+			offsetCounter++;
+			continue;
+		}
+
+		storage.m_renderPlan.parts.push_back(part);
+
+		part.offset = offsetCounter;
+		part.count = 1;
+		part.meshUID = entry.GetMesh();
+		part.textureUID = entry.GetTexture();
+
+		offsetCounter++;
+	}
+	// the last one seems to go forgotten for some reason. idk why.
+	storage.m_renderPlan.parts.push_back(part);
 }

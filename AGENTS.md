@@ -47,8 +47,9 @@ Lives in `src/Engine/Core/Handlers/...`
 Deep core handlers are **singletons stored globally** in the `CoreSystems` class alongside other handlers. They are distinguished only by philosophy: they primarily interact with System Abstractions.
 
 - **Render Handler**: Records render missions during the draw part of the game loop. Performs automatic optimizations before sending work to Iris.
+- **Sector Handler**: Owns every sector in the game. Loads them all at boot from the Asset Repo and draws them each frame.
 - **Audio Handler**: Takes in audio files and plays them. To be reworked when Echo arrives.
-- **Input**: Not really a handler, but an interface to Haptic used by gameplay components. Also parses YAML input maps into `InputSense` entries and loads them into Haptic.
+- **Input**: Not really a handler, but an interface to Haptic used by gameplay code. Also parses YAML input maps into `InputSense` entries and loads them into Haptic.
 
 ### Asset Repo
 
@@ -72,15 +73,13 @@ Also stored globally in `CoreSystems`, but closer to gameplay. They may touch Sy
 
 ### Gameplay Concepts
 
-Similar to Unity. **This is not ECS, despite the name.**
+**This is not ECS. There are no entities and no components anymore.**
 
-- **Sector**: A small part of the world, absurdly small: one apartment, one segment of a street. Sectors are used almost like a modernized Doom BSP: occluding chunks of the world by knowing where the player is, based on the player walking into triggers. Sectors hold and tick entities.
-- **Entities**: Containers of components. Unlike game objects in other engines, there are **no parent-child relationships**; all entities within a sector are siblings.
-- **Components**: Execute logic and hold data on an entity. Two kinds:
-  - **Engine components** handle general tasks: calling the render handler, calling the physics handler, being a camera, and can be directly referenced by superior handlers.
-  - **Gameplay components** handle game-specific tasks like movement or gameplay.
-- **Game class**: Executes game systems. Has extensive access to ordering in the game loop: tick, draw, physics, plus the points right before and right after them, and many others.
-- **Game Systems**: Almost like handlers but purely for gameplay. They only control gameplay, e.g. a score system or an enemy system.
+- **Sector**: A small chunk of the world, absurdly small: one apartment, one segment of a street. A sector only holds **stationary world objects** (`SectorEntry` list): a mesh, a texture, and a transform per entry, parsed from a YAML file at boot. Sectors have no entities, no components, and no ticking; they just exist and get drawn. Loaded once at boot by the Asset Repo into the Sector Handler, which draws them each frame.
+- **SectorEntry**: One stationary object within a sector, kept small enough to fit in a cache line. Resolution of asset names to UIDs happens at boot.
+- **Dynamic objects**: Anything that moves or has logic (the player, the camera, enemies) is a plain class written in the game, e.g. `Freecam`. It owns its own transform and is ticked, drawn, and plugged into physics **directly by the Game class**, never by components.
+- **Game class**: Executes the game and owns the dynamic objects. Has extensive access to ordering in the game loop: tick, draw, physics, audio, plus the points right before and right after each of them, and many others (see `Game.h`).
+- **Game Systems**: Handlers purely for gameplay. They only control gameplay, e.g. a score system or an enemy system.
 
 ### Editor (ATK)
 
@@ -109,9 +108,9 @@ ATK (Afterlife ToolKit) is an interface for visually editing YAML configurations
 - **Methods and functions**: PascalCase (`GetRandomInt`).
 - **Member variables**: `m_` prefix + camelCase (`m_renderQueue`). Statics use the same prefix (`m_uptime`).
 - **Local variables and parameters**: camelCase (`speed`, `dt`).
-- **Public struct fields**: no prefix (`transform`, `entityName` in `Entity`).
+- **Public struct fields**: no prefix (`meshUID`, `transform` in `RenderMission`).
 - **Enums**: `enum class` throughout. Members are PascalCase (`Samples1`) or `X_Y` (`Triangle_List`).
-- **Macros**: UPPER_SNAKE (`COMP_HASH`, `REGISTER_COMPONENT`, `BIT`, `DEFINE_OPAQUE_HANDLE`).
+- **Macros**: UPPER_SNAKE (`BIT`, `DEFINE_OPAQUE_HANDLE`).
 - **Files**: PascalCase, one class per `.h`/`.cpp` pair matching the class name.
 - **Namespaces**: `WEngine` (engine), `WEditor` (editor), `Iris`, `wtl`. Game code often sits in the global namespace (e.g. `Freecam`).
 

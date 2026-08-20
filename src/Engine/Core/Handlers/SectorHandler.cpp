@@ -12,6 +12,6 @@ SectorHandler::SectorHandler()
 
 void SectorHandler::DrawSectors()
 {
-    for (const auto& sec : m_sectors)
+    for (auto& sec : m_sectors)
         sec.Draw();
 }

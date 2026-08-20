@@ -9,10 +9,6 @@
 #include "Engine/Types/Rendering/InstanceData.h"
 #include "Engine/Types/Rendering/LightingInfo.h"
 #include "Engine/Types/Rendering/RenderMission.h"
-#include "Engine/Types/Rendering/GPU/Framebuffer.h"
-#include "Engine/Types/Rendering/GPU/Material.h"
-#include "Engine/Types/Rendering/GPU/Shader.h"
-#include "Engine/Types/Rendering/GPU/StatBufKey.h"
 #include "Engine/Types/Rendering/Iris/Handles.h"
 #include "Engine/WTL/deque.h"
 
@@ -32,39 +28,6 @@ namespace WEngine
 
 	private:
 
-		struct ModelGroup
-		{
-			Model groupID;
-			wtl::vector<RenderMission> missions;
-		};
-
-		struct MaterialGroup
-		{
-			Material groupID;
-			wtl::vector<ModelGroup> models;
-		};
-
-		struct StationaryObjStaged
-		{
-			StatBufKey key;
-			Model model;
-			Material material;
-			wtl::vector<InstanceData> instData;
-		};
-
-		struct StationaryRenderMission
-		{
-			Model model;
-			Material material;
-			wtl::vector<StatBufKey> references;
-		};
-
-		struct SkyboxInfo
-		{
-			Model skyModel;
-			Material skyMaterial;
-		};
-
 	public:
 		/**
 		 * Changes the behaviour of the render handler to account for the editor.
@@ -77,7 +40,7 @@ namespace WEngine
 		 * @return Framebuffer handle of the viewport.
 		 * @warning This should only be called by WEDGE.
 		 */
-		Framebuffer EditorGetViewportFramebuffer();
+		//Framebuffer EditorGetViewportFramebuffer();
 
 		/**
 		 * Starts the render pass and begins recording render missions.
@@ -101,6 +64,7 @@ namespace WEngine
 		 * @param mission Mission to be recorded.
 		 */
 		void AddToRenderQueue(RenderMission& mission);
+		void AddPlanToRenderQueue(RenderPlan& plan);
 
 		void RegisterTexture(Iris::TextureHandle handle);
 
@@ -111,13 +75,10 @@ namespace WEngine
 		void CreatePipelines();
 
 		void RenderSingleMission(const RenderMission& mission, const glm::mat4& vp);
+		void RenderSinglePlan(const RenderPlan& plan, const Mat4x4& vp);
 
 		Mat4x4 CalcModelMatrix(const Transform& transform);
 		glm::mat4 CalcModelMatrixGLM(const Transform& transform);
-
-		void RenderModelGroup(const ModelGroup& group, Material material);
-
-		void InsertModelIntoShaderGroup(RenderMission& mission, MaterialGroup& materialGroup);
 
 		void SortMissions(bool transparentPass);
 		void CleanSortedMissions();
@@ -130,9 +91,11 @@ namespace WEngine
 		// while it was comfy to use the old shader system, a static one makes
 		// more sense considering the style were going after.
 		Iris::ShaderHandle m_vertexShader; // this is in this case the basic one.
+		Iris::ShaderHandle m_statVertexShader; // this is in this case the basic one.
 		Iris::ShaderHandle m_fragmentShader; // this is in this case the basic one.
 		Iris::ResourceTableLayoutHandle m_mainTableLayout;
-		Iris::GraphicsPipelineHandle m_mainPipeline;
+		Iris::GraphicsPipelineHandle m_basicPipeline;
+		Iris::GraphicsPipelineHandle m_statPipeline;
 		Iris::SamplerHandle m_sampler;
 
 		wtl::vector<Iris::ResourceTableHandle> m_textureTables;
@@ -146,13 +109,12 @@ namespace WEngine
 		Color m_camColor = Color::Black;
 
 		wtl::deque<RenderMission> m_renderQueue;
-		wtl::vector<MaterialGroup> m_sortedMissions;
+		wtl::deque<RenderPlan> m_renderPlanQueue;
 
 		glm::mat4 m_projection;
 		glm::mat4 m_viewMatrix;
 
 		bool m_isEditor = false;
-		Framebuffer m_viewportFb{};
 		Vector2 m_viewportResolution{};
 	};
 }

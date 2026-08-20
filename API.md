@@ -232,7 +232,7 @@ Singletons stored globally in `CoreSystems`. They primarily interact with System
 
 ### Render Handler (`src/Engine/Core/Handlers/RenderHandler.h`)
 
-Class `WEngine::RenderHandler`. Middle man between components that wish to draw and Iris. Records render missions during the draw part of the game loop, optimizes them, and hands them to Iris.
+Class `WEngine::RenderHandler`. Middle man between the world and Iris. Records render missions during the draw part of the game loop, optimizes them, and hands them to Iris.
 
 | Function | Description |
 | --- | --- |
@@ -241,9 +241,44 @@ Class `WEngine::RenderHandler`. Middle man between components that wish to draw 
 | `Framebuffer EditorGetViewportFramebuffer()` | The framebuffer meant for the editor viewport. Only called by ATK. |
 | `void BeginFrame()` | Starts the render pass and begins collecting render missions. Game loop only. |
 | `void RenderFrame()` | Finishes mission collection, optimizes, and renders everything. Game loop only. |
-| `void RegisterCamera(CameraComponent* camera)` | Sets the camera used to render the frame. |
+| `void UpdateCamera(const Transform& trans)` | Sets the camera transform used to render the frame. |
+| `void UpdateCamera(const Vector3& position, const Quaternion& rotation)` | Sets the camera position and rotation. |
+| `void UpdateCameraColor(const Color& backColor)` | Sets the color the frame is cleared to. |
 | `void AddToRenderQueue(RenderMission& mission)` | Records a render mission for the frame. |
 | `void RegisterTexture(Iris::TextureHandle handle)` | Registers a texture handle so it can be bound during rendering. |
+
+### Sector Handler (`src/Engine/Core/Handlers/SectorHandler.h`)
+
+Class `WEngine::SectorHandler`. Owns every sector in the game. Loads them all at boot via the Asset Repo and draws them during the draw part of the game loop. Stored globally in `CoreSystems`.
+
+| Function | Description |
+| --- | --- |
+| `SectorHandler()` | Loads all sectors from the Asset Repo. |
+| `void DrawSectors()` | Draws every sector, queueing each entry as a render mission. |
+
+`Sector` (in `src/Engine/Core/World/Sector.h`): a chunk of the world that holds stationary objects only. No entities, no components, no ticking.
+
+| Function | Description |
+| --- | --- |
+| `Sector(const std::string& sectorName)` | Creates a sector with the given name. |
+| `void Show()` | Marks the sector as showing. |
+| `void Hide()` | Marks the sector as hidden. |
+| `void Draw() const` | Queues every entry in the sector as a render mission. |
+| `Iris::BufferHandle GetStatBufKey() const` | The sector's stationary instance buffer, created when the sector is loaded. |
+| `const std::string& GetName() const` | The sector's name. |
+
+`SectorEntry` (in `src/Engine/Core/World/SectorEntry.h`): a stationary object within a sector; small enough to fit in a cache line.
+
+| Function | Description |
+| --- | --- |
+| `SectorEntry(uint64 meshUID, uint64 textureUID, uint64 colMeshUID, const Transform& transform)` | Constructs an entry from asset UIDs and a transform. |
+| `SectorEntry(const std::string& assetName)` | Constructs an entry by looking up the first static mesh and texture in the asset directory named `assetName`. |
+| `bool HasVisuals() const` | Whether the entry has both a mesh and a texture. |
+| `bool HasCollision() const` | Whether the entry has a collision mesh. |
+| `uint32 GetMesh() const` | The mesh UID. |
+| `uint32 GetTexture() const` | The texture UID. |
+| `uint32 GetCollisionMesh() const` | The collision mesh UID. |
+| `const Transform& GetTransform() const` | The entry's transform. |
 
 ### Audio Handler (`src/Engine/Core/Handlers/AudioHandler.h`)
 
@@ -259,7 +294,7 @@ Class `WEngine::AudioHandler`. Manages creation, swapping, and playing of audio 
 
 ### Input (`src/Engine/Core/Handlers/Input.h`)
 
-Class `Input`. All static. Not a handler itself, but the interface gameplay components use to query Haptic. Also parses YAML input maps into `InputSense` entries and loads them into Haptic.
+Class `Input`. All static. Not a handler itself, but the interface gameplay code uses to query Haptic. Also parses YAML input maps into `InputSense` entries and loads them into Haptic.
 
 | Function | Description |
 | --- | --- |
@@ -304,7 +339,7 @@ Class `WEngine::PhysicsHandler`. Simulates physics using Box3D.
 | Function | Description |
 | --- | --- |
 | `void Tick()` | Advances the physics simulation one step. |
-| `PhysicsBodyHandle CreateBody(PhysicsBodyType type, Entity* entity)` | Creates a physics body of the given type tied to an entity. |
+| `PhysicsBodyHandle CreateBody(PhysicsBodyType type, Transform* entity)` | Creates a physics body of the given type tied to a transform. |
 | `void ChangeBodyPosition(PhysicsBodyHandle body, const Vector3& position)` | Moves a body to the given position. |
 | `void ChangeBodyRotation(PhysicsBodyHandle body, const Quaternion& rotation)` | Rotates a body to the given rotation. |
 | `void AttachBox(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset)` | Attaches a box collider to the body. |
@@ -343,10 +378,14 @@ Class `WEngine::AssetRepo`. Primary location for getting all kinds of files. Han
 | Function | Description |
 | --- | --- |
 | `void LoadAllGPUAssets()` | Loads all graphical assets up front. Can only be called once. |
+| `wtl::vector<Sector> LoadAllSectors()` | Loads every sector in the sector data path into fresh `Sector` objects (skips `$Sample`). |
+| `void RegisterAllTextures()` | Registers all loaded textures with the Render Handler. Can only be called once. |
 | `void TickTextureUpload()` | Uploads textures to VRAM in chunks over time. Call at the beginning of every frame; turns itself off when done. |
-| `template<class T> void GetAsset(T& mission)` | Fills out the given asset mission (e.g. `ShaderAssetMission`, `SpirVAssetMission`, `YamlAssetMission`, `AudioClipAssetMission`, `UISheetAssetMission`, `MeshAssetMission`) by name. Return type is void; results go into the mission. |
+| `template<class T = AssetMissionBase> void GetAsset(T& mission)` | Fills out the given asset mission (e.g. `ShaderAssetMission`, `SpirVAssetMission`, `YamlAssetMission`, `AudioClipAssetMission`, `UISheetAssetMission`, `MeshAssetMission`) by name. Return type is void; results go into the mission. |
 | `std::string GetDataPath() const` | The data path where assets are stored. |
 | `const wtl::vector<AssetRef>& GetAllAssetsInDir(const std::string& dirName)` | All assets in a directory (empty if the directory is empty or doesn't exist). |
 | `wtl::vector<AssetRef> GetAllAssetsInDirOfType(const std::string& dirName, AssetType type)` | All assets of a given type in a directory. |
 | `uint64 GetFirstAssetInDirOfType(const std::string& dirName, AssetType type)` | UID of the first asset of a type in a directory; 0 if not found. |
 | `uint64 GetAssetInDirByName(const std::string& dirName, const std::string& assetName)` | UID of the first asset with the given name (sub name, not project-file name) in a directory; 0 if not found. |
+| `Iris::BufferHandle GetVertexBuffer() const` | The shared vertex buffer all meshes are loaded into. |
+| `Iris::BufferHandle GetIndexBuffer() const` | The shared index buffer all meshes are loaded into. |

@@ -6,7 +6,6 @@
 #include "Engine/Math/Matrix.h"
 #include "Engine/Math/Vector.h"
 #include "Engine/WTL/vector.h"
-#include "GPU/Texture.h"
 
 namespace WEngine
 {

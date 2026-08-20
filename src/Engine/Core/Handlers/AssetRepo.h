@@ -6,6 +6,7 @@
 #include <string>
 #include <Engine/Types/Refcounted.h>
 
+#include "Engine/Core/World/SectorEntry.h"
 #include "Engine/Types/Rendering/Iris/Handles.h"
 #include "Engine/Types/Rendering/Iris/IrisAssetComms.h"
 
@@ -116,7 +117,10 @@ namespace WEngine
 		void FinalizeTextureCopy();
 
 		void LoadSingleSector(Sector& storage);
-	
+		void SortSectorForRender(wtl::vector<SectorEntry>& entries);
+		void UploadTransformsOfSector(Sector& storage, const wtl::vector<SectorEntry> &renderables);
+		void CreateRenderPlanForSector(Sector& storage, const wtl::vector<SectorEntry> &renderables);
+
 	private:
 		std::string m_dataPath;
 		std::unordered_map<std::string, AudioClip> m_audioRepo;

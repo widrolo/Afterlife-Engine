@@ -6,9 +6,7 @@
 
 #include "ShaderSettings.h"
 #include "Engine/Math/Transform.h"
-#include "GPU/Model.h"
-#include "GPU/Material.h"
-#include "GPU/StatBufKey.h"
+#include "Iris/Handles.h"
 
 namespace WEngine
 {
@@ -27,8 +25,22 @@ namespace WEngine
 		uint64 textureUID;
 		uint64 meshUID;
 		Transform transform;
-		bool isStationary;
-		StatBufKey key;
+	};
+
+	struct RenderPlanPart
+	{
+		// yes its less then 64 bit, i know. But there is no way were going
+		// to have more than 4 billion meshes anyway.
+		uint32 textureUID;
+		uint32 meshUID;
+		uint16 offset; // in number of items, not bytes
+		uint16 count;  // in number of items, not bytes
+	};
+
+	struct RenderPlan
+	{
+		wtl::vector<RenderPlanPart> parts;
+		Iris::BufferHandle statBuffer;
 	};
 
 	struct RenderVisualizationMission

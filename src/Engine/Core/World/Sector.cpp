@@ -7,20 +7,7 @@
 
 using namespace WEngine;
 
-Sector::Sector(const std::string& sectorName)
-	: m_name(sectorName)
+void Sector::Draw()
 {
-
-}
-
-void Sector::Draw() const
-{
-	for (const auto& entry : m_entries)
-	{
-		RenderMission mission{};
-		mission.meshUID = entry.GetMesh();
-		mission.textureUID = entry.GetTexture();
-		mission.transform = entry.GetTransform();
-		CoreSystems::GetRenderHandler()->AddToRenderQueue(mission);
-	}
+	CoreSystems::GetRenderHandler()->AddPlanToRenderQueue(m_renderPlan);
 }

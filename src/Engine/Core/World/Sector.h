@@ -2,11 +2,9 @@
 #include <Engine/WTL/vector.h>
 #include <fstream>
 
-#include <Engine/Types/CommonTypes.h>
-
 #include "SectorEntry.h"
+#include "Engine/Types/Rendering/RenderMission.h"
 #include "Engine/Types/Rendering/Iris/Handles.h"
-
 
 namespace WEngine
 {
@@ -15,21 +13,20 @@ namespace WEngine
 	{
 		friend AssetRepo;
 	public:
-		Sector(const std::string& sectorName);
+		Sector(const std::string& sectorName) : m_name(sectorName) {}
 
 	public:
 		void Show() { m_showing = true; }
 		void Hide() { m_showing = false; }
 
-		void Draw() const;
+		void Draw();
 
-		[[nodiscard]] Iris::BufferHandle GetStatBufKey() const { return m_statBuffer; }
 		[[nodiscard]] const std::string& GetName() const { return m_name; }
 
 	private:
 		std::string m_name;
 		wtl::vector<SectorEntry> m_entries;
-		Iris::BufferHandle m_statBuffer;
+		RenderPlan m_renderPlan;
 
 		bool m_showing = false;
 

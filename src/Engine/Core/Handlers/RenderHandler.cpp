@@ -68,10 +68,10 @@ void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)
 		);
 }
 
-Framebuffer RenderHandler::EditorGetViewportFramebuffer()
-{
-	return m_viewportFb;
-}
+//Framebuffer RenderHandler::EditorGetViewportFramebuffer()
+//{
+//	return m_viewportFb;
+//}
 
 
 void RenderHandler::BeginFrame()
@@ -102,28 +102,26 @@ void RenderHandler::BeginFrame()
 
 void RenderHandler::RenderFrame()
 {
-
-	//SortMissions(false);
-	//SortMissions(true);
-	for (auto& materialGroup : m_sortedMissions)
-	{
-		for (auto& modelGroup : materialGroup.models)
-		{
-			RenderModelGroup(modelGroup, materialGroup.groupID);
-		}
-	}
-
-	auto vp = m_projection * m_viewMatrix;
-
-	Iris::BindGraphicsPipeline(tempHandle, m_mainPipeline);
+	auto vpGLM = m_projection * m_viewMatrix;
 
 	wtl::vector<Iris::BufferHandle> vertBuffs{CoreSystems::GetAssetRepo()->GetVertexBuffer()};
 	wtl::vector<sizeT> vertOffs{0};
+
+	Iris::BindGraphicsPipeline(tempHandle, m_statPipeline);
+	Iris::BindVertexBuffers(tempHandle, 0, vertBuffs, vertOffs);
+	Iris::BindIndexBuffer(tempHandle, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
+
+	Mat4x4 vp = Glm4x4ToMat4x4(vpGLM);
+
+	for (const auto& plan : m_renderPlanQueue)
+		RenderSinglePlan(plan, vp);
+
+	Iris::BindGraphicsPipeline(tempHandle, m_basicPipeline);
 	Iris::BindVertexBuffers(tempHandle, 0, vertBuffs, vertOffs);
 	Iris::BindIndexBuffer(tempHandle, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
 
 	for (const auto& mission : m_renderQueue)
-		RenderSingleMission(mission, vp);
+		RenderSingleMission(mission, vpGLM);
 
 	if (!Engine::GetCla().testMode)
 	{
@@ -147,7 +145,7 @@ void RenderHandler::RenderFrame()
 	Iris::SubmitCommandBuffer(tempHandle);
 	Iris::Present();
 	m_renderQueue.clear();
-	CleanSortedMissions();
+	m_renderPlanQueue.clear();
 	Iris::EndFrame();
 	m_currentBoundTexture = 0;
 }
@@ -168,10 +166,34 @@ void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm:
 	Mat4x4 mvp = Glm4x4ToMat4x4(vp * CalcModelMatrixGLM(mission.transform));
 
 	if (mission.textureUID != m_currentBoundTexture)
-		Iris::BindResourceTable(tempHandle, m_mainPipeline, 0, m_textureTables[mission.textureUID]);
+		Iris::BindResourceTable(tempHandle, m_basicPipeline, 0, m_textureTables[mission.textureUID]);
 	m_currentBoundTexture = mission.textureUID;
-	Iris::SetPushConstants(tempHandle, m_mainPipeline, (byte*)&mvp, sizeof(mvp));
+	Iris::SetPushConstants(tempHandle, m_basicPipeline, (byte*)&mvp, sizeof(mvp));
 	Iris::DrawIndexed(tempHandle, indexCount, 1, indexOffset, vertOffset, 0);
+}
+
+void RenderHandler::RenderSinglePlan(const RenderPlan &plan, const Mat4x4 &vp)
+{
+	Iris::BindVertexBuffers(tempHandle, 1, {plan.statBuffer}, {0});
+	for (const auto& part : plan.parts)
+	{
+		MeshAssetMission meshMission{};
+		meshMission.uid = part.meshUID;
+		CoreSystems::GetAssetRepo()->GetAsset(meshMission);
+
+		sizeT indexSize = sizeof(uint32);
+		sizeT vertexSize = sizeof(float32) * 3 + sizeof(float32) * 3 + sizeof(float32) * 2;
+
+		sizeT indexCount = (meshMission.model.indexSize - meshMission.model.indexOffset) / indexSize;
+		sizeT indexOffset = meshMission.model.indexOffset / indexSize;
+		sizeT vertOffset = meshMission.model.vertexOffset / vertexSize;
+
+		if (part.textureUID != m_currentBoundTexture)
+			Iris::BindResourceTable(tempHandle, m_basicPipeline, 0, m_textureTables[part.textureUID]);
+		m_currentBoundTexture = part.textureUID;
+		Iris::SetPushConstants(tempHandle, m_basicPipeline, (byte*)&vp, sizeof(vp));
+		Iris::DrawIndexed(tempHandle, indexCount, part.count, indexOffset, vertOffset, part.offset);
+	}
 }
 
 void RenderHandler::UpdateCamera(const Transform &trans)
@@ -195,6 +217,13 @@ void RenderHandler::AddToRenderQueue(RenderMission& mission)
 	if (mission.meshUID == 0 || mission.textureUID == 0)
 		return;
 	m_renderQueue.push_back(mission);
+}
+
+void RenderHandler::AddPlanToRenderQueue(RenderPlan& plan)
+{
+	if (plan.statBuffer == 0)
+		return;
+	m_renderPlanQueue.push_back(plan);
 }
 
 void RenderHandler::RegisterTexture(Iris::TextureHandle handle)
@@ -233,14 +262,23 @@ void RenderHandler::LoadShaders()
 	CoreSystems::GetAssetRepo()->GetAsset(mission);
 
 	Iris::ShaderStageDesc desc{};
-	desc.debugName = "Main Vertex Shader";
+	desc.debugName = "Simple Vertex Shader";
 	desc.stage = Iris::ShaderStage::Vertex;
 	desc.entryPoint = "main";
 	desc.bytecode = mission.shaderCode;
 	desc.bytecodeSize = mission.shaderSize;
 	m_vertexShader = Iris::CreateShader(desc);
 
+	mission.name = "basicInst";
+	mission.shaderType = SpirVAssetMission::VertexShader;
+	CoreSystems::GetAssetRepo()->GetAsset(mission);
 
+	desc.debugName = "Instanced Vertex Shader";
+	desc.bytecode = mission.shaderCode;
+	desc.bytecodeSize = mission.shaderSize;
+	m_statVertexShader = Iris::CreateShader(desc);
+
+	mission.name = "basic";
 	mission.shaderType = SpirVAssetMission::FragmentShader;
 	CoreSystems::GetAssetRepo()->GetAsset(mission);
 
@@ -321,7 +359,31 @@ void RenderHandler::CreatePipelines()
 
 	desc.pushConstantsSize = sizeof(Mat4x4);
 
-	m_mainPipeline = Iris::CreateGraphicsPipeline(desc);
+	m_basicPipeline = Iris::CreateGraphicsPipeline(desc);
+
+	// ---- now the instanced one ----
+
+	binding.binding = 1;
+	binding.perInstance = true;
+	binding.stride = sizeof(Mat4x4);
+	vertDesc.bindings.push_back(binding);
+
+	attribute.binding = 1;
+	attribute.format = Iris::VertFormat::Float4;
+	// this is still the stupidest way to send a matrix to the gpu.
+	attribute.location = 3;
+	vertDesc.attributes.push_back(attribute);
+	attribute.location = 4;
+	vertDesc.attributes.push_back(attribute);
+	attribute.location = 5;
+	vertDesc.attributes.push_back(attribute);
+	attribute.location = 6;
+	vertDesc.attributes.push_back(attribute);
+
+	desc.vertexLayout = vertDesc;
+	desc.vertexShader = m_statVertexShader;
+
+	m_statPipeline = Iris::CreateGraphicsPipeline(desc);
 }
 
 Mat4x4 RenderHandler::CalcModelMatrix(const Transform &transform)
@@ -342,106 +404,6 @@ glm::mat4 RenderHandler::CalcModelMatrixGLM(const Transform &transform)
 
 	modelMatrix[3] = glm::vec4(transform.position.x, -transform.position.y, transform.position.z, 1.0f);
 	return modelMatrix;
-}
-
-void RenderHandler::RenderModelGroup(const ModelGroup &group, Material material)
-{
-	wtl::vector<InstanceData> instances(group.missions.size());
-
-	for (sizeT i = 0; i < group.missions.size(); i++)
-	{
-		Mat4x4 model = CalcModelMatrix(group.missions[i].transform);
-		instances[i] = {model};
-	}
-
-	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
-
-	//Iris::DRAWCALL_DrawModelInstanced(group.groupID, material, vp, instances);
-}
-
-
-void RenderHandler::InsertModelIntoShaderGroup(RenderMission &mission, MaterialGroup &materialGroup)
-{
-	bool foundModel = false;
-	for (sizeT i = 0; i < materialGroup.models.size(); ++i)
-	{
-		if (materialGroup.models[i].groupID == mission.meshUID)
-		{
-			foundModel = true;
-			materialGroup.models[i].missions.push_back(mission);
-			break;
-		}
-	}
-	if (!foundModel)
-	{
-		ModelGroup group;
-		group.groupID = mission.meshUID;
-		group.missions.push_back(mission);
-		materialGroup.models.push_back(group);
-	}
-}
-
-/*
- * As clarification because the rationale might not be obvious: we need to draw opaque objects first.
- * That is because every transparent object also writes to the stencil buffer, so any opaque object that
- * would have been drawn after does not get drawn.
- */
-void RenderHandler::SortMissions(bool transparentPass)
-{
-	for (auto& mission : m_renderQueue)
-	{
-		//if (transparentPass)
-		//{
-		//	auto def = Iris::GetShaderDef(mission.material);
-		//	if (!def.HasValue())
-		//		continue;
-		//	if (!def.GetValue().transparent)
-		//		continue;
-		//}
-		//if (!transparentPass)
-		//{
-		//	auto def = Iris::GetShaderDef(mission.material);
-		//	if (!def.HasValue())
-		//		continue;
-		//	if (def.GetValue().transparent)
-		//		continue;
-		//}
-		if (mission.isStationary)
-		{
-			//SortStationary(mission);
-			continue;
-		}
-		bool foundShader = false;
-		for (auto& m_sortedMission : m_sortedMissions)
-		{
-			if (m_sortedMission.groupID == mission.textureUID)
-			{
-				foundShader = true;
-				InsertModelIntoShaderGroup(mission, m_sortedMission);
-				continue;
-			}
-		}
-		if (!foundShader)
-		{
-			MaterialGroup group;
-			group.groupID = mission.textureUID;
-			InsertModelIntoShaderGroup(mission, group);
-			m_sortedMissions.push_back(group);
-		}
-	}
-}
-
-void RenderHandler::CleanSortedMissions()
-{
-	for (auto& shaderGroup : m_sortedMissions)
-	{
-		for (auto& modelGroup : shaderGroup.models)
-		{
-			modelGroup.missions.clear();
-		}
-		shaderGroup.models.clear();
-	}
-	m_sortedMissions.clear();
 }
 
 // just so i can close this part of code.

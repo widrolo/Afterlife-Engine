@@ -500,8 +500,15 @@ namespace Iris
         wtl::vector<VkVertexInputBindingDescription> bindingDescriptions;
 
         sizeT offsetCounter = 0;
+        int32 currentBinding = -1;
         for (const auto& attDesc : desc.vertexLayout.attributes)
         {
+            if (attDesc.binding != currentBinding)
+            {
+                currentBinding = attDesc.binding;
+                offsetCounter = 0;
+            }
+
             VkVertexInputAttributeDescription att{};
             att.format = IrisVertFormatToVulkan(attDesc.format);
             att.location = attDesc.location;
