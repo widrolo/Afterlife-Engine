@@ -5,7 +5,6 @@
 #include <Engine/Core/System/Memory.h>
 
 // Components
-#include <Engine/Components/Rendering/CameraComponent.h>
 #include <Engine/Components/SectorComponent.h>
 #include <Engine/Components/RNGComponent.h>
 #include <Engine/Components/AudioComponent.h>

@@ -1,24 +1,13 @@
 #include "Freecam.h"
 
 #include "Engine/Core/Handlers/Input.h"
+#include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Core/System/Haptic.h"
 
-
-REGISTER_COMPONENT(Freecam)
-
-Freecam::Freecam(WEngine::Entity *e)
+Freecam::Freecam()
 {
-    COMP_SETUP("Freecam")
-}
-
-void Freecam::Awake(WEngine::ComponentArgs ca)
-{
-    m_speed = 3.0f;
-}
-
-void Freecam::Start()
-{
-
+    m_speed = 5.0f;
+    m_trans = WEngine::Transform::Zero;
 }
 
 void Freecam::Tick(float32 dt)
@@ -41,17 +30,16 @@ void Freecam::Tick(float32 dt)
     if (Input::GetAction("camSpeed", PressType::Hold))
         speed *= 2.0f;
 
-    WEngine::Vector3 moveForward = entity->transform.Forward();
+    WEngine::Vector3 moveForward = m_trans.Forward();
     moveForward.y = -moveForward.y;
 
-    entity->transform.position = entity->transform.position + moveForward * move.y * speed
-        + entity->transform.Right() * move.x * speed;
+    m_trans.position = m_trans.position + moveForward * move.y * speed + m_trans.Right() * move.x * speed;
 
 
     if (Input::GetAction("camHigher", PressType::Hold))
-        entity->transform.position.y += speed;
+        m_trans.position.y += speed;
     if (Input::GetAction("camLower", PressType::Hold))
-        entity->transform.position.y -= speed;
+        m_trans.position.y -= speed;
 
     m_yaw += look.x;
     m_pitch +=  look.y / 1.5f;
@@ -61,5 +49,10 @@ void Freecam::Tick(float32 dt)
     if (m_pitch < -89.0f)
         m_pitch = -89.0f;
 
-    entity->transform.rotation = WEngine::Quaternion::EulerToQuaternion({glm::radians(m_pitch), glm::radians(m_yaw), 0.0f});
+    m_trans.rotation = WEngine::Quaternion::EulerToQuaternion({glm::radians(m_pitch), glm::radians(m_yaw), 0.0f});
+}
+
+void Freecam::UploadCamera()
+{
+    WEngine::CoreSystems::GetRenderHandler()->UpdateCamera(m_trans);
 }

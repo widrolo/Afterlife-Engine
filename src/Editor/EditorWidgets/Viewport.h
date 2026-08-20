@@ -3,11 +3,7 @@
 #include <Engine/Core/Widget.h>
 
 #include "Engine/Core/World/Entity.h"
-#include "Game/Components/Freecam.h"
-
-namespace WEngine {
-    class CameraComponent;
-}
+#include "Game/Gameplay/Freecam.h"
 
 namespace WEditor
 {
@@ -25,8 +21,6 @@ namespace WEditor
         void CheckForSizeChange(ImVec2 newRes);
     private:
         WEngine::Entity* m_viewportEntity;
-        WEngine::CameraComponent* viewportCam;
-        Freecam* freecam;
         bool m_resDecided = false;
     };
 }

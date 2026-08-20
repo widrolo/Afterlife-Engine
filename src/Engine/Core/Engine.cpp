@@ -233,7 +233,7 @@ void Engine::Loop_Begin(std::chrono::steady_clock::time_point& last, StopWatch& 
 
 	CoreSystems::timeHandler->Update(m_deltaTime * CoreSystems::GetTimeScale());
 
-	m_game->GameLoopBegin();
+	m_game->GameLoopBegin(m_deltaTime * CoreSystems::GetTimeScale());
 	m_frameBegin = timings.GetTime<TimeUnit::Microseconds>();
 	timings.Reset();
 
@@ -249,6 +249,7 @@ void Engine::Loop_Tick()
 	Haptic::FetchInput();
 
 	m_game->GameLoopTickEarly();
+	m_game->GameLoopTick();
 	m_rootSector->Tick(m_deltaTime * CoreSystems::GetTimeScale());
 	m_game->GameLoopTickLate();
 	m_entityTick = timings.GetTime<TimeUnit::Microseconds>();
@@ -265,6 +266,7 @@ void Engine::Loop_Physics()
 	while (m_physicsTickTimer > PhysicsSettings::physicsTickRate)
 	{
 		m_physicsTickTimer -= PhysicsSettings::physicsTickRate;
+		m_game->GameLoopPhysics();
 		m_rootSector->PhysicsTick(PhysicsSettings::physicsTickRate * CoreSystems::GetTimeScale());
 		CoreSystems::physicsHandler->Tick();
 		m_physicsTickCounterLastFrame++;
@@ -294,13 +296,13 @@ void Engine::Loop_Draw()
 	timings.Reset();
 
 	m_game->GameLoopDrawEarly();
+	m_game->GameLoopDraw();
 	m_rootSector->Draw();
 	if constexpr (PhysicsSettings::physicsEnabled)
 	{
 		CoreSystems::physicsHandler->Visualize();
 	}
 
-	m_game->GameLoopDrawJustBefore();
 	CoreSystems::renderHandler->RenderFrame();
 	m_game->GameLoopDrawLate();
 	m_draw = timings.GetTime<TimeUnit::Microseconds>();

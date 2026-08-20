@@ -17,8 +17,6 @@ set(OPTION_ENABLED 1)
 
 # thank god for CLion
 add_executable(Afterlife_Engine
-        src/Engine/Components/Rendering/CameraComponent.cpp
-        src/Engine/Components/Rendering/CameraComponent.h
         src/Engine/Components/AudioComponent.cpp
         src/Engine/Components/AudioComponent.h
         src/Engine/Components/Component.cpp
@@ -260,8 +258,8 @@ add_executable(Afterlife_Engine
         src/Engine/imgui/backends/imgui_impl_vulkan.cpp
         src/Engine/Types/Rendering/VertextData.h
         src/Engine/Types/Rendering/ShaderInfo.h
-        src/Game/Components/Freecam.cpp
-        src/Game/Components/Freecam.h
+        src/Game/Gameplay/Freecam.cpp
+        src/Game/Gameplay/Freecam.h
         src/Engine/Components/Rendering/MeshRendererComponent.cpp
         src/Engine/Components/Rendering/MeshRendererComponent.h
         src/Engine/gl/gltf/tiny_gltf_v3.c

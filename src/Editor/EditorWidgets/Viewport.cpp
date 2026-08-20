@@ -6,11 +6,10 @@
 #include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Core/System/Iris.h"
 #include "Engine/Types/CoreSystems.h"
-#include <Engine/Components/Rendering/CameraComponent.h>
 #include <Engine/Core/World/Entity.h>
 
 #include "Editor/Types/EditorSystems.h"
-#include "Game/Components/Freecam.h"
+#include "Game/Gameplay/Freecam.h"
 
 using namespace WEditor;
 
@@ -21,21 +20,12 @@ void Viewport::Setup()
 
     m_viewportEntity =  WAllocator::Construct<WEngine::Entity>();
     m_viewportEntity->transform.size = WEngine::Vector3::One;
-    viewportCam = WAllocator::Construct<WEngine::CameraComponent>(m_viewportEntity);
-    freecam = WAllocator::Construct<Freecam>(m_viewportEntity);
-    freecam->Awake({});
-    freecam->EnableEditorMode();
-    viewportCam->Start();
-    WEngine::CoreSystems::GetRenderHandler()->RegisterCamera(viewportCam);
 }
 
 void Viewport::RenderInternal()
 {
     // due to docking and resolutions, we need to do this
     ImVec2 size = ImGui::GetContentRegionAvail();
-
-    viewportCam->Tick(EditorSystems::GetDt());
-    freecam->Tick(EditorSystems::GetDt());
 
     WEngine::Framebuffer fb = WEngine::CoreSystems::GetRenderHandler()->EditorGetViewportFramebuffer();
     //auto textureNullable = Iris::FramebufferToImGui(fb);

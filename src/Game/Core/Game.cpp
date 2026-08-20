@@ -21,14 +21,20 @@ void Game::PreGameLoop()
 
 }
 
-void Game::GameLoopBegin()
+void Game::GameLoopBegin(float64 frameDelta)
 {
-
+    m_dt = frameDelta;
 }
 
 void Game::GameLoopTickEarly()
 {
 
+}
+
+void Game::GameLoopTick()
+{
+    m_freecam.Tick((float32)m_dt);
+    m_freecam.UploadCamera();
 }
 
 void Game::GameLoopTickLate()
@@ -37,6 +43,11 @@ void Game::GameLoopTickLate()
 }
 
 void Game::GameLoopPhysicsEarly()
+{
+
+}
+
+void Game::GameLoopPhysics()
 {
 
 }
@@ -66,7 +77,7 @@ void Game::GameLoopDrawEarly()
 
 }
 
-void Game::GameLoopDrawJustBefore()
+void Game::GameLoopDraw()
 {
 
 }

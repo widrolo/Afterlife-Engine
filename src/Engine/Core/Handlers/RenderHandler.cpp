@@ -3,7 +3,6 @@
 #include <queue>
 
 #include <Engine/Util/Log.h>
-#include <Engine/Components/Rendering/CameraComponent.h>
 #include <Engine/Core/Handlers/AssetRepo.h>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -83,7 +82,7 @@ void RenderHandler::BeginFrame()
 	Iris::BeginCommandBuffer(tempHandle);
 
 	Iris::RenderPassBeginDesc desc{};
-	desc.colorAttachment.clearColor = m_camera->GetBackColor();
+	desc.colorAttachment.clearColor = m_camColor;
 	Iris::BeginRenderPass(tempHandle, desc);
 
 	Iris::Viewport vp{};
@@ -91,18 +90,14 @@ void RenderHandler::BeginFrame()
 	vp.maxDepth = 1.0f;
 	Iris::SetViewport(tempHandle, vp);
 
-	if (m_camera == nullptr)
-		m_viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-	else
-	{
-		Vector3 camPos = m_camera->GetPosition();
-		Quaternion camRot = m_camera->GetRotation();
 
-		glm::quat q(camRot.w, camRot.x, camRot.y, camRot.z);
+	Vector3 camPos = m_camera.position;
+	Quaternion camRot = m_camera.rotation;
 
-		m_viewMatrix = glm::mat4_cast(glm::conjugate(q));
-		m_viewMatrix = glm::translate(m_viewMatrix, glm::vec3(-camPos.x, camPos.y, -camPos.z));
-	}
+	glm::quat q(camRot.w, camRot.x, camRot.y, camRot.z);
+
+	m_viewMatrix = glm::mat4_cast(glm::conjugate(q));
+	m_viewMatrix = glm::translate(m_viewMatrix, glm::vec3(-camPos.x, camPos.y, -camPos.z));
 }
 
 void RenderHandler::RenderFrame()
@@ -179,9 +174,20 @@ void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm:
 	Iris::DrawIndexed(tempHandle, indexCount, 1, indexOffset, vertOffset, 0);
 }
 
-void RenderHandler::RegisterCamera(CameraComponent *camera)
+void RenderHandler::UpdateCamera(const Transform &trans)
 {
-	m_camera = camera;
+	m_camera = trans;
+}
+
+void RenderHandler::UpdateCamera(const Vector3& position, const Quaternion& rotation)
+{
+	m_camera.position = position;
+	m_camera.rotation = rotation;
+}
+
+void RenderHandler::UpdateCameraColor(const Color& backColor)
+{
+	m_camColor = backColor;
 }
 
 void RenderHandler::AddToRenderQueue(RenderMission& mission)

@@ -91,11 +91,10 @@ namespace WEngine
 		 */
 		void RenderFrame();
 
-		/**
-		 * Sets the given camera to be primary camera used for rendering the frame.
-		 * @param camera Pointer to the camera component.
-		 */
-		void RegisterCamera(CameraComponent* camera);
+
+		void UpdateCamera(const Transform& trans);
+		void UpdateCamera(const Vector3& position, const Quaternion& rotation);
+		void UpdateCameraColor(const Color& backColor);
 
 		/**
 		 * Records a given render mission to the queue.
@@ -143,7 +142,8 @@ namespace WEngine
 		SDL_DisplayMode* m_displayMode = nullptr;
 		SDL_Window* m_window = nullptr;
 
-		CameraComponent* m_camera = nullptr;
+		Transform m_camera = Transform::Zero;
+		Color m_camColor = Color::Black;
 
 		wtl::deque<RenderMission> m_renderQueue;
 		wtl::vector<MaterialGroup> m_sortedMissions;

@@ -236,22 +236,14 @@ Class `WEngine::RenderHandler`. Middle man between components that wish to draw 
 
 | Function | Description |
 | --- | --- |
+| `RenderHandler()` | Constructor. |
 | `void EnableEditorMode(const Vector2& viewportResolution)` | Changes behavior to account for the editor (ATK), using the given viewport resolution. |
 | `Framebuffer EditorGetViewportFramebuffer()` | The framebuffer meant for the editor viewport. Only called by ATK. |
 | `void BeginFrame()` | Starts the render pass and begins collecting render missions. Game loop only. |
 | `void RenderFrame()` | Finishes mission collection, optimizes, and renders everything. Game loop only. |
 | `void RegisterCamera(CameraComponent* camera)` | Sets the camera used to render the frame. |
 | `void AddToRenderQueue(RenderMission& mission)` | Records a render mission for the frame. |
-| `void RecordStationaryAdd(StatBufKey key, Model model, Material material, const Transform& transform)` | Records a stationary object (with its position) for stationary batching. |
-| `void PushStationaryData()` | Pushes recorded stationary data to Iris. Game loop only. |
-| `void SetSunlight(const Sunlight& light)` | Records sunlight data for later use. |
-| `void SetAmbientLight(const AmbientLight& light)` | Records ambient light data for later use. |
-| `void SetLightTime(float32 time)` | Records time of day (0 = start of day, 1 = end of day) for lighting. |
-| `void SetSunlightColorFactor(float32 factor)` | Records the sunlight color intensity. |
-| `const Sunlight& GetSunlight() const` | Currently recorded sunlight (subject to change before render). |
-| `const AmbientLight& GetAmbientLight() const` | Currently recorded ambient light (subject to change before render). |
-| `float32 GetLightTime() const` | Currently recorded time of day. |
-| `void PrepareSkybox()` | Prepares the skybox model/material for rendering. |
+| `void RegisterTexture(Iris::TextureHandle handle)` | Registers a texture handle so it can be bound during rendering. |
 
 ### Audio Handler (`src/Engine/Core/Handlers/AudioHandler.h`)
 

@@ -8,16 +8,6 @@
         bounds-type: init
         logic-def:
             logic-type: 1
-            sector: freecam
-    showselector:
-        bounds-type: init
-        logic-def:
-            logic-type: 3
-            sector: freecam
-    loadselector:
-        bounds-type: init
-        logic-def:
-            logic-type: 1
             sector: testworld
     showselector:
         bounds-type: init
