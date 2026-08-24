@@ -393,3 +393,5 @@ keys/
 /packedBuild.zip
 pack/
 /pack.7z
+
+/GameData/Data/Packages/
