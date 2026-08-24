@@ -394,4 +394,4 @@ keys/
 pack/
 /pack.7z
 
-/GameData/Data/Packages/
+GameData/Data/Packages/*

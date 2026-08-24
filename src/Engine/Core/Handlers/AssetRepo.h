@@ -10,8 +10,8 @@
 #include "Engine/Types/Rendering/Iris/Handles.h"
 #include "Engine/Types/Rendering/Iris/IrisAssetComms.h"
 
-#define ASSET_REPO_INEFFICIENT_LOADING_TEST 1
-#define ASSET_REPO_STREAMING_VISUAL_TEST 1
+#define ASSET_REPO_INEFFICIENT_LOADING_TEST 0
+#define ASSET_REPO_STREAMING_VISUAL_TEST 0
 
 namespace WEngine
 {
