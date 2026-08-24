@@ -125,6 +125,18 @@ void AssetRepo::GetAsset<SpirVAssetMission>(SpirVAssetMission& mission)
 #endif
 
 }
+
+bool AssetRepo::IsTextureDoneLoading(uint64 uid) const
+{
+	// We clear the texture done cache in the finalization, so this is
+	// necessary
+	if (m_texturesDone.empty())
+		return true;
+
+	// we trust that the caller has already confirmed that the uid is correct.
+	return m_texturesDone[uid] == StreamingProgress::Loaded;
+}
+
 AudioClip* AssetRepo::LoadAudioWAV(const std::string& name)
 {
 	AudioClip clip{};
@@ -370,11 +382,26 @@ void AssetRepo::TickTextureUpload()
 	if (!Iris::IsCopyPassDone(m_copyCmdBuffer))
 		return;
 
+#if ASSET_REPO_STREAMING_VISUAL_TEST
+	constexpr uint32 StreamingVisualFrameDelay = 70;
+	static uint8 streamingVisualCounter = 0;
+	if (streamingVisualCounter != StreamingVisualFrameDelay)
+	{
+		streamingVisualCounter++;
+		return;
+	}
+	else
+		streamingVisualCounter = 0;
+#endif
+
 	bool allDone = true;
 
 	for (sizeT i = 0; i < m_texturesDone.size(); i++)
 	{
-		if (m_texturesDone[i])
+		if (m_texturesDone[i] == StreamingProgress::Progress)
+			m_texturesDone[i] = StreamingProgress::Loaded;
+
+		if (m_texturesDone[i] == StreamingProgress::Loaded)
 			continue;
 		allDone = false;
 		break;
@@ -390,6 +417,7 @@ void AssetRepo::TickTextureUpload()
 	}
 
 	Iris::BeginCopyPass(m_copyCmdBuffer);
+	WLog::ConsoleLog(" ---- Begin Texture Stream Pass -----");
 
 	FillCopyBuffers(m_copyBuffers_XS.data(), m_copyBuffers_XS.size(), 128);
 	FillCopyBuffers(m_copyBuffers_S.data(), m_copyBuffers_S.size(), 256);
@@ -473,7 +501,7 @@ void AssetRepo::PrepareTransferBuffers()
 {
 	m_texturesDone.resize(m_textures.size());
 	for (sizeT i = 0; i < m_texturesDone.size(); i++)
-		m_texturesDone[i] = false;
+		m_texturesDone[i] = StreamingProgress::Unloaded;
 
 	m_copyCmdBuffer = Iris::CreateCopyBuffer();
 
@@ -727,7 +755,7 @@ void AssetRepo::ParseTextures(const wtl::vector<byte*>& texFiles)
 
 	m_texturesDone.resize(m_textures.size());
 	for (sizeT i = 0; i < m_texturesDone.size(); i++)
-		m_texturesDone[i] = false;
+		m_texturesDone[i] = StreamingProgress::Unloaded;
 }
 
 void AssetRepo::FillCopyBuffers(Iris::BufferHandle* handles, sizeT handleCount, sizeT textureWidth)
@@ -735,13 +763,16 @@ void AssetRepo::FillCopyBuffers(Iris::BufferHandle* handles, sizeT handleCount, 
 	uint32 handleCursor = 0;
 	for (sizeT i = 0; i < m_textures.size(); i++)
 	{
-		if (m_textures[i].first.width == textureWidth && m_texturesDone[i] == false)
+		if (m_textures[i].first.width == textureWidth && m_texturesDone[i] == StreamingProgress::Unloaded)
 		{
 			Iris::UpdateBuffer(handles[handleCursor], 0, m_textures[i].first.data, m_textures[i].first.dataSize);
 
 			Iris::CopyBufferToTexture(m_copyCmdBuffer, handles[handleCursor], 0, m_textures[i].second);
 
-			m_texturesDone[i] = true;
+			WLog::SetConsoleInfo();
+			WLog::ConsoleLog(std::format("Submitted a {} texture for copy.", textureWidth));
+
+			m_texturesDone[i] = StreamingProgress::Progress;
 			handleCursor++;
 			if (handleCursor == handleCount)
 				return;

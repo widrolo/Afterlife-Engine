@@ -152,6 +152,8 @@ void RenderHandler::RenderFrame()
 
 void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm::mat4& vp)
 {
+	if (!CoreSystems::GetAssetRepo()->IsTextureDoneLoading(mission.textureUID))
+		return;
 	MeshAssetMission meshMission{};
 	meshMission.uid = mission.meshUID;
 	CoreSystems::GetAssetRepo()->GetAsset(meshMission);
@@ -177,6 +179,8 @@ void RenderHandler::RenderSinglePlan(const RenderPlan &plan, const Mat4x4 &vp)
 	Iris::BindVertexBuffers(tempHandle, 1, {plan.statBuffer}, {0});
 	for (const auto& part : plan.parts)
 	{
+		if (!CoreSystems::GetAssetRepo()->IsTextureDoneLoading(part.textureUID))
+			continue;
 		MeshAssetMission meshMission{};
 		meshMission.uid = part.meshUID;
 		CoreSystems::GetAssetRepo()->GetAsset(meshMission);

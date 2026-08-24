@@ -10,6 +10,9 @@
 #include "Engine/Types/Rendering/Iris/Handles.h"
 #include "Engine/Types/Rendering/Iris/IrisAssetComms.h"
 
+#define ASSET_REPO_INEFFICIENT_LOADING_TEST 1
+#define ASSET_REPO_STREAMING_VISUAL_TEST 1
+
 namespace WEngine
 {
 	class Sector;
@@ -24,6 +27,12 @@ namespace WEngine
 			char identifier[4];
 			uint64 vertCount;
 			uint64 indCount;
+		};
+		enum class StreamingProgress
+		{
+			Unloaded,
+			Progress,
+			Loaded,
 		};
 	public:
 		/**
@@ -94,7 +103,7 @@ namespace WEngine
 		Iris::BufferHandle GetVertexBuffer() const { return m_vertexBuffer; }
 		Iris::BufferHandle GetIndexBuffer() const { return m_indexBuffer; }
 
-
+		bool IsTextureDoneLoading(uint64 uid) const;
 
 	private:
 		AudioClip* LoadAudioWAV(const std::string& name);
@@ -135,12 +144,21 @@ namespace WEngine
 
 		// keep this as the bottom so it doesnt pollute the offsets of the rest
 		// These should be fine-tuned in the final optimization pass of the game long after the content lock.
-		wtl::vector<bool> m_texturesDone;
+		wtl::vector<StreamingProgress> m_texturesDone;
+
+#if ASSET_REPO_INEFFICIENT_LOADING_TEST
+		_GLOBAL_CEX_ sizeT TexturesPerUpload_XS = 1;
+		_GLOBAL_CEX_ sizeT TexturesPerUpload_S = 1;
+		_GLOBAL_CEX_ sizeT TexturesPerUpload_M = 1;
+		_GLOBAL_CEX_ sizeT TexturesPerUpload_L = 1;
+		_GLOBAL_CEX_ sizeT TexturesPerUpload_X = 1;
+#else
 		_GLOBAL_CEX_ sizeT TexturesPerUpload_XS = 96;
 		_GLOBAL_CEX_ sizeT TexturesPerUpload_S = 128;
 		_GLOBAL_CEX_ sizeT TexturesPerUpload_M = 64;
 		_GLOBAL_CEX_ sizeT TexturesPerUpload_L = 16;
 		_GLOBAL_CEX_ sizeT TexturesPerUpload_X = 4;
+#endif
 		std::array<Iris::BufferHandle, TexturesPerUpload_XS>	m_copyBuffers_XS;	// for 128 or lower
 		std::array<Iris::BufferHandle, TexturesPerUpload_S> 	m_copyBuffers_S;	// for 256 or lower
 		std::array<Iris::BufferHandle, TexturesPerUpload_M> 	m_copyBuffers_M;	// for 512 or lower

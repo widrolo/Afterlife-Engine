@@ -8,6 +8,8 @@ Freecam::Freecam()
 {
     m_speed = 5.0f;
     m_trans = WEngine::Transform::Zero;
+    m_trans.position.z = 4;
+    m_trans.position.y = 2;
 }
 
 void Freecam::Tick(float32 dt)

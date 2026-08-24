@@ -76,7 +76,6 @@ add_executable(Afterlife_Engine
         src/Engine/Math/Math.h
         src/Engine/Types/Nullable.h
         src/Engine/Types/Rendering/RenderMission.h
-        src/Engine/Types/Rendering/GPU/Shader.h
         src/Engine/Types/SpawnArgs.cpp
         src/Engine/Types/SpawnArgs.h
         src/Engine/Math/Transform.cpp
@@ -199,12 +198,8 @@ add_executable(Afterlife_Engine
         src/Editor/MenubarItems/Tools/Menubar_ResFind.h
         src/Engine/Core/System/GPU_OpenGL.cpp
         src/Engine/Core/System/Iris.h
-        src/Engine/Types/Rendering/GPU/Framebuffer.h
         src/Engine/Types/Rendering/ShaderSettings.h
-        src/Engine/Types/Rendering/GPU/Texture.h
-        src/Engine/Types/Rendering/GPU/Model.h
         src/Engine/Types/Rendering/MeshInfo.h
-        src/Engine/Types/Rendering/GPU/Line.h
         src/Engine/Types/Rendering/LineInfo.h
         src/Engine/Types/Rendering/TextureInfo.h
         src/Engine/Types/DebugFlags.h
@@ -237,7 +232,6 @@ add_executable(Afterlife_Engine
         src/Engine/Types/AI/Behaviour/Control/BranchNode.h
         src/Engine/Core/System/GPUSettings.h
         src/Engine/imgui/backends/imgui_impl_vulkan.cpp
-        src/Engine/Types/Rendering/VertextData.h
         src/Engine/Types/Rendering/ShaderInfo.h
         src/Game/Gameplay/Freecam.cpp
         src/Game/Gameplay/Freecam.h
@@ -247,7 +241,6 @@ add_executable(Afterlife_Engine
         src/Engine/Types/Rendering/Iris/InstThreadedList.h
         src/Engine/EngineWidgets/RenderWatchWidget.cpp
         src/Engine/EngineWidgets/RenderWatchWidget.h
-        src/Engine/Types/Rendering/GPU/Material.h
         src/Engine/Types/Rendering/ShaderDefinition.h
         src/Engine/Types/Refcounted.h
         src/Engine/Types/Rendering/MaterialDefinition.h
@@ -268,7 +261,6 @@ add_executable(Afterlife_Engine
         src/Engine/Types/Time/Date.cpp
         src/Engine/EngineWidgets/TimeWatchWidget.cpp
         src/Engine/EngineWidgets/TimeWatchWidget.h
-        src/Engine/Types/Rendering/GPU/StatBufKey.h
         src/Engine/Core/System/Haptic.h
         src/Engine/Types/Input/InputPatch.h
         src/Engine/Core/System/HapticSDL.cpp
