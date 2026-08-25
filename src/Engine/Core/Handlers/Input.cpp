@@ -5,6 +5,7 @@
 #include "Engine/Types/AssetMission.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Util/Log.h"
+#include "Engine/Util/TimeAnalysis.h"
 
 
 using namespace WEngine;
@@ -50,6 +51,7 @@ void Input::LoadInputMap()
 
 bool Input::GetAction(const std::string &name, PressType press)
 {
+    TimeSample sample("Input::GetAction");
     Nullable<bool> pressed;
 
     switch (press)
@@ -72,6 +74,7 @@ bool Input::GetAction(const std::string &name, PressType press)
 
 float32 Input::GetFloat(const std::string &name)
 {
+    TimeSample sample("Input::GetFloat");
     auto floatN = Haptic::GetFloat(name);
     if (floatN.HasValue())
         return floatN.GetValue();
@@ -80,6 +83,7 @@ float32 Input::GetFloat(const std::string &name)
 
 Vector2 Input::GetVector(const std::string &name)
 {
+    TimeSample sample("Input::GetVector");
     auto vectorN = Haptic::GetVector(name);
     if (vectorN.HasValue())
         return vectorN.GetValue();

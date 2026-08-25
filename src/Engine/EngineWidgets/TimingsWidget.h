@@ -4,6 +4,8 @@
 #include <Engine/WTL/deque.h>
 #include <Engine/Types/CommonTypes.h>
 
+#include "Engine/Util/TimeAnalysis.h"
+
 namespace WEngine
 {
 	class TimingsWidget : public Widget
@@ -14,6 +16,8 @@ namespace WEngine
 		void Setup() override;
 	protected:
 		void RenderInternal() override;
+	private:
+		void PrintChildren(const TimeRecord& record);
 	};
 }
 

@@ -5,6 +5,7 @@
 #include "SDLHelpers.h"
 #include "Engine/Core/System/Memory.h"
 #include "Engine/Util/Log.h"
+#include "Engine/Util/TimeAnalysis.h"
 
 void InitKeyboard(SDLContext &ctx)
 {
@@ -79,6 +80,7 @@ void InitController(SDLContext &ctx)
 
 void AdvanceBelts(SDLContext &ctx)
 {
+    WEngine::TimeSample sample("[Haptic]AdvanceBelts");
     ctx.rawKeys.Cycle();
     ctx.rawMouse.Cycle();
     ctx.rawController.Cycle();
@@ -97,6 +99,7 @@ void AdvanceBelts(SDLContext &ctx)
 
 void CheckControllerStatus(SDLContext &ctx)
 {
+    WEngine::TimeSample sample("[Haptic]CheckControllerStatus");
     if (ctx.isControllerConnected)
         CheckControllerStillConnected(ctx);
     else
@@ -105,6 +108,7 @@ void CheckControllerStatus(SDLContext &ctx)
 
 void CheckControllerStillConnected(SDLContext &ctx)
 {
+    WEngine::TimeSample sample("[Haptic]CheckControllerStillConnected");
     int32 count;
     SDL_GetGamepads(&count);
     if (count == 0)
@@ -118,6 +122,7 @@ void CheckControllerStillConnected(SDLContext &ctx)
 
 void CheckNewControllerConnected(SDLContext &ctx)
 {
+    WEngine::TimeSample sample("[Haptic]CheckNewControllerConnected");
     int32 count = 0;
     SDL_JoystickID* controllers = SDL_GetGamepads(&count);
     if (count == 0)

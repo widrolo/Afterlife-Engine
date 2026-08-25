@@ -7,6 +7,7 @@
 #include "Engine/EngineDefines.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Util/Log.h"
+#include "Engine/Util/TimeAnalysis.h"
 
 using namespace WEngine;
 
@@ -19,6 +20,7 @@ TimeHandler::TimeHandler()
 
 void TimeHandler::Update(float32 dt)
 {
+    TimeSample sample("TimeHandler::Update");
     m_accumulator += dt * TimeSettings::gameSecondPerRealSecond;
     uint32 secs = std::floor(m_accumulator);
     m_accumulator -= (float32)secs;
@@ -49,6 +51,7 @@ Time TimeHandler::GetTime() const
 
 void TimeHandler::UpdateRenderTime()
 {
+    TimeSample sample("TimeHandler::UpdateRenderTime");
     constexpr uint32 secondsInDay = 60 * 60 * 24;
 
     uint32 secs = m_time.GetSeconds();

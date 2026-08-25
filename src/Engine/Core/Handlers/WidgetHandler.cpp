@@ -115,11 +115,6 @@ void WidgetHandler::DrawWidgets()
             m_systemWidgets[i]->RenderWidget();
     }
 
-    auto* time = static_cast<TimingsWidget*>(m_systemWidgets[(sizeT)SysWidgetTypes::Timings]);
-
-    if (time != nullptr)
-        time->CountTime();
-
     // im trying everything vro, this shit will soon be nasa grade code.
     //auto widgetSnapshot = m_gameWidgets; // no longer crashes, but im gonna keep this commented for now.
     for (const auto& weak : m_gameWidgets)

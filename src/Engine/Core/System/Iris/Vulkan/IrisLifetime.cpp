@@ -4,6 +4,7 @@
 
 #include "Helpers/Helpers.h"
 #include "IrisGlobals.h"
+#include "Engine/Util/TimeAnalysis.h"
 
 namespace Iris
 {
@@ -24,6 +25,7 @@ namespace Iris
 
     void BeginFrame()
     {
+        WEngine::TimeSample sample("[Iris]BeginFrame");
         commandBufferFrameIndex++;
         const uint32 slot = commandBufferFrameIndex % (uint32)framePools.size();
         Vulkan_FramePools& fp = framePools[slot];
@@ -35,6 +37,7 @@ namespace Iris
 
     void EndFrame()
     {
+        WEngine::TimeSample sample("[Iris]EndFrame");
         irisCtx.firstFrame = false;
         stats.bindStatsLastFrame = stats.bindStats;
         stats.drawStatsLastFrame = stats.drawStats;

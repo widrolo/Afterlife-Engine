@@ -7,6 +7,7 @@
 #include "Engine/imgui/backends/imgui_impl_sdl3.h"
 #include "Engine/imgui/backends/imgui_impl_vulkan.h"
 #include "Engine/Util/Log.h"
+#include "Engine/Util/TimeAnalysis.h"
 #include "Helpers/Helpers.h"
 #include "Helpers/ImGui.h"
 
@@ -14,6 +15,7 @@ namespace Iris
 {
     void ConfigureImGui()
     {
+        WEngine::TimeSample sample("[Iris]ConfigureImGui");
         static VkFormat swapFormat = FindBestSwapchainFormat();
 
         VkPipelineRenderingCreateInfo pipeInfo{};
@@ -44,6 +46,7 @@ namespace Iris
 
     void ImGuiNewFrame()
     {
+        WEngine::TimeSample sample("[Iris]ImGuiNewFrame");
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
@@ -51,6 +54,7 @@ namespace Iris
 
     void ImGuiRenderDrawData(CommandBufferHandle cmd)
     {
+        WEngine::TimeSample sample("[Iris]ImGuiRenderDrawData");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleError();
@@ -64,6 +68,7 @@ namespace Iris
 
     WEngine::Nullable<ImTextureID> TextureToImGui(TextureHandle texture)
     {
+        WEngine::TimeSample sample("[Iris]TextureToImGui");
         if (texture == 0 || texture > loadedTextures.size())
         {
             WEngine::WLog::SetConsoleError();

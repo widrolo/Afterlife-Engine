@@ -6,6 +6,7 @@
 
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Util/Log.h"
+#include "Engine/Util/TimeAnalysis.h"
 #include "glm/trigonometric.hpp"
 
 using namespace WEngine;
@@ -17,6 +18,7 @@ PhysicsHandler::PhysicsHandler()
 
 void PhysicsHandler::Tick()
 {
+	TimeSample sample("PhysicsHandler::Tick");
 	b3World_Step(m_worldID, PhysicsSettings::physicsTickRate * CoreSystems::GetTimeScale(), 8);
 	for (auto& body : m_bodies)
 		UpdateAttachedEntity(body);
@@ -24,6 +26,7 @@ void PhysicsHandler::Tick()
 
 PhysicsBodyHandle PhysicsHandler::CreateBody(PhysicsBodyType type, Transform *entity)
 {
+	TimeSample sample("PhysicsHandler::CreateBody");
 	b3BodyDef groundBodyDef = b3DefaultBodyDef();
 	if (type == PhysicsBodyType::Dynamic)
 		groundBodyDef.type = b3_dynamicBody;
@@ -47,6 +50,7 @@ PhysicsBodyHandle PhysicsHandler::CreateBody(PhysicsBodyType type, Transform *en
 
 void PhysicsHandler::ChangeBodyPosition(PhysicsBodyHandle body, const Vector3 &position)
 {
+	TimeSample sample("PhysicsHandler::ChangeBodyPosition");
 	if (body == 0 || body > m_bodies.size())
 		return;
 
@@ -57,6 +61,7 @@ void PhysicsHandler::ChangeBodyPosition(PhysicsBodyHandle body, const Vector3 &p
 
 void PhysicsHandler::ChangeBodyRotation(PhysicsBodyHandle body, const Quaternion &rotation)
 {
+	TimeSample sample("PhysicsHandler::ChangeBodyRotation");
 	if (body == 0 || body > m_bodies.size())
 		return;
 
@@ -70,6 +75,7 @@ void PhysicsHandler::ChangeBodyRotation(PhysicsBodyHandle body, const Quaternion
 
 void PhysicsHandler::AttachBox(PhysicsBodyHandle body, const Vector3 &size, const Vector3 &offset)
 {
+	TimeSample sample("PhysicsHandler::AttachBox");
 	if (body == 0 || body > m_bodies.size())
 		return;
 
@@ -91,6 +97,7 @@ void PhysicsHandler::AttachBox(PhysicsBodyHandle body, const Vector3 &size, cons
 
 void PhysicsHandler::AttachMesh(PhysicsBodyHandle body, const MeshInfo &mesh)
 {
+	TimeSample sample("PhysicsHandler::AttachMesh");
 	if (body == 0 || body > m_bodies.size())
 		return;
 
@@ -116,6 +123,7 @@ void PhysicsHandler::Visualize()
 
 void PhysicsHandler::UpdateAttachedEntity(PhysicsBody& body)
 {
+	TimeSample sample("PhysicsHandler::UpdateAttachedEntity");
 	if (body.type != PhysicsBodyType::Dynamic)
 		return;
 

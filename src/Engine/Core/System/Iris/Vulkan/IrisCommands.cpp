@@ -5,12 +5,14 @@
 
 #include "IrisGlobals.h"
 #include "Engine/Util/Log.h"
+#include "Engine/Util/TimeAnalysis.h"
 #include "Helpers/Helpers.h"
 
 namespace Iris
 {
     void SetViewport(CommandBufferHandle cmd, const Viewport& viewport)
     {
+        WEngine::TimeSample sample("[Iris]SetViewport");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -36,6 +38,7 @@ namespace Iris
 
     void Draw(CommandBufferHandle cmd, sizeT vertexCount, sizeT instanceCount, sizeT firstVertex, sizeT firstInstance)
     {
+        WEngine::TimeSample sample("[Iris]Draw");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -50,6 +53,7 @@ namespace Iris
     void DrawIndexed(CommandBufferHandle cmd, sizeT indexCount, sizeT instanceCount, sizeT firstIndex, int32 vertexOffset,
         sizeT firstInstance)
     {
+        WEngine::TimeSample sample("[Iris]DrawIndexed");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -63,6 +67,7 @@ namespace Iris
 
     void DrawIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset, sizeT drawCount, sizeT stride)
     {
+        WEngine::TimeSample sample("[Iris]DrawIndirect");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -83,6 +88,7 @@ namespace Iris
 
     void DrawIndexedIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset, sizeT drawCount, sizeT stride)
     {
+        WEngine::TimeSample sample("[Iris]DrawIndexedIndirect");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -103,6 +109,7 @@ namespace Iris
 
     void Dispatch(CommandBufferHandle cmd, sizeT groupCountX, sizeT groupCountY, sizeT groupCountZ)
     {
+        WEngine::TimeSample sample("[Iris]Dispatch");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -116,6 +123,7 @@ namespace Iris
 
     void DispatchIndirect(CommandBufferHandle cmd, BufferHandle argBuffer, sizeT offset)
     {
+        WEngine::TimeSample sample("[Iris]DispatchIndirect");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -137,6 +145,7 @@ namespace Iris
     void CopyBufferToBuffer(CommandBufferHandle cmd, BufferHandle dst, sizeT dstOffset, BufferHandle src, sizeT srcOffset,
         sizeT size)
     {
+        WEngine::TimeSample sample("[Iris]CopyBufferToBuffer");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -170,6 +179,7 @@ namespace Iris
 
     void CopyBufferToTexture(CopyBufferHandle cmd, BufferHandle src, sizeT srcOffset, TextureHandle dst)
     {
+        WEngine::TimeSample sample("[Iris]CopyBufferToTexture");
         if (cmd == 0 || cmd > loadedCopyBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();

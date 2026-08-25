@@ -5,9 +5,11 @@
 #include <cstring>
 
 #include "Engine/Util/Log.h"
+#include "Engine/Util/TimeAnalysis.h"
 
 void FetchAllInput(SDLContext &ctx)
 {
+    WEngine::TimeSample sample("[Haptic]FetchInput");
     FetchKeyboard(ctx);
     FetchMouse(ctx);
     FetchController(ctx);
@@ -15,6 +17,7 @@ void FetchAllInput(SDLContext &ctx)
 
 void FetchKeyboard(SDLContext &ctx)
 {
+    WEngine::TimeSample sample("[Haptic]FetchKeyboard");
     int32 numKeys;
     const auto sdlKeyState = SDL_GetKeyboardState(&numKeys);
     std::memcpy(ctx.rawSDLKeys[0], sdlKeyState, numKeys);
@@ -22,6 +25,7 @@ void FetchKeyboard(SDLContext &ctx)
 
 void FetchMouse(SDLContext &ctx)
 {
+    WEngine::TimeSample sample("[Haptic]FetchMouse");
     float32 mouseY = 0.0f, mouseX = 0.0f;
     if (SDL_GetWindowRelativeMouseMode(ctx.window))
         ctx.rawSDLMouse[0] = SDL_GetRelativeMouseState(&mouseX, &mouseY);
@@ -32,6 +36,7 @@ void FetchMouse(SDLContext &ctx)
 
 void FetchController(SDLContext &ctx)
 {
+    WEngine::TimeSample sample("[Haptic]FetchController");
     if (!ctx.isControllerConnected)
         return;
 
@@ -53,6 +58,7 @@ void FetchController(SDLContext &ctx)
 
 void TranslateFetched(SDLContext &ctx)
 {
+    WEngine::TimeSample sample("[Haptic]TranslateFetched");
     TranslateKeyboard(ctx);
     TranslateMouse(ctx);
     TranslateController(ctx);
@@ -60,6 +66,7 @@ void TranslateFetched(SDLContext &ctx)
 
 void TranslateKeyboard(SDLContext &ctx)
 {
+    WEngine::TimeSample sample("[Haptic]TranslateKeyboard");
     // Absolutely Unreadable
 
     // WKey -> 0...9
@@ -103,11 +110,12 @@ void TranslateKeyboard(SDLContext &ctx)
 
 void TranslateMouse(SDLContext &ctx)
 {
-
+    WEngine::TimeSample sample("[Haptic]TranslateMouse");
 }
 
 void TranslateController(SDLContext &ctx)
 {
+    WEngine::TimeSample sample("[Haptic]TranslateController");
     if (!ctx.isControllerConnected)
         return;
 
@@ -144,12 +152,14 @@ void TranslateController(SDLContext &ctx)
 
 void UpdateAllSenses(SDLContext &ctx)
 {
+    WEngine::TimeSample sample("[Haptic]UpdateAllSenses");
     for (auto& map : ctx.maps)
         UpdateAllSensesInMap(ctx, map);
 }
 
 void UpdateAllSensesInMap(SDLContext &ctx, SDLMap &map)
 {
+    WEngine::TimeSample sample("[Haptic]UpdateAllSensesInMap");
     for (const auto& sense : map.senses)
     {
         switch (sense.inputKind)
@@ -170,6 +180,7 @@ void UpdateAllSensesInMap(SDLContext &ctx, SDLMap &map)
 
 FetchResult UpdateActionSense(const SDLContext &ctx, const SDLSense &sense)
 {
+    WEngine::TimeSample sample("[Haptic]UpdateActionSense");
     bool justPressed = false;
     bool pressed = false;
     bool justReleased = false;

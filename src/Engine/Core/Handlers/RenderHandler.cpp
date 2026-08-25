@@ -19,6 +19,7 @@
 #include "Engine/Core/Engine.h"
 #include "Engine/Core/System/Haptic.h"
 #include "Engine/Types/CoreSystems.h"
+#include "Engine/Util/TimeAnalysis.h"
 #include "glm/gtc/quaternion.hpp"
 
 
@@ -76,6 +77,7 @@ void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)
 
 void RenderHandler::BeginFrame()
 {
+	TimeSample sample("RenderHandler::BeginFrame");
 	Iris::BeginFrame();
 	Iris::AcquireSwapchainTexture();
 	Iris::ImGuiNewFrame();
@@ -102,6 +104,7 @@ void RenderHandler::BeginFrame()
 
 void RenderHandler::RenderFrame()
 {
+	TimeSample sample("RenderHandler::RenderFrame");
 	auto vpGLM = m_projection * m_viewMatrix;
 
 	wtl::vector<Iris::BufferHandle> vertBuffs{CoreSystems::GetAssetRepo()->GetVertexBuffer()};
@@ -152,6 +155,7 @@ void RenderHandler::RenderFrame()
 
 void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm::mat4& vp)
 {
+	TimeSample sample("RenderHandler::RenderSingleMission");
 	if (!CoreSystems::GetAssetRepo()->IsTextureDoneLoading(mission.textureUID))
 		return;
 	MeshAssetMission meshMission{};
@@ -176,6 +180,7 @@ void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm:
 
 void RenderHandler::RenderSinglePlan(const RenderPlan &plan, const Mat4x4 &vp)
 {
+	TimeSample sample("RenderHandler::RenderSinglePlan");
 	Iris::BindVertexBuffers(tempHandle, 1, {plan.statBuffer}, {0});
 	for (const auto& part : plan.parts)
 	{

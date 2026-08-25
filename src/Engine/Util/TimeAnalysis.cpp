@@ -26,7 +26,8 @@ void TimeSample::SaveAndResetRoot()
     record.sectionName = m_sectionName;
     record.loggedTime = m_time.GetTime<TimeUnit::Microseconds>();
     record.children = std::move(m_children);
-
+    if (TimeAnalysisState::rootSample == this)
+        record.loggedTime = 0.0;
     TimeAnalysisState::lastSample = std::move(record);
     m_children.clear();
 }

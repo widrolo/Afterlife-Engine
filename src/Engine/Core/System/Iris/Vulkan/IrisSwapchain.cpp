@@ -4,12 +4,14 @@
 
 #include "IrisGlobals.h"
 #include "Engine/Util/Log.h"
+#include "Engine/Util/TimeAnalysis.h"
 #include "Helpers/Helpers.h"
 
 namespace Iris
 {
     TextureHandle AcquireSwapchainTexture()
     {
+        WEngine::TimeSample sample("[Iris]AcquireSwapchainTexture");
         uint32 imageIndex = 0;
         VkResult res = vkAcquireNextImageKHR(vcore.gpuDevice, screen.swapchain, UINT64_MAX,
                                              displayTarget.imageAvailableSems[screen.currentFrame],
@@ -33,6 +35,7 @@ namespace Iris
 
     void Present()
     {
+        WEngine::TimeSample sample("[Iris]Present");
         VkResult renderRes;
         VkPresentInfoKHR presentInfo{};
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

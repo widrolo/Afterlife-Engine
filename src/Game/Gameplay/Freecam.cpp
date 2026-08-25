@@ -3,6 +3,7 @@
 #include "Engine/Core/Handlers/Input.h"
 #include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Core/System/Haptic.h"
+#include "Engine/Util/TimeAnalysis.h"
 
 Freecam::Freecam()
 {
@@ -14,6 +15,7 @@ Freecam::Freecam()
 
 void Freecam::Tick(float32 dt)
 {
+    WEngine::TimeSample sample("Freecam::Tick");
     static bool firstFrame = true;
     if (firstFrame)
     {

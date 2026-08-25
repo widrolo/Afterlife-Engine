@@ -5,6 +5,7 @@
 #include "Engine/imgui/backends/imgui_impl_sdl3.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Util/Log.h"
+#include "Engine/Util/TimeAnalysis.h"
 #include "Haptic/SDL/SDLContext.h"
 #include "Haptic/SDL/SDLFetching.h"
 #include "Haptic/SDL/SDLCore.h"
@@ -21,6 +22,7 @@ void Haptic::Init(SDL_Window* window)
 
 void Haptic::FetchInput()
 {
+    WEngine::TimeSample sample("Haptic::FetchInput");
     AdvanceBelts(ctx);
     CheckControllerStatus(ctx);
     FetchAllInput(ctx);
@@ -31,6 +33,7 @@ void Haptic::FetchInput()
 
 void Haptic::PollEvents()
 {
+    WEngine::TimeSample sample("[Haptic]PollEvents");
     while (SDL_PollEvent(&ctx.event))
     {
         ImGui_ImplSDL3_ProcessEvent(&ctx.event);

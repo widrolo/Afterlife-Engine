@@ -10,6 +10,7 @@
 #include "Engine/Core/Handlers/AssetRepo.h"
 #include "Engine/Core/System/Memory.h"
 #include "Engine/Types/CoreSystems.h"
+#include "Engine/Util/TimeAnalysis.h"
 
 using namespace WEngine;
 
@@ -57,6 +58,7 @@ SteamStore::~SteamStore()
 
 std::string SteamStore::GetSteamAccountName()
 {
+	TimeSample sample("SteamStore::GetSteamAccountName");
 #if STEAM
 	return SteamFriends()->GetPersonaName();
 #else
@@ -66,6 +68,7 @@ std::string SteamStore::GetSteamAccountName()
 
 void SteamStore::DispatchCallbacks()
 {
+	TimeSample sample("SteamStore::DispatchCallbacks");
 #if STEAM
 	SteamAPI_RunCallbacks();
 #endif // STEAM
@@ -73,6 +76,7 @@ void SteamStore::DispatchCallbacks()
 
 void SteamStore::UnlockAchievement(std::string achievementApiName)
 {
+	TimeSample sample("SteamStore::UnlockAchievement");
 #if STEAM
 	
 	if (!m_initSuccess)
@@ -95,6 +99,7 @@ void SteamStore::UnlockAchievement(std::string achievementApiName)
 
 void SteamStore::OpenOverlay(OverlayWindows overlay)
 {
+	TimeSample sample("SteamStore::OpenOverlay");
 #if STEAM
 	SteamFriends()->ActivateGameOverlay(overlayWindowsStr[overlay]);
 #endif // STEAM

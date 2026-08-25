@@ -6,6 +6,7 @@
 #include <Engine/Util/Log.h>
 
 #include "IrisGlobals.h"
+#include "Engine/Util/TimeAnalysis.h"
 #include "Helpers/Helpers.h"
 #include "Helpers/Types.h"
 
@@ -20,6 +21,7 @@ namespace Iris
 
     BufferHandle CreateBuffer(const BufferDesc& desc, const byte* initialData, sizeT initialDataSize)
     {
+        WEngine::TimeSample sample("[Iris]CreateBuffer");
         Vulkan_Buffer buff;
         buff.debugName = desc.debugName;
         buff.usage = desc.usage;
@@ -86,6 +88,7 @@ namespace Iris
 
     TextureHandle CreateTexture(const TextureDesc& desc)
     {
+        WEngine::TimeSample sample("[Iris]CreateTexture");
         Vulkan_Texture tex{};
         tex.debugName = desc.debugName;
         tex.width = desc.width;
@@ -151,6 +154,7 @@ namespace Iris
 
     SamplerHandle CreateSampler(const SamplerDesc& desc)
     {
+        WEngine::TimeSample sample("[Iris]CreateSampler");
         Vulkan_Sampler sam{};
         sam.debugName = desc.debugName;
 
@@ -186,6 +190,7 @@ namespace Iris
 
     ShaderHandle CreateShader(const ShaderStageDesc& desc)
     {
+        WEngine::TimeSample sample("[Iris]CreateShader");
         Vulkan_Shader shader{};
         shader.debugName = desc.debugName;
         shader.stage = IrisShaderStageToVulkan(desc.stage);
@@ -234,6 +239,7 @@ namespace Iris
 
     ResourceTableLayoutHandle CreateResourceTableLayout(const ResourceTableLayoutDesc& desc)
     {
+        WEngine::TimeSample sample("[Iris]CreateResourceTableLayout");
         Vulkan_ResourceTableLayout layout{};
         layout.debugName = desc.debugName;
 
@@ -287,6 +293,7 @@ namespace Iris
 
     ResourceTableHandle CreateResourceTable(ResourceTableLayoutHandle layout)
     {
+        WEngine::TimeSample sample("[Iris]CreateResourceTable");
         if (layout == 0 || layout > loadedResourceTableLayouts.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -335,6 +342,7 @@ namespace Iris
     // take a rest before reading this, it's super long.
     GraphicsPipelineHandle CreateGraphicsPipeline(const GraphicsPipelineDesc& desc)
     {
+        WEngine::TimeSample sample("[Iris]CreateGraphicsPipeline");
         Vulkan_Pipeline pip{};
         pip.debugName = desc.debugName;
 
@@ -577,18 +585,21 @@ namespace Iris
 
     ComputePipelineHandle CreateComputePipeline(const ComputePipelineDesc& desc)
     {
+        WEngine::TimeSample sample("[Iris]CreateComputePipeline");
         PrintNotImplemented("CreateComputePipeline");
         return 0;
     }
 
     FramebufferHandle CreateFramebuffer(const FramebufferDesc& desc)
     {
+        WEngine::TimeSample sample("[Iris]CreateFramebuffer");
         PrintNotImplemented("CreateFramebuffer");
         return 0;
     }
 
     void UpdateBuffer(BufferHandle buffer, sizeT dstOffset, const byte* data, sizeT size)
     {
+        WEngine::TimeSample sample("[Iris]UpdateBuffer");
         if (buffer == 0 || buffer > loadedBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -617,6 +628,7 @@ namespace Iris
 
     void UpdateResourceTable(ResourceTableHandle table, const ResourceTableUpdateDesc& update)
     {
+        WEngine::TimeSample sample("[Iris]UpdateResourceTable");
         // vibe coding go brrrr....
         // But yeah, couldnt ever be asked to make all this.
         // Although i think i could have written it a bit cleaner
@@ -777,6 +789,7 @@ namespace Iris
 
     void DestroyBuffer(BufferHandle buffer)
     {
+        WEngine::TimeSample sample("[Iris]DestroyBuffer");
         if (buffer == 0 || buffer > loadedBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();

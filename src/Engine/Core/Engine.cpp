@@ -232,13 +232,14 @@ void Engine::Loop_Begin(std::chrono::steady_clock::time_point& last, StopWatch& 
 	CoreSystems::timeHandler->Update(m_deltaTime * CoreSystems::GetTimeScale());
 
 	m_game->GameLoopBegin(m_deltaTime * CoreSystems::GetTimeScale());
+
+	// This should be in Loop_Tick, but I like seeing input and logic being separate in timings.
+	Haptic::FetchInput();
 }
 
 void Engine::Loop_Tick()
 {
 	TimeSample sample("Engine::Loop_Tick");
-
-	Haptic::FetchInput();
 
 	m_game->GameLoopTickEarly();
 	m_game->GameLoopTick();
@@ -252,6 +253,12 @@ void Engine::Loop_Physics()
 
 	m_game->GameLoopPhysicsEarly();
 	// this can only happen on boot, and is a bug
+	if (!(m_physicsTickTimer > PhysicsSettings::physicsTickRate))
+	{
+		// This is here because otherwise, it flickers in the engine timing widget.
+		{TimeSample sample("Game::GameLoopPhysics");}
+		{TimeSample sample("PhysicsHandler::Tick");}
+	}
 	while (m_physicsTickTimer > PhysicsSettings::physicsTickRate)
 	{
 		m_physicsTickTimer -= PhysicsSettings::physicsTickRate;

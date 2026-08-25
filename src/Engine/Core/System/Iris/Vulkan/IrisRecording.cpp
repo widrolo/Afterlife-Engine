@@ -4,6 +4,7 @@
 
 #include "IrisGlobals.h"
 #include "Engine/Util/Log.h"
+#include "Engine/Util/TimeAnalysis.h"
 #include "Helpers/Helpers.h"
 #include "Helpers/Queues.h"
 
@@ -11,6 +12,7 @@ namespace Iris
 {
     CommandBufferHandle CreateCommandBuffer(QueueType queue)
     {
+        WEngine::TimeSample sample("[Iris]CreateCommandBuffer");
         Vulkan_CmdBuff entry{};
         entry.queue = QueueFor(queue);
 
@@ -40,6 +42,7 @@ namespace Iris
 
     CopyBufferHandle CreateCopyBuffer()
     {
+        WEngine::TimeSample sample("[Iris]CreateCopyBuffer");
         Vulkan_CopyBuff buff{};
         buff.queue = QueueFor(QueueType::Copy);
 
@@ -87,6 +90,7 @@ namespace Iris
 
     void BeginCommandBuffer(CommandBufferHandle cmd)
     {
+        WEngine::TimeSample sample("[Iris]BeginCommandBuffer");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -103,6 +107,7 @@ namespace Iris
 
     void EndCommandBuffer(CommandBufferHandle cmd)
     {
+        WEngine::TimeSample sample("[Iris]EndCommandBuffer");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -114,6 +119,7 @@ namespace Iris
 
     void SubmitCommandBuffer(CommandBufferHandle cmd)
     {
+        WEngine::TimeSample sample("[Iris]SubmitCommandBuffer");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -145,6 +151,7 @@ namespace Iris
     // it doesnt bring anything to the table.
     void BeginRenderPass(CommandBufferHandle cmd, const RenderPassBeginDesc& desc)
     {
+        WEngine::TimeSample sample("[Iris]BeginRenderPass");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -217,6 +224,7 @@ namespace Iris
 
     void EndRenderPass(CommandBufferHandle cmd)
     {
+        WEngine::TimeSample sample("[Iris]EndRenderPass");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -247,16 +255,19 @@ namespace Iris
 
     void BeginComputePass(CommandBufferHandle cmd)
     {
+        WEngine::TimeSample sample("[Iris]BeginComputePass");
         PrintNotImplemented("BeginComputePass");
     }
 
     void EndComputePass(CommandBufferHandle cmd)
     {
+        WEngine::TimeSample sample("[Iris]EndComputePass");
         PrintNotImplemented("EndComputePass");
     }
 
     void BeginCopyPass(CopyBufferHandle cmd)
     {
+        WEngine::TimeSample sample("[Iris]BeginCopyPass");
         if (cmd == 0 || cmd > loadedCopyBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -276,6 +287,7 @@ namespace Iris
 
     void EndCopyPass(CopyBufferHandle cmd)
     {
+        WEngine::TimeSample sample("[Iris]EndCopyPass");
         if (cmd == 0 || cmd > loadedCopyBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -302,6 +314,7 @@ namespace Iris
 
     bool IsCopyPassDone(CopyBufferHandle cmd)
     {
+        WEngine::TimeSample sample("[Iris]IsCopyPassDone");
         if (cmd == 0 || cmd > loadedCopyBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
