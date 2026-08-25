@@ -339,6 +339,8 @@ add_executable(Afterlife_Engine
         src/Engine/Core/World/SectorEntry.h
         src/Engine/Core/Handlers/SectorHandler.cpp
         src/Engine/Core/Handlers/SectorHandler.h
+        src/Engine/Util/TimeAnalysis.cpp
+        src/Engine/Util/TimeAnalysis.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

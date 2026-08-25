@@ -21,6 +21,7 @@
 namespace Iris
 {
     bool Init(const InitDesc& desc);
+    [[deprecated]]
     void Shutdown();
     uint32 GetCurrentFrameIndex();
     uint32 GetFramesInFlight();
@@ -53,6 +54,7 @@ namespace Iris
     void UpdateBuffer(BufferHandle buffer, sizeT dstOffset, const byte* data, sizeT size);
     void UpdateResourceTable(ResourceTableHandle table, const ResourceTableUpdateDesc& update);
 
+    // ------- Deletion --------
     void DestroyBuffer(BufferHandle buffer);
 
     // --------------------------------------- Swapchain ---------------------------------------

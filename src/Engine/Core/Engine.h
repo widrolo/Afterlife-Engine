@@ -31,14 +31,6 @@ namespace WEngine
 		_GLOBAL_ float64 m_deltaTime;
 		_GLOBAL_ uint64 m_uptime; // in seconds
 
-		// profiler
-		_GLOBAL_ float32 m_frameBegin;
-		_GLOBAL_ float32 m_widgetDraw;
-		_GLOBAL_ float32 m_sectorLoad;
-		_GLOBAL_ float32 m_entityTick;
-		_GLOBAL_ float32 m_physicsTick;
-		_GLOBAL_ float32 m_draw;
-
 		_GLOBAL_ CmdLineArgs m_cla = {};
 
 	public:
@@ -46,12 +38,6 @@ namespace WEngine
 		static float64 GetDeltaTime();
 
 		static uint64 GetUptime()		{ return m_uptime; }
-		static float32 GetFrameBegin()	{ return m_frameBegin; }
-		static float32 GetWidgetDraw()	{ return m_widgetDraw; }
-		static float32 GetSectorLoad()	{ return m_sectorLoad; }
-		static float32 GetEntityTick()	{ return m_entityTick; }
-		static float32 GetPhysicsTick()	{ return m_physicsTick; }
-		static float32 GetDraw()		{ return m_draw; }
 
 		static uint16 GetPhysicsTickCounter() { return m_physicsTickCounterLastFrame; }
 

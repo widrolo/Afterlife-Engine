@@ -80,19 +80,16 @@ float64 StopWatch::GetTime<TimeUnit::Minutes>() const
 template<>
 float64 StopWatch::GetTime<TimeUnit::Seconds>() const
 {
-    using FloatSeconds = std::chrono::duration<float64>; // ratio<1> by default, float64 rep
     return std::chrono::duration_cast<FloatSeconds>(std::chrono::high_resolution_clock::now() - m_time).count();
 }
 template<>
 float64 StopWatch::GetTime<TimeUnit::Milliseconds>() const
 {
-    using FloatMillis = std::chrono::duration<float64, std::milli>;
     return std::chrono::duration_cast<FloatMillis>(std::chrono::high_resolution_clock::now() - m_time).count();
 }
 
 template<>
 float64 StopWatch::GetTime<TimeUnit::Microseconds>() const
 {
-    using FloatMicros = std::chrono::duration<float64, std::micro>;
     return std::chrono::duration_cast<FloatMicros>(std::chrono::high_resolution_clock::now() - m_time).count();
 }

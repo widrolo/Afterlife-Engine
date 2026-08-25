@@ -50,6 +50,9 @@ namespace Iris
         return true;
     }
 
+    // Deprecated because in theory, the driver is leagues faster at removing the leftover stuff than the engine
+    // manual deletion would be slower.
+    [[deprecated]]
     void Shutdown()
     {
         PrintNotImplemented("Shutdown");

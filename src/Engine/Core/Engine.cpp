@@ -3,6 +3,7 @@
 #include <chrono>
 #include <thread>
 #include <cstdlib>
+#include <xmmintrin.h>
 
 #include <Game/Core/Game.h>
 
@@ -28,6 +29,7 @@
 #include <Engine/Types/CoreSystems.h>
 #include <Engine/Core/System/Memory.h>
 
+#include "Engine/Util/TimeAnalysis.h"
 #include "System/Haptic.h"
 #include "System/Iris.h"
 using namespace WEngine;
@@ -197,6 +199,7 @@ void Engine::Run()
 	m_physicsTickTimer = 0.0f;
 	m_game->PreGameLoop();
 
+	TimeSample rootSample("Root", true);
 	while (CoreSystems::isGameRunning)
 	{
 		Loop_Begin(lastUpdate, uptime, frameStart);
@@ -205,6 +208,8 @@ void Engine::Run()
 		Loop_Audio();
 		Loop_Draw();
 		Loop_Finish();
+		rootSample.SaveAndResetRoot();
+
 		Loop_Stall(frameStart);
 	}
 
@@ -213,51 +218,36 @@ void Engine::Run()
 
 void Engine::Loop_Begin(std::chrono::steady_clock::time_point& last, StopWatch& uptime, std::chrono::time_point<std::chrono::steady_clock>& frameStart)
 {
-	StopWatch timings;
+	TimeSample sample("Engine::Loop_Begin");
 	m_uptime = (uint64)uptime.GetTime<TimeUnit::Seconds>();
-	timings.Reset();
 	// delta time
 	auto now = std::chrono::steady_clock::now();
 	m_deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(now - last).count() / 1000000.0f;
 	last = now;
 
 	frameStart = std::chrono::steady_clock::now();
-
-
 	m_physicsTickTimer += m_deltaTime;
 
-	//if (!Iris::IsFirstFrame())
-	//	Iris::SETTING_BeginNewPreFrame();
-
 	CoreSystems::GetAssetRepo()->TickTextureUpload();
-
 	CoreSystems::timeHandler->Update(m_deltaTime * CoreSystems::GetTimeScale());
 
 	m_game->GameLoopBegin(m_deltaTime * CoreSystems::GetTimeScale());
-	m_frameBegin = timings.GetTime<TimeUnit::Microseconds>();
-	timings.Reset();
-
-	m_sectorLoad = timings.GetTime<TimeUnit::Microseconds>();
-	timings.Reset();
 }
 
 void Engine::Loop_Tick()
 {
-
-	StopWatch timings;
+	TimeSample sample("Engine::Loop_Tick");
 
 	Haptic::FetchInput();
 
 	m_game->GameLoopTickEarly();
 	m_game->GameLoopTick();
 	m_game->GameLoopTickLate();
-	m_entityTick = timings.GetTime<TimeUnit::Microseconds>();
-	timings.Reset();
 }
 
 void Engine::Loop_Physics()
 {
-	StopWatch timings;
+	TimeSample sample("Engine::Loop_Physics");
 	m_physicsTickCounterLastFrame = 0;
 
 	m_game->GameLoopPhysicsEarly();
@@ -271,12 +261,11 @@ void Engine::Loop_Physics()
 	}
 	skipPhysics:
 	m_game->GameLoopPhysicsLate();
-	m_physicsTick = timings.GetTime<TimeUnit::Microseconds>();
-	timings.Reset();
 }
 
 void Engine::Loop_Audio()
 {
+	TimeSample sample("Engine::Loop_Audio");
 	m_game->GameLoopAudioEarly();
 	CoreSystems::audioHandler->AudioTick();
 	m_game->GameLoopAudioLate();
@@ -284,14 +273,11 @@ void Engine::Loop_Audio()
 
 void Engine::Loop_Draw()
 {
+	TimeSample sample("Engine::Loop_Draw");
 	CoreSystems::renderHandler->BeginFrame();
 
-	StopWatch timings;
 	m_game->GameLoopWidgetEarly();
 	CoreSystems::widgetHandler->DrawWidgets();
-
-	m_widgetDraw = timings.GetTime<TimeUnit::Microseconds>();
-	timings.Reset();
 
 	m_game->GameLoopDrawEarly();
 	m_game->GameLoopDraw();
@@ -303,13 +289,11 @@ void Engine::Loop_Draw()
 
 	CoreSystems::renderHandler->RenderFrame();
 	m_game->GameLoopDrawLate();
-	m_draw = timings.GetTime<TimeUnit::Microseconds>();
-	timings.Reset();
 }
 
 void Engine::Loop_Finish()
 {
-	StopWatch timings;
+	TimeSample sample("Engine::Loop_Finish");
 	CoreSystems::steamStore->DispatchCallbacks();
 
 	m_game->GameLoopFinish();
@@ -319,16 +303,17 @@ void Engine::Loop_Finish()
 
 void Engine::Loop_Stall(std::chrono::time_point<std::chrono::steady_clock>& frameStart)
 {
-	auto frameEndReal = std::chrono::steady_clock::now();
-	auto frameEnd = frameStart - frameEndReal + std::chrono::microseconds(cap);
+	//TimeSample sample("Engine::Loop_Stall");
+	const auto target = frameStart + std::chrono::microseconds(cap);
+	const auto now = std::chrono::steady_clock::now();
+	if (now < target)
+	{
+		const auto spinWindow = std::chrono::microseconds(1000);
+		if (target - now > spinWindow)
+			std::this_thread::sleep_until(target - spinWindow);
 
-	if (frameEnd.count() < 0)
-		frameEnd = std::chrono::microseconds(0);
-
-	sizeT sleepMs = (sizeT)frameEnd.count() / (1000 * 1000);
-	if (sleepMs > 1) SDL_Delay(sleepMs - 1);
-
-	// Spin for the remainder, this makes sure that the frame rate is rock solid on the cap.
-	while (std::chrono::steady_clock::now() < frameStart + std::chrono::microseconds(cap));
+		while (std::chrono::steady_clock::now() < target)
+			_mm_pause();
+	}
 }
 

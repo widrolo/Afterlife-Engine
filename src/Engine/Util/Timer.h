@@ -45,6 +45,9 @@ namespace WEngine
     /**
      * A stopwatch used for measuring elapsed time.
      */
+    using FloatSeconds = std::chrono::duration<float64>; // ratio<1> by default, float64 rep
+    using FloatMillis = std::chrono::duration<float64, std::milli>;
+    using FloatMicros = std::chrono::duration<float64, std::micro>;
     class StopWatch
     {
     public:
