@@ -4,7 +4,7 @@
 
 namespace WEditor
 {
-    class ComponentList : public WEngine::Widget
+    class EntryList : public WEngine::Widget
     {
     public:
         using Widget::Widget;
@@ -13,7 +13,6 @@ namespace WEditor
         void Setup() override;
     protected:
         void RenderInternal() override;
-
     };
 }
 

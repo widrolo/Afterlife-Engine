@@ -171,19 +171,16 @@ add_executable(Afterlife_Engine
         src/Editor/Types/MenubarItem.h
         src/Editor/MenubarItems/File/Menubar_Exit.cpp
         src/Editor/MenubarItems/File/Menubar_Exit.h
-        src/Editor/Types/ComponentSettingDefinition.h
-        src/Editor/Core/Handlers/CompSettingsRepo.cpp
-        src/Editor/Core/Handlers/CompSettingsRepo.h
         src/Editor/MenubarItems/File/Menubar_RunGame.cpp
         src/Editor/MenubarItems/File/Menubar_RunGame.h
         src/Editor/EditorWidgets/SectorList.cpp
         src/Editor/EditorWidgets/SectorList.h
-        src/Editor/EditorWidgets/EntityList.cpp
-        src/Editor/EditorWidgets/EntityList.h
-        src/Editor/EditorWidgets/ComponentList.cpp
-        src/Editor/EditorWidgets/ComponentList.h
-        src/Editor/EditorWidgets/ComponentSettings.cpp
-        src/Editor/EditorWidgets/ComponentSettings.h
+        src/Editor/EditorWidgets/EntryList.cpp
+        src/Editor/EditorWidgets/EntryList.h
+        src/Editor/EditorWidgets/AssetBrowser.cpp
+        src/Editor/EditorWidgets/AssetBrowser.h
+        src/Editor/EditorWidgets/EntryData.cpp
+        src/Editor/EditorWidgets/EntryData.h
         src/Editor/EditorWidgets/Viewport.cpp
         src/Editor/EditorWidgets/Viewport.h
         src/Editor/MenubarItems/Help/Menubar_About.cpp
@@ -192,10 +189,6 @@ add_executable(Afterlife_Engine
         src/Game/Core/Game.cpp
         src/Game/Core/Game.h
         src/Engine/WTL/list.h
-        src/Editor/EditorWidgets/Tools/ResolutionFinderWidget.cpp
-        src/Editor/EditorWidgets/Tools/ResolutionFinderWidget.h
-        src/Editor/MenubarItems/Tools/Menubar_ResFind.cpp
-        src/Editor/MenubarItems/Tools/Menubar_ResFind.h
         src/Engine/Core/System/GPU_OpenGL.cpp
         src/Engine/Core/System/Iris.h
         src/Engine/Types/Rendering/ShaderSettings.h
@@ -205,13 +198,7 @@ add_executable(Afterlife_Engine
         src/Engine/Types/DebugFlags.h
         src/Engine/EngineWidgets/DebugFlagsWidget.cpp
         src/Engine/EngineWidgets/DebugFlagsWidget.h
-        src/Editor/MenubarItems/Tools/Menubar_AnimEditor.cpp
-        src/Editor/MenubarItems/Tools/Menubar_AnimEditor.h
         src/Engine/Types/Rendering/PostProcessShader.h
-        src/Editor/MenubarItems/Help/Menubar_NodeTest.cpp
-        src/Editor/MenubarItems/Help/Menubar_NodeTest.h
-        src/Editor/EditorWidgets/Tests/NodeTestWidget.cpp
-        src/Editor/EditorWidgets/Tests/NodeTestWidget.h
         src/Engine/Types/AI/Behaviour/BehaviourTree.h
         src/Engine/Types/AI/Behaviour/BehaviourNode.h
         src/Engine/Types/AI/Behaviour/BehaviourExecutionStatus.h
@@ -341,6 +328,8 @@ add_executable(Afterlife_Engine
         src/Engine/Core/Handlers/SectorHandler.h
         src/Engine/Util/TimeAnalysis.cpp
         src/Engine/Util/TimeAnalysis.h
+        src/Editor/Core/Handlers/EditorSectorHandler.cpp
+        src/Editor/Core/Handlers/EditorSectorHandler.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

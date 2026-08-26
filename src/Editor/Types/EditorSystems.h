@@ -12,8 +12,8 @@ namespace WEditor
 
 	class Editor;
 	class EditorUIHandler;
+	class EditorSectorHandler;
 	class MenubarHandler;
-	class CompSettingsRepo;
 
 	struct EditorSystems
 	{
@@ -22,8 +22,8 @@ namespace WEditor
 		_GLOBAL_ WEngine::RenderHandler* renderHandler;
 		_GLOBAL_ WEngine::AssetRepo* assetRepo;
 		_GLOBAL_ EditorUIHandler* editorUIHandler;
+		_GLOBAL_ EditorSectorHandler* editorSectorHandler;
 		_GLOBAL_ MenubarHandler* menubarHandler;
-		_GLOBAL_ CompSettingsRepo* compSettingsRepo;
 
 		_GLOBAL_ bool* isEditorRunning;
 
@@ -33,8 +33,8 @@ namespace WEditor
 		static WEngine::RenderHandler* GetRenderHandler() { return renderHandler; }
 		static WEngine::AssetRepo* GetAssetRepo() { return assetRepo; }
 		static EditorUIHandler* GetEditorUIHandler() { return editorUIHandler; }
+		static EditorSectorHandler* GetEditorSectorHandler() { return editorSectorHandler; }
 		static MenubarHandler* GetMenubarHandler() { return menubarHandler; }
-		static CompSettingsRepo* GetCompSettingsRepo() { return compSettingsRepo; }
 		static float32 GetDt() { return dt; }
 
 

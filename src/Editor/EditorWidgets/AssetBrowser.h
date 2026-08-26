@@ -4,7 +4,7 @@
 
 namespace WEditor
 {
-    class EntityList : public WEngine::Widget
+    class AssetBrowser : public WEngine::Widget
     {
     public:
         using Widget::Widget;
@@ -13,6 +13,7 @@ namespace WEditor
         void Setup() override;
     protected:
         void RenderInternal() override;
+
     };
 }
 

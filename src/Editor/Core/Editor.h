@@ -1,5 +1,4 @@
 #pragma once
-#include "Engine/Math/Vector.h"
 
 namespace WEditor
 {

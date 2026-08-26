@@ -1,10 +1,10 @@
 #pragma once
-#include "Engine/Core/Widget.h"
 
+#include <Engine/Core/Widget.h>
 
 namespace WEditor
 {
-    class NodeTestWidget : public WEngine::Widget
+    class EntryData : public WEngine::Widget
     {
     public:
         using Widget::Widget;

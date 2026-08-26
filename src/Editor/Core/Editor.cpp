@@ -18,17 +18,13 @@
 
 #include <Editor/Core/Handlers/EditorUIHandler.h>
 #include <Editor/Core/Handlers/MenubarHandler.h>
-#include <Editor/Core/Handlers/CompSettingsRepo.h>
 
 #include <Engine/imgui/imgui.h>
 #include <Engine/imgui/imgui_internal.h>
-#include <Engine/imgui/backends/imgui_impl_sdl3.h>
-#include <Engine/imgui/backends/imgui_impl_opengl3.h>
-#include <Engine/imgui/implot.h>
 
 #include "Editor/Types/EditorState.h"
 #include "Engine/Core/System/Haptic.h"
-#include "Engine/Core/System/Iris.h"
+#include "Handlers/EditorSectorHandler.h"
 
 using namespace WEditor;
 
@@ -99,9 +95,8 @@ void Editor::InitHandlers()
 	ImGui::GetStyle().WindowBorderSize = 1;
     StartHandlerSingleEditor<EditorUIHandler>(&EditorSystems::editorUIHandler, "Editor UI Handler");
     StartHandlerSingleEditor<MenubarHandler>(&EditorSystems::menubarHandler, "Menubar Handler");
-    StartHandlerSingleEditor<CompSettingsRepo>(&EditorSystems::compSettingsRepo, "Component Settings Repo");
+    StartHandlerSingleEditor<EditorSectorHandler>(&EditorSystems::editorSectorHandler, "Editor Sector Handler");
 
-	WAllocator::Construct<WEngine::Sector, const std::string&>("root");
 	Haptic::EnableEditorMode();
 	Input::LoadInputMap();
 }
@@ -199,13 +194,13 @@ void Editor::Dock()
 		dockIdLeftTop = ImGui::DockBuilderSplitNode(dockIdLeft, ImGuiDir_Up, 0.33f, nullptr, &dockIdLeftBottom);
 
 		ImGuiID dockIdRightTop, dockIdRightBottom;
-		dockIdRightTop = ImGui::DockBuilderSplitNode(dockIdRight, ImGuiDir_Up, 0.5f, nullptr, &dockIdRightBottom);
+		dockIdRightTop = ImGui::DockBuilderSplitNode(dockIdRight, ImGuiDir_Up, 0.25f, nullptr, &dockIdRightBottom);
 
-		ImGui::DockBuilderDockWindow("Loaded Sectors", dockIdLeftTop);
-		ImGui::DockBuilderDockWindow("Entity List", dockIdLeftBottom);
+		ImGui::DockBuilderDockWindow("Sectors", dockIdLeftTop);
+		ImGui::DockBuilderDockWindow("Entries", dockIdLeftBottom);
 		ImGui::DockBuilderDockWindow("Viewport", dockIdCenter);
-		ImGui::DockBuilderDockWindow("Entity Properties", dockIdRightTop);
-		ImGui::DockBuilderDockWindow("Component Settings", dockIdRightBottom);
+		ImGui::DockBuilderDockWindow("Entry Data", dockIdRightTop);
+		ImGui::DockBuilderDockWindow("Asset Browser", dockIdRightBottom);
 
 		ImGui::DockBuilderFinish(dockspaceId);
 	}

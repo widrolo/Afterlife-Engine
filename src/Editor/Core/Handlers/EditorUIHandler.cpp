@@ -4,9 +4,9 @@
 #include <Engine/Core/Widget.h>
 
 #include <Editor/EditorWidgets/AboutWidget.h>
-#include <Editor/EditorWidgets/ComponentList.h>
-#include <Editor/EditorWidgets/ComponentSettings.h>
-#include <Editor/EditorWidgets/EntityList.h>
+#include <Editor/EditorWidgets/AssetBrowser.h>
+#include <Editor/EditorWidgets/EntryData.h>
+#include <Editor/EditorWidgets/EntryList.h>
 #include <Editor/EditorWidgets/SectorList.h>
 #include <Editor/EditorWidgets/Viewport.h>
 
@@ -36,9 +36,9 @@ EditorUIHandler::~EditorUIHandler()
 
 void EditorUIHandler::InitSystemWidgets()
 {
-    InitBaseWidget<ComponentList>(m_uiWidgets);
-    InitBaseWidget<ComponentSettings>(m_uiWidgets);
-    InitBaseWidget<EntityList>(m_uiWidgets);
+    InitBaseWidget<AssetBrowser>(m_uiWidgets);
+    InitBaseWidget<EntryData>(m_uiWidgets);
+    InitBaseWidget<EntryList>(m_uiWidgets);
     InitBaseWidget<Viewport>(m_uiWidgets);
     InitBaseWidget<SectorList>(m_uiWidgets);
 }
