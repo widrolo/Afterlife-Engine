@@ -6,12 +6,18 @@
 #include "Engine/Types/Rendering/RenderMission.h"
 #include "Engine/Types/Rendering/Iris/Handles.h"
 
+namespace WEditor
+{
+	class EntryList;
+}
+
 namespace WEngine
 {
 	class AssetRepo;
 	class Sector
 	{
 		friend AssetRepo;
+		friend WEditor::EntryList;
 	public:
 		Sector(const std::string& sectorName) : m_name(sectorName) {}
 

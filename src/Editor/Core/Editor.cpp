@@ -97,6 +97,7 @@ void Editor::InitHandlers()
     StartHandlerSingleEditor<MenubarHandler>(&EditorSystems::menubarHandler, "Menubar Handler");
     StartHandlerSingleEditor<EditorSectorHandler>(&EditorSystems::editorSectorHandler, "Editor Sector Handler");
 
+    WEngine::CoreSystems::assetRepo->RegisterAllTextures();
 	Haptic::EnableEditorMode();
 	Input::LoadInputMap();
 }
@@ -124,18 +125,13 @@ void Editor::Run()
 
 		auto frameStart = std::chrono::steady_clock::now();
 
+		WEngine::CoreSystems::GetAssetRepo()->TickTextureUpload();
 		Haptic::FetchInput();
-		//if (!Iris::IsFirstFrame())
-		//	Iris::SETTING_BeginNewPreFrame();
-
 
 		EditorSystems::renderHandler->BeginFrame();
 		EditorSystems::menubarHandler->Render();
 		Dock();
-
 		EditorSystems::editorUIHandler->DrawWidgets();
-
-
 		EditorSystems::renderHandler->RenderFrame();
 
 		auto frameEndReal = std::chrono::steady_clock::now();

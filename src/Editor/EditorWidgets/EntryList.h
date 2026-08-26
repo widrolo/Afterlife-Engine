@@ -13,6 +13,10 @@ namespace WEditor
         void Setup() override;
     protected:
         void RenderInternal() override;
+
+    private:
+        static constexpr sizeT NameBufferMaxSize = 256;
+        char* m_nameBuffer = nullptr;
     };
 }
 
