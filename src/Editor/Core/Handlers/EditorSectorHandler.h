@@ -1,4 +1,5 @@
 #pragma once
+#include "Editor/Core/World/EditorSector.h"
 #include "Engine/Core/World/Sector.h"
 #include "Engine/WTL/vector.h"
 
@@ -14,10 +15,10 @@ namespace WEditor
     public:
         void CreateSector(const std::string& secName);
         void DrawSectors();
-        wtl::vector<WEngine::Sector>& GetSectorList();
+        wtl::vector<EditorSector>& GetSectorList();
 
     private:
-        wtl::vector<WEngine::Sector> m_sectors;
+        wtl::vector<EditorSector> m_sectors;
     };
 }
 

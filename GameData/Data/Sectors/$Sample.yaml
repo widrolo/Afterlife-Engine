@@ -5,6 +5,8 @@
 # "Sector" is the top level node and identifies the file as containing a sector
 sector:
     0: 
+        # Only loaded for ATK, ignored by game.
+        name: "Missing Thing"
         # This is defined by the Afterlife Browser, and will extract:
         # 1: The first found mesh
         # 2: The first found texture
@@ -18,6 +20,7 @@ sector:
         # Scale of the object
         size: [1, 1, 1]
     1:
+        name: "Cool Shit"
         asset: /Something/Cool
         position: [5, 0, 2]
         rotation: [0, 0, 0, 1]

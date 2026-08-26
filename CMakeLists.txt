@@ -330,6 +330,10 @@ add_executable(Afterlife_Engine
         src/Engine/Util/TimeAnalysis.h
         src/Editor/Core/Handlers/EditorSectorHandler.cpp
         src/Editor/Core/Handlers/EditorSectorHandler.h
+        src/Editor/Core/World/EditorSector.cpp
+        src/Editor/Core/World/EditorSector.h
+        src/Editor/Core/World/EditorSectorEntry.cpp
+        src/Editor/Core/World/EditorSectorEntry.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

@@ -34,7 +34,7 @@ void SectorList::RenderInternal()
 
     for (auto& sec : list)
     {
-        if (ImGui::Button(sec.GetName().c_str()))
+        if (ImGui::Button(sec.name.c_str()))
         {
             if (EditorState::SelectedSector == &sec)
                 continue;

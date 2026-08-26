@@ -22,14 +22,13 @@ void EntryList::RenderInternal()
         return;
     }
 
-    // everything beyond this point is pretty much filler for whenever i fix the issue of
-    // sector entries not having a name
-
     ImGui::InputText("##", m_nameBuffer, NameBufferMaxSize);
     ImGui::SameLine();
-    if (ImGui::Button("Create"))
+    if (ImGui::Button("Create") && m_nameBuffer[0] != 0)
     {
-        EditorState::SelectedSector->m_entries.push_back(WEngine::SectorEntry(0, 0, 0, WEngine::Transform::Zero));
+        EditorSectorEntry entry;
+        entry.name = m_nameBuffer;
+        EditorState::SelectedSector->entries.push_back(entry);
         EditorState::SelectedEntry = nullptr;
         for (sizeT i = 0; i < NameBufferMaxSize; i++)
             m_nameBuffer[i] = 0;
@@ -38,9 +37,9 @@ void EntryList::RenderInternal()
     ImGui::SeparatorText("Entries");
 
     uint64 counter = 0;
-    for (auto& entry : EditorState::SelectedSector->m_entries)
+    for (auto& entry : EditorState::SelectedSector->entries)
     {
-        if (ImGui::Button(std::format("Entry {}", counter).c_str()))
+        if (ImGui::Button(std::format("{}##{}", entry.name, counter).c_str()))
         {
             EditorState::SelectedEntry = &entry;
         }

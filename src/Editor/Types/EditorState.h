@@ -2,19 +2,16 @@
 
 #include <Engine/Types/CommonTypes.h>
 
-namespace WEngine
-{
-    class Sector;
-    class SectorEntry;
-}
+#include "Editor/Core/World/EditorSector.h"
+
 namespace WEditor
 {
     struct EditorState
     {
         _GLOBAL_ bool EditorMode = false;
 
-        _GLOBAL_ WEngine::Sector* SelectedSector = nullptr;
-        _GLOBAL_ WEngine::SectorEntry* SelectedEntry = nullptr;
+        _GLOBAL_ EditorSector* SelectedSector = nullptr;
+        _GLOBAL_ EditorSectorEntry* SelectedEntry = nullptr;
         _GLOBAL_ bool ViewportSelected = false;
     };
 }
