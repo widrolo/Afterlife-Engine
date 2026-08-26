@@ -7,8 +7,7 @@ using namespace WEditor;
 
 EditorSectorHandler::EditorSectorHandler()
 {
-    // TODO: write a editor specific loader for editor sectors in asset repo.
-    //m_sectors = WEngine::CoreSystems::GetAssetRepo()->LoadAllSectors();
+    m_sectors = WEngine::CoreSystems::GetAssetRepo()->LoadAllEditorSectors();
 }
 
 void EditorSectorHandler::CreateSector(const std::string &secName)

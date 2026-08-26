@@ -380,6 +380,27 @@ wtl::vector<Sector> AssetRepo::LoadAllSectors()
 	return sectors;
 }
 
+wtl::vector<WEditor::EditorSector> AssetRepo::LoadAllEditorSectors()
+{
+	auto sectorDefs = OS::GetAllFileNamesInDir(GetDataPath() + EngineSettings::sectorPath);
+
+	wtl::vector<WEditor::EditorSector> sectors;
+
+	for (auto& def : sectorDefs)
+	{
+		std::string sectorName = std::filesystem::path(def).stem().string();
+
+		if (sectorName == "$Sample")
+			continue;
+		WEditor::EditorSector newSec{};
+		newSec.name = sectorName;
+		LoadSingleEditorSector(newSec);
+		sectors.push_back(newSec);
+	}
+
+	return sectors;
+}
+
 void AssetRepo::TickTextureUpload()
 {
 	TimeSample sample("AssetRepo::TickTextureUpload");
@@ -848,6 +869,41 @@ void AssetRepo::LoadSingleSector(Sector& storage)
 		storage.m_entries.push_back(newEntry);
 	}
 
+}
+
+void AssetRepo::LoadSingleEditorSector(WEditor::EditorSector &storage)
+{
+	std::string defPath = GetDataPath() + EngineSettings::sectorPath + storage.name + ".yaml";
+	std::string sectorDef = LoadTextFile(defPath);
+
+	YAML::Node root = YAML::Load(sectorDef);
+
+	if (!root["sector"])
+	{
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog(std::format("Unable to load sector \"{}\", missing sector identifier", storage.name));
+		return;
+	}
+
+	for (const auto& entry : root["sector"])
+	{
+		const auto& entryDef = entry.second;
+
+		const YAML::Node& pos = entryDef["position"];
+		const YAML::Node& rot = entryDef["rotation"];
+		const YAML::Node& size = entryDef["size"];
+
+		Transform t;
+		t.position = { pos[0].as<float32>(), pos[1].as<float32>(), pos[2].as<float32>() };
+		t.rotation = { rot[0].as<float32>(), rot[1].as<float32>(), rot[2].as<float32>(), rot[3].as<float32>() };
+		t.size = { size[0].as<float32>(), size[1].as<float32>(), size[2].as<float32>() };
+
+		WEditor::EditorSectorEntry newEntry;
+		newEntry.asset = entryDef["asset"].as<std::string>();
+		newEntry.name = entryDef["name"].as<std::string>();
+		newEntry.transform = t;
+		storage.entries.push_back(newEntry);
+	}
 }
 
 void AssetRepo::SortSectorForRender(wtl::vector<SectorEntry>& entries)

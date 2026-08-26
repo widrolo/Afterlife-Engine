@@ -6,6 +6,7 @@
 #include <string>
 #include <Engine/Types/Refcounted.h>
 
+#include "Editor/Core/World/EditorSector.h"
 #include "Engine/Core/World/SectorEntry.h"
 #include "Engine/Types/Rendering/Iris/Handles.h"
 #include "Engine/Types/Rendering/Iris/IrisAssetComms.h"
@@ -47,6 +48,7 @@ namespace WEngine
 		 */
 		void LoadAllGPUAssets();
 		wtl::vector<Sector> LoadAllSectors();
+		wtl::vector<WEditor::EditorSector> LoadAllEditorSectors();
 		/**
 		 * Since textures are a bit special when it comes to uploading to VRAM, we need to do it over time.
 		 * @note This should be called at the beginning of every frame.
@@ -126,6 +128,7 @@ namespace WEngine
 		void FinalizeTextureCopy();
 
 		void LoadSingleSector(Sector& storage);
+		void LoadSingleEditorSector(WEditor::EditorSector& storage);
 		void SortSectorForRender(wtl::vector<SectorEntry>& entries);
 		void UploadTransformsOfSector(Sector& storage, const wtl::vector<SectorEntry> &renderables);
 		void CreateRenderPlanForSector(Sector& storage, const wtl::vector<SectorEntry> &renderables);
