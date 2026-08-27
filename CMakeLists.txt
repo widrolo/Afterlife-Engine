@@ -189,7 +189,6 @@ add_executable(Afterlife_Engine
         src/Game/Core/Game.cpp
         src/Game/Core/Game.h
         src/Engine/WTL/list.h
-        src/Engine/Core/System/GPU_OpenGL.cpp
         src/Engine/Core/System/Iris.h
         src/Engine/Types/Rendering/ShaderSettings.h
         src/Engine/Types/Rendering/MeshInfo.h

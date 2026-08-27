@@ -29,7 +29,6 @@ void RenderWatchWidget::Header() const
         ImGui::TableNextColumn();
         switch (GPU_BACKEND)
         {
-            case GPU_OPENGL:    ImGui::Text("Renderer: OPENGL");    break;
             case GPU_VULKAN:    ImGui::Text("Renderer: VULKAN");    break;
             case GPU_D3D12:     ImGui::Text("Renderer: D3D12");     break;
             case GPU_METAL:     ImGui::Text("Renderer: METAL");     break;
