@@ -70,6 +70,36 @@ namespace Iris
         stats.bindStats.tableBinds++;
     }
 
+    void BindFramebuffer(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, uint32 slot, FramebufferHandle fb)
+    {
+        WEngine::TimeSample sample("[Iris]BindFramebuffer");
+        if (cmd == 0 || cmd > loadedCommandBuffers.size())
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog("Invalid command buffer handle, refusing to bind framebuffer!");
+            return;
+        }
+        if (pipeline == 0 || pipeline > loadedPipelines.size())
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog("Invalid pipeline handle, refusing to bind framebuffer!");
+            return;
+        }
+        if (fb == 0 || fb > loadedRenderTargets.size())
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog("Invalid framebuffer handle, refusing to bind framebuffer!");
+            return;
+        }
+
+        Vulkan_RenderTarget& rt = loadedRenderTargets[fb - 1];
+
+        vkCmdBindDescriptorSets(GetCurrentCmdBuff(cmd), VK_PIPELINE_BIND_POINT_GRAPHICS, loadedPipelines[pipeline - 1].layout,
+            slot, 1, &rt.descSets[rt.currentImage], 0, nullptr);
+        stats.bindStats.total++;
+        stats.bindStats.tableBinds++;
+    }
+
     void SetPushConstants(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, const byte* data, sizeT size)
     {
         WEngine::TimeSample sample("[Iris]SetPushConstants");

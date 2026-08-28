@@ -600,6 +600,13 @@ namespace Iris
     {
         WEngine::TimeSample sample("[Iris]CreateFramebuffer");
 
+        if (desc.resourceTableLayout == 0 || desc.resourceTableLayout > loadedResourceTableLayouts.size())
+        {
+            WEngine::WLog::SetConsoleWarning();
+            WEngine::WLog::ConsoleLog(std::format("Invalid resource table layout handle, refusing to create framebuffer!"));
+            return 99999999999; // because swapchain is 0
+        }
+
         Vulkan_RenderTarget rt{};
         rt.debugName = desc.debugName;
         rt.hasDepth = desc.hasDepth;
@@ -664,6 +671,121 @@ namespace Iris
         }
 
         PopulateSemsAndFences(rt);
+
+        // ---------------------------------
+
+        // for now, lets only focus on creating descriptors for the color buffer
+        const Vulkan_ResourceTableLayout& vkLayout = loadedResourceTableLayouts[desc.resourceTableLayout - 1];
+
+        VkDescriptorPool pool{};
+
+        // The layout's pool sizes cover a single set, but we're allocating
+        // renderTargetsInFlightImages sets, so scale every type to match.
+        wtl::vector<VkDescriptorPoolSize> poolSizes = vkLayout.poolSizes;
+        for (VkDescriptorPoolSize& poolSize : poolSizes)
+            poolSize.descriptorCount *= GPUSettingsVulkan::renderTargetsInFlightImages;
+
+        VkDescriptorPoolCreateInfo poolInfo{};
+        poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        poolInfo.maxSets = GPUSettingsVulkan::renderTargetsInFlightImages;
+        poolInfo.poolSizeCount = poolSizes.size();
+        poolInfo.pPoolSizes = poolSizes.data();
+
+        auto res = vkCreateDescriptorPool(vcore.gpuDevice, &poolInfo, vcore.allocator, &pool);
+
+        if (!ParseVkResult(res))
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog(std::format("Unable to create descriptor pool for table \"{}\"!", vkLayout.debugName));
+            return 0;
+        }
+
+        VkDescriptorSet sets[GPUSettingsVulkan::renderTargetsInFlightImages];
+
+        // pSetLayouts must be an array of descriptorSetCount entries, so repeat the layout once
+        // per set. Passing &vkLayout.layout alone would let the driver read past it.
+        VkDescriptorSetLayout layouts[GPUSettingsVulkan::renderTargetsInFlightImages];
+        for (sizeT i = 0; i < GPUSettingsVulkan::renderTargetsInFlightImages; i++)
+            layouts[i] = vkLayout.layout;
+
+        VkDescriptorSetAllocateInfo descAllocInfo{};
+        descAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        descAllocInfo.descriptorPool = pool;
+        descAllocInfo.descriptorSetCount = GPUSettingsVulkan::renderTargetsInFlightImages;
+        descAllocInfo.pSetLayouts = layouts;
+        res = vkAllocateDescriptorSets(vcore.gpuDevice, &descAllocInfo, sets);
+        if (!ParseVkResult(res))
+        {
+            vkDestroyDescriptorPool(vcore.gpuDevice, pool, vcore.allocator);
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog(std::format("Unable to allocate descriptor set for table \"{}\"!", vkLayout.debugName));
+            return 0;
+        }
+
+        for (sizeT i = 0; i < GPUSettingsVulkan::renderTargetsInFlightImages; i++)
+            rt.descSets[i] = sets[i];
+
+        // The very first image entry in the set gets the framebuffer's color image, one write
+        // per in-flight image. This is what makes the framebuffer samplable via BindFramebuffer.
+        const VkDescriptorSetLayoutBinding* imageBinding = nullptr;
+        for (const VkDescriptorSetLayoutBinding& candidate : vkLayout.bindings)
+        {
+            if (candidate.descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER ||
+                candidate.descriptorType == VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE ||
+                candidate.descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
+            {
+                imageBinding = &candidate;
+                break;
+            }
+        }
+        if (imageBinding == nullptr)
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog(std::format(
+                "Framebuffer \"{}\" needs a layout with an image binding to sample from!", desc.debugName));
+            return 0; // leaving the pool and sets alone on purpose, theyre unreferenced
+        }
+
+        // A combined image sampler must come with a sampler, no way around it.
+        if (imageBinding->descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER &&
+            (desc.sampler == 0 || desc.sampler > loadedSamplers.size()))
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog(std::format(
+                "Framebuffer \"{}\" needs a valid sampler for its combined image sampler binding!", desc.debugName));
+            return 0;
+        }
+
+        VkDescriptorImageInfo imageInfos[GPUSettingsVulkan::renderTargetsInFlightImages];
+        VkWriteDescriptorSet writes[GPUSettingsVulkan::renderTargetsInFlightImages];
+
+        for (sizeT i = 0; i < GPUSettingsVulkan::renderTargetsInFlightImages; i++)
+        {
+            VkDescriptorImageInfo& imgInfo = imageInfos[i];
+            imgInfo.sampler = (imageBinding->descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                ? loadedSamplers[desc.sampler - 1].sampler
+                : VK_NULL_HANDLE;
+            imgInfo.imageView = rt.targetImageViews[i];
+            imgInfo.imageLayout = (imageBinding->descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
+                ? VK_IMAGE_LAYOUT_GENERAL
+                : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+            VkWriteDescriptorSet& write = writes[i];
+            write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            write.pNext = nullptr;
+            write.dstSet = rt.descSets[i];
+            write.dstBinding = imageBinding->binding;
+            write.dstArrayElement = 0;
+            write.descriptorCount = 1;
+            write.descriptorType = imageBinding->descriptorType;
+            write.pImageInfo = &imgInfo;
+            write.pBufferInfo = nullptr;
+            write.pTexelBufferView = nullptr;
+        }
+
+        vkUpdateDescriptorSets(vcore.gpuDevice, GPUSettingsVulkan::renderTargetsInFlightImages, writes, 0, nullptr);
+
+        // ---------------------------------
 
         rt.state = RenderTargetState::Invalid;
         rt.lastUsedImage = 0;

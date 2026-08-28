@@ -46,7 +46,7 @@ Namespace `Iris`. The low-level, explicitly recorded command API for rendering. 
 | `ResourceTableHandle CreateResourceTable(ResourceTableLayoutHandle layout)` | Creates a resource table (descriptor set) from a layout. |
 | `GraphicsPipelineHandle CreateGraphicsPipeline(const GraphicsPipelineDesc& desc)` | Creates a graphics pipeline. |
 | `ComputePipelineHandle CreateComputePipeline(const ComputePipelineDesc& desc)` | Creates a compute pipeline. |
-| `FramebufferHandle CreateFramebuffer(const FramebufferDesc& desc)` | Creates a framebuffer from color/depth attachments. |
+| `FramebufferHandle CreateFramebuffer(const FramebufferDesc& desc)` | Creates a framebuffer from color/depth attachments. The first image binding of the given table layout is bound to the framebuffer's color attachment; a `sampler` is required when that binding is a combined image sampler. |
 
 #### Resource Updates & Destruction
 

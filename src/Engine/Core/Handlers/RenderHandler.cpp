@@ -58,6 +58,8 @@ RenderHandler::RenderHandler()
 	frameDesc.width = 1920;
 	frameDesc.height = 1080;
 	frameDesc.debugName = "Primary Framebuffer";
+	frameDesc.resourceTableLayout = m_mainTableLayout;
+	frameDesc.sampler = m_sampler;
 	m_primaryFramebuffer = Iris::CreateFramebuffer(frameDesc);
 }
 
@@ -231,7 +233,7 @@ void RenderHandler::RenderScreen()
 	Iris::BindGraphicsPipeline(m_screenCmd, m_screenPipeline);
 	Iris::BindVertexBuffers(m_screenCmd, 0, vertBuffs, vertOffs);
 
-	Iris::BindResourceTable(m_screenCmd, m_screenPipeline, 0, m_textureTables[1]); // just for testing
+	Iris::BindFramebuffer(m_screenCmd, m_screenPipeline, 0, m_primaryFramebuffer);
 	Iris::Draw(m_screenCmd, 4, 1, 0, 0);
 
 	Iris::EndRenderPass(m_screenCmd);
