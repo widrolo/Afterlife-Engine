@@ -236,7 +236,6 @@ void RenderHandler::RenderScreen()
 
 	Iris::EndRenderPass(m_screenCmd);
 	Iris::EndCommandBuffer(m_screenCmd);
-	WLog::ConsoleLog("Were here");
 	Iris::SubmitCommandBuffer(m_screenCmd);
 }
 
@@ -304,18 +303,18 @@ void RenderHandler::CreateScreen()
 	m_screenCmd = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
 
 	float32 screen[] = {
-		//  pos        uv
-		0.0f, 0.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, -1.0f, 0.0f, -1.0f,
-		1.0f, -1.0f, 1.0f, -1.0f
+		//  pos          uv
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
 	};
 
 	Iris::BufferDesc buffDesc{};
 	buffDesc.debugName = "Screen Mesh";
 	buffDesc.usage = Iris::BufferUsage::Vertex;
-	buffDesc.size = sizeof(float32) * 16;
-	m_screenMesh = Iris::CreateBuffer(buffDesc, (byte*)screen, sizeof(float32) * 16);
+	buffDesc.size = sizeof(screen);
+	m_screenMesh = Iris::CreateBuffer(buffDesc, (byte*)screen, sizeof(screen));
 
 	SpirVAssetMission mission{};
 	mission.name = "screen";
@@ -349,7 +348,7 @@ void RenderHandler::CreateScreen()
 	Iris::VertexBindingDesc binding{};
 	binding.binding = 0;
 	binding.perInstance = false;
-	binding.stride = 32;
+	binding.stride = 16;
 	vertDesc.bindings.push_back(binding);
 
 	Iris::VertexAttributeDesc attribute{};
@@ -370,6 +369,7 @@ void RenderHandler::CreateScreen()
 	pipeDesc.fragmentShader = m_screenFragmentShader;
 	pipeDesc.vertexLayout = vertDesc;
 	pipeDesc.rasterizer = rastDesc;
+	pipeDesc.topology = Iris::TopologyType::Triangle_Strip;
 	pipeDesc.depthStencil = Iris::DepthStencilDesc{};
 	pipeDesc.blend = Iris::BlendDesc{};
 

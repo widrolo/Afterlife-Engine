@@ -614,7 +614,7 @@ namespace Iris
         colorInfo.format = FindBestSwapchainFormat();
         colorInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         colorInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        colorInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         colorInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
         VkImageCreateInfo depthInfo = colorInfo;
@@ -667,6 +667,7 @@ namespace Iris
 
         rt.state = RenderTargetState::Invalid;
         rt.lastUsedImage = 0;
+        rt.currentImage = 0;
 
         loadedRenderTargets.push_back(rt);
         return loadedRenderTargets.size();

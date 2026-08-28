@@ -98,6 +98,9 @@ struct Vulkan_RenderTarget
     // If this render target is picked for rendering, then we take
     // image [lastUsedImage + 1] or wrapped and update this to that.
     uint8 lastUsedImage;
+    // The image index currently being recorded into, set by BeginRenderPass so EndRenderPass
+    // knows which image to transition.
+    uint8 currentImage;
 };
 
 struct Vulkan_RenderTargetSwapchain

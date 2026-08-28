@@ -210,10 +210,9 @@ namespace Iris
         else
         {
             auto& rt = loadedRenderTargets[desc.framebuffer - 1];
-            uint8 imageIndex = rt.lastUsedImage++;
-            if (imageIndex >= Vulkan_RenderTarget::maxIF)
-                imageIndex = 0;
-            rt.lastUsedImage = imageIndex;
+            uint8 imageIndex = rt.lastUsedImage;
+            rt.lastUsedImage = (uint8)((imageIndex + 1) % Vulkan_RenderTarget::maxIF);
+            rt.currentImage = imageIndex;
 
             currentlyRecording = &rt;
 
@@ -290,19 +289,22 @@ namespace Iris
         }
         vkCmdEndRendering(GetCurrentCmdBuff(cmd));
 
-        VkImageLayout newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
         VkImageMemoryBarrier imgBarrier{};
         imgBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         imgBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        imgBarrier.newLayout = newLayout;
-
-        if (currentlyRecording == nullptr)
-            imgBarrier.image = displayTarget.targetImages[screen.currentFrame];
-        else
-            imgBarrier.image = currentlyRecording->targetImages[screen.currentFrame];
         imgBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         imgBarrier.dstAccessMask = 0;
+
+        if (currentlyRecording == nullptr)
+        {
+            imgBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            imgBarrier.image = displayTarget.targetImages[screen.currentFrame];
+        }
+        else
+        {
+            imgBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imgBarrier.image = currentlyRecording->targetImages[currentlyRecording->currentImage];
+        }
 
         imgBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         imgBarrier.subresourceRange.baseMipLevel = 0;
