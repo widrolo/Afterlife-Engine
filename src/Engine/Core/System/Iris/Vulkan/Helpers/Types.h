@@ -72,6 +72,8 @@ struct Vulkan_ResourceTable
 struct Vulkan_CmdBuff
 {
     wtl::vector<VkCommandBuffer> commandBuffers;
+    wtl::vector<VkFence> fences;
+    wtl::vector<VkSemaphore> signalSems;
     VkQueue queue = VK_NULL_HANDLE;
 };
 

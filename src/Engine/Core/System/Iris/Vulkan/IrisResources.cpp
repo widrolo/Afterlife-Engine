@@ -380,6 +380,8 @@ namespace Iris
             return 0;
         }
 
+
+
         std::array<VkPushConstantRange, 1> pushConstants;
 
         pushConstants[0].stageFlags = IrisShaderStageToVulkan(desc.pushConstantsStage);
@@ -389,8 +391,11 @@ namespace Iris
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.pushConstantRangeCount = pushConstants.size();
-        pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
+        if (desc.pushConstantsSize != 0)
+        {
+            pipelineLayoutInfo.pushConstantRangeCount = pushConstants.size();
+            pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
+        }
 
         wtl::vector<VkDescriptorSetLayout> descriptorSetLayouts(desc.tableAttachmentCount);
 

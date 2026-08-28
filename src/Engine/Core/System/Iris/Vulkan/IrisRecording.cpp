@@ -24,6 +24,8 @@ namespace Iris
         allocInfo.commandBufferCount = 1;
 
         entry.commandBuffers.resize(frameCount);
+        entry.fences.resize(frameCount);
+        entry.signalSems.resize(frameCount);
         for (uint32 i = 0; i < frameCount; ++i)
         {
             allocInfo.commandPool = framePools[i].pool[(uint8)queue];
@@ -32,6 +34,27 @@ namespace Iris
             {
                 WEngine::WLog::SetConsoleError();
                 WEngine::WLog::ConsoleLog("Unable to create command buffer");
+                return 0;
+            }
+
+            VkFenceCreateInfo fenceInfo{};
+            fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+            fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // so the first frame doesn't block forever
+            res = vkCreateFence(vcore.gpuDevice, &fenceInfo, vcore.allocator, &entry.fences[i]);
+            if (!ParseVkResult(res))
+            {
+                WEngine::WLog::SetConsoleError();
+                WEngine::WLog::ConsoleLog("Unable to create command buffer fence");
+                return 0;
+            }
+
+            VkSemaphoreCreateInfo semInfo{};
+            semInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+            res = vkCreateSemaphore(vcore.gpuDevice, &semInfo, vcore.allocator, &entry.signalSems[i]);
+            if (!ParseVkResult(res))
+            {
+                WEngine::WLog::SetConsoleError();
+                WEngine::WLog::ConsoleLog("Unable to create command buffer semaphore");
                 return 0;
             }
         }
@@ -130,21 +153,25 @@ namespace Iris
         const uint32 slot = commandBufferFrameIndex % (uint32)framePools.size();
         const Vulkan_CmdBuff& cmdBuff = loadedCommandBuffers[cmd - 1];
 
-        const VkSemaphore imageAvailable = displayTarget.imageAvailableSems[screen.currentFrame];
-        const VkSemaphore renderFinished  = displayTarget.renderFinishedSems[screen.currentFrame];
+        const VkSemaphore waitSemaphore = (lastSubmittedSignalSem == VK_NULL_HANDLE)
+            ? displayTarget.imageAvailableSems[screen.currentFrame]
+            : lastSubmittedSignalSem;
+        const VkSemaphore renderFinished  = cmdBuff.signalSems[slot];
         const VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
         VkSubmitInfo submit{};
         submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submit.waitSemaphoreCount   = 1;
-        submit.pWaitSemaphores      = &imageAvailable;
+        submit.pWaitSemaphores      = &waitSemaphore;
         submit.pWaitDstStageMask    = &waitStage;
         submit.signalSemaphoreCount = 1;
         submit.pSignalSemaphores    = &renderFinished;
         submit.commandBufferCount   = 1;
         submit.pCommandBuffers      = &cmdBuff.commandBuffers[slot];
 
-        vkQueueSubmit(cmdBuff.queue, 1, &submit, framePools[slot].fence);
+        vkQueueSubmit(cmdBuff.queue, 1, &submit, cmdBuff.fences[slot]);
+
+        lastSubmittedSignalSem = renderFinished;
     }
 
     // We conveniently ignore most of the attachment information of the description as of now because for now,
@@ -166,11 +193,41 @@ namespace Iris
         clearValues[0].color = clearCol;
         clearValues[1].depthStencil = { desc.depthStencil.clearDepth, desc.depthStencil.clearStencil };
 
+        VkImage* colorImage = nullptr;
+        VkImage* depthImage = nullptr;
+        VkImageView* colorImageView = nullptr;
+        VkImageView* depthImageView = nullptr;
+
+        if (desc.framebuffer == 0 || desc.framebuffer > loadedRenderTargets.size())
+        {
+            currentlyRecording = nullptr;
+
+            colorImage = &displayTarget.targetImages[screen.currentFrame];
+            colorImageView = &displayTarget.targetImageViews[screen.currentFrame];
+            depthImage = &screen.depthImage;
+            depthImageView = &screen.depthImageView;
+        }
+        else
+        {
+            auto& rt = loadedRenderTargets[desc.framebuffer - 1];
+            uint8 imageIndex = rt.lastUsedImage++;
+            if (imageIndex >= Vulkan_RenderTarget::maxIF)
+                imageIndex = 0;
+            rt.lastUsedImage = imageIndex;
+
+            currentlyRecording = &rt;
+
+            colorImage = &rt.targetImages[imageIndex];
+            colorImageView = &rt.targetImageViews[imageIndex];
+            depthImage = &rt.depthImages[imageIndex];
+            depthImageView = &rt.depthImageViews[imageIndex];
+        }
+
         VkImageMemoryBarrier colBarrier{};
         colBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         colBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         colBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        colBarrier.image = displayTarget.targetImages[screen.currentFrame];
+        colBarrier.image = *colorImage;
         colBarrier.srcAccessMask = 0;
         colBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
@@ -185,7 +242,7 @@ namespace Iris
 
         // never trusting vulkan with things passed in as reference!
         VkImageMemoryBarrier depthBarrier = colBarrier;
-        depthBarrier.image = screen.depthImage;
+        depthBarrier.image = *depthImage;
         depthBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         depthBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         depthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
@@ -196,7 +253,7 @@ namespace Iris
         VkRenderingAttachmentInfo colorAttachmentInfo{};
         colorAttachmentInfo.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
         colorAttachmentInfo.clearValue = clearValues[0];
-        colorAttachmentInfo.imageView = displayTarget.targetImageViews[screen.currentFrame];
+        colorAttachmentInfo.imageView = *colorImageView;
         colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         colorAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -206,7 +263,7 @@ namespace Iris
         depthAttachmentInfo.clearValue = clearValues[1];
         depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         depthAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthAttachmentInfo.imageView = screen.depthImageView;
+        depthAttachmentInfo.imageView = *depthImageView;
         depthAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
 
@@ -239,7 +296,11 @@ namespace Iris
         imgBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         imgBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         imgBarrier.newLayout = newLayout;
-        imgBarrier.image = displayTarget.targetImages[screen.currentFrame];
+
+        if (currentlyRecording == nullptr)
+            imgBarrier.image = displayTarget.targetImages[screen.currentFrame];
+        else
+            imgBarrier.image = currentlyRecording->targetImages[screen.currentFrame];
         imgBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         imgBarrier.dstAccessMask = 0;
 

@@ -148,6 +148,8 @@ inline wtl::vector<Vulkan_CmdBuff> loadedCommandBuffers{};
 inline wtl::vector<Vulkan_CopyBuff> loadedCopyBuffers{};
 inline wtl::vector<Vulkan_Pipeline> loadedPipelines{};
 inline wtl::vector<Vulkan_RenderTarget> loadedRenderTargets{};
+inline Vulkan_RenderTarget* currentlyRecording;
+inline VkSemaphore lastSubmittedSignalSem = VK_NULL_HANDLE;
 
 inline VkSampler imGuiSampler;
 

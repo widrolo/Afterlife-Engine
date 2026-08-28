@@ -70,12 +70,14 @@ namespace WEngine
 
 	private:
 		void PrepareRenderingSetup();
+		void CreateScreen();
 		void LoadShaders();
 		void CreateTables();
 		void CreatePipelines();
 
 		void RenderSingleMission(const RenderMission& mission, const glm::mat4& vp);
 		void RenderSinglePlan(const RenderPlan& plan, const Mat4x4& vp);
+		void RenderScreen();
 
 		Mat4x4 CalcModelMatrix(const Transform& transform);
 		glm::mat4 CalcModelMatrixGLM(const Transform& transform);
@@ -97,6 +99,15 @@ namespace WEngine
 		Iris::GraphicsPipelineHandle m_basicPipeline;
 		Iris::GraphicsPipelineHandle m_statPipeline;
 		Iris::SamplerHandle m_sampler;
+		Iris::FramebufferHandle m_primaryFramebuffer;
+		Iris::CommandBufferHandle m_primaryCmd;
+
+		// screen stuff
+		Iris::CommandBufferHandle m_screenCmd;
+		Iris::BufferHandle m_screenMesh;
+		Iris::ShaderHandle m_screenVertexShader;
+		Iris::ShaderHandle m_screenFragmentShader;
+		Iris::GraphicsPipelineHandle m_screenPipeline;
 
 		wtl::vector<Iris::ResourceTableHandle> m_textureTables;
 		uint64 m_currentBoundTexture = 0;

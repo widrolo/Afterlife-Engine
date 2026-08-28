@@ -25,7 +25,6 @@
 
 using namespace WEngine;
 
-Iris::CommandBufferHandle tempHandle;
 RenderHandler::RenderHandler()
 {
 	InitSDL();
@@ -53,13 +52,13 @@ RenderHandler::RenderHandler()
 		1000.0f
 		);
 
-	tempHandle = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
+	m_primaryCmd = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
 	Iris::FramebufferDesc frameDesc{};
 	frameDesc.hasDepth = true;
 	frameDesc.width = 1920;
 	frameDesc.height = 1080;
-	frameDesc.debugName = "dummy framebuffer";
-	Iris::CreateFramebuffer(frameDesc);
+	frameDesc.debugName = "Primary Framebuffer";
+	m_primaryFramebuffer = Iris::CreateFramebuffer(frameDesc);
 }
 
 void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)
@@ -87,16 +86,17 @@ void RenderHandler::BeginFrame()
 	Iris::BeginFrame();
 	Iris::AcquireSwapchainTexture();
 	Iris::ImGuiNewFrame();
-	Iris::BeginCommandBuffer(tempHandle);
+	Iris::BeginCommandBuffer(m_primaryCmd);
 
 	Iris::RenderPassBeginDesc desc{};
 	desc.colorAttachment.clearColor = m_camColor;
-	Iris::BeginRenderPass(tempHandle, desc);
+	desc.framebuffer = m_primaryFramebuffer;
+	Iris::BeginRenderPass(m_primaryCmd, desc);
 
 	Iris::Viewport vp{};
 	vp.extent = {1920.0f, 1080.0f};
 	vp.maxDepth = 1.0f;
-	Iris::SetViewport(tempHandle, vp);
+	Iris::SetViewport(m_primaryCmd, vp);
 
 
 	Vector3 camPos = m_camera.position;
@@ -116,18 +116,18 @@ void RenderHandler::RenderFrame()
 	wtl::vector<Iris::BufferHandle> vertBuffs{CoreSystems::GetAssetRepo()->GetVertexBuffer()};
 	wtl::vector<sizeT> vertOffs{0};
 
-	Iris::BindGraphicsPipeline(tempHandle, m_statPipeline);
-	Iris::BindVertexBuffers(tempHandle, 0, vertBuffs, vertOffs);
-	Iris::BindIndexBuffer(tempHandle, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
+	Iris::BindGraphicsPipeline(m_primaryCmd, m_statPipeline);
+	Iris::BindVertexBuffers(m_primaryCmd, 0, vertBuffs, vertOffs);
+	Iris::BindIndexBuffer(m_primaryCmd, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
 
 	Mat4x4 vp = Glm4x4ToMat4x4(vpGLM);
 
 	for (const auto& plan : m_renderPlanQueue)
 		RenderSinglePlan(plan, vp);
 
-	Iris::BindGraphicsPipeline(tempHandle, m_basicPipeline);
-	Iris::BindVertexBuffers(tempHandle, 0, vertBuffs, vertOffs);
-	Iris::BindIndexBuffer(tempHandle, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
+	Iris::BindGraphicsPipeline(m_primaryCmd, m_basicPipeline);
+	Iris::BindVertexBuffers(m_primaryCmd, 0, vertBuffs, vertOffs);
+	Iris::BindIndexBuffer(m_primaryCmd, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
 
 	for (const auto& mission : m_renderQueue)
 		RenderSingleMission(mission, vpGLM);
@@ -137,21 +137,22 @@ void RenderHandler::RenderFrame()
 		// temp until we have proper drawing again
 		if (m_isEditor)
 		{
-			Iris::ImGuiRenderDrawData(tempHandle);
+			Iris::ImGuiRenderDrawData(m_primaryCmd);
 		}
 		else
 		{
-			Iris::ImGuiRenderDrawData(tempHandle);
+			Iris::ImGuiRenderDrawData(m_primaryCmd);
 		}
 	}
 	else
 	{
-		Iris::ImGuiRenderDrawData(tempHandle);
+		Iris::ImGuiRenderDrawData(m_primaryCmd);
 	}
 
-	Iris::EndRenderPass(tempHandle);
-	Iris::EndCommandBuffer(tempHandle);
-	Iris::SubmitCommandBuffer(tempHandle);
+	Iris::EndRenderPass(m_primaryCmd);
+	Iris::EndCommandBuffer(m_primaryCmd);
+	Iris::SubmitCommandBuffer(m_primaryCmd);
+	RenderScreen();
 	Iris::Present();
 	m_renderQueue.clear();
 	m_renderPlanQueue.clear();
@@ -178,16 +179,16 @@ void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm:
 	Mat4x4 mvp = Glm4x4ToMat4x4(vp * CalcModelMatrixGLM(mission.transform));
 
 	if (mission.textureUID != m_currentBoundTexture)
-		Iris::BindResourceTable(tempHandle, m_basicPipeline, 0, m_textureTables[mission.textureUID]);
+		Iris::BindResourceTable(m_primaryCmd, m_basicPipeline, 0, m_textureTables[mission.textureUID]);
 	m_currentBoundTexture = mission.textureUID;
-	Iris::SetPushConstants(tempHandle, m_basicPipeline, (byte*)&mvp, sizeof(mvp));
-	Iris::DrawIndexed(tempHandle, indexCount, 1, indexOffset, vertOffset, 0);
+	Iris::SetPushConstants(m_primaryCmd, m_basicPipeline, (byte*)&mvp, sizeof(mvp));
+	Iris::DrawIndexed(m_primaryCmd, indexCount, 1, indexOffset, vertOffset, 0);
 }
 
 void RenderHandler::RenderSinglePlan(const RenderPlan &plan, const Mat4x4 &vp)
 {
 	TimeSample sample("RenderHandler::RenderSinglePlan");
-	Iris::BindVertexBuffers(tempHandle, 1, {plan.statBuffer}, {0});
+	Iris::BindVertexBuffers(m_primaryCmd, 1, {plan.statBuffer}, {0});
 	for (const auto& part : plan.parts)
 	{
 		if (!CoreSystems::GetAssetRepo()->IsTextureDoneLoading(part.textureUID))
@@ -204,11 +205,39 @@ void RenderHandler::RenderSinglePlan(const RenderPlan &plan, const Mat4x4 &vp)
 		sizeT vertOffset = meshMission.model.vertexOffset / vertexSize;
 
 		if (part.textureUID != m_currentBoundTexture)
-			Iris::BindResourceTable(tempHandle, m_basicPipeline, 0, m_textureTables[part.textureUID]);
+			Iris::BindResourceTable(m_primaryCmd, m_basicPipeline, 0, m_textureTables[part.textureUID]);
 		m_currentBoundTexture = part.textureUID;
-		Iris::SetPushConstants(tempHandle, m_basicPipeline, (byte*)&vp, sizeof(vp));
-		Iris::DrawIndexed(tempHandle, indexCount, part.count, indexOffset, vertOffset, part.offset);
+		Iris::SetPushConstants(m_primaryCmd, m_basicPipeline, (byte*)&vp, sizeof(vp));
+		Iris::DrawIndexed(m_primaryCmd, indexCount, part.count, indexOffset, vertOffset, part.offset);
 	}
+}
+
+void RenderHandler::RenderScreen()
+{
+	Iris::BeginCommandBuffer(m_screenCmd);
+
+	Iris::RenderPassBeginDesc desc{};
+	desc.colorAttachment.clearColor = m_camColor;
+	Iris::BeginRenderPass(m_screenCmd, desc);
+
+	Iris::Viewport vp{};
+	vp.extent = {1920.0f, 1080.0f};
+	vp.maxDepth = 1.0f;
+	Iris::SetViewport(m_screenCmd, vp);
+
+	wtl::vector<Iris::BufferHandle> vertBuffs{m_screenMesh};
+	wtl::vector<sizeT> vertOffs{0};
+
+	Iris::BindGraphicsPipeline(m_screenCmd, m_screenPipeline);
+	Iris::BindVertexBuffers(m_screenCmd, 0, vertBuffs, vertOffs);
+
+	Iris::BindResourceTable(m_screenCmd, m_screenPipeline, 0, m_textureTables[1]); // just for testing
+	Iris::Draw(m_screenCmd, 4, 1, 0, 0);
+
+	Iris::EndRenderPass(m_screenCmd);
+	Iris::EndCommandBuffer(m_screenCmd);
+	WLog::ConsoleLog("Were here");
+	Iris::SubmitCommandBuffer(m_screenCmd);
 }
 
 void RenderHandler::UpdateCamera(const Transform &trans)
@@ -261,11 +290,93 @@ void RenderHandler::RegisterTexture(Iris::TextureHandle handle)
 	m_textureTables.push_back(table);
 }
 
+
 void RenderHandler::PrepareRenderingSetup()
 {
 	LoadShaders();
 	CreateTables();
 	CreatePipelines();
+	CreateScreen();
+}
+
+void RenderHandler::CreateScreen()
+{
+	m_screenCmd = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
+
+	float32 screen[] = {
+		//  pos        uv
+		0.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, -1.0f, 0.0f, -1.0f,
+		1.0f, -1.0f, 1.0f, -1.0f
+	};
+
+	Iris::BufferDesc buffDesc{};
+	buffDesc.debugName = "Screen Mesh";
+	buffDesc.usage = Iris::BufferUsage::Vertex;
+	buffDesc.size = sizeof(float32) * 16;
+	m_screenMesh = Iris::CreateBuffer(buffDesc, (byte*)screen, sizeof(float32) * 16);
+
+	SpirVAssetMission mission{};
+	mission.name = "screen";
+	mission.shaderType = SpirVAssetMission::VertexShader;
+	CoreSystems::GetAssetRepo()->GetAsset(mission);
+
+	Iris::ShaderStageDesc desc{};
+	desc.debugName = "Screen Shader";
+	desc.stage = Iris::ShaderStage::Vertex;
+	desc.entryPoint = "main";
+	desc.bytecode = mission.shaderCode;
+	desc.bytecodeSize = mission.shaderSize;
+	m_screenVertexShader = Iris::CreateShader(desc);
+
+	mission.name = "screen";
+	mission.shaderType = SpirVAssetMission::FragmentShader;
+	CoreSystems::GetAssetRepo()->GetAsset(mission);
+
+	desc.debugName = "Screen Fragment Shader";
+	desc.stage = Iris::ShaderStage::Fragment;
+	desc.bytecode = mission.shaderCode;
+	desc.bytecodeSize = mission.shaderSize;
+	m_screenFragmentShader = Iris::CreateShader(desc);
+
+	// we will use basic 2D rendering for the screen
+	// |     Name     |  Size  |
+	// |--------------|--------|
+	// |Position      | 8 bytes|
+	// |UV            | 8 bytes|
+	Iris::VertexLayoutDesc vertDesc{};
+	Iris::VertexBindingDesc binding{};
+	binding.binding = 0;
+	binding.perInstance = false;
+	binding.stride = 32;
+	vertDesc.bindings.push_back(binding);
+
+	Iris::VertexAttributeDesc attribute{};
+	attribute.binding = 0;
+	attribute.location = 0;
+	attribute.format = Iris::VertFormat::Float2;
+	vertDesc.attributes.push_back(attribute);
+
+	attribute.location = 1;
+	vertDesc.attributes.push_back(attribute);
+
+	Iris::RasterizerDesc rastDesc{};
+	rastDesc.frontFace = Iris::FrontFace::CounterClockwise;
+
+	Iris::GraphicsPipelineDesc pipeDesc{};
+	pipeDesc.debugName = "Screen Pipeline";
+	pipeDesc.vertexShader = m_screenVertexShader;
+	pipeDesc.fragmentShader = m_screenFragmentShader;
+	pipeDesc.vertexLayout = vertDesc;
+	pipeDesc.rasterizer = rastDesc;
+	pipeDesc.depthStencil = Iris::DepthStencilDesc{};
+	pipeDesc.blend = Iris::BlendDesc{};
+
+	pipeDesc.tableLayouts[0] = m_mainTableLayout;
+	pipeDesc.tableAttachmentCount = 1;
+
+	m_screenPipeline = Iris::CreateGraphicsPipeline(pipeDesc);
 }
 
 void RenderHandler::LoadShaders()
