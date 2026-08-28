@@ -64,7 +64,7 @@ bool SetupSwapchain()
     stats.vramStats.total += size;
     stats.vramStats.framebuffers += size;
 
-    PopulateSemsAndFences(displayTarget);
+    PopulateSemsAndFencesSwapchain(displayTarget);
 
     displayTarget.resolution = EngineSettings::resolution;
 

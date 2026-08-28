@@ -9,6 +9,13 @@
 #include "Engine/Types/Rendering/Iris/Handles.h"
 #include "Engine/WTL/vector.h"
 
+enum class RenderTargetState
+{
+    Invalid,// has to be initialized via barrier first.
+    Target, // can be used for rendering
+    Source  // can be used for sampling.
+};
+
 struct Vulkan_Buffer
 {
     std::string debugName;

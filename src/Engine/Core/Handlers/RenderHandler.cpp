@@ -54,6 +54,12 @@ RenderHandler::RenderHandler()
 		);
 
 	tempHandle = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
+	Iris::FramebufferDesc frameDesc{};
+	frameDesc.hasDepth = true;
+	frameDesc.width = 1920;
+	frameDesc.height = 1080;
+	frameDesc.debugName = "dummy framebuffer";
+	Iris::CreateFramebuffer(frameDesc);
 }
 
 void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)

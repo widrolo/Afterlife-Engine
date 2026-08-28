@@ -4,6 +4,7 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan.h>
 
+#include "Engine/Core/System/GPUSettings.h"
 #include "Engine/Types/CommonTypes.h"
 #include "Engine/Util/BitwiseMacros.h"
 #include "Engine/Math/Vector.h"
@@ -72,24 +73,41 @@ struct Vulkan_Screen
 
 struct Vulkan_RenderTarget
 {
+    _GLOBAL_CEX_ uint64 maxIF = GPUSettingsVulkan::renderTargetsInFlightImages;
+    std::string debugName;
+
+    // color
+    std::array<VkImage, maxIF> targetImages;
+    std::array<VkImageView, maxIF> targetImageViews;
+    std::array<VmaAllocation, maxIF> targetImageAlloc;
+    std::array<VkDescriptorSet, maxIF> descSets;
+
+    // depth
+    std::array<VkImage, maxIF> depthImages;
+    std::array<VkImageView, maxIF> depthImageViews;
+    std::array<VmaAllocation, maxIF> depthImageAlloc;
+    std::array<VkDescriptorSet, maxIF> depthDescSets;
+
+    std::array<VkFence, maxIF> endOfFrameFences;
+    std::array<VkSemaphore, maxIF> renderFinishedSems;
+    std::array<VkSemaphore, maxIF> imageAvailableSems;
+    WEngine::Vector2 resolution;
+    RenderTargetState state;
+    bool hasDepth;
+
+    // If this render target is picked for rendering, then we take
+    // image [lastUsedImage + 1] or wrapped and update this to that.
+    uint8 lastUsedImage;
+};
+
+struct Vulkan_RenderTargetSwapchain
+{
     WEngine::Vector2 resolution;
     wtl::vector<VkImage> targetImages;
     wtl::vector<VkImageView> targetImageViews;
-    wtl::vector<VkSampler> targetSampler;
-    wtl::vector<VkImage> depthImages;
-    wtl::vector<VkImageView> depthImageViews;
-    wtl::vector<VkSampler> depthSampler;
-    wtl::vector<VmaAllocation> targetImageAlloc;
-    wtl::vector<VmaAllocation> depthImageAlloc;
-    wtl::vector<VkSemaphore> imageAvailableSems;
-    wtl::vector<VkSemaphore> renderFinishedSems;
     wtl::vector<VkFence> endOfFrameFences;
-    wtl::vector<VkCommandBuffer> cmdBuffs;
-    wtl::vector<VkDescriptorSet> descSets;
-    wtl::vector<VkDescriptorSet> depthDescSets;
-    wtl::vector<VkImageLayout> currentLayouts;
-    wtl::vector<VkImageLayout> currentDepthLayouts;
-    bool hasDepth;
+    wtl::vector<VkSemaphore> renderFinishedSems;
+    wtl::vector<VkSemaphore> imageAvailableSems;
 };
 
 struct VulkanStatistics
@@ -115,7 +133,7 @@ inline IrisContext irisCtx{};
 inline VulkanCore vcore{};
 inline Vulkan_Queues queues{};
 inline Vulkan_Screen screen{};
-inline Vulkan_RenderTarget displayTarget{};
+inline Vulkan_RenderTargetSwapchain displayTarget{};
 inline VulkanStatistics stats{};
 inline wtl::vector<BufferCollection> bufferGraveyard{};
 inline wtl::vector<Vulkan_Buffer> loadedBuffers{};
@@ -129,6 +147,7 @@ inline wtl::vector<Vulkan_FramePools> framePools{};
 inline wtl::vector<Vulkan_CmdBuff> loadedCommandBuffers{};
 inline wtl::vector<Vulkan_CopyBuff> loadedCopyBuffers{};
 inline wtl::vector<Vulkan_Pipeline> loadedPipelines{};
+inline wtl::vector<Vulkan_RenderTarget> loadedRenderTargets{};
 
 inline VkSampler imGuiSampler;
 

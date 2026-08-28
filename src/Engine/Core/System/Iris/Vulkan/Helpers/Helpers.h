@@ -11,6 +11,9 @@
 #include "Engine/Types/Rendering/Iris/Resource.h"
 #include "Engine/Types/Rendering/Iris/Usage.h"
 
+// Since the swapchain is special, it gets to use the zero handle.
+constexpr uint64 swapchainHandle = 0;
+
 void PrintNotImplemented(const std::string& functionName);
 bool ParseVkResult(VkResult result);
 VkBool32 ValidationCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes,

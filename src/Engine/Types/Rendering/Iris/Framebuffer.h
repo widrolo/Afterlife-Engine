@@ -8,11 +8,10 @@ namespace Iris
 {
     struct FramebufferDesc
     {
-        wtl::vector<TextureHandle> colorAttachments;
-        TextureHandle depthStencilAttachment;
         uint32 width;
         uint32 height;
         uint32 layers = 1;
+        bool hasDepth;
         std::string debugName;
     };
 }

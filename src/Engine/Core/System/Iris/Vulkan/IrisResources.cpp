@@ -8,6 +8,7 @@
 #include "IrisGlobals.h"
 #include "Engine/Util/TimeAnalysis.h"
 #include "Helpers/Helpers.h"
+#include "Helpers/Sync.h"
 #include "Helpers/Types.h"
 
 // Just up front: new handles are made by storage.size() after push, therefore 0 is only ever invalid.
@@ -593,8 +594,77 @@ namespace Iris
     FramebufferHandle CreateFramebuffer(const FramebufferDesc& desc)
     {
         WEngine::TimeSample sample("[Iris]CreateFramebuffer");
-        PrintNotImplemented("CreateFramebuffer");
-        return 0;
+
+        Vulkan_RenderTarget rt{};
+        rt.debugName = desc.debugName;
+        rt.hasDepth = desc.hasDepth;
+        rt.resolution = { (float32)desc.width, (float32)desc.height };
+
+        VkImageCreateInfo colorInfo{};
+        colorInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        colorInfo.imageType = VK_IMAGE_TYPE_2D;
+        colorInfo.extent = { desc.width, desc.height, 1 };
+        colorInfo.mipLevels = 1;
+        colorInfo.arrayLayers = 1;
+        colorInfo.format = FindBestSwapchainFormat();
+        colorInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        colorInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        colorInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        colorInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+
+        VkImageCreateInfo depthInfo = colorInfo;
+        depthInfo.format = FindBestDepthFormat();
+        depthInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        depthInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+
+        VmaAllocationCreateInfo allocInfo{};
+        allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+        allocInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+
+        for (sizeT i = 0; i < GPUSettingsVulkan::renderTargetsInFlightImages; i++)
+        {
+            VmaAllocationInfo info;
+            vmaCreateImage(vcore.vmaAllocator, &colorInfo, &allocInfo, &rt.targetImages[i], &rt.targetImageAlloc[i], &info);
+            stats.vramStats.framebuffers += info.size;
+            stats.vramStats.total += info.size;
+            if (desc.hasDepth)
+            {
+                vmaCreateImage(vcore.vmaAllocator, &depthInfo, &allocInfo, &rt.depthImages[i], &rt.depthImageAlloc[i], &info);
+                stats.vramStats.depthTextures += info.size;
+                stats.vramStats.total += info.size;
+            }
+        }
+
+        VkImageViewCreateInfo viewInfo{};
+        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.subresourceRange.baseMipLevel = 0;
+        viewInfo.subresourceRange.levelCount = 1;
+        viewInfo.subresourceRange.baseArrayLayer = 0;
+        viewInfo.subresourceRange.layerCount = 1;
+
+        for (sizeT i = 0; i < GPUSettingsVulkan::renderTargetsInFlightImages; i++)
+        {
+            viewInfo.image = rt.targetImages[i];
+            viewInfo.format = FindBestSwapchainFormat();
+            viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            vkCreateImageView(vcore.gpuDevice, &viewInfo, vcore.allocator, &rt.targetImageViews[i]);
+            if (desc.hasDepth)
+            {
+                viewInfo.image = rt.depthImages[i];
+                viewInfo.format = FindBestDepthFormat();
+                viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+                vkCreateImageView(vcore.gpuDevice, &viewInfo, vcore.allocator, &rt.depthImageViews[i]);
+            }
+        }
+
+        PopulateSemsAndFences(rt);
+
+        rt.state = RenderTargetState::Invalid;
+        rt.lastUsedImage = 0;
+
+        loadedRenderTargets.push_back(rt);
+        return loadedRenderTargets.size();
     }
 
     void UpdateBuffer(BufferHandle buffer, sizeT dstOffset, const byte* data, sizeT size)
