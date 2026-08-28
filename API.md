@@ -32,6 +32,7 @@ Namespace `Iris`. The low-level, explicitly recorded command API for rendering. 
 | `void ImGuiNewFrame()` | Starts a new ImGui frame. Call before recording ImGui draw data. |
 | `void ImGuiRenderDrawData(CommandBufferHandle cmd)` | Records ImGui's generated draw data into the given command buffer. |
 | `WEngine::Nullable<ImTextureID> TextureToImGui(TextureHandle texture)` | Converts a texture handle to an ImGui texture ID, or empty if unsupported. |
+| `WEngine::Nullable<ImTextureID> GetFramebufferImGuiImage(FramebufferHandle fb)` | Gets an ImGui texture ID for the framebuffer's current in-flight color attachment, for use with `ImGui::Image`. |
 
 #### Resource Creation
 

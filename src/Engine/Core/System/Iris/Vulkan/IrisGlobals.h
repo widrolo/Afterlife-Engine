@@ -81,6 +81,7 @@ struct Vulkan_RenderTarget
     std::array<VkImageView, maxIF> targetImageViews;
     std::array<VmaAllocation, maxIF> targetImageAlloc;
     std::array<VkDescriptorSet, maxIF> descSets;
+    std::array<VkDescriptorSet, maxIF> imGuiDescSets;
 
     // depth
     std::array<VkImage, maxIF> depthImages;

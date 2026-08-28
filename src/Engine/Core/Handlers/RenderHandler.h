@@ -40,7 +40,7 @@ namespace WEngine
 		 * @return Framebuffer handle of the viewport.
 		 * @warning This should only be called by WEDGE.
 		 */
-		//Framebuffer EditorGetViewportFramebuffer();
+		Iris::FramebufferHandle EditorGetViewportFramebuffer();
 
 		/**
 		 * Starts the render pass and begins recording render missions.
@@ -108,6 +108,8 @@ namespace WEngine
 		Iris::ShaderHandle m_screenVertexShader;
 		Iris::ShaderHandle m_screenFragmentShader;
 		Iris::GraphicsPipelineHandle m_screenPipeline;
+
+		// atk viewport
 
 		wtl::vector<Iris::ResourceTableHandle> m_textureTables;
 		uint64 m_currentBoundTexture = 0;

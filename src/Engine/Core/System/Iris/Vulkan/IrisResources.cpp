@@ -6,6 +6,7 @@
 #include <Engine/Util/Log.h>
 
 #include "IrisGlobals.h"
+#include "Engine/imgui/backends/imgui_impl_vulkan.h"
 #include "Engine/Util/TimeAnalysis.h"
 #include "Helpers/Helpers.h"
 #include "Helpers/Sync.h"
@@ -790,6 +791,12 @@ namespace Iris
         rt.state = RenderTargetState::Invalid;
         rt.lastUsedImage = 0;
         rt.currentImage = 0;
+
+        for (sizeT i = 0; i < GPUSettingsVulkan::renderTargetsInFlightImages; i++)
+        {
+            rt.imGuiDescSets[i] = ImGui_ImplVulkan_AddTexture(imGuiSampler, rt.targetImageViews[i],
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        }
 
         loadedRenderTargets.push_back(rt);
         return loadedRenderTargets.size();

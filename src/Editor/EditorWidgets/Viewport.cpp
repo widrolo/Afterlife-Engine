@@ -1,5 +1,6 @@
 #include "Viewport.h"
 
+#include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Core/System/Iris.h"
 
 #include "Game/Gameplay/Freecam.h"
@@ -14,5 +15,7 @@ void Viewport::Setup()
 
 void Viewport::RenderInternal()
 {
-
+    Iris::FramebufferHandle fb = WEngine::CoreSystems::GetRenderHandler()->EditorGetViewportFramebuffer();
+    auto image = Iris::GetFramebufferImGuiImage(fb);
+    ImGui::Image(image.GetValue(), ImGui::GetContentRegionAvail());
 }

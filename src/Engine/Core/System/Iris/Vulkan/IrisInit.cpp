@@ -10,6 +10,7 @@
 #include "Engine/Util/Log.h"
 #include "Helpers/Allocators.h"
 #include "Helpers/CmdBuffs.h"
+#include "Helpers/ImGui.h"
 #include "Helpers/Swapchain.h"
 
 namespace Iris
@@ -46,6 +47,7 @@ namespace Iris
         }
 
         if (!SetupCommandBuffers()) return false;
+        SetupImGuiSampler();
 
         return true;
     }

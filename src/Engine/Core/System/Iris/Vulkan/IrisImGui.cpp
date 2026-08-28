@@ -95,6 +95,21 @@ namespace Iris
 
         return (ImTextureID)descriptorSet;
     }
+
+    WEngine::Nullable<ImTextureID> GetFramebufferImGuiImage(FramebufferHandle fb)
+    {
+        WEngine::TimeSample sample("[Iris]GetFramebufferImGuiImage");
+        if (fb == 0 || fb > loadedRenderTargets.size())
+        {
+            WEngine::WLog::SetConsoleError();
+            WEngine::WLog::ConsoleLog("Invalid framebuffer handle, refusing to create ImGui image!");
+            return {};
+        }
+
+        Vulkan_RenderTarget& rt = loadedRenderTargets[fb - 1];
+
+        return (ImTextureID)rt.descSets[rt.lastUsedImage];
+    }
 }
 
 

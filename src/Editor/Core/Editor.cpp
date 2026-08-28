@@ -24,6 +24,7 @@
 
 #include "Editor/Types/EditorState.h"
 #include "Engine/Core/System/Haptic.h"
+#include "Game/Gameplay/Freecam.h"
 #include "Handlers/EditorSectorHandler.h"
 
 using namespace WEditor;
@@ -110,10 +111,8 @@ void Editor::Run()
 
 	EditorSystems::renderHandler->EnableEditorMode({1000, 1000});
 
-	WEngine::AmbientLight ambLight;
-	ambLight.ambientColor = WEngine::Color::White;
-	ambLight.intensity = 1.0f;
-	//EditorSystems::renderHandler->SetAmbientLight(ambLight);
+	Freecam freecam;
+
 
 	while (*EditorSystems::isEditorRunning)
 	{
@@ -127,10 +126,13 @@ void Editor::Run()
 
 		WEngine::CoreSystems::GetAssetRepo()->TickTextureUpload();
 		Haptic::FetchInput();
+		freecam.Tick(dt);
+		freecam.UploadCamera();
 
 		EditorSystems::renderHandler->BeginFrame();
 		EditorSystems::menubarHandler->Render();
 		Dock();
+		EditorSystems::editorSectorHandler->DrawSectors();
 		EditorSystems::editorUIHandler->DrawWidgets();
 		EditorSystems::renderHandler->RenderFrame();
 

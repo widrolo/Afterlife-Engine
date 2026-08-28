@@ -76,10 +76,10 @@ void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)
 		);
 }
 
-//Framebuffer RenderHandler::EditorGetViewportFramebuffer()
-//{
-//	return m_viewportFb;
-//}
+Iris::FramebufferHandle RenderHandler::EditorGetViewportFramebuffer()
+{
+	return m_primaryFramebuffer;
+}
 
 
 void RenderHandler::BeginFrame()
@@ -134,27 +134,12 @@ void RenderHandler::RenderFrame()
 	for (const auto& mission : m_renderQueue)
 		RenderSingleMission(mission, vpGLM);
 
-	if (!Engine::GetCla().testMode)
-	{
-		// temp until we have proper drawing again
-		if (m_isEditor)
-		{
-			Iris::ImGuiRenderDrawData(m_primaryCmd);
-		}
-		else
-		{
-			Iris::ImGuiRenderDrawData(m_primaryCmd);
-		}
-	}
-	else
-	{
-		Iris::ImGuiRenderDrawData(m_primaryCmd);
-	}
-
 	Iris::EndRenderPass(m_primaryCmd);
 	Iris::EndCommandBuffer(m_primaryCmd);
 	Iris::SubmitCommandBuffer(m_primaryCmd);
+
 	RenderScreen();
+
 	Iris::Present();
 	m_renderQueue.clear();
 	m_renderPlanQueue.clear();
@@ -235,6 +220,8 @@ void RenderHandler::RenderScreen()
 
 	Iris::BindFramebuffer(m_screenCmd, m_screenPipeline, 0, m_primaryFramebuffer);
 	Iris::Draw(m_screenCmd, 4, 1, 0, 0);
+
+	Iris::ImGuiRenderDrawData(m_screenCmd);
 
 	Iris::EndRenderPass(m_screenCmd);
 	Iris::EndCommandBuffer(m_screenCmd);

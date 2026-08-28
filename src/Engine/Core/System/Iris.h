@@ -118,6 +118,7 @@ namespace Iris
     void ImGuiNewFrame();
     void ImGuiRenderDrawData(CommandBufferHandle cmd);
     WEngine::Nullable<ImTextureID> TextureToImGui(TextureHandle texture);
+    WEngine::Nullable<ImTextureID> GetFramebufferImGuiImage(FramebufferHandle fb);
 
     // ---------------------------------------- Stats ------------------------------------------
     GPUInfo GetGPUInfo();
