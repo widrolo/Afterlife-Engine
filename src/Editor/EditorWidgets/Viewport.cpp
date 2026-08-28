@@ -1,5 +1,6 @@
 #include "Viewport.h"
 
+#include "Editor/Types/EditorState.h"
 #include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Core/System/Iris.h"
 
@@ -15,6 +16,9 @@ void Viewport::Setup()
 
 void Viewport::RenderInternal()
 {
+    EditorState::ViewportSelected = ImGui::IsWindowFocused();
+    WEngine::WLog::ConsoleLog(std::format("{}", ImGui::IsWindowFocused()));
+
     Iris::FramebufferHandle fb = WEngine::CoreSystems::GetRenderHandler()->EditorGetViewportFramebuffer();
     auto image = Iris::GetFramebufferImGuiImage(fb);
     ImGui::Image(image.GetValue(), ImGui::GetContentRegionAvail());

@@ -628,7 +628,7 @@ namespace Iris
         VkImageCreateInfo depthInfo = colorInfo;
         depthInfo.format = FindBestDepthFormat();
         depthInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        depthInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        depthInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
         VmaAllocationCreateInfo allocInfo{};
         allocInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
@@ -675,20 +675,26 @@ namespace Iris
 
         // ---------------------------------
 
-        // for now, lets only focus on creating descriptors for the color buffer
+        // The framebuffer's descriptor sets describe its render targets, so a shader
+        // can sample them later via BindFramebuffer.
         const Vulkan_ResourceTableLayout& vkLayout = loadedResourceTableLayouts[desc.resourceTableLayout - 1];
 
         VkDescriptorPool pool{};
 
         // The layout's pool sizes cover a single set, but we're allocating
-        // renderTargetsInFlightImages sets, so scale every type to match.
+        // renderTargetsInFlightImages sets for the color buffer, plus the same
+        // again for the depth buffer when present, so scale every type to match.
+        sizeT framebufferSetCount = GPUSettingsVulkan::renderTargetsInFlightImages;
+        if (desc.hasDepth)
+            framebufferSetCount *= 2;
+
         wtl::vector<VkDescriptorPoolSize> poolSizes = vkLayout.poolSizes;
         for (VkDescriptorPoolSize& poolSize : poolSizes)
-            poolSize.descriptorCount *= GPUSettingsVulkan::renderTargetsInFlightImages;
+            poolSize.descriptorCount *= framebufferSetCount;
 
         VkDescriptorPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        poolInfo.maxSets = GPUSettingsVulkan::renderTargetsInFlightImages;
+        poolInfo.maxSets = framebufferSetCount;
         poolInfo.poolSizeCount = poolSizes.size();
         poolInfo.pPoolSizes = poolSizes.data();
 
@@ -701,18 +707,18 @@ namespace Iris
             return 0;
         }
 
-        VkDescriptorSet sets[GPUSettingsVulkan::renderTargetsInFlightImages];
+        VkDescriptorSet sets[2 * GPUSettingsVulkan::renderTargetsInFlightImages];
 
         // pSetLayouts must be an array of descriptorSetCount entries, so repeat the layout once
         // per set. Passing &vkLayout.layout alone would let the driver read past it.
-        VkDescriptorSetLayout layouts[GPUSettingsVulkan::renderTargetsInFlightImages];
-        for (sizeT i = 0; i < GPUSettingsVulkan::renderTargetsInFlightImages; i++)
+        VkDescriptorSetLayout layouts[2 * GPUSettingsVulkan::renderTargetsInFlightImages];
+        for (sizeT i = 0; i < framebufferSetCount; i++)
             layouts[i] = vkLayout.layout;
 
         VkDescriptorSetAllocateInfo descAllocInfo{};
         descAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
         descAllocInfo.descriptorPool = pool;
-        descAllocInfo.descriptorSetCount = GPUSettingsVulkan::renderTargetsInFlightImages;
+        descAllocInfo.descriptorSetCount = framebufferSetCount;
         descAllocInfo.pSetLayouts = layouts;
         res = vkAllocateDescriptorSets(vcore.gpuDevice, &descAllocInfo, sets);
         if (!ParseVkResult(res))
@@ -725,6 +731,14 @@ namespace Iris
 
         for (sizeT i = 0; i < GPUSettingsVulkan::renderTargetsInFlightImages; i++)
             rt.descSets[i] = sets[i];
+
+        // When there's a depth buffer, the sets past the color ones describe it, so
+        // BindFramebuffer with FramebufferBindKind::Depth has something to bind.
+        if (desc.hasDepth)
+        {
+            for (sizeT i = 0; i < GPUSettingsVulkan::renderTargetsInFlightImages; i++)
+                rt.depthDescSets[i] = sets[GPUSettingsVulkan::renderTargetsInFlightImages + i];
+        }
 
         // The very first image entry in the set gets the framebuffer's color image, one write
         // per in-flight image. This is what makes the framebuffer samplable via BindFramebuffer.
@@ -785,6 +799,40 @@ namespace Iris
         }
 
         vkUpdateDescriptorSets(vcore.gpuDevice, GPUSettingsVulkan::renderTargetsInFlightImages, writes, 0, nullptr);
+
+        // The same write for the depth buffer, reusing the very first image binding,
+        // so a shader can sample it via BindFramebuffer with FramebufferBindKind::Depth.
+        if (desc.hasDepth)
+        {
+            VkDescriptorImageInfo depthImageInfos[GPUSettingsVulkan::renderTargetsInFlightImages];
+            VkWriteDescriptorSet depthWrites[GPUSettingsVulkan::renderTargetsInFlightImages];
+
+            for (sizeT i = 0; i < GPUSettingsVulkan::renderTargetsInFlightImages; i++)
+            {
+                VkDescriptorImageInfo& imgInfo = depthImageInfos[i];
+                imgInfo.sampler = (imageBinding->descriptorType == VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+                    ? loadedSamplers[desc.sampler - 1].sampler
+                    : VK_NULL_HANDLE;
+                imgInfo.imageView = rt.depthImageViews[i];
+                imgInfo.imageLayout = (imageBinding->descriptorType == VK_DESCRIPTOR_TYPE_STORAGE_IMAGE)
+                    ? VK_IMAGE_LAYOUT_GENERAL
+                    : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+                VkWriteDescriptorSet& write = depthWrites[i];
+                write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                write.pNext = nullptr;
+                write.dstSet = rt.depthDescSets[i];
+                write.dstBinding = imageBinding->binding;
+                write.dstArrayElement = 0;
+                write.descriptorCount = 1;
+                write.descriptorType = imageBinding->descriptorType;
+                write.pImageInfo = &imgInfo;
+                write.pBufferInfo = nullptr;
+                write.pTexelBufferView = nullptr;
+            }
+
+            vkUpdateDescriptorSets(vcore.gpuDevice, GPUSettingsVulkan::renderTargetsInFlightImages, depthWrites, 0, nullptr);
+        }
 
         // ---------------------------------
 

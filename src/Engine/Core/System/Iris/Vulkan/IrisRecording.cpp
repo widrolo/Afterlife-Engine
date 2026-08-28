@@ -314,6 +314,30 @@ namespace Iris
 
         vkCmdPipelineBarrier(GetCurrentCmdBuff(cmd), VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imgBarrier);
+
+        // The depth buffer gets the same treatment as the color one, otherwise the
+        // depth descriptor sets (written as SHADER_READ_ONLY_OPTIMAL) are sampled
+        // from an image still stuck in DEPTH_STENCIL_ATTACHMENT_OPTIMAL.
+        if (currentlyRecording != nullptr && currentlyRecording->hasDepth)
+        {
+            VkImageMemoryBarrier depthBarrier{};
+            depthBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+            depthBarrier.oldLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+            depthBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            depthBarrier.image = currentlyRecording->depthImages[currentlyRecording->currentImage];
+            depthBarrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+            depthBarrier.dstAccessMask = 0;
+
+            depthBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+            depthBarrier.subresourceRange.baseMipLevel = 0;
+            depthBarrier.subresourceRange.levelCount = 1;
+            depthBarrier.subresourceRange.baseArrayLayer = 0;
+            depthBarrier.subresourceRange.layerCount = 1;
+
+            vkCmdPipelineBarrier(GetCurrentCmdBuff(cmd), VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT |
+                VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                0, 0, nullptr, 0, nullptr, 1, &depthBarrier);
+        }
     }
 
     void BeginComputePass(CommandBufferHandle cmd)

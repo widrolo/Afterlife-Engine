@@ -70,7 +70,8 @@ namespace Iris
         stats.bindStats.tableBinds++;
     }
 
-    void BindFramebuffer(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, uint32 slot, FramebufferHandle fb)
+    void BindFramebuffer(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, uint32 slot, FramebufferHandle fb,
+        FramebufferBindKind bindKind)
     {
         WEngine::TimeSample sample("[Iris]BindFramebuffer");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
@@ -94,8 +95,12 @@ namespace Iris
 
         Vulkan_RenderTarget& rt = loadedRenderTargets[fb - 1];
 
-        vkCmdBindDescriptorSets(GetCurrentCmdBuff(cmd), VK_PIPELINE_BIND_POINT_GRAPHICS, loadedPipelines[pipeline - 1].layout,
-            slot, 1, &rt.descSets[rt.currentImage], 0, nullptr);
+        if (bindKind == FramebufferBindKind::Color)
+            vkCmdBindDescriptorSets(GetCurrentCmdBuff(cmd), VK_PIPELINE_BIND_POINT_GRAPHICS,
+                loadedPipelines[pipeline - 1].layout, slot, 1, &rt.descSets[rt.currentImage], 0, nullptr);
+        else
+            vkCmdBindDescriptorSets(GetCurrentCmdBuff(cmd), VK_PIPELINE_BIND_POINT_GRAPHICS,
+                loadedPipelines[pipeline - 1].layout, slot, 1, &rt.depthDescSets[rt.currentImage], 0, nullptr);
         stats.bindStats.total++;
         stats.bindStats.tableBinds++;
     }

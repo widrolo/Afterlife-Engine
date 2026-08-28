@@ -18,4 +18,10 @@ namespace Iris
         // is a combined image sampler.
         SamplerHandle sampler;
     };
+
+    enum class FramebufferBindKind
+    {
+        Color,
+        Depth
+    };
 }

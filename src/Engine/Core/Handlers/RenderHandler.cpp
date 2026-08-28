@@ -218,7 +218,7 @@ void RenderHandler::RenderScreen()
 	Iris::BindGraphicsPipeline(m_screenCmd, m_screenPipeline);
 	Iris::BindVertexBuffers(m_screenCmd, 0, vertBuffs, vertOffs);
 
-	Iris::BindFramebuffer(m_screenCmd, m_screenPipeline, 0, m_primaryFramebuffer);
+	Iris::BindFramebuffer(m_screenCmd, m_screenPipeline, 0, m_primaryFramebuffer, Iris::FramebufferBindKind::Depth);
 	Iris::Draw(m_screenCmd, 4, 1, 0, 0);
 
 	Iris::ImGuiRenderDrawData(m_screenCmd);

@@ -113,7 +113,6 @@ void Editor::Run()
 
 	Freecam freecam;
 
-
 	while (*EditorSystems::isEditorRunning)
 	{
 		// delta time
@@ -126,7 +125,8 @@ void Editor::Run()
 
 		WEngine::CoreSystems::GetAssetRepo()->TickTextureUpload();
 		Haptic::FetchInput();
-		freecam.Tick(dt);
+		if (EditorState::ViewportSelected)
+			freecam.Tick(dt);
 		freecam.UploadCamera();
 
 		EditorSystems::renderHandler->BeginFrame();
