@@ -17,7 +17,6 @@ void Viewport::Setup()
 void Viewport::RenderInternal()
 {
     EditorState::ViewportSelected = ImGui::IsWindowFocused();
-    WEngine::WLog::ConsoleLog(std::format("{}", ImGui::IsWindowFocused()));
 
     Iris::FramebufferHandle fb = WEngine::CoreSystems::GetRenderHandler()->EditorGetViewportFramebuffer();
     auto image = Iris::GetFramebufferImGuiImage(fb);

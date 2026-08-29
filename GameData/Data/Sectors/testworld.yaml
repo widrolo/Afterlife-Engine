@@ -1,55 +1,55 @@
 sector:
-    0:
-        name: "Ground"
-        asset: /Testing/Floor
-        position: [0, -1.6, 0]
-        rotation: [-2.576063e-18, 5.893345e-11, 1, -4.371139e-08]
-        size: [3, 3, 3]
-    1:
-        name: "Monkey"
-        asset: /Testing/Monkey
-        position: [5.2, 0.5, -1.9]
-        rotation: [0.78125197, -0.16098508, 0.5586925, 0.22713844]
-        size: [1, 1, 1]
-    2:
-        name: "Bread"
-        asset: /Testing/Bread
-        position: [4, 2.2, 0.3]
-        rotation: [-0.70710677, 0, 0, 0.70710677]
-        size: [10, 10, 10]
-    3:
-        name: "Wooden Cube"
-        asset: /Testing/Cube
-        position: [0, 0, 0]
-        rotation: [0, 0, 0, 1]
-        size: [1, 1, 1]
-    4:
-        name: "Sun Cube"
-        asset: /Testing/Sun
-        position: [0, 6.3, 0]
-        rotation: [0, 0, 0, 1]
-        size: [1, 1, 1]
-    5:
-        name: "Dirt Cube"
-        asset: /Testing/Dirt
-        position: [-3, 2, 0]
-        rotation: [0, 0, 0, 1]
-        size: [1, 1, 1]
-    6:
-        name: "Brick Cube"
-        asset: /Testing/Brick
-        position: [-3, 4, 0]
-        rotation: [0, 0, 0, 1]
-        size: [1, 1, 1]
-    7:
-        name: "Wooden Cube"
-        asset: /Testing/Cube
-        position: [-3, 0, 0]
-        rotation: [0, 0, 0, 1]
-        size: [1, 1, 1]
-    8:
-        name: "Missing Thingy"
-        asset: /Engine/Missing
-        position: [0.6, 0, -2.2]
-        rotation: [-1, 4.371138e-08, 1.9106853e-15, -4.371139e-08]
-        size: [1, 1, 1]
+  0:
+    name: Ground
+    asset: /Testing/Floor
+    position: [0, -1.6, 0]
+    rotation: [-2.576063e-18, 5.893345e-11, 1, -4.371139e-08]
+    size: [3, 3, 3]
+  1:
+    name: Monkey
+    asset: /Testing/Monkey
+    position: [5.2, 0.5, -1.9]
+    rotation: [0.78125197, -0.16098508, 0.5586925, 0.22713844]
+    size: [1, 1, 1]
+  2:
+    name: Bread
+    asset: /Testing/Bread
+    position: [4, 2.2, 0.3]
+    rotation: [-0.70710677, 0, 0, 0.70710677]
+    size: [10, 10, 10]
+  3:
+    name: Wooden Cube
+    asset: /Testing/Cube
+    position: [0, 0, 0]
+    rotation: [0, 0, 0, 1]
+    size: [1, 1, 1]
+  4:
+    name: Sun Cube
+    asset: /Testing/Sun
+    position: [0, 6.3, 0]
+    rotation: [0, 0, 0, 1]
+    size: [1, 1, 1]
+  5:
+    name: Dirt Cube
+    asset: /Testing/Dirt
+    position: [-3, 2, 0]
+    rotation: [0, 0, 0, 1]
+    size: [1, 1, 1]
+  6:
+    name: Brick Cube
+    asset: /Testing/Brick
+    position: [-3, 4, 0]
+    rotation: [0, 0, 0, 1]
+    size: [1, 1, 1]
+  7:
+    name: Wooden Cube
+    asset: /Testing/Cube
+    position: [-3, 0, 0]
+    rotation: [0, 0, 0, 1]
+    size: [1, 1, 1]
+  8:
+    name: Missing Thingy
+    asset: /Engine/Missing
+    position: [0.6, 0, -2.2]
+    rotation: [-1, 4.371138e-08, 1.9106853e-15, -4.371139e-08]
+    size: [1, 1, 1]

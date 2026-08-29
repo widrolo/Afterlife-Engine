@@ -32,6 +32,7 @@ void SectorList::RenderInternal()
 
     ImGui::SeparatorText("Sectors");
 
+    uint64 counter = 0;
     for (auto& sec : list)
     {
         if (ImGui::Button(sec.name.c_str()))
@@ -41,6 +42,12 @@ void SectorList::RenderInternal()
             EditorState::SelectedSector = &sec;
             EditorState::SelectedEntry = nullptr;
         }
+        ImGui::SameLine();
+        if (ImGui::Button(std::format("Save##{}", counter).c_str()))
+        {
+            EditorSystems::GetEditorSectorHandler()->SaveSector(sec);
+        }
+        counter++;
     }
 
 }
