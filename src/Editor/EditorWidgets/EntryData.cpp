@@ -50,17 +50,30 @@ void EntryData::RenderInternal()
 	euler.y = glm::degrees(euler.y);
 	euler.z = glm::degrees(euler.z);
 
-	bool rotUpdate = false;
+	// to prevent gimble lock hissy fits, we just force the editor to have full control over the rotation.
+	static WEngine::Vector3 rotationGrab = WEngine::Vector3::Zero;
+	static bool rotUpdate = false;
+
+	if (rotUpdate)
+		euler = rotationGrab;
 
 	ImGui::DragFloat3("Position", (float32*)&pos, 0.1f);
-	if (ImGui::DragFloat3("Rotation", (float32*)&euler, 0.1f)) rotUpdate = true;
+	ImGui::DragFloat3("Rotation", (float32*)&euler, 0.1f);
+	if (ImGui::IsItemActive())
+	{
+		rotUpdate = true;
+		rotationGrab = euler;
+	}
+	if (ImGui::IsItemDeactivated())
+		rotUpdate = false;
+
 	ImGui::DragFloat3("Size", (float32*)&size, 0.1f);
 
 	if (rotUpdate)
 	{
-		euler.x = glm::radians(euler.x);
-		euler.y = glm::radians(euler.y);
-		euler.z = glm::radians(euler.z);
+		euler.x = glm::radians(rotationGrab.x);
+		euler.y = glm::radians(rotationGrab.y);
+		euler.z = glm::radians(rotationGrab.z);
 
 		rot = WEngine::Quaternion::EulerToQuaternion(euler);
 	}
