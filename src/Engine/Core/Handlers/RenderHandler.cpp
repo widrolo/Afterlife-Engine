@@ -96,6 +96,7 @@ void RenderHandler::RenderFrame()
 	TimeSample sample("RenderHandler::RenderFrame");
 
 	Rendering::Passes::forward->Render();
+	Rendering::Passes::normal->Render();
 	Rendering::Passes::screen->Render();
 
 	Iris::Present();
@@ -106,7 +107,7 @@ void RenderHandler::RenderFrame()
 }
 
 void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm::mat4& vp,
-	Iris::CommandBufferHandle cmdBuff, Iris::GraphicsPipelineHandle singlePipe)
+	Iris::CommandBufferHandle cmdBuff, Iris::GraphicsPipelineHandle singlePipe, bool noTex)
 {
 	TimeSample sample("RenderHandler::RenderSingleMission");
 	if (!CoreSystems::GetAssetRepo()->IsTextureDoneLoading(mission.textureUID))
@@ -123,16 +124,25 @@ void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm:
 	sizeT vertOffset = meshMission.model.vertexOffset / vertexSize;
 
 	Mat4x4 mvp = Glm4x4ToMat4x4(vp * CalcModelMatrixGLM(mission.transform));
+	Mat4x4 model = CalcModelMatrix(mission.transform);
 
-	if (mission.textureUID != m_currentBoundTexture)
+	struct PushConstants
+	{
+		Mat4x4 mvp;
+		Mat4x4 model;
+	} pushConstants{};
+	pushConstants.mvp = mvp;
+	pushConstants.model = model;
+
+	if (mission.textureUID != m_currentBoundTexture && !noTex)
 		Iris::BindResourceTable(cmdBuff, singlePipe, 0, m_textureTables[mission.textureUID]);
 	m_currentBoundTexture = mission.textureUID;
-	Iris::SetPushConstants(cmdBuff, singlePipe, (byte*)&mvp, sizeof(mvp));
+	Iris::SetPushConstants(cmdBuff, singlePipe, (byte*)&pushConstants, sizeof(pushConstants));
 	Iris::DrawIndexed(cmdBuff, indexCount, 1, indexOffset, vertOffset, 0);
 }
 
 void RenderHandler::RenderSinglePlan(const RenderPlan &plan, const Mat4x4 &vp,  Iris::CommandBufferHandle cmdBuff,
-	Iris::GraphicsPipelineHandle statPipe)
+	Iris::GraphicsPipelineHandle statPipe, bool noTex)
 {
 	TimeSample sample("RenderHandler::RenderSinglePlan");
 	Iris::BindVertexBuffers(cmdBuff, 1, {plan.statBuffer}, {0});
@@ -151,7 +161,7 @@ void RenderHandler::RenderSinglePlan(const RenderPlan &plan, const Mat4x4 &vp,  
 		sizeT indexOffset = meshMission.model.indexOffset / indexSize;
 		sizeT vertOffset = meshMission.model.vertexOffset / vertexSize;
 
-		if (part.textureUID != m_currentBoundTexture)
+		if (part.textureUID != m_currentBoundTexture && !noTex)
 			Iris::BindResourceTable(cmdBuff, statPipe, 0, m_textureTables[part.textureUID]);
 		m_currentBoundTexture = part.textureUID;
 		Iris::SetPushConstants(cmdBuff, statPipe, (byte*)&vp, sizeof(vp));
@@ -211,7 +221,7 @@ void RenderHandler::RegisterTexture(Iris::TextureHandle handle)
 }
 
 void RenderHandler::RenderScene(Iris::CommandBufferHandle cmdBuff, Iris::GraphicsPipelineHandle singlePipe,
-	Iris::GraphicsPipelineHandle statPipe)
+	Iris::GraphicsPipelineHandle statPipe, bool noTex)
 {
 	auto vpGLM = m_projection * m_viewMatrix;
 
@@ -226,7 +236,7 @@ void RenderHandler::RenderScene(Iris::CommandBufferHandle cmdBuff, Iris::Graphic
 	Iris::BindIndexBuffer(cmdBuff, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
 
 	for (const auto& plan : m_renderPlanQueue)
-		RenderSinglePlan(plan, vp, cmdBuff, statPipe);
+		RenderSinglePlan(plan, vp, cmdBuff, statPipe, noTex);
 
 	// missions are singular objects, they take the model matrix as a push constant.
 	Iris::BindGraphicsPipeline(cmdBuff, singlePipe);
@@ -234,7 +244,7 @@ void RenderHandler::RenderScene(Iris::CommandBufferHandle cmdBuff, Iris::Graphic
 	Iris::BindIndexBuffer(cmdBuff, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
 
 	for (const auto& mission : m_renderQueue)
-		RenderSingleMission(mission, vpGLM, cmdBuff, singlePipe);
+		RenderSingleMission(mission, vpGLM, cmdBuff, singlePipe, noTex);
 }
 Mat4x4 RenderHandler::CalcModelMatrix(const Transform &transform)
 {
@@ -277,9 +287,11 @@ void RenderHandler::CreateBasics()
 void RenderHandler::CreatePasses()
 {
 	Rendering::Passes::forward = WAllocator::Construct<Rendering::ForwardPass>();
+	Rendering::Passes::normal = WAllocator::Construct<Rendering::NormalPass>();
 	Rendering::Passes::screen = WAllocator::Construct<Rendering::ScreenPass>();
 
 	Rendering::Passes::forward->SetupPass();
+	Rendering::Passes::normal->SetupPass();
 	Rendering::Passes::screen->SetupPass();
 }
 

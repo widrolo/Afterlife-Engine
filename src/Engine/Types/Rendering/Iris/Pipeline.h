@@ -19,7 +19,7 @@ namespace Iris
         BlendDesc blend;
 
         std::array<ResourceTableLayoutHandle, 8> tableLayouts;
-        uint32 tableAttachmentCount = 1;
+        uint32 tableAttachmentCount = 0;
 
         uint32 pushConstantsSize = 0;
         ShaderStage pushConstantsStage = ShaderStage::Vertex;

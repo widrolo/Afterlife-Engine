@@ -2,6 +2,7 @@
 
 #include "Engine/EngineDefines.h"
 #include "Engine/Core/System/Iris.h"
+#include "Engine/Util/TimeAnalysis.h"
 #include "Storage/Basics.h"
 #include "Storage/Passes.h"
 #include "Storage/ShaderStore.h"
@@ -37,6 +38,7 @@ void ScreenPass::SetupPass()
 
 void ScreenPass::Render()
 {
+    TimeSample sample("ScreenPass::Render");
     BeginRendering(Color(), EngineSettings::resolution);
 
     wtl::vector<Iris::BufferHandle> vertBuffs{Basics::screenMesh};

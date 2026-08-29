@@ -66,7 +66,8 @@ void AssetRepo::GetAsset<YamlAssetMission>(YamlAssetMission& mission)
 template<>
 void AssetRepo::GetAsset<MeshAssetMission>(MeshAssetMission& mission)
 {
-	TimeSample sample("AssetRepo::GetAsset<MeshAssetMission>");
+	// we dont do this because this gets called all the damn time and i dont want a high res clock call here
+	//TimeSample sample("AssetRepo::GetAsset<MeshAssetMission>");
 	if (mission.uid == 0 || mission.uid >= m_meshes.size())
 	{
 		WLog::SetConsoleWarning();
@@ -134,7 +135,6 @@ void AssetRepo::GetAsset<SpirVAssetMission>(SpirVAssetMission& mission)
 
 bool AssetRepo::IsTextureDoneLoading(uint64 uid) const
 {
-	TimeSample sample("AssetRepo::IsTextureDoneLoading");
 	// We clear the texture done cache in the finalization, so this is
 	// necessary
 	if (m_texturesDone.empty())

@@ -343,6 +343,8 @@ add_executable(Afterlife_Engine
         src/Engine/Core/RenderPasses/Storage/ShaderStore.cpp
         src/Engine/Core/RenderPasses/Storage/Basics.h
         src/Engine/Core/RenderPasses/Storage/Passes.h
+        src/Engine/Core/RenderPasses/NormalPass.cpp
+        src/Engine/Core/RenderPasses/NormalPass.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

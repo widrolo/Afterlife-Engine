@@ -14,7 +14,6 @@ namespace Iris
     // Again, burden of performance is on the user.
     void BindGraphicsPipeline(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline)
     {
-        WEngine::TimeSample sample("[Iris]BindGraphicsPipeline");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -35,7 +34,6 @@ namespace Iris
 
     void BindComputePipeline(CommandBufferHandle cmd, ComputePipelineHandle  pipeline)
     {
-        WEngine::TimeSample sample("[Iris]BindComputePipeline");
         PrintNotImplemented("BindComputePipeline");
         // not implemented but its fine.
         stats.bindStats.total++;
@@ -44,7 +42,6 @@ namespace Iris
 
     void BindResourceTable(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, uint32 slot, ResourceTableHandle table)
     {
-        WEngine::TimeSample sample("[Iris]BindResourceTable");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -73,7 +70,6 @@ namespace Iris
     void BindFramebuffer(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, uint32 slot, FramebufferHandle fb,
         FramebufferBindKind bindKind)
     {
-        WEngine::TimeSample sample("[Iris]BindFramebuffer");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -107,7 +103,6 @@ namespace Iris
 
     void SetPushConstants(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, const byte* data, sizeT size)
     {
-        WEngine::TimeSample sample("[Iris]SetPushConstants");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -140,7 +135,6 @@ namespace Iris
     void BindVertexBuffers(CommandBufferHandle cmd, uint32 firstBinding, const wtl::vector<BufferHandle>& buffers,
         const wtl::vector<sizeT>& offsets)
     {
-        WEngine::TimeSample sample("[Iris]BindVertexBuffers");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();
@@ -207,7 +201,6 @@ namespace Iris
 
     void BindIndexBuffer(CommandBufferHandle cmd, BufferHandle buffer, sizeT offset)
     {
-        WEngine::TimeSample sample("[Iris]BindIndexBuffer");
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
             WEngine::WLog::SetConsoleWarning();

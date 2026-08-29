@@ -1,22 +1,22 @@
-#include "ForwardPass.h"
+#include "NormalPass.h"
 
+#include "Engine/EngineDefines.h"
 #include "Engine/Core/System/Iris.h"
 #include "Engine/Math/Matrices/CommonMatracies.h"
-#include "./Storage/ShaderStore.h"
-#include "Engine/EngineDefines.h"
 #include "Engine/Util/TimeAnalysis.h"
 #include "Storage/Basics.h"
 #include "Storage/Passes.h"
+#include "Storage/ShaderStore.h"
 
 using namespace WEngine::Rendering;
 
-void ForwardPass::SetupPass()
+void NormalPass::SetupPass()
 {
-    Passes::forward = this;
+    Passes::normal = this;
     m_cmd = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
     auto vert = GetShader("basic", Iris::ShaderStage::Vertex);
     auto vertInst = GetShader("basicInst", Iris::ShaderStage::Vertex);
-    auto frag = GetShader("basic", Iris::ShaderStage::Fragment);
+    auto frag = GetShader("normals", Iris::ShaderStage::Fragment);
 
     Iris::VertexLayoutDesc layout;
     AddASMFAttributes(layout);
@@ -27,16 +27,13 @@ void ForwardPass::SetupPass()
     depthDesc.depthCompareOp = Iris::CompareOp::Less;
 
     Iris::GraphicsPipelineDesc desc{};
-    desc.debugName = "Main Pipeline";
+    desc.debugName = "Normals Pipeline";
     desc.vertexShader = vert;
     desc.fragmentShader = frag;
     desc.vertexLayout = layout;
     desc.rasterizer = Iris::RasterizerDesc{};
     desc.depthStencil = depthDesc;
     desc.blend = Iris::BlendDesc{};
-
-    desc.tableLayouts[0] = Basics::singleTexLayout;
-    desc.tableAttachmentCount = 1;
 
     desc.pushConstantsSize = sizeof(Mat4x4) * 2;
 
@@ -53,16 +50,16 @@ void ForwardPass::SetupPass()
     fbDesc.hasDepth = true;
     fbDesc.width = EngineSettings::resolution.x;
     fbDesc.height = EngineSettings::resolution.y;
-    fbDesc.debugName = "Primary Framebuffer";
+    fbDesc.debugName = "Normal G-Buffer";
     fbDesc.resourceTableLayout = Basics::singleTexLayout;
     fbDesc.sampler = Basics::sampler;
     m_fb = Iris::CreateFramebuffer(fbDesc);
 }
 
-void ForwardPass::Render()
+void NormalPass::Render()
 {
-    TimeSample sample("ForwardPass::Render");
+    TimeSample sample("NormalPass::Render");
     BeginRendering(Color(168, 233, 242), EngineSettings::resolution);
-    RenderFullScene();
+    RenderFullScene(true);
     EndRendering();
 }

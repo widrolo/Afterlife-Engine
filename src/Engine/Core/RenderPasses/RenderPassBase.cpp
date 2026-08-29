@@ -34,9 +34,9 @@ void RenderPassBase::EndRendering()
     Iris::SubmitCommandBuffer(m_cmd);
 }
 
-void RenderPassBase::RenderFullScene()
+void RenderPassBase::RenderFullScene(bool noTex)
 {
-    CoreSystems::GetRenderHandler()->RenderScene(m_cmd, m_regPipe, m_statPipe);
+    CoreSystems::GetRenderHandler()->RenderScene(m_cmd, m_regPipe, m_statPipe, noTex);
 }
 
 void RenderPassBase::AddASMFAttributes(Iris::VertexLayoutDesc &storage)

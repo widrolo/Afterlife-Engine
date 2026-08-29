@@ -21,7 +21,7 @@ namespace WEngine::Rendering
     protected:
         void BeginRendering(const Color& color, const Vector2& resolution);
         void EndRendering();
-        void RenderFullScene();
+        void RenderFullScene(bool noTex = false);
         void AddASMFAttributes(Iris::VertexLayoutDesc& storage);
         void AddScreenAttributes(Iris::VertexLayoutDesc& storage);
         void AddInstancingAttributes(Iris::VertexLayoutDesc& storage);

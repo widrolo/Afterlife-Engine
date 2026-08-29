@@ -68,15 +68,15 @@ namespace WEngine
 
 		void RegisterTexture(Iris::TextureHandle handle);
 		void RenderScene(Iris::CommandBufferHandle cmdBuff, Iris::GraphicsPipelineHandle singlePipe,
-			Iris::GraphicsPipelineHandle statPipe);
+			Iris::GraphicsPipelineHandle statPipe, bool noTex);
 
 	private:
 		void CreateBasics();
 		void CreatePasses();
 		void RenderSingleMission(const RenderMission& mission, const glm::mat4& vp, Iris::CommandBufferHandle cmdBuff,
-			Iris::GraphicsPipelineHandle singlePipe);
+			Iris::GraphicsPipelineHandle singlePipe, bool noTex);
 		void RenderSinglePlan(const RenderPlan& plan, const Mat4x4& vp, Iris::CommandBufferHandle cmdBuff,
-			Iris::GraphicsPipelineHandle statPipe);
+			Iris::GraphicsPipelineHandle statPipe, bool noTex);
 
 		Mat4x4 CalcModelMatrix(const Transform& transform);
 		glm::mat4 CalcModelMatrixGLM(const Transform& transform);
