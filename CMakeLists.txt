@@ -359,6 +359,9 @@ add_executable(Afterlife_Engine
         src/Engine/imgui/ImCurveEdit.cpp
         src/Engine/imgui/GraphEditor.h
         src/Engine/imgui/GraphEditor.cpp
+        src/Engine/Core/RenderPasses/GTAOPass.cpp
+        src/Engine/Core/RenderPasses/GTAOPass.h
+        src/Engine/Core/RenderPasses/Storage/GTAOSettings.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

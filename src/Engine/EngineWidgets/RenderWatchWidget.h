@@ -28,5 +28,7 @@ namespace WEngine
         void PrintRenderUsage(const std::string& category, sizeT count) const;
         void RenderDisplayDrawcall() const;
         void RenderDisplayBindings() const;
+
+        void ShowPassSettings();
     };
 }

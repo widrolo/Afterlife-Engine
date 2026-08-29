@@ -105,7 +105,7 @@ namespace Iris
     struct DepthStencilDesc
     {
         bool depthTestEnable = false;
-        bool depthWriteEnable = true;
+        bool depthWriteEnable = false;
         CompareOp depthCompareOp = CompareOp::Less;
         bool stencilTestEnable = false;
         StencilFaceDesc front;

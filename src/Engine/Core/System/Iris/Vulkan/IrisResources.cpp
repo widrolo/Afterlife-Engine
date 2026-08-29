@@ -560,7 +560,10 @@ namespace Iris
         dynaRenderInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
         dynaRenderInfo.colorAttachmentCount = 1;
         dynaRenderInfo.pColorAttachmentFormats = &swapFormat;
-        dynaRenderInfo.depthAttachmentFormat = FindBestDepthFormat(); // hypocrisy
+        if (desc.depthStencil.depthWriteEnable)
+            dynaRenderInfo.depthAttachmentFormat = FindBestDepthFormat(); // hypocrisy
+        else
+            dynaRenderInfo.depthAttachmentFormat = VK_FORMAT_UNDEFINED;
 
         VkGraphicsPipelineCreateInfo pipeInfo{};
         pipeInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;

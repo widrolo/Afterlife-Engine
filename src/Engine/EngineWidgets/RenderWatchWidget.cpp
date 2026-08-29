@@ -2,6 +2,9 @@
 
 #include "Engine/EngineDefines.h"
 #include "Engine/Core/Handlers/RenderHandler.h"
+#include "Engine/Core/RenderPasses/ForwardPass.h"
+#include "Engine/Core/RenderPasses/Storage/GTAOSettings.h"
+#include "Engine/Core/RenderPasses/Storage/Passes.h"
 #include "Engine/Core/System/Iris.h"
 
 using namespace WEngine;
@@ -19,6 +22,7 @@ void RenderWatchWidget::RenderInternal()
     VramDisplay();
     ImGui::SeparatorText("Rendering Statistics");
     RenderDisplay();
+    ShowPassSettings();
 }
 
 void RenderWatchWidget::Header() const
@@ -231,5 +235,10 @@ void RenderWatchWidget::RenderDisplayBindings() const
 
         ImGui::EndTable();
     }
+}
+
+void RenderWatchWidget::ShowPassSettings()
+{
+    ImGui::DragFloat("GTAO Someval", &Rendering::Passes::gtao->GetSettings().someVal, 0.01, 0, 1);
 }
 

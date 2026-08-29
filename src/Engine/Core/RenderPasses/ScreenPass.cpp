@@ -19,6 +19,10 @@ void ScreenPass::SetupPass()
     Iris::VertexLayoutDesc layout;
     AddScreenAttributes(layout);
 
+    // this needs to be gone ASAP!
+    Iris::DepthStencilDesc depthDesc{};
+    depthDesc.depthWriteEnable = true;
+
     Iris::GraphicsPipelineDesc pipeDesc{};
     pipeDesc.debugName = "Screen Pipeline";
     pipeDesc.vertexShader = vert;
@@ -26,7 +30,7 @@ void ScreenPass::SetupPass()
     pipeDesc.vertexLayout = layout;
     pipeDesc.rasterizer = Iris::RasterizerDesc{};
     pipeDesc.topology = Iris::TopologyType::Triangle_Strip;
-    pipeDesc.depthStencil = Iris::DepthStencilDesc{};
+    pipeDesc.depthStencil = depthDesc;
     pipeDesc.blend = Iris::BlendDesc{};
 
     pipeDesc.tableLayouts[0] = Basics::singleTexLayout;
@@ -47,9 +51,11 @@ void ScreenPass::Render()
     Iris::BindGraphicsPipeline(m_cmd, m_regPipe);
     Iris::BindVertexBuffers(m_cmd, 0, vertBuffs, vertOffs);
 
-    const auto forwardFb = Passes::forward->GetFb();
+    //const auto forwardFb = Passes::forward->GetFb();
+    //Iris::BindFramebuffer(m_cmd, m_regPipe, 0, forwardFb, Iris::FramebufferBindKind::Color);
+    const auto gtaoFb = Passes::gtao->GetFb();
+    Iris::BindFramebuffer(m_cmd, m_regPipe, 0, gtaoFb, Iris::FramebufferBindKind::Color);
 
-    Iris::BindFramebuffer(m_cmd, m_regPipe, 0, forwardFb, Iris::FramebufferBindKind::Color);
     Iris::Draw(m_cmd, 4, 1, 0, 0);
 
     Iris::ImGuiRenderDrawData(m_cmd);

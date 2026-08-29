@@ -25,6 +25,7 @@ namespace Iris
         FramebufferHandle framebuffer;
         AttachmentOps colorAttachment;
         AttachmentOps depthStencil;
+        WEngine::Vector2 resolution;
         bool hasDepthStencil = false;
     };
 
