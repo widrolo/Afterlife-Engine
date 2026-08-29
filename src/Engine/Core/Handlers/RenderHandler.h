@@ -67,49 +67,25 @@ namespace WEngine
 		void AddPlanToRenderQueue(RenderPlan& plan);
 
 		void RegisterTexture(Iris::TextureHandle handle);
+		void RenderScene(Iris::CommandBufferHandle cmdBuff, Iris::GraphicsPipelineHandle singlePipe,
+			Iris::GraphicsPipelineHandle statPipe);
 
 	private:
-		void PrepareRenderingSetup();
-		void CreateScreen();
-		void LoadShaders();
-		void CreateTables();
-		void CreatePipelines();
-
-		void RenderSingleMission(const RenderMission& mission, const glm::mat4& vp);
-		void RenderSinglePlan(const RenderPlan& plan, const Mat4x4& vp);
-		void RenderScreen();
+		void CreateBasics();
+		void CreatePasses();
+		void RenderSingleMission(const RenderMission& mission, const glm::mat4& vp, Iris::CommandBufferHandle cmdBuff,
+			Iris::GraphicsPipelineHandle singlePipe);
+		void RenderSinglePlan(const RenderPlan& plan, const Mat4x4& vp, Iris::CommandBufferHandle cmdBuff,
+			Iris::GraphicsPipelineHandle statPipe);
 
 		Mat4x4 CalcModelMatrix(const Transform& transform);
 		glm::mat4 CalcModelMatrixGLM(const Transform& transform);
-
-		void SortMissions(bool transparentPass);
-		void CleanSortedMissions();
 
 		void InitSDL();
 		void InitImGui();
 
 
 	private:
-		// while it was comfy to use the old shader system, a static one makes
-		// more sense considering the style were going after.
-		Iris::ShaderHandle m_vertexShader; // this is in this case the basic one.
-		Iris::ShaderHandle m_statVertexShader; // this is in this case the basic one.
-		Iris::ShaderHandle m_fragmentShader; // this is in this case the basic one.
-		Iris::ResourceTableLayoutHandle m_mainTableLayout;
-		Iris::GraphicsPipelineHandle m_basicPipeline;
-		Iris::GraphicsPipelineHandle m_statPipeline;
-		Iris::SamplerHandle m_sampler;
-		Iris::FramebufferHandle m_primaryFramebuffer;
-		Iris::CommandBufferHandle m_primaryCmd;
-
-		// screen stuff
-		Iris::CommandBufferHandle m_screenCmd;
-		Iris::BufferHandle m_screenMesh;
-		Iris::ShaderHandle m_screenVertexShader;
-		Iris::ShaderHandle m_screenFragmentShader;
-		Iris::GraphicsPipelineHandle m_screenPipeline;
-
-		// atk viewport
 
 		wtl::vector<Iris::ResourceTableHandle> m_textureTables;
 		uint64 m_currentBoundTexture = 0;

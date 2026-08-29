@@ -192,17 +192,29 @@ void AssetRepo::LoadSpirVFromGlsl(SpirVAssetMission &mission)
 	shaderc_shader_kind kind = shaderc_glsl_infer_from_source; // just to shut up the compiler.
 	switch (mission.shaderType)
 	{
-		case SpirVAssetMission::VertexShader:
+		case Iris::ShaderStage::Vertex:
 			path += "Vertex";
 			kind = shaderc_glsl_vertex_shader;
 			break;
-		case SpirVAssetMission::FragmentShader:
+		case Iris::ShaderStage::Fragment:
 			path += "Fragment";
 			kind = shaderc_glsl_fragment_shader;
 			break;
-		case SpirVAssetMission::GeometryShader:
+		case Iris::ShaderStage::Compute:
+			path += "Compute";
+			kind = shaderc_glsl_compute_shader;
+			break;
+		case Iris::ShaderStage::Geometry:
 			path += "Geometry";
 			kind = shaderc_glsl_geometry_shader;
+			break;
+		case Iris::ShaderStage::TessControl:
+			path += "TessControl";
+			kind = shaderc_glsl_tess_control_shader;
+			break;
+		case Iris::ShaderStage::TessEval:
+			path += "TessEval";
+			kind = shaderc_glsl_tess_evaluation_shader;
 			break;
 	}
 
@@ -250,14 +262,23 @@ void AssetRepo::LoadSpirVFromSpv(SpirVAssetMission &mission)
 	std::string path = GetDataPath() + EngineSettings::shaderPath + mission.name;
 	switch (mission.shaderType)
 	{
-		case SpirVAssetMission::VertexShader:
+		case Iris::ShaderStage::Vertex:
 			path += "Vertex";
 			break;
-		case SpirVAssetMission::FragmentShader:
+		case Iris::ShaderStage::Fragment:
 			path += "Fragment";
 			break;
-		case SpirVAssetMission::GeometryShader:
+		case Iris::ShaderStage::Compute:
+			path += "Compute";
+			break;
+		case Iris::ShaderStage::Geometry:
 			path += "Geometry";
+			break;
+		case Iris::ShaderStage::TessControl:
+			path += "TessControl";
+			break;
+		case Iris::ShaderStage::TessEval:
+			path += "TessEval";
 			break;
 	}
 	path += ".spv";

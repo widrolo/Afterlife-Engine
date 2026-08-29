@@ -333,6 +333,16 @@ add_executable(Afterlife_Engine
         src/Editor/Core/World/EditorSector.h
         src/Editor/Core/World/EditorSectorEntry.cpp
         src/Editor/Core/World/EditorSectorEntry.h
+        src/Engine/Core/RenderPasses/RenderPassBase.cpp
+        src/Engine/Core/RenderPasses/RenderPassBase.h
+        src/Engine/Core/RenderPasses/ForwardPass.cpp
+        src/Engine/Core/RenderPasses/ForwardPass.h
+        src/Engine/Core/RenderPasses/ScreenPass.cpp
+        src/Engine/Core/RenderPasses/ScreenPass.h
+        src/Engine/Core/RenderPasses/Storage/ShaderStore.h
+        src/Engine/Core/RenderPasses/Storage/ShaderStore.cpp
+        src/Engine/Core/RenderPasses/Storage/Basics.h
+        src/Engine/Core/RenderPasses/Storage/Passes.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

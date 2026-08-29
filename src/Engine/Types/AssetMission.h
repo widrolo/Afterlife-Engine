@@ -8,6 +8,10 @@
 
 #include "Rendering/MeshInfo.h"
 
+namespace Iris {
+	enum class ShaderStage : uint8;
+}
+
 namespace WEngine
 {
 	/**
@@ -32,12 +36,7 @@ namespace WEngine
 	  */
 	struct SpirVAssetMission : public AssetMissionBase
 	{
-		enum SpirVMissionShaderType
-		{
-			VertexShader,
-			FragmentShader,
-			GeometryShader,
-		} shaderType;
+		Iris::ShaderStage shaderType;
 		sizeT shaderSize;
 		dword* shaderCode;
 	};

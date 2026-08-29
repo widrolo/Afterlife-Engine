@@ -8,7 +8,7 @@ layout(location = 0) out vec4 outColor;
 
 void main()
 {
-    vec4 col = texture(tex, inUV);
-    outColor = col.xxxw;
-    // outColor = texture(tex, inUV);
+    //vec4 col = texture(tex, inUV);
+    //outColor = col.xxxw;
+    outColor = texture(tex, inUV);
 }
