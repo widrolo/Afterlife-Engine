@@ -56,8 +56,6 @@ wtl::vector<EditorSector>& EditorSectorHandler::GetSectorList()
 
 void EditorSectorHandler::SaveSector(const EditorSector& sector)
 {
-    WEngine::WLog::ConsoleLog(std::format("Saving sector \"{}\"", sector.name));
-
     YAML::Node root;
     YAML::Node entries;
 
@@ -71,8 +69,6 @@ void EditorSectorHandler::SaveSector(const EditorSector& sector)
     YAML::Emitter out;
     out << root;
 
-    std::cout << out.c_str();
-
     std::string path = EditorSystems::GetAssetRepo()->GetDataPath();
     path += EngineSettings::sectorPath;
     path += sector.name;
@@ -82,7 +78,7 @@ void EditorSectorHandler::SaveSector(const EditorSector& sector)
     fout << out.c_str();
     fout.close();
 
-    WEngine::WLog::ConsoleLog(std::format("Saved changes to:\n\t\t{}", path));
+    WEngine::WLog::ConsoleLog(std::format("Saved sector \"{}\"", sector.name));
 }
 
 YAML::Node EditorSectorHandler::SaveSingleEntry(const EditorSectorEntry& entry)

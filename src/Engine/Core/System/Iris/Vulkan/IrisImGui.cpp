@@ -108,7 +108,7 @@ namespace Iris
 
         Vulkan_RenderTarget& rt = loadedRenderTargets[fb - 1];
 
-        return (ImTextureID)rt.descSets[rt.lastUsedImage];
+        return (ImTextureID)rt.descSets[rt.currentImage];
     }
 }
 

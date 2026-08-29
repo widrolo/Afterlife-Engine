@@ -8,9 +8,9 @@ sector:
   1:
     name: Monkey
     asset: /Testing/Monkey
-    position: [5.2, -1.1, -1.9]
-    rotation: [0.77184504, -0.18009219, 0.555068, 0.25243124]
-    size: [1, 1, 1]
+    position: [1.3937594, -1.0932287, -0.8494272]
+    rotation: [0.77184504, -0.18009238, 0.55506796, 0.25243124]
+    size: [0.99999994, 1, 1]
   2:
     name: Bread
     asset: /Testing/Bread

@@ -345,6 +345,20 @@ add_executable(Afterlife_Engine
         src/Engine/Core/RenderPasses/Storage/Passes.h
         src/Engine/Core/RenderPasses/NormalPass.cpp
         src/Engine/Core/RenderPasses/NormalPass.h
+        src/Engine/imgui/ImSequencer.cpp
+        src/Engine/imgui/ImLightRig.h
+        src/Engine/imgui/ImSequencer.h
+        src/Engine/imgui/ImVectorEditor.cpp
+        src/Engine/imgui/ImZoomSlider.h
+        src/Engine/imgui/ImVectorEditor.h
+        src/Engine/imgui/ImGuizmo.h
+        src/Engine/imgui/ImGuizmo.cpp
+        src/Engine/imgui/ImGradient.h
+        src/Engine/imgui/ImGradient.cpp
+        src/Engine/imgui/ImCurveEdit.h
+        src/Engine/imgui/ImCurveEdit.cpp
+        src/Engine/imgui/GraphEditor.h
+        src/Engine/imgui/GraphEditor.cpp
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

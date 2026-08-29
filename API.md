@@ -247,6 +247,9 @@ Class `WEngine::RenderHandler`. Middle man between the world and Iris. Records r
 | `void UpdateCameraColor(const Color& backColor)` | Sets the color the frame is cleared to. |
 | `void AddToRenderQueue(RenderMission& mission)` | Records a render mission for the frame. |
 | `void RegisterTexture(Iris::TextureHandle handle)` | Registers a texture handle so it can be bound during rendering. |
+| `const glm::mat4& GetProjectionMatrix()` | Projection matrix of the active camera. |
+| `const Transform& GetRenderedCameraTransform()` | Camera transform the last rendered frame used. Used by ATK's gizmo so it stays glued to the viewport image. |
+| `glm::mat4 CalcModelMatrixGLM(const Transform& transform)` | Builds the engine-convention model matrix (glm) for a transform. |
 
 ### Sector Handler (`src/Engine/Core/Handlers/SectorHandler.h`)
 

@@ -70,6 +70,10 @@ namespace WEngine
 		void RenderScene(Iris::CommandBufferHandle cmdBuff, Iris::GraphicsPipelineHandle singlePipe,
 			Iris::GraphicsPipelineHandle statPipe, bool noTex);
 
+		const glm::mat4& GetProjectionMatrix() const;
+		const Transform& GetRenderedCameraTransform() const;
+		static glm::mat4 CalcModelMatrixGLM(const Transform& transform);
+
 	private:
 		void CreateBasics();
 		void CreatePasses();
@@ -79,7 +83,6 @@ namespace WEngine
 			Iris::GraphicsPipelineHandle statPipe, bool noTex);
 
 		Mat4x4 CalcModelMatrix(const Transform& transform);
-		glm::mat4 CalcModelMatrixGLM(const Transform& transform);
 
 		void InitSDL();
 		void InitImGui();
@@ -95,6 +98,7 @@ namespace WEngine
 		SDL_Window* m_window = nullptr;
 
 		Transform m_camera = Transform::Zero;
+		Transform m_renderedCamera = Transform::Zero;
 		Color m_camColor = Color::Black;
 
 		wtl::deque<RenderMission> m_renderQueue;

@@ -20,6 +20,7 @@
 #include "Engine/Core/RenderPasses/Storage/Basics.h"
 #include "Engine/Core/RenderPasses/Storage/Passes.h"
 #include "Engine/Core/System/Haptic.h"
+#include "Engine/imgui/ImGuizmo.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Util/TimeAnalysis.h"
 #include "glm/gtc/quaternion.hpp"
@@ -81,6 +82,7 @@ void RenderHandler::BeginFrame()
 	Iris::BeginFrame();
 	Iris::AcquireSwapchainTexture();
 	Iris::ImGuiNewFrame();
+	ImGuizmo::BeginFrame();
 
 	Vector3 camPos = m_camera.position;
 	Quaternion camRot = m_camera.rotation;
@@ -100,6 +102,7 @@ void RenderHandler::RenderFrame()
 	Rendering::Passes::screen->Render();
 
 	Iris::Present();
+	m_renderedCamera = m_camera;
 	m_renderQueue.clear();
 	m_renderPlanQueue.clear();
 	Iris::EndFrame();
@@ -293,6 +296,16 @@ void RenderHandler::CreatePasses()
 	Rendering::Passes::forward->SetupPass();
 	Rendering::Passes::normal->SetupPass();
 	Rendering::Passes::screen->SetupPass();
+}
+
+const glm::mat4& RenderHandler::GetProjectionMatrix() const
+{
+	return m_projection;
+}
+
+const Transform& RenderHandler::GetRenderedCameraTransform() const
+{
+	return m_renderedCamera;
 }
 
 glm::mat4 RenderHandler::CalcModelMatrixGLM(const Transform &transform)
