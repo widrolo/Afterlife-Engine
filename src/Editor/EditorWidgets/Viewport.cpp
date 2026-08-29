@@ -41,7 +41,7 @@ void Viewport::RenderInternal()
         mCurrentGizmoOperation = ImGuizmo::SCALE;
     if (Haptic::GetDebugKeyHeld(9))
         mCurrentGizmoMode = ImGuizmo::WORLD;
-    if (Haptic::GetDebugKeyHeld(9))
+    if (Haptic::GetDebugKeyHeld(10))
         mCurrentGizmoMode = ImGuizmo::LOCAL;
 
     // vibe coded bullshit doesnt even work and now i have to fix it.
@@ -81,18 +81,24 @@ void Viewport::RenderInternal()
 
         if (mCurrentGizmoOperation == ImGuizmo::ROTATE)
         {
-            // the engine renders the world Y-mirrored, which flips the rotation
-            // direction of the x and z axes (y is untouched). mirror the delta
-            // quaternion back so the object rotates the way the gizmo is dragged.
+            // bullshit fuckface shitass code.
             glm::quat prevRotation(entryTransform.rotation.w, entryTransform.rotation.x,
                 entryTransform.rotation.y, entryTransform.rotation.z);
             glm::quat deltaRotation = glm::quat_cast(glm::mat3(deltaMatrix));
-            deltaRotation.x = -deltaRotation.x;
-            deltaRotation.z = -deltaRotation.z;
-            // right-multiplying composes in local space, left-multiplying in world space.
-            glm::quat newRotation = mCurrentGizmoMode == ImGuizmo::WORLD
-                ? glm::normalize(deltaRotation * prevRotation)
-                : glm::normalize(prevRotation * deltaRotation);
+            glm::quat newRotation;
+            if (mCurrentGizmoMode == ImGuizmo::WORLD)
+            {
+                deltaRotation.x = -deltaRotation.x;
+                deltaRotation.z = -deltaRotation.z;
+                newRotation = glm::normalize(deltaRotation * prevRotation);
+            }
+            else
+            {
+                glm::quat rawDelta = prevRotation * deltaRotation * glm::conjugate(prevRotation);
+                rawDelta.x = -rawDelta.x;
+                rawDelta.z = -rawDelta.z;
+                newRotation = glm::normalize(prevRotation * rawDelta);
+            }
             transform.rotation = { newRotation.x, newRotation.y, newRotation.z, newRotation.w };
         }
         else
