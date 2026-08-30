@@ -7,10 +7,8 @@ layout(location = 0) out vec4 outColor;
 
 void main()
 {
-    vec3 faceN = cross(dFdx(inWorldPos), dFdy(inWorldPos));
+    vec3 faceN = cross(dFdy(inWorldPos), dFdx(inWorldPos));
     vec3 meshN = normalize(inNormal);
-    if (dot(faceN, meshN) < 0.0)
-        faceN = -faceN;
 
     vec3 n = normalize(faceN);
     vec3 colNorm = n * 0.5 + 0.5;
