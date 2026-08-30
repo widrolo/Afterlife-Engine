@@ -58,6 +58,7 @@ namespace WEngine
 		void UpdateCamera(const Transform& trans);
 		void UpdateCamera(const Vector3& position, const Quaternion& rotation);
 		void UpdateCameraColor(const Color& backColor);
+		const Transform& GetCamera() const;
 
 		/**
 		 * Records a given render mission to the queue.
@@ -71,6 +72,7 @@ namespace WEngine
 			Iris::GraphicsPipelineHandle statPipe, bool noTex);
 
 		const glm::mat4& GetProjectionMatrix() const;
+		const glm::mat4& GetViewMatrix() const;
 		const Transform& GetRenderedCameraTransform() const;
 		static glm::mat4 CalcModelMatrixGLM(const Transform& transform);
 

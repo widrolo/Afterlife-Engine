@@ -1,8 +1,10 @@
 #include "GTAOPass.h"
 
 #include "Engine/EngineDefines.h"
+#include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Core/System/Iris.h"
 #include "Engine/Math/Matrices/CommonMatracies.h"
+#include "Engine/Types/CoreSystems.h"
 #include "Engine/Util/TimeAnalysis.h"
 #include "Storage/Basics.h"
 #include "Storage/GTAOSettings.h"
@@ -83,9 +85,21 @@ GTAOSettings& GTAOPass::GetSettings()
     return m_settingsData;
 }
 
+void GTAOPass::UpdateSettings()
+{
+    auto* rh = CoreSystems::GetRenderHandler();
+
+    m_settingsData.invProj = glm::inverse(rh->GetProjectionMatrix());
+    m_settingsData.invView = glm::inverse(rh->GetViewMatrix());
+    m_settingsData.viewSize = EngineSettings::resolution;
+    m_settingsData.camPos = rh->GetCamera().position;
+}
+
 void GTAOPass::Render()
 {
     TimeSample sample("GTAOPass::Render");
+
+    UpdateSettings();
 
     Iris::UpdateBuffer(m_settingsUniformBuffer, 0, (byte*)&m_settingsData, sizeof(GTAOSettings));
 

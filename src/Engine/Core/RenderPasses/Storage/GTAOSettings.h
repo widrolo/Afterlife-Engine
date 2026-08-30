@@ -1,10 +1,14 @@
 #pragma once
-#include "Engine/Types/CommonTypes.h"
+
+#include <glm/glm.hpp>
 
 namespace WEngine::Rendering
 {
     struct GTAOSettings
     {
-        float32 someVal = 0.0f;
+        Vector3 camPos;
+        glm::mat4 invProj;
+        glm::mat4 invView;
+        Vector2 viewSize;
     };
 }

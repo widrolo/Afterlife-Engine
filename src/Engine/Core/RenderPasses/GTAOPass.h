@@ -14,6 +14,9 @@ namespace WEngine::Rendering
         GTAOSettings& GetSettings();
 
     private:
+        void UpdateSettings();
+
+    private:
         Iris::ResourceTableLayoutHandle m_settingsLayout;
         Iris::ResourceTableHandle m_settings;
         Iris::BufferHandle m_settingsUniformBuffer;

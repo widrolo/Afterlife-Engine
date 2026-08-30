@@ -29,6 +29,15 @@
     Header : "ASMF" (4 bytes) | vertex count u64 (8) | index count u64 (8)
     Vertex : position xyz f32 (12) | normal xyz f32 (12) | uv xy f32 (8)
     Index  : u32 (4 bytes) per index
+
+  Normals: each triangle's 3 corners are unique vertices (no cross-triangle
+  welding -- indices are just 0,1,2,3,... in emission order), and all 3
+  corners of a triangle are written with the SAME flat face normal, computed
+  from the actual (baked) triangle geometry rather than Blender's
+  smoothed/split shading normal. This makes the normal safe to read with a
+  `flat` interpolation qualifier in the fragment shader: every fragment in
+  the triangle gets the exact geometric face normal, with no dependence on
+  screen-space derivatives, pixel-quad alignment, or camera angle.
 ============================================================================]]
 
 local projPath, outPath, assetPath, meshName, blenderPath =
@@ -298,17 +307,45 @@ def main():
         out_idx = []
 
         for tri in tris:
+            # Baked (world-space) corner positions for this triangle.
+            tri_pos = []
             for loop_index in tri.loops:
                 loop = loops[loop_index]
                 v = verts[loop.vertex_index]
+                tri_pos.append(mat @ v.co)
 
-                pos = mat @ v.co
+            # True flat face normal, computed directly from the transformed
+            # triangle edges. This is correct even under non-uniform scale:
+            # cross(M*e1, M*e2) == det(M) * M^-T * cross(e1, e2), i.e. taking
+            # the cross product AFTER transforming the positions already
+            # gives the properly-transformed (inverse-transpose) normal, with
+            # no separate normal matrix needed -- unlike transforming a
+            # stored per-vertex normal directly.
+            e1 = tri_pos[1] - tri_pos[0]
+            e2 = tri_pos[2] - tri_pos[0]
+            face_n = e1.cross(e2)
 
-                if has_split:
-                    nrm = rot @ loop.normal
-                else:
-                    nrm = rot @ v.normal
-                nrm.normalize()
+            # Reference direction to resolve winding/mirroring ambiguity
+            # (e.g. from a negative-scaled object): use the mesh's own
+            # shading normal at the triangle's first corner.
+            first_loop_index = tri.loops[0]
+            first_loop = loops[first_loop_index]
+            if has_split:
+                ref_n = rot @ first_loop.normal
+            else:
+                ref_n = rot @ verts[first_loop.vertex_index].normal
+
+            if face_n.length_squared < 1e-12:
+                # Degenerate (zero-area) triangle: fall back to the shading
+                # normal so we don't normalize a zero vector into NaNs.
+                face_n = ref_n
+            elif face_n.dot(ref_n) < 0.0:
+                face_n = -face_n
+
+            face_n.normalize()
+
+            for corner, loop_index in enumerate(tri.loops):
+                pos = tri_pos[corner]
 
                 if uv_layer is not None:
                     uv = uv_layer[loop_index].uv
@@ -316,7 +353,9 @@ def main():
                 else:
                     u, vt = 0.0, 0.0
 
-                out_verts += [pos[0], pos[1], pos[2], nrm[0], nrm[1], nrm[2], u, vt]
+                # Same face_n written to all 3 corners -> genuinely flat,
+                # independent of which corner ends up the provoking vertex.
+                out_verts += [pos[0], pos[1], pos[2], face_n[0], face_n[1], face_n[2], u, vt]
                 out_idx.append(len(out_idx))
 
         if not out_verts:

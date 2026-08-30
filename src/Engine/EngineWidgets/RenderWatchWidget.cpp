@@ -239,6 +239,6 @@ void RenderWatchWidget::RenderDisplayBindings() const
 
 void RenderWatchWidget::ShowPassSettings()
 {
-    ImGui::DragFloat("GTAO Someval", &Rendering::Passes::gtao->GetSettings().someVal, 0.01, 0, 1);
+    //ImGui::DragFloat("GTAO Someval", &Rendering::Passes::gtao->GetSettings().someVal, 0.01, 0, 1);
 }
 

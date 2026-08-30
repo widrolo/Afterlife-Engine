@@ -190,6 +190,11 @@ void RenderHandler::UpdateCameraColor(const Color& backColor)
 	m_camColor = backColor;
 }
 
+const Transform & RenderHandler::GetCamera() const
+{
+	return m_camera;
+}
+
 void RenderHandler::AddToRenderQueue(RenderMission& mission)
 {
 	if (mission.meshUID == 0 || mission.textureUID == 0)
@@ -304,6 +309,11 @@ void RenderHandler::CreatePasses()
 const glm::mat4& RenderHandler::GetProjectionMatrix() const
 {
 	return m_projection;
+}
+
+const glm::mat4 & RenderHandler::GetViewMatrix() const
+{
+	return m_viewMatrix;
 }
 
 const Transform& RenderHandler::GetRenderedCameraTransform() const

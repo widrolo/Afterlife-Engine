@@ -53,7 +53,7 @@ void ScreenPass::Render()
 
     //const auto forwardFb = Passes::forward->GetFb();
     //Iris::BindFramebuffer(m_cmd, m_regPipe, 0, forwardFb, Iris::FramebufferBindKind::Color);
-    const auto gtaoFb = Passes::normal->GetFb();
+    const auto gtaoFb = Passes::gtao->GetFb();
     Iris::BindFramebuffer(m_cmd, m_regPipe, 0, gtaoFb, Iris::FramebufferBindKind::Color);
 
     Iris::Draw(m_cmd, 4, 1, 0, 0);
