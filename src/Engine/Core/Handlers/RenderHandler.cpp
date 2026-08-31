@@ -50,7 +50,7 @@ RenderHandler::RenderHandler()
 	CoreSystems::GetAssetRepo()->LoadAllGPUAssets();
 
 	m_projection = glm::perspective(
-		glm::radians(90.0f),
+		glm::radians(60.0f),
 		m_windowResolution.x / m_windowResolution.y,
 		0.01f,
 		1000.0f
@@ -362,8 +362,7 @@ namespace WEngine
 
 		if (m_displayMode != nullptr)
 		{
-			m_windowResolution.x = m_displayMode->w;
-			m_windowResolution.y = m_displayMode->h;
+			m_windowResolution = EngineSettings::resolution;
 		}
 		else
 		{

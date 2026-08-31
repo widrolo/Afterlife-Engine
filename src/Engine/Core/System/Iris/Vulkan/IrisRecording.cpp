@@ -268,7 +268,7 @@ namespace Iris
             depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
             depthAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
             depthAttachmentInfo.imageView = *depthImageView;
-            depthAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            depthAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         }
         else
         {

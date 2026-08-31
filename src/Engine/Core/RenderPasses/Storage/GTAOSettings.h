@@ -6,9 +6,9 @@ namespace WEngine::Rendering
 {
     struct GTAOSettings
     {
-        Vector3 camPos;
-        glm::mat4 invProj;
-        glm::mat4 invView;
-        Vector2 viewSize;
+        alignas(16) Vector3 camPos;
+        alignas(16) glm::mat4 invProj;
+        alignas(16) glm::mat4 invView;
+        alignas(16) Vector2 viewSize;
     };
 }

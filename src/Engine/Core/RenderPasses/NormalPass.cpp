@@ -59,7 +59,7 @@ void NormalPass::SetupPass()
 void NormalPass::Render()
 {
     TimeSample sample("NormalPass::Render");
-    BeginRendering(Color(168, 233, 242), EngineSettings::resolution);
+    BeginRendering(Color::Black, EngineSettings::resolution);
     RenderFullScene(true);
     EndRendering();
 }

@@ -9,5 +9,6 @@ void main()
 {
     vec3 n = inNormal;
     n.y = -n.y;
-    outColor = vec4(n * 0.5 + 0.5, 1.0);
+    n = n * 0.5 + 0.5;
+    outColor = vec4(n, 1.0);
 }

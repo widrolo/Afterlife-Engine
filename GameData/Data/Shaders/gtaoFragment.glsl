@@ -14,36 +14,16 @@ layout(set = 2, binding = 0) uniform GTAOSettings
 
 layout(location = 0) out vec4 outColor;
 
-vec3 ReconstructWorldPosition(vec2 uv) 
+vec3 ReconstructWorldPosition(vec2 uv)
 {
-    float z = texture(depth, uv).x;
-    vec2 ndcXY = uv * 2.0 - 1.0;
-    float ndcZ = z * 2.0 - 1.0;
+    float z = texture(depth, uv).r;
 
-    vec4 viewPos = settings.invProj * vec4(ndcXY, ndcZ, 1.0);
-    viewPos /= viewPos.w;
+    vec2 ndc = uv * 2.0 - 1.0;
 
-    return (settings.invView * viewPos).xyz;
+    vec4 p = settings.invProj * vec4(ndc, z, 1.0);
+
+    return p.xyz / p.w;
 }
-//
-//void main()
-//{
-//    vec3 pos = ReconstructWorldPosition(inUV);
-//    vec3 normal = texture(normals, inUV).xyz * 2.0 - 1.0;
-//    normal = normalize(normal);
-//
-//    vec3 toCamera = normalize(settings.camPos - pos);
-//    float d = dot(normal, toCamera);
-//
-//    if (d < 0.0)
-//    {
-//        outColor = vec4(1.0, 0.0, 0.0, 1.0);
-//    }
-//    else
-//    {
-//        outColor = vec4(0.0, 1.0, 0.0, 1.0);
-//    }
-//}
 
 void main()
 {
@@ -52,16 +32,23 @@ void main()
     vec3 n = texture(normals, inUV).xyz;
 
     vec3 cp = settings.camPos;
-    cp.y = - cp.y;
     vec3 toCamera = normalize(cp - p);
 
     float d = dot(n, toCamera);
 
-    // Visualize the actual dot product.
-    outColor = vec4(
-        d * 0.5 + 0.5,
-        d * 0.5 + 0.5,
-        d * 0.5 + 0.5,
-        1.0
-    );
+    if (d < 0)
+    {
+        outColor = vec4(-d, 0.0, 0.0, 1.0);
+    }
+    else
+    {
+        outColor = vec4(0.0, 0.0, d, 1.0);
+    }
 }
+
+//void main()
+//{
+//    vec3 p = ReconstructViewPosition(inUV);
+//
+//    outColor = vec4(normalize(p) * 0.5 + 0.5, 1.0);
+//}
