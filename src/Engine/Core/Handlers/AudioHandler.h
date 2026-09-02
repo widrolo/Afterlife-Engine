@@ -24,28 +24,33 @@ namespace WEngine
 		/**
 		 * Does nothing for now.
 		 */
+		[[deprecated]]
 		void AudioTick();
 		/**
 		 * Creates a new audio player with the specified audio clip.
 		 * @param clip The audio clip to be played. If nullptr, no player is created and nullptr is returned.
 		 * @return A pointer to the newly created audio player, or nullptr if an error occurred during creation.
 		 */
+		[[deprecated]]
 		AudioPlayer* NewAudioPlayer(AudioClip* clip);
 		/**
 		 * Swaps the audio clip of an existing audio player with a new one.
 		 * @param player The audio player whose clip is to be swapped.
 		 * @param newClip The new audio clip to be assigned to the player.
 		 */
+		[[deprecated]]
 		void SwapAudioClip(AudioPlayer* player, AudioClip* newClip);
 		/**
 		 * Plays an audio player. If the player is already playing, this function does nothing.
 		 * @param player The audio player to be played. If nullptr, the function does nothing.
 		 */
+		[[deprecated]]
 		void PlayAudioPlayer(AudioPlayer* player);
 		/**
 		 * Pauses an audio player. If the player is already paused, this function does nothing.
 		 * @param player The audio player to be paused. If nullptr, the function does nothing.
 		 */
+		[[deprecated]]
 		void PauseAudioPlayer(AudioPlayer* player);
 	};
 }

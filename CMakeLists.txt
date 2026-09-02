@@ -362,6 +362,10 @@ add_executable(Afterlife_Engine
         src/Engine/Core/RenderPasses/GTAOPass.cpp
         src/Engine/Core/RenderPasses/GTAOPass.h
         src/Engine/Core/RenderPasses/Storage/GTAOSettings.h
+        src/Engine/Types/Audio/Echo/Handles.h
+        src/Engine/Core/System/Echo.h
+        src/Engine/Types/Audio/Echo/Init.h
+        src/Engine/Types/Audio/Echo/Resource.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

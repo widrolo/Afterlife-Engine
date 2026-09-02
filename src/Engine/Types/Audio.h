@@ -4,6 +4,8 @@
 #include "CommonTypes.h"
 #include <SDL3/SDL.h>
 
+// all deprecated
+
 namespace WEngine
 {
 	/**

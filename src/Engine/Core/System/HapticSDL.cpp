@@ -12,178 +12,181 @@
 
 static SDLContext ctx;
 
-void Haptic::Init(SDL_Window* window)
+namespace Haptic
 {
-    ctx.window = window;
-    InitKeyboard(ctx);
-    InitMouse(ctx);
-    InitController(ctx);
-}
-
-void Haptic::FetchInput()
-{
-    WEngine::TimeSample sample("Haptic::FetchInput");
-    AdvanceBelts(ctx);
-    CheckControllerStatus(ctx);
-    FetchAllInput(ctx);
-    PollEvents();
-    TranslateFetched(ctx);
-    UpdateAllSenses(ctx);
-}
-
-void Haptic::PollEvents()
-{
-    WEngine::TimeSample sample("[Haptic]PollEvents");
-    while (SDL_PollEvent(&ctx.event))
+    void Init(SDL_Window* window)
     {
-        ImGui_ImplSDL3_ProcessEvent(&ctx.event);
-        if (ctx.event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
+        ctx.window = window;
+        InitKeyboard(ctx);
+        InitMouse(ctx);
+        InitController(ctx);
+    }
+
+    void FetchInput()
+    {
+        WEngine::TimeSample sample("Haptic::FetchInput");
+        AdvanceBelts(ctx);
+        CheckControllerStatus(ctx);
+        FetchAllInput(ctx);
+        PollEvents();
+        TranslateFetched(ctx);
+        UpdateAllSenses(ctx);
+    }
+
+    void PollEvents()
+    {
+        WEngine::TimeSample sample("[Haptic]PollEvents");
+        while (SDL_PollEvent(&ctx.event))
         {
-            if (!ctx.isEditor)
-                WEngine::CoreSystems::ShutdownGame();
-            else
-                WEditor::EditorSystems::ShutdownEditor();
+            ImGui_ImplSDL3_ProcessEvent(&ctx.event);
+            if (ctx.event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
+            {
+                if (!ctx.isEditor)
+                    WEngine::CoreSystems::ShutdownGame();
+                else
+                    WEditor::EditorSystems::ShutdownEditor();
+            }
         }
     }
-}
 
-void Haptic::EnableEditorMode()
-{
-    ctx.isEditor = true;
-}
-
-void Haptic::LoadInputMap(const wtl::vector<WEngine::InputSense> &mapContent, const std::string &mapName)
-{
-    SDLMap map;
-    map.name = mapName;
-
-    for (const auto& sense : mapContent)
+    void EnableEditorMode()
     {
-        auto s = SenseToSDLSense(ctx, sense);
-        map.senses.push_back(s);
+        ctx.isEditor = true;
     }
 
-    ctx.maps.push_back(map);
-}
-
-void Haptic::SelectInputMap(const std::string &mapName)
-{
-    for (auto& map : ctx.maps)
+    void LoadInputMap(const wtl::vector<WEngine::InputSense> &mapContent, const std::string &mapName)
     {
-        if (map.name == mapName)
+        SDLMap map;
+        map.name = mapName;
+
+        for (const auto& sense : mapContent)
         {
-            ctx.selectedMap = &map;
-            return;
+            auto s = SenseToSDLSense(ctx, sense);
+            map.senses.push_back(s);
         }
+
+        ctx.maps.push_back(map);
     }
-    WEngine::WLog::SetConsoleError();
-    WEngine::WLog::ConsoleLog(std::format("Unable to find map {}", mapName));
-}
 
-void Haptic::LoadOutputMap(const std::string &mapName)
-{
+    void SelectInputMap(const std::string &mapName)
+    {
+        for (auto& map : ctx.maps)
+        {
+            if (map.name == mapName)
+            {
+                ctx.selectedMap = &map;
+                return;
+            }
+        }
+        WEngine::WLog::SetConsoleError();
+        WEngine::WLog::ConsoleLog(std::format("Unable to find map {}", mapName));
+    }
 
-}
+    void LoadOutputMap(const std::string &mapName)
+    {
 
-void Haptic::SelectOutputMap(const std::string &mapName)
-{
+    }
 
-}
+    void SelectOutputMap(const std::string &mapName)
+    {
 
-void Haptic::ApplyFullPatch(const wtl::vector<WEngine::InputPatch> &patches)
-{
+    }
 
-}
+    void ApplyFullPatch(const wtl::vector<WEngine::InputPatch> &patches)
+    {
 
-void Haptic::ApplySinglePatch(const WEngine::InputPatch &patch)
-{
+    }
 
-}
+    void ApplySinglePatch(const WEngine::InputPatch &patch)
+    {
 
-wtl::vector<WEngine::InputPatch> Haptic::GetPatchList()
-{
+    }
 
-}
+    wtl::vector<WEngine::InputPatch> GetPatchList()
+    {
 
-WEngine::Nullable<bool> Haptic::GetActionJustPressed(const std::string &actionName)
-{
-    if (ctx.selectedMap == nullptr)
-        return {};
-    if (!ctx.selectedMap->results.contains(actionName))
-        return {};
-    return ctx.selectedMap->results[actionName].justPressed;
-}
+    }
 
-WEngine::Nullable<bool> Haptic::GetActionHeld(const std::string &actionName)
-{
-    if (ctx.selectedMap == nullptr)
-        return {};
-    if (!ctx.selectedMap->results.contains(actionName))
-        return {};
-    return ctx.selectedMap->results[actionName].held;
-}
+    WEngine::Nullable<bool> GetActionJustPressed(const std::string &actionName)
+    {
+        if (ctx.selectedMap == nullptr)
+            return {};
+        if (!ctx.selectedMap->results.contains(actionName))
+            return {};
+        return ctx.selectedMap->results[actionName].justPressed;
+    }
 
-WEngine::Nullable<bool> Haptic::GetActionJustReleased(const std::string &actionName)
-{
-    if (ctx.selectedMap == nullptr)
-        return {};
-    if (!ctx.selectedMap->results.contains(actionName))
-        return {};
-    return ctx.selectedMap->results[actionName].justReleased;
-}
+    WEngine::Nullable<bool> GetActionHeld(const std::string &actionName)
+    {
+        if (ctx.selectedMap == nullptr)
+            return {};
+        if (!ctx.selectedMap->results.contains(actionName))
+            return {};
+        return ctx.selectedMap->results[actionName].held;
+    }
 
-WEngine::Nullable<float32> Haptic::GetFloat(const std::string &floatName)
-{
-    if (ctx.selectedMap == nullptr)
-        return {};
-    if (!ctx.selectedMap->results.contains(floatName))
-        return {};
-    return ctx.selectedMap->results[floatName].trigger;
-}
+    WEngine::Nullable<bool> GetActionJustReleased(const std::string &actionName)
+    {
+        if (ctx.selectedMap == nullptr)
+            return {};
+        if (!ctx.selectedMap->results.contains(actionName))
+            return {};
+        return ctx.selectedMap->results[actionName].justReleased;
+    }
 
-WEngine::Nullable<WEngine::Vector2> Haptic::GetVector(const std::string &vectorName)
-{
-    if (ctx.selectedMap == nullptr)
-        return {};
-    if (!ctx.selectedMap->results.contains(vectorName))
-        return {};
-    return ctx.selectedMap->results[vectorName].pos;
-}
+    WEngine::Nullable<float32> GetFloat(const std::string &floatName)
+    {
+        if (ctx.selectedMap == nullptr)
+            return {};
+        if (!ctx.selectedMap->results.contains(floatName))
+            return {};
+        return ctx.selectedMap->results[floatName].trigger;
+    }
 
-WEngine::Nullable<WEngine::InputVendor> Haptic::GetVendor()
-{
+    WEngine::Nullable<WEngine::Vector2> GetVector(const std::string &vectorName)
+    {
+        if (ctx.selectedMap == nullptr)
+            return {};
+        if (!ctx.selectedMap->results.contains(vectorName))
+            return {};
+        return ctx.selectedMap->results[vectorName].pos;
+    }
 
-}
+    WEngine::Nullable<WEngine::InputVendor> GetVendor()
+    {
 
-bool Haptic::GetDebugKeyJustPressed(uint8 keyNum)
-{
-    if (keyNum > 12)
-        return false;
-    return ctx.rawKeys[0][(sizeT)WKey::DEBUG1 + keyNum - 1] && !ctx.rawKeys[1][(sizeT)WKey::DEBUG1 + keyNum - 1];
-}
+    }
 
-bool Haptic::GetDebugKeyHeld(uint8 keyNum)
-{
-    if (keyNum > 12)
-        return false;
-    return ctx.rawKeys[0][(sizeT)WKey::DEBUG1 + keyNum - 1];
-}
+    bool GetDebugKeyJustPressed(uint8 keyNum)
+    {
+        if (keyNum > 12)
+            return false;
+        return ctx.rawKeys[0][(sizeT)WKey::DEBUG1 + keyNum - 1] && !ctx.rawKeys[1][(sizeT)WKey::DEBUG1 + keyNum - 1];
+    }
 
-bool Haptic::GetDebugKeyJustReleased(uint8 keyNum)
-{
-    if (keyNum > 12)
-        return false;
-    return !ctx.rawKeys[0][(sizeT)WKey::DEBUG1 + keyNum - 1] && ctx.rawKeys[1][(sizeT)WKey::DEBUG1 + keyNum - 1];
-}
+    bool GetDebugKeyHeld(uint8 keyNum)
+    {
+        if (keyNum > 12)
+            return false;
+        return ctx.rawKeys[0][(sizeT)WKey::DEBUG1 + keyNum - 1];
+    }
 
-void Haptic::Rumble(const std::string &outputName)
-{
+    bool GetDebugKeyJustReleased(uint8 keyNum)
+    {
+        if (keyNum > 12)
+            return false;
+        return !ctx.rawKeys[0][(sizeT)WKey::DEBUG1 + keyNum - 1] && ctx.rawKeys[1][(sizeT)WKey::DEBUG1 + keyNum - 1];
+    }
 
-}
+    void Rumble(const std::string &outputName)
+    {
 
-void Haptic::SetLED(const std::string &outputName)
-{
+    }
 
+    void SetLED(const std::string &outputName)
+    {
+
+    }
 }
 
 #endif

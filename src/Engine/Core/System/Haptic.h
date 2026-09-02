@@ -9,41 +9,40 @@
 #include "Engine/Types/Input/InputSense.h"
 #include "Engine/WTL/vector.h"
 
-class Haptic
+namespace  Haptic
 {
-public:
-    static void Init(SDL_Window* window); // temporary SDL reference
-    static void FetchInput();
-    static void PollEvents();
-    static void EnableEditorMode();
+    void Init(SDL_Window* window); // temporary SDL reference
+    void FetchInput();
+    void PollEvents();
+    void EnableEditorMode();
 
     // ------------------------ INPUT/OUTPUT MAPS -------------------------
-    static void LoadInputMap(const wtl::vector<WEngine::InputSense>& mapContent, const std::string& mapName);
-    static void SelectInputMap(const std::string& mapName);
-    static void LoadOutputMap(const std::string& mapName);
-    static void SelectOutputMap(const std::string& mapName);
+    void LoadInputMap(const wtl::vector<WEngine::InputSense>& mapContent, const std::string& mapName);
+    void SelectInputMap(const std::string& mapName);
+    void LoadOutputMap(const std::string& mapName);
+    void SelectOutputMap(const std::string& mapName);
 
     // ----------------------------- PATCHING -----------------------------
-    static void ApplyFullPatch(const wtl::vector<WEngine::InputPatch>& patches);
-    static void ApplySinglePatch(const WEngine::InputPatch& patch);
-    static wtl::vector<WEngine::InputPatch> GetPatchList();
+    void ApplyFullPatch(const wtl::vector<WEngine::InputPatch>& patches);
+    void ApplySinglePatch(const WEngine::InputPatch& patch);
+    wtl::vector<WEngine::InputPatch> GetPatchList();
 
     // ------------------------------ INPUT -------------------------------
-    static WEngine::Nullable<bool> GetActionJustPressed(const std::string& actionName);
-    static WEngine::Nullable<bool> GetActionHeld(const std::string& actionName);
-    static WEngine::Nullable<bool> GetActionJustReleased(const std::string& actionName);
+    WEngine::Nullable<bool> GetActionJustPressed(const std::string& actionName);
+    WEngine::Nullable<bool> GetActionHeld(const std::string& actionName);
+    WEngine::Nullable<bool> GetActionJustReleased(const std::string& actionName);
 
-    static WEngine::Nullable<float32> GetFloat(const std::string& floatName);
+    WEngine::Nullable<float32> GetFloat(const std::string& floatName);
 
-    static WEngine::Nullable<WEngine::Vector2> GetVector(const std::string& vectorName);
+    WEngine::Nullable<WEngine::Vector2> GetVector(const std::string& vectorName);
 
-    static WEngine::Nullable<WEngine::InputVendor> GetVendor();
+    WEngine::Nullable<WEngine::InputVendor> GetVendor();
 
-    static bool GetDebugKeyJustPressed(uint8 keyNum);
-    static bool GetDebugKeyHeld(uint8 keyNum);
-    static bool GetDebugKeyJustReleased(uint8 keyNum);
+    bool GetDebugKeyJustPressed(uint8 keyNum);
+    bool GetDebugKeyHeld(uint8 keyNum);
+    bool GetDebugKeyJustReleased(uint8 keyNum);
 
     // ------------------------------ Output -------------------------------
-    static void Rumble(const std::string& outputName);
-    static void SetLED(const std::string& outputName);
+    void Rumble(const std::string& outputName);
+    void SetLED(const std::string& outputName);
 };

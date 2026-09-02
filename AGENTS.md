@@ -24,21 +24,21 @@ For the public API of the System Abstractions, the Deep/High Level Core Handlers
 
 Lives in `src/Engine/Core/System/...`
 
-System abstractions are classes with **all static functions and no class data**. Their purpose is to provide a common, high-level interface for a part of the system that can be swapped for another implementation via a CMake edit. Implementations live in their own translation units, with dedicated helper functions and global data.
+System abstractions are namespaces or classes with **all static functions and no class data**. Their purpose is to provide a common, high-level interface for a part of the system that can be swapped for another implementation via a CMake edit. Implementations live in their own translation units, with dedicated helper functions and global data.
 
 - **Iris**: Rendering. Exposes a low-level, explicitly recorded command API:
   - The caller creates opaque handles for buffers, textures, samplers, shaders (SPIR-V bytecode), resource tables (descriptor sets), and graphics pipelines.
   - Commands are recorded into per-frame command buffers: render passes via dynamic rendering, draw/draw-indexed/draw-indirect, dispatches, and async copy passes.
-  - Only the swapchain is a render target (no offscreen framebuffers yet); there is no model/material abstraction: the Render Handler and Asset Repo translate game data into raw buffers and pipelines.
+  - Render targets are framebuffers (color/depth attachments) alongside the swapchain; there is no model/material abstraction: the Render Handler and Asset Repo translate game data into raw buffers and pipelines.
   - Integrates ImGui and books GPU, VRAM, draw, and bind statistics.
-  - Currently Vulkan-only. Compute pipelines, compute passes, offscreen framebuffers, and shutdown are still stubbed; buffer-to-texture uploads only accept BC1/4/5 formats.
+  - Currently Vulkan-only. Compute pipelines and compute passes are still stubbed; shutdown is deprecated and left to the driver; buffer-to-texture uploads only accept BC1/4/5 formats.
 - **Haptic**: Input and haptic output. An all-static facade with no class data; real state lives in backend-specific translation units behind a static context. The backend is picked by a CMake define (`HAPTIC_BACKEND`, currently the SDL3 backend). Behaves like Steam Input by default.
   - Input maps are YAML files parsed by the Input handler into `InputSense` entries and loaded into Haptic as named maps, one selected at a time. Gameplay queries senses by name and gets Nullable results (empty when missing).
   - Three sense kinds: **Action**, **Float**, **Vector**, each bindable to keyboard, mouse, and/or controller.
   - Per frame, Haptic polls raw device state into double-buffered ValueBelt slots (current vs. previous frame), detects controller hotplug and vendor type, translates raw SDL scancodes/buttons into vendor-neutral `WKey`/`WMouseBtn`/`WPadBtn` enums, then runs signal processing: just-pressed/held/just-released edges for actions, normalized [-1,1] floats (triggers, with delta variants), and 2D vectors (joysticks with a deadzone, WASD-style key clusters).
   - Mouse state is fetched but not yet translated into senses. Output maps, rumble/LED, input patching, and `GetVendor` are declared but still stubbed.
 - **OS**: Rarely used, since the STL covers most OS differences; when it doesn't, OS steps in to resolve it.
-- **Echo**: In the planning phase; will be responsible for audio.
+- **Echo**: Audio. Sounds and streams as resources, virtual audio instances for playback, and buses for grouping and mixing.
 
 ### Deep Core Handlers
 
@@ -48,7 +48,6 @@ Deep core handlers are **singletons stored globally** in the `CoreSystems` class
 
 - **Render Handler**: Records render missions during the draw part of the game loop. Performs automatic optimizations before sending work to Iris.
 - **Sector Handler**: Owns every sector in the game. Loads them all at boot from the Asset Repo and draws them each frame.
-- **Audio Handler**: Takes in audio files and plays them. To be reworked when Echo arrives.
 - **Input**: Not really a handler, but an interface to Haptic used by gameplay code. Also parses YAML input maps into `InputSense` entries and loads them into Haptic.
 
 ### Asset Repo
