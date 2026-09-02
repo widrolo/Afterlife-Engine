@@ -124,3 +124,16 @@ BeginAssets:
               Type: 2
               Asset: Images/Brick 24 - 256x256.png
               Info: ""
+        c7:
+          Name: UtahPot
+          Data:
+            d0:
+              SubName: Mesh
+              Type: 1
+              Asset: Meshes/Testing/UtahPot.blend
+              Info: Utah Teapot
+            d1:
+              SubName: Tex
+              Type: 2
+              Asset: Images/Proto/ProtoTexture.png
+              Info: ""

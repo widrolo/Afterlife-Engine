@@ -16,23 +16,31 @@ layout(location = 0) out vec4 outColor;
 
 vec3 ReconstructWorldPosition(vec2 uv)
 {
-    float z = texture(depth, uv).r;
+    // depth attachment is Vulkan [0,1], projection is OpenGL-style NDC [-1,1]
+    float z = texture(depth, uv).r * 2.0 - 1.0;
 
     vec2 ndc = uv * 2.0 - 1.0;
 
     vec4 p = settings.invProj * vec4(ndc, z, 1.0);
+    p.xyz /= p.w;
 
-    return p.xyz / p.w;
+    vec4 w = settings.invView * vec4(p.xyz, 1.0);
+
+    return w.xyz / w.w;
 }
 
 void main()
 {
     vec3 p = ReconstructWorldPosition(inUV);
 
-    vec3 n = texture(normals, inUV).xyz;
+    vec3 n = texture(normals, inUV).xyz * 2.0 - 1.0;
+    n.y = -n.y;
 
     vec3 cp = settings.camPos;
+    cp.y = -cp.y;
+
     vec3 toCamera = normalize(cp - p);
+    n = normalize(n);
 
     float d = dot(n, toCamera);
 
@@ -44,6 +52,13 @@ void main()
     {
         outColor = vec4(0.0, 0.0, d, 1.0);
     }
+
+    outColor = vec4(
+        fract(abs(p.x) * 0.1),
+        fract(abs(p.y) * 0.1),
+        fract(abs(p.z) * 0.1),
+        1.0
+    );
 }
 
 //void main()

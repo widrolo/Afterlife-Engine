@@ -9,8 +9,11 @@ Freecam::Freecam()
 {
     m_speed = 5.0f;
     m_trans = WEngine::Transform::Zero;
-    m_trans.position.z = 6;
-    m_trans.position.y = 1;
+    m_yaw = 120.0f;
+    m_pitch = -20.0f;
+    m_trans.position.x = -8;
+    m_trans.position.y = 3;
+    m_trans.position.z = -6;
 }
 
 void Freecam::Tick(float32 dt)
@@ -52,8 +55,6 @@ void Freecam::Tick(float32 dt)
         m_pitch = 89.0f;
     if (m_pitch < -89.0f)
         m_pitch = -89.0f;
-
-    WEngine::WLog::ConsoleLog(std::format("{}", m_trans.rotation));
 
     m_trans.rotation = WEngine::Quaternion::EulerToQuaternion({glm::radians(m_pitch), glm::radians(m_yaw), 0.0f});
 }
