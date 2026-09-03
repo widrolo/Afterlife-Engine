@@ -4,4 +4,4 @@ target_compile_definitions(Afterlife_Engine PRIVATE
         ECHO_MINIAUDIO=${ECHO_MINIAUDIO_VAL}
 )
 
-target_compile_definitions(Afterlife_Engine PRIVATE ECHO_BACKEND=${ECHO_MINIAUDIO})
+target_compile_definitions(Afterlife_Engine PRIVATE ECHO_BACKEND=${ECHO_MINIAUDIO_VAL})
