@@ -372,6 +372,9 @@ add_executable(Afterlife_Engine
         src/Engine/Core/System/Echo/MA/EchoVirtAudio.cpp
         src/Engine/Core/System/Echo/MA/EchoPlayback.cpp
         src/Engine/Core/System/Echo/MA/EchoBus.cpp
+        src/Engine/Core/System/Echo/MA/Helpers/Callback.cpp
+        src/Engine/Core/System/Echo/MA/Helpers/Callback.h
+        src/Engine/Core/System/Echo/MA/EchoGlobals.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

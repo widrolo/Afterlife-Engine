@@ -30,6 +30,7 @@
 #include <Engine/Core/System/Memory.h>
 
 #include "Engine/Util/TimeAnalysis.h"
+#include "System/Echo.h"
 #include "System/Haptic.h"
 #include "System/Iris.h"
 using namespace WEngine;
@@ -137,6 +138,9 @@ void Engine::InitHandlers()
 	StartHandlerSingle<JobHandler>(&CoreSystems::jobHandler, "Job Handler");
 	StartHandlerSingle<TimeHandler>(&CoreSystems::timeHandler, "Time Handler");
 
+	Echo::InitDesc desc{};
+	Echo::Init(desc);
+
 	CoreSystems::assetRepo->RegisterAllTextures();
 	Input::LoadInputMap();
 	m_game = new Game();
@@ -212,7 +216,7 @@ void Engine::Run()
 
 		Loop_Stall(frameStart);
 	}
-
+	Echo::Shutdown();
 	std::exit(EXIT_SUCCESS);
 }
 
