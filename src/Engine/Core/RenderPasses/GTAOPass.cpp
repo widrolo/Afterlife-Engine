@@ -7,7 +7,7 @@
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Util/TimeAnalysis.h"
 #include "Storage/Basics.h"
-#include "Storage/GTAOSettings.h"
+#include "Storage/RenderSettings.h"
 #include "Storage/Passes.h"
 #include "Storage/ShaderStore.h"
 
@@ -21,7 +21,7 @@ void GTAOPass::SetupPass()
     auto frag = GetShader("gtao", Iris::ShaderStage::Fragment);
 
     Iris::ResourceTableLayoutDesc layoutDesc{};
-    layoutDesc.debugName = "GTAO Settings";
+    layoutDesc.debugName = "Render Settings";
 
     Iris::ResourceTableLayoutEntry texEntry{};
     texEntry.binding = 0;
@@ -30,6 +30,9 @@ void GTAOPass::SetupPass()
     texEntry.count = 1;
     layoutDesc.entries.push_back(texEntry);
 
+    m_renSettingsLayout = Iris::CreateResourceTableLayout(layoutDesc);
+
+    layoutDesc.debugName = "GTAO Settings";
     m_settingsLayout = Iris::CreateResourceTableLayout(layoutDesc);
 
     Iris::VertexLayoutDesc layout;
@@ -50,8 +53,9 @@ void GTAOPass::SetupPass()
 
     desc.tableLayouts[0] = Basics::singleTexLayout;
     desc.tableLayouts[1] = Basics::singleTexLayout;
-    desc.tableLayouts[2] = m_settingsLayout;
-    desc.tableAttachmentCount = 3;
+    desc.tableLayouts[2] = m_renSettingsLayout;
+    desc.tableLayouts[3] = m_settingsLayout;
+    desc.tableAttachmentCount = 4;
 
     m_regPipe = Iris::CreateGraphicsPipeline(desc);
 
@@ -59,30 +63,34 @@ void GTAOPass::SetupPass()
     fbDesc.hasDepth = false;
     fbDesc.width = EngineSettings::resolution.x;
     fbDesc.height = EngineSettings::resolution.y;
-    fbDesc.debugName = "GTAO Buffer";
+    fbDesc.debugName = "GTAO FB";
     fbDesc.resourceTableLayout = Basics::singleTexLayout;
     fbDesc.sampler = Basics::sampler;
     m_fb = Iris::CreateFramebuffer(fbDesc);
 
     Iris::BufferDesc buffDesc{};
-    buffDesc.debugName = "GTAO Buffer";
+    buffDesc.debugName = "Render Settings Buffer";
     buffDesc.usage = Iris::BufferUsage::Uniform;
-    buffDesc.size = sizeof(GTAOSettings);
-    m_settingsUniformBuffer = Iris::CreateBuffer(buffDesc, (byte*)&m_settingsData, sizeof(GTAOSettings));
+    buffDesc.size = sizeof(RenderSettings);
+    m_renSettingsUniformBuffer = Iris::CreateBuffer(buffDesc, (byte*)&m_settingsData, sizeof(RenderSettings));
 
+    buffDesc.debugName = "GTAO Buffer";
+    buffDesc.size = sizeof(GTAOSettings);
+    m_settingsUniformBuffer = Iris::CreateBuffer(buffDesc, (byte*)&m_gtaoData, sizeof(GTAOSettings));
+
+    m_renSettings = Iris::CreateResourceTable(m_settingsLayout);
     m_settings = Iris::CreateResourceTable(m_settingsLayout);
 
     Iris::ResourceTableUpdateDesc updateDesc{};
     Iris::ResourceTableWrite updateWrite{};
-    updateWrite.buffer = m_settingsUniformBuffer;
+
+    updateWrite.buffer = m_renSettingsUniformBuffer;
     updateDesc.writes.push_back(updateWrite);
+    Iris::UpdateResourceTable(m_renSettings, updateDesc);
 
+    updateWrite.buffer = m_settingsUniformBuffer;
+    updateDesc.writes[0] = updateWrite;
     Iris::UpdateResourceTable(m_settings, updateDesc);
-}
-
-GTAOSettings& GTAOPass::GetSettings()
-{
-    return m_settingsData;
 }
 
 void GTAOPass::UpdateSettings()
@@ -101,7 +109,8 @@ void GTAOPass::Render()
 
     UpdateSettings();
 
-    Iris::UpdateBuffer(m_settingsUniformBuffer, 0, (byte*)&m_settingsData, sizeof(GTAOSettings));
+    Iris::UpdateBuffer(m_renSettingsUniformBuffer, 0, (byte*)&m_settingsData, sizeof(RenderSettings));
+    Iris::UpdateBuffer(m_settingsUniformBuffer, 0, (byte*)&m_gtaoData, sizeof(GTAOSettings));
 
     BeginRendering(Color::White, EngineSettings::resolution);
 
@@ -116,7 +125,8 @@ void GTAOPass::Render()
 
     Iris::BindFramebuffer(m_cmd, m_regPipe, 0, forwardFb, Iris::FramebufferBindKind::Depth);
     Iris::BindFramebuffer(m_cmd, m_regPipe, 1, normalsFb, Iris::FramebufferBindKind::Color);
-    Iris::BindResourceTable(m_cmd, m_regPipe, 2, m_settings);
+    Iris::BindResourceTable(m_cmd, m_regPipe, 2, m_renSettings);
+    Iris::BindResourceTable(m_cmd, m_regPipe, 3, m_settings);
     Iris::Draw(m_cmd, 4, 1, 0, 0);
 
     EndRendering();

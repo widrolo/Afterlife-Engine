@@ -360,7 +360,7 @@ add_executable(Afterlife_Engine
         src/Engine/imgui/GraphEditor.cpp
         src/Engine/Core/RenderPasses/GTAOPass.cpp
         src/Engine/Core/RenderPasses/GTAOPass.h
-        src/Engine/Core/RenderPasses/Storage/GTAOSettings.h
+        src/Engine/Core/RenderPasses/Storage/RenderSettings.h
         src/Engine/Types/Audio/Echo/Handles.h
         src/Engine/Core/System/Echo.h
         src/Engine/Types/Audio/Echo/Init.h
@@ -377,6 +377,7 @@ add_executable(Afterlife_Engine
         src/Engine/Core/System/Echo/MA/Helpers/Types.h
         libs/stb/Impl.cpp
         libs/stb/include/stb_vorbis.h
+        src/Engine/Core/RenderPasses/Storage/GTAOSettings.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

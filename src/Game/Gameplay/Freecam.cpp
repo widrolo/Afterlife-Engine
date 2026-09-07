@@ -6,15 +6,17 @@
 #include "Engine/Util/TimeAnalysis.h"
 #include "Engine/Types/Audio/Echo/Handles.h"
 #include "Engine/Core/System/Echo.h"
+#include "Engine/Core/System/Iris.h"
 
 Echo::AudioBusHandle bus;
+float32 memTest = 0.0f;
 
 Freecam::Freecam()
 {
     m_speed = 5.0f;
     m_trans = WEngine::Transform::Zero;
     m_yaw = 120.0f;
-    m_pitch = -20.0f;
+    m_pitch = 20.0f;
     m_trans.position.x = -8;
     m_trans.position.y = 3;
     m_trans.position.z = -6;
@@ -46,7 +48,6 @@ void Freecam::Tick(float32 dt)
         speed *= 2.0f;
 
     WEngine::Vector3 moveForward = m_trans.Forward();
-    moveForward.y = -moveForward.y;
 
     m_trans.position = m_trans.position + moveForward * move.y * speed + m_trans.Right() * move.x * speed;
 
@@ -57,7 +58,7 @@ void Freecam::Tick(float32 dt)
         m_trans.position.y -= speed;
 
     m_yaw += look.x;
-    m_pitch +=  look.y / 1.5f;
+    m_pitch -=  look.y / 1.5f;
 
     if (m_pitch > 89.0f)
         m_pitch = 89.0f;

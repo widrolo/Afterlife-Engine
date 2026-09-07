@@ -87,7 +87,7 @@ void RenderHandler::BeginFrame()
 	Vector3 camPos = m_camera.position;
 	Quaternion camRot = m_camera.rotation;
 
-	glm::quat q(camRot.w, camRot.x, camRot.y, camRot.z);
+	glm::quat q(camRot.w, -camRot.x, camRot.y, -camRot.z);
 
 	m_viewMatrix = glm::mat4_cast(glm::conjugate(q));
 	m_viewMatrix = glm::translate(m_viewMatrix, glm::vec3(-camPos.x, camPos.y, -camPos.z));
@@ -327,6 +327,9 @@ glm::mat4 RenderHandler::CalcModelMatrixGLM(const Transform &transform)
 				transform.rotation.y, transform.rotation.z);
 
 	glm::mat4 modelMatrix = glm::mat4_cast(q);
+	// Meshes and sector transforms use the legacy asset basis. Keep the
+	// conversion here so every render path gets the same orientation.
+	modelMatrix = glm::rotate(modelMatrix, glm::radians(180.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 	modelMatrix[0] *= transform.size.x;
 	modelMatrix[1] *= transform.size.y;
@@ -467,4 +470,3 @@ namespace WEngine
 
 	}
 }
-

@@ -948,21 +948,7 @@ void AssetRepo::UploadTransformsOfSector(Sector &storage, const wtl::vector<Sect
 	wtl::vector<Mat4x4> stationaryPayload;
 
 	for (const auto& entry : renderables)
-	{
-		glm::quat q(entry.GetTransform().rotation.w, entry.GetTransform().rotation.x,
-			entry.GetTransform().rotation.y, entry.GetTransform().rotation.z);
-
-		glm::mat4 modelMatrix = glm::mat4_cast(q);
-
-		modelMatrix[0] *= entry.GetTransform().size.x;
-		modelMatrix[1] *= entry.GetTransform().size.y;
-		modelMatrix[2] *= entry.GetTransform().size.z;
-
-		modelMatrix[3] = glm::vec4(entry.GetTransform().position.x, -entry.GetTransform().position.y,
-			entry.GetTransform().position.z, 1.0f);
-
-		stationaryPayload.push_back(Glm4x4ToMat4x4(modelMatrix));
-	}
+		stationaryPayload.push_back(Glm4x4ToMat4x4(RenderHandler::CalcModelMatrixGLM(entry.GetTransform())));
 
 	Iris::BufferDesc desc;
 	desc.debugName = storage.GetName() + " stat buff";

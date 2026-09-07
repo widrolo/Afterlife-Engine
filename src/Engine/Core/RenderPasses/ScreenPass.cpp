@@ -34,7 +34,8 @@ void ScreenPass::SetupPass()
     pipeDesc.blend = Iris::BlendDesc{};
 
     pipeDesc.tableLayouts[0] = Basics::singleTexLayout;
-    pipeDesc.tableAttachmentCount = 1;
+    pipeDesc.tableLayouts[1] = Basics::singleTexLayout;
+    pipeDesc.tableAttachmentCount = 2;
 
     m_regPipe = Iris::CreateGraphicsPipeline(pipeDesc);
     m_fb = Iris::GetSwapchainFramebuffer();
@@ -51,10 +52,10 @@ void ScreenPass::Render()
     Iris::BindGraphicsPipeline(m_cmd, m_regPipe);
     Iris::BindVertexBuffers(m_cmd, 0, vertBuffs, vertOffs);
 
-    //const auto forwardFb = Passes::forward->GetFb();
-    //Iris::BindFramebuffer(m_cmd, m_regPipe, 0, forwardFb, Iris::FramebufferBindKind::Color);
-    const auto gtaoFb = Passes::forward->GetFb();
-    Iris::BindFramebuffer(m_cmd, m_regPipe, 0, gtaoFb, Iris::FramebufferBindKind::Color);
+    const auto forwardFb = Passes::forward->GetFb();
+    const auto gtaoFb = Passes::gtao->GetFb();
+    Iris::BindFramebuffer(m_cmd, m_regPipe, 0, forwardFb, Iris::FramebufferBindKind::Color);
+    Iris::BindFramebuffer(m_cmd, m_regPipe, 1, gtaoFb, Iris::FramebufferBindKind::Color);
 
     Iris::Draw(m_cmd, 4, 1, 0, 0);
 

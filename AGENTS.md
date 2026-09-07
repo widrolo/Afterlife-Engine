@@ -47,6 +47,7 @@ Lives in `src/Engine/Core/Handlers/...`
 Deep core handlers are **singletons stored globally** in the `CoreSystems` class alongside other handlers. They are distinguished only by philosophy: they primarily interact with System Abstractions.
 
 - **Render Handler**: Records render missions during the draw part of the game loop. Performs automatic optimizations before sending work to Iris.
+- **GTAO pass**: Evaluates bidirectional horizons and analytic cosine-weighted visibility in view space, using forward depth and the normal buffer. Outputs a grayscale visibility mask (white is unoccluded), without denoising or temporal accumulation. Uses fixed per-pixel PCG3D jitter with decorrelated angle/radius values to avoid directional noise patterns. `GTAOSettings.h` supplies per-pass defaults in a 32-byte std140-compatible struct uploaded each frame. Reconstruction uses raw Vulkan depth and unflipped UVs; normal decoding undoes the normal buffer's Y flip before rotating into view space.
 - **Sector Handler**: Owns every sector in the game. Loads them all at boot from the Asset Repo and draws them each frame.
 - **Input**: Not really a handler, but an interface to Haptic used by gameplay code. Also parses YAML input maps into `InputSense` entries and loads them into Haptic.
 

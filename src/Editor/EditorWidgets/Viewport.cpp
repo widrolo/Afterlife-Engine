@@ -44,40 +44,29 @@ void Viewport::RenderInternal()
     if (Haptic::GetDebugKeyHeld(10))
         mCurrentGizmoMode = ImGuizmo::LOCAL;
 
-    // vibe coded bullshit doesnt even work and now i have to fix it.
-
     if (EditorState::SelectedEntry == nullptr)
         return;
 
     auto* renderHandler = WEngine::CoreSystems::GetRenderHandler();
 
-    const WEngine::Transform& cam = renderHandler->GetRenderedCameraTransform();
     const glm::mat4& cameraProjection = renderHandler->GetProjectionMatrix();
+    glm::mat4 gizmoProjection = cameraProjection;
+    gizmoProjection[1][1] *= -1.0f;
 
-    glm::quat camRot(cam.rotation.w, -cam.rotation.x, cam.rotation.y, -cam.rotation.z);
-    glm::mat4 cameraView = glm::mat4_cast(glm::conjugate(camRot));
-    cameraView = glm::translate(cameraView, glm::vec3(-cam.position.x, -cam.position.y, -cam.position.z));
+    const glm::mat4& cameraView = renderHandler->GetViewMatrix();
 
     WEngine::Transform entryTransform = EditorState::SelectedEntry->transform;
-    entryTransform.position.y = 0 - entryTransform.position.y;
     glm::mat4 matrix = WEngine::RenderHandler::CalcModelMatrixGLM(entryTransform);
 
     glm::mat4 deltaMatrix = glm::mat4(1.0f);
     ImGuizmo::SetDrawlist();
     ImGuizmo::SetRect(viewportPos.x, viewportPos.y, viewportSize.x, viewportSize.y);
-    if (ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+    if (ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(gizmoProjection),
         mCurrentGizmoOperation, mCurrentGizmoMode, glm::value_ptr(matrix), glm::value_ptr(deltaMatrix)))
     {
         WEngine::Transform& transform = EditorState::SelectedEntry->transform;
 
-        transform.position = { matrix[3][0], matrix[3][1], matrix[3][2] };
-
-        glm::vec3 scale = {
-            glm::length(glm::vec3(matrix[0])),
-            glm::length(glm::vec3(matrix[1])),
-            glm::length(glm::vec3(matrix[2]))
-        };
-        transform.size = { scale.x, scale.y, scale.z };
+        transform.position = { matrix[3][0], -matrix[3][1], matrix[3][2] };
 
         if (mCurrentGizmoOperation == ImGuizmo::ROTATE)
         {
@@ -88,26 +77,23 @@ void Viewport::RenderInternal()
             glm::quat newRotation;
             if (mCurrentGizmoMode == ImGuizmo::WORLD)
             {
-                deltaRotation.x = -deltaRotation.x;
-                deltaRotation.z = -deltaRotation.z;
                 newRotation = glm::normalize(deltaRotation * prevRotation);
             }
             else
             {
                 glm::quat rawDelta = prevRotation * deltaRotation * glm::conjugate(prevRotation);
-                rawDelta.x = -rawDelta.x;
-                rawDelta.z = -rawDelta.z;
                 newRotation = glm::normalize(prevRotation * rawDelta);
             }
             transform.rotation = { newRotation.x, newRotation.y, newRotation.z, newRotation.w };
         }
-        else
+        else if (mCurrentGizmoOperation == ImGuizmo::SCALE)
         {
-            glm::mat3 rotationMatrix = glm::mat3(glm::vec3(matrix[0]) / scale.x,
-                                                 glm::vec3(matrix[1]) / scale.y,
-                                                 glm::vec3(matrix[2]) / scale.z);
-            glm::quat rotation = glm::quat_cast(rotationMatrix);
-            transform.rotation = { rotation.x, rotation.y, rotation.z, rotation.w };
+            glm::vec3 scale = {
+                glm::length(glm::vec3(matrix[0])),
+                glm::length(glm::vec3(matrix[1])),
+                glm::length(glm::vec3(matrix[2]))
+            };
+            transform.size = { scale.x, scale.y, scale.z };
         }
     }
 }
