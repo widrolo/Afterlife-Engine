@@ -13,6 +13,9 @@
 
 using namespace WEngine::Rendering;
 
+//constexpr float32 RenderScale = 3.0f / 4.0f;
+constexpr float32 RenderScale = 1.0f;
+
 void GTAOPass::SetupPass()
 {
     Passes::gtao = this;
@@ -61,8 +64,8 @@ void GTAOPass::SetupPass()
 
     Iris::FramebufferDesc fbDesc{};
     fbDesc.hasDepth = false;
-    fbDesc.width = EngineSettings::resolution.x;
-    fbDesc.height = EngineSettings::resolution.y;
+    fbDesc.width = EngineSettings::resolution.x * RenderScale;
+    fbDesc.height = EngineSettings::resolution.y * RenderScale;
     fbDesc.debugName = "GTAO FB";
     fbDesc.resourceTableLayout = Basics::singleTexLayout;
     fbDesc.sampler = Basics::sampler;
@@ -99,7 +102,7 @@ void GTAOPass::UpdateSettings()
 
     m_settingsData.invProj = glm::inverse(rh->GetProjectionMatrix());
     m_settingsData.invView = glm::inverse(rh->GetViewMatrix());
-    m_settingsData.viewSize = EngineSettings::resolution;
+    m_settingsData.viewSize = EngineSettings::resolution * RenderScale;
     m_settingsData.camPos = rh->GetCamera().position;
 }
 
@@ -112,7 +115,7 @@ void GTAOPass::Render()
     Iris::UpdateBuffer(m_renSettingsUniformBuffer, 0, (byte*)&m_settingsData, sizeof(RenderSettings));
     Iris::UpdateBuffer(m_settingsUniformBuffer, 0, (byte*)&m_gtaoData, sizeof(GTAOSettings));
 
-    BeginRendering(Color::White, EngineSettings::resolution);
+    BeginRendering(Color::White, EngineSettings::resolution  * RenderScale);
 
     wtl::vector<Iris::BufferHandle> vertBuffs{Basics::screenMesh};
     wtl::vector<sizeT> vertOffs{0};

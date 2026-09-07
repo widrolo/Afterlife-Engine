@@ -1,4 +1,4 @@
-#include "ScreenPass.h"
+#include "AOBlurPass.h"
 
 #include "Engine/EngineDefines.h"
 #include "Engine/Core/System/Iris.h"
@@ -8,23 +8,20 @@
 #include "Storage/ShaderStore.h"
 
 using namespace WEngine::Rendering;
-
-void ScreenPass::SetupPass()
+void AOBlurPass::SetupPass()
 {
-    Passes::screen = this;
+    Passes::aoBlur = this;
     m_cmd = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
     auto vert = GetShader("screen", Iris::ShaderStage::Vertex);
-    auto frag = GetShader("screen", Iris::ShaderStage::Fragment);
+    auto frag = GetShader("aoBlur", Iris::ShaderStage::Fragment);
 
     Iris::VertexLayoutDesc layout;
     AddScreenAttributes(layout);
 
-    // this needs to be gone ASAP!
     Iris::DepthStencilDesc depthDesc{};
-    depthDesc.depthWriteEnable = true;
 
     Iris::GraphicsPipelineDesc pipeDesc{};
-    pipeDesc.debugName = "Screen Pipeline";
+    pipeDesc.debugName = "AO Blur Pipeline";
     pipeDesc.vertexShader = vert;
     pipeDesc.fragmentShader = frag;
     pipeDesc.vertexLayout = layout;
@@ -34,17 +31,24 @@ void ScreenPass::SetupPass()
     pipeDesc.blend = Iris::BlendDesc{};
 
     pipeDesc.tableLayouts[0] = Basics::singleTexLayout;
-    pipeDesc.tableLayouts[1] = Basics::singleTexLayout;
-    pipeDesc.tableAttachmentCount = 2;
+    pipeDesc.tableAttachmentCount = 1;
 
     m_regPipe = Iris::CreateGraphicsPipeline(pipeDesc);
-    m_fb = Iris::GetSwapchainFramebuffer();
+
+    Iris::FramebufferDesc fbDesc{};
+    fbDesc.hasDepth = false;
+    fbDesc.width = EngineSettings::resolution.x;
+    fbDesc.height = EngineSettings::resolution.y;
+    fbDesc.debugName = "AO Blur FB";
+    fbDesc.resourceTableLayout = Basics::singleTexLayout;
+    fbDesc.sampler = Basics::sampler;
+    m_fb = Iris::CreateFramebuffer(fbDesc);
 }
 
-void ScreenPass::Render()
+void AOBlurPass::Render()
 {
-    TimeSample sample("ScreenPass::Render");
-    BeginRendering(Color(), EngineSettings::resolution);
+    TimeSample sample("AOBlurPass::Render");
+    BeginRendering(Color::White, EngineSettings::resolution);
 
     wtl::vector<Iris::BufferHandle> vertBuffs{Basics::screenMesh};
     wtl::vector<sizeT> vertOffs{0};
@@ -52,14 +56,10 @@ void ScreenPass::Render()
     Iris::BindGraphicsPipeline(m_cmd, m_regPipe);
     Iris::BindVertexBuffers(m_cmd, 0, vertBuffs, vertOffs);
 
-    const auto forwardFb = Passes::forward->GetFb();
-    const auto aoFB = Passes::aoBlur->GetFb();
-    Iris::BindFramebuffer(m_cmd, m_regPipe, 0, forwardFb, Iris::FramebufferBindKind::Color);
-    Iris::BindFramebuffer(m_cmd, m_regPipe, 1, aoFB, Iris::FramebufferBindKind::Color);
+    const auto gtaoFb = Passes::gtao->GetFb();
+    Iris::BindFramebuffer(m_cmd, m_regPipe, 0, gtaoFb, Iris::FramebufferBindKind::Color);
 
     Iris::Draw(m_cmd, 4, 1, 0, 0);
-
-    Iris::ImGuiRenderDrawData(m_cmd);
 
     EndRendering();
 }

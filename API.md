@@ -296,7 +296,7 @@ Class `WEngine::RenderHandler`. Middle man between the world and Iris. Records r
 | `void EnableEditorMode(const Vector2& viewportResolution)` | Changes behavior to account for the editor (ATK), using the given viewport resolution. |
 | `Framebuffer EditorGetViewportFramebuffer()` | The framebuffer meant for the editor viewport. Only called by ATK. |
 | `void BeginFrame()` | Starts the frame: begins Iris's frame, acquires the swapchain image, starts ImGui/ImGuizmo, and derives the view matrix from the current camera. Game loop only. |
-| `void RenderFrame()` | Runs the render passes (forward, normal, GTAO, screen) and presents; the queued missions/plans render through the passes. Clears the frame's queues at the end. Game loop only. |
+| `void RenderFrame()` | Runs the render passes (forward, normal, GTAO, AO blur, screen) and presents; the queued missions/plans render through the passes. Clears the frame's queues at the end. Game loop only. |
 | `void UpdateCamera(const Transform& trans)` | Sets the camera transform used to render the frame. |
 | `void UpdateCamera(const Vector3& position, const Quaternion& rotation)` | Sets the camera position and rotation. |
 | `void UpdateCameraColor(const Color& backColor)` | Sets the color the frame is cleared to. |

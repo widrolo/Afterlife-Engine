@@ -278,7 +278,7 @@ namespace Iris
         VkRenderingInfo renderingInfo{};
         renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
         renderingInfo.renderArea.offset = {0, 0};
-        renderingInfo.renderArea.extent = {1920, 1080}; // temporary max resolution until i can figure this out.
+        renderingInfo.renderArea.extent = {(uint32)desc.resolution.x, (uint32)desc.resolution.y};
         renderingInfo.layerCount = 1;
         renderingInfo.colorAttachmentCount = 1;
         renderingInfo.pColorAttachments = &colorAttachmentInfo;

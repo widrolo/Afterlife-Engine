@@ -378,6 +378,8 @@ add_executable(Afterlife_Engine
         libs/stb/Impl.cpp
         libs/stb/include/stb_vorbis.h
         src/Engine/Core/RenderPasses/Storage/GTAOSettings.h
+        src/Engine/Core/RenderPasses/AOBlurPass.cpp
+        src/Engine/Core/RenderPasses/AOBlurPass.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

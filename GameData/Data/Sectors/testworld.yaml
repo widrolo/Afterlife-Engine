@@ -57,5 +57,5 @@ sector:
     name: UtahPot
     asset: /Testing/UtahPot
     position: [0.67549926, -1.6170846, 1.5150305]
-    rotation: [0, 0, 0.9999888, 0.004731014]
+    rotation: [0, 0, -0, 1]
     size: [0.30000722, 0.30000722, 0.3]

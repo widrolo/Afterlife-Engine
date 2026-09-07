@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/Core/RenderPasses/AOBlurPass.h"
 #include "Engine/Core/RenderPasses/ForwardPass.h"
 #include "Engine/Core/RenderPasses/GTAOPass.h"
 #include "Engine/Core/RenderPasses/NormalPass.h"
@@ -12,6 +13,7 @@ namespace WEngine::Rendering
         _GLOBAL_ ForwardPass* forward;
         _GLOBAL_ NormalPass* normal;
         _GLOBAL_ GTAOPass* gtao;
+        _GLOBAL_ AOBlurPass* aoBlur;
         _GLOBAL_ ScreenPass* screen;
     };
 }

@@ -19,6 +19,7 @@ void RenderPassBase::BeginRendering(const Color &color, const Vector2 &resolutio
     Iris::RenderPassBeginDesc desc{};
     desc.colorAttachment.clearColor = color;
     desc.framebuffer = m_fb;
+    desc.resolution = resolution;
     Iris::BeginRenderPass(m_cmd, desc);
 
     Iris::Viewport vp{};

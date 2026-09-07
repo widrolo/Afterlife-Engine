@@ -100,6 +100,7 @@ void RenderHandler::RenderFrame()
 	Rendering::Passes::forward->Render();
 	Rendering::Passes::normal->Render();
 	Rendering::Passes::gtao->Render();
+	Rendering::Passes::aoBlur->Render();
 	Rendering::Passes::screen->Render();
 
 	Iris::Present();
@@ -298,11 +299,13 @@ void RenderHandler::CreatePasses()
 	Rendering::Passes::forward = WAllocator::Construct<Rendering::ForwardPass>();
 	Rendering::Passes::normal = WAllocator::Construct<Rendering::NormalPass>();
 	Rendering::Passes::gtao = WAllocator::Construct<Rendering::GTAOPass>();
+	Rendering::Passes::aoBlur = WAllocator::Construct<Rendering::AOBlurPass>();
 	Rendering::Passes::screen = WAllocator::Construct<Rendering::ScreenPass>();
 
 	Rendering::Passes::forward->SetupPass();
 	Rendering::Passes::normal->SetupPass();
 	Rendering::Passes::gtao->SetupPass();
+	Rendering::Passes::aoBlur->SetupPass();
 	Rendering::Passes::screen->SetupPass();
 }
 
