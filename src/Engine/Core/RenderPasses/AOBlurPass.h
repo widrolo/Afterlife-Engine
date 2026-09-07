@@ -11,6 +11,9 @@ namespace WEngine::Rendering
     public:
         void SetupPass() override;
         void Render() override;
+
+    private:
+        float32 m_renderScale = 1.0f;
     };
 
 }

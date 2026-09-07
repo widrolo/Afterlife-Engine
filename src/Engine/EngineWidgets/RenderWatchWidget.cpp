@@ -17,12 +17,24 @@ void RenderWatchWidget::Setup()
 void RenderWatchWidget::RenderInternal()
 {
     SetSize({800, 600});
-    Header();
-    ImGui::SeparatorText("Vram Statistics");
-    VramDisplay();
-    ImGui::SeparatorText("Rendering Statistics");
-    RenderDisplay();
-    ShowPassSettings();
+    if (ImGui::BeginTabBar("RenderWatchTabBar"))
+    {
+        if (ImGui::BeginTabItem("Statistics"))
+        {
+            Header();
+            ImGui::SeparatorText("Vram Statistics");
+            VramDisplay();
+            ImGui::SeparatorText("Rendering Statistics");
+            RenderDisplay();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("GTAO"))
+        {
+            ShowGTAOPassSettings();
+            ImGui::EndTabItem();
+        }
+        ImGui::EndTabBar();
+    }
 }
 
 void RenderWatchWidget::Header() const
@@ -237,8 +249,17 @@ void RenderWatchWidget::RenderDisplayBindings() const
     }
 }
 
-void RenderWatchWidget::ShowPassSettings()
+void RenderWatchWidget::ShowGTAOPassSettings()
 {
-    //ImGui::DragFloat("GTAO Someval", &Rendering::Passes::gtao->GetSettings().someVal, 0.01, 0, 1);
+    ImGui::Text("Ground Truth Ambient Occlusion Render Pass Settings");
+    auto& settings = Rendering::Passes::gtao->GetGTAOSettings();
+    ImGui::DragFloat("Radius", &settings.radius, 0.01, 0, 1);
+    ImGui::DragFloat("Falloff Start", &settings.falloffStart, 0.01, 0, 0.99f);
+    ImGui::DragFloat("Strength", &settings.strength, 0.01, 0, 1);
+    ImGui::DragFloat("Power", &settings.power, 0.01, 1, 5);
+    ImGui::DragFloat("Max Radius Pixels", &settings.maxRadiusPixels, 1, 1, 256);
+    ImGui::DragFloat("Horizon Bias", &settings.horizonBias, 0.01, 0, 1);
+    ImGui::DragInt("Slice Count", &settings.sliceCount, 1, 1, 16);
+    ImGui::DragInt("Step Count", &settings.stepCount, 1, 1, 32);
 }
 

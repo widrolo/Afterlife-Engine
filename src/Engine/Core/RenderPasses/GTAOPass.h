@@ -12,6 +12,7 @@ namespace WEngine::Rendering
         void SetupPass() override;
         void Render() override;
 
+        GTAOSettings& GetGTAOSettings();
 
     private:
         void UpdateSettings();
@@ -25,5 +26,6 @@ namespace WEngine::Rendering
         Iris::BufferHandle m_settingsUniformBuffer;
         RenderSettings m_settingsData;
         GTAOSettings m_gtaoData;
+        float32 m_renderScale = 1.0f;
     };
 }

@@ -2,6 +2,8 @@
 
 #include "Engine/EngineDefines.h"
 #include "Engine/Core/System/Iris.h"
+#include "Engine/Stores/Steam/SteamStore.h"
+#include "Engine/Types/CoreSystems.h"
 #include "Engine/Util/TimeAnalysis.h"
 #include "Storage/Basics.h"
 #include "Storage/Passes.h"
@@ -10,6 +12,9 @@
 using namespace WEngine::Rendering;
 void AOBlurPass::SetupPass()
 {
+    if (CoreSystems::GetSteamStore()->IsSteamDeck())
+        m_renderScale = 3.0f/4.0f;
+
     Passes::aoBlur = this;
     m_cmd = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
     auto vert = GetShader("screen", Iris::ShaderStage::Vertex);
@@ -37,8 +42,8 @@ void AOBlurPass::SetupPass()
 
     Iris::FramebufferDesc fbDesc{};
     fbDesc.hasDepth = false;
-    fbDesc.width = EngineSettings::resolution.x;
-    fbDesc.height = EngineSettings::resolution.y;
+    fbDesc.width = EngineSettings::resolution.x * m_renderScale;
+    fbDesc.height = EngineSettings::resolution.y * m_renderScale;
     fbDesc.debugName = "AO Blur FB";
     fbDesc.resourceTableLayout = Basics::singleTexLayout;
     fbDesc.sampler = Basics::sampler;
@@ -48,7 +53,7 @@ void AOBlurPass::SetupPass()
 void AOBlurPass::Render()
 {
     TimeSample sample("AOBlurPass::Render");
-    BeginRendering(Color::White, EngineSettings::resolution);
+    BeginRendering(Color::White, EngineSettings::resolution * m_renderScale);
 
     wtl::vector<Iris::BufferHandle> vertBuffs{Basics::screenMesh};
     wtl::vector<sizeT> vertOffs{0};

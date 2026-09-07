@@ -17,6 +17,7 @@ namespace WEngine
         void RenderInternal() override;
 
     private:
+        // render stats:
         void Header() const;
         void VramDisplay() const;
         void PrintVramUsage(const std::string& category, sizeT sizeInBytes) const;
@@ -29,6 +30,7 @@ namespace WEngine
         void RenderDisplayDrawcall() const;
         void RenderDisplayBindings() const;
 
-        void ShowPassSettings();
+        // GTAO settings
+        void ShowGTAOPassSettings();
     };
 }

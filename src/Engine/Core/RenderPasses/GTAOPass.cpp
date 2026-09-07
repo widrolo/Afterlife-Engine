@@ -4,6 +4,7 @@
 #include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Core/System/Iris.h"
 #include "Engine/Math/Matrices/CommonMatracies.h"
+#include "Engine/Stores/Steam/SteamStore.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Util/TimeAnalysis.h"
 #include "Storage/Basics.h"
@@ -13,11 +14,11 @@
 
 using namespace WEngine::Rendering;
 
-//constexpr float32 RenderScale = 3.0f / 4.0f;
-constexpr float32 RenderScale = 1.0f;
-
 void GTAOPass::SetupPass()
 {
+    if (CoreSystems::GetSteamStore()->IsSteamDeck())
+        m_renderScale = 2.0f/4.0f;
+
     Passes::gtao = this;
     m_cmd = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
     auto vert = GetShader("screen", Iris::ShaderStage::Vertex);
@@ -64,8 +65,8 @@ void GTAOPass::SetupPass()
 
     Iris::FramebufferDesc fbDesc{};
     fbDesc.hasDepth = false;
-    fbDesc.width = EngineSettings::resolution.x * RenderScale;
-    fbDesc.height = EngineSettings::resolution.y * RenderScale;
+    fbDesc.width = EngineSettings::resolution.x * m_renderScale;
+    fbDesc.height = EngineSettings::resolution.y * m_renderScale;
     fbDesc.debugName = "GTAO FB";
     fbDesc.resourceTableLayout = Basics::singleTexLayout;
     fbDesc.sampler = Basics::sampler;
@@ -102,7 +103,7 @@ void GTAOPass::UpdateSettings()
 
     m_settingsData.invProj = glm::inverse(rh->GetProjectionMatrix());
     m_settingsData.invView = glm::inverse(rh->GetViewMatrix());
-    m_settingsData.viewSize = EngineSettings::resolution * RenderScale;
+    m_settingsData.viewSize = EngineSettings::resolution * m_renderScale;
     m_settingsData.camPos = rh->GetCamera().position;
 }
 
@@ -115,7 +116,7 @@ void GTAOPass::Render()
     Iris::UpdateBuffer(m_renSettingsUniformBuffer, 0, (byte*)&m_settingsData, sizeof(RenderSettings));
     Iris::UpdateBuffer(m_settingsUniformBuffer, 0, (byte*)&m_gtaoData, sizeof(GTAOSettings));
 
-    BeginRendering(Color::White, EngineSettings::resolution  * RenderScale);
+    BeginRendering(Color::White, EngineSettings::resolution  * m_renderScale);
 
     wtl::vector<Iris::BufferHandle> vertBuffs{Basics::screenMesh};
     wtl::vector<sizeT> vertOffs{0};
@@ -133,4 +134,9 @@ void GTAOPass::Render()
     Iris::Draw(m_cmd, 4, 1, 0, 0);
 
     EndRendering();
+}
+
+GTAOSettings& GTAOPass::GetGTAOSettings()
+{
+    return m_gtaoData;
 }

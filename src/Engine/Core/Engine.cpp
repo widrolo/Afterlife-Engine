@@ -89,8 +89,8 @@ void Engine::StartGame()
 	StartupMessage();
 	WLog::ConsoleLog("--------------- Engine Init ----------------");
 
-	InitHandlers();
 	InitSteam();
+	InitHandlers();
 
 	if (CoreSystems::steamStore != nullptr && CoreSystems::steamStore->IsSteamDeck())
 	{
