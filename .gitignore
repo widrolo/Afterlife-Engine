@@ -374,13 +374,10 @@ packedBuild-Linux/
 packedBuild-Windows/
 # technically unsupported, but dont want to push a game by accident one day
 packedBuild-MacOS/
-packedBuild-MacOSMobile/
-packedBuild-Android/
-packedBuild-BSD/
 packedBuild-Playstation5/
 packedBuild-Playstation6/
 packedBuild-XboxSeries/
-packedBuild-NintendoS1/
+packedBuild-XboxHelix/
 packedBuild-NintendoS2/
 packedBuild-NintendoS3/
 

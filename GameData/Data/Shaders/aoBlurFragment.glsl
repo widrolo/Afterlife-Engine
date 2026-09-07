@@ -25,5 +25,6 @@ void main()
                   + textureLod(aoTexture, vec2(sampleX.y, sampleY.z), 0.0).r * 0.375;
 
     float visibility = (top + bottom) * 0.3125 + middle * 0.375;
+    visibility = min(visibility / 0.95, 1.0);
     outColor = vec4(vec3(visibility), 1.0);
 }
