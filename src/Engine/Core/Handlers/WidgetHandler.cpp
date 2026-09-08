@@ -101,8 +101,7 @@ void WidgetHandler::DrawWidgets()
             }
             for (const auto& widget : m_gameWidgets)
             {
-                if (const auto& lw = widget.lock())
-                    lw->m_open = false;
+                widget->m_open = false;
             }
         }
     }
@@ -117,13 +116,8 @@ void WidgetHandler::DrawWidgets()
 
     // im trying everything vro, this shit will soon be nasa grade code.
     //auto widgetSnapshot = m_gameWidgets; // no longer crashes, but im gonna keep this commented for now.
-    for (const auto& weak : m_gameWidgets)
-    {
-        if (const auto& widget = weak.lock())
-        {
-            widget->RenderWidget();
-        }
-    }
+    for (const auto& widget : m_gameWidgets)
+        widget->RenderWidget();
 }
 
 void WidgetHandler::AddGameWidget(const std::shared_ptr<Widget>& widget)
@@ -135,10 +129,9 @@ void WidgetHandler::AddGameWidget(const std::shared_ptr<Widget>& widget)
 void WidgetHandler::RemoveGameWidget(const std::shared_ptr<Widget>& widget)
 {
     const auto it = std::ranges::remove_if(m_gameWidgets,
-        [&widget](const std::weak_ptr<Widget>& weak)
+        [&widget](const std::shared_ptr<Widget>& stored)
         {
-            auto locked = weak.lock();
-            return !locked || locked == widget;
+            return stored == widget;
         }).begin();
 
 

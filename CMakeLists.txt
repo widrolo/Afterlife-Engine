@@ -383,6 +383,11 @@ add_executable(Afterlife_Engine
         src/Engine/Core/RenderPasses/Storage/SSAOSettings.h
         src/Engine/Core/RenderPasses/SSAOPass.cpp
         src/Engine/Core/RenderPasses/SSAOPass.h
+        src/Game/Gameplay/Player.cpp
+        src/Game/Gameplay/Player.h
+        src/Game/Widgets/PlayerWatchWidget.cpp
+        src/Game/Widgets/PlayerWatchWidget.h
+        src/Game/Types/GameState.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Game/Gameplay/Freecam.h>
+#include "Game/Gameplay/Player.h"
 
 class Game
 {
@@ -32,4 +33,5 @@ private:
 private:
     float64 m_dt;
     Freecam m_freecam;
+    Player m_player;
 };

@@ -40,7 +40,7 @@ namespace WEngine
         ~WidgetHandler();
     private:
         std::array<Widget*, (uint16)SysWidgetTypes::SysWidget_Count> m_systemWidgets;
-        wtl::vector<std::weak_ptr<Widget>> m_gameWidgets;
+        wtl::vector<std::shared_ptr<Widget>> m_gameWidgets;
         bool m_widgetsEnabled = true;
     public:
         /**

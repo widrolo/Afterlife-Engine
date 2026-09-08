@@ -24,16 +24,13 @@ void WEngine::GameSystemWidget::RenderInternal()
 
     int i = 0;
 
-    for (auto& weak : wh->m_gameWidgets)
+    for (auto& widget : wh->m_gameWidgets)
     {
-        if (auto widget = weak.lock())
-        {
-            ImGui::PushID(i);
-            ImGui::Checkbox("", &widget->m_open);
-            ImGui::SameLine();
-            ImGui::Text("%s", widget->m_widgetName.c_str());
-            ImGui::PopID();
-            i++;
-        }
+        ImGui::PushID(i);
+        ImGui::Checkbox("", &widget->m_open);
+        ImGui::SameLine();
+        ImGui::Text("%s", widget->m_widgetName.c_str());
+        ImGui::PopID();
+        i++;
     }
 }

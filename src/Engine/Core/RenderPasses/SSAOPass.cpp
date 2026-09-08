@@ -17,7 +17,10 @@ using namespace WEngine::Rendering;
 void SSAOPass::SetupPass()
 {
     if (CoreSystems::GetSteamStore()->IsSteamDeck())
+    {
         m_renderScale = 2.0f/4.0f;
+        m_ssaoData.sampleCount = 16;
+    }
 
     Passes::ssao = this;
     m_cmd = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);

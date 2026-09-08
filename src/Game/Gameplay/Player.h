@@ -2,17 +2,17 @@
 
 #include <WidroloFramework.h>
 
-class Player;
-class Freecam
+#include "Freecam.h"
+
+class Player
 {
-    friend Player;
 public:
-    Freecam();
+    Player();
 
 public:
     void Tick(float32 dt);
     void UploadCamera();
-    void RenderNotif();
+    void UpdateFreecam(Freecam& freecam);
 
 private:
     WEngine::Transform m_trans;
@@ -21,4 +21,3 @@ private:
     float32 m_yaw = 0.0f;
     float32 m_pitch = 0.0f;
 };
-

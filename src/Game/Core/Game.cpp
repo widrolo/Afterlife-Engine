@@ -5,6 +5,7 @@
 #include <Engine/Util/Log.h>
 
 #include "Engine/Util/TimeAnalysis.h"
+#include "Game/Types/GameState.h"
 
 
 Game::Game()
@@ -20,7 +21,6 @@ Game::~Game()
 void Game::PreGameLoop()
 {
     InitGameSystems();
-
 }
 
 void Game::GameLoopBegin(float64 frameDelta)
@@ -37,8 +37,23 @@ void Game::GameLoopTickEarly()
 void Game::GameLoopTick()
 {
     WEngine::TimeSample sample("Game::GameLoopTick");
-    m_freecam.Tick((float32)m_dt);
-    m_freecam.UploadCamera();
+
+    if (Input::GetAction("toggleFreecam", PressType::Press))
+    {
+        FreecamState::active = !FreecamState::active;
+        m_player.UpdateFreecam(m_freecam);
+    }
+
+    if (FreecamState::active)
+    {
+        m_freecam.Tick((float32)m_dt);
+        m_freecam.UploadCamera();
+    }
+    else
+    {
+        m_player.Tick((float32)m_dt);
+        m_player.UploadCamera();
+    }
 }
 
 void Game::GameLoopTickLate()
@@ -91,7 +106,8 @@ void Game::GameLoopDrawEarly()
 void Game::GameLoopDraw()
 {
     WEngine::TimeSample sample("Game::GameLoopDraw");
-
+    if (FreecamState::active)
+        m_freecam.RenderNotif();
 }
 
 void Game::GameLoopDrawLate()

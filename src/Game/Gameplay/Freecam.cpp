@@ -57,8 +57,8 @@ void Freecam::Tick(float32 dt)
     if (Input::GetAction("camLower", PressType::Hold))
         m_trans.position.y -= speed;
 
-    m_yaw += look.x;
-    m_pitch -=  look.y / 1.5f;
+    m_yaw += (look.x * dt * m_lookSpeed);
+    m_pitch -=  (look.y * dt * m_lookSpeed) / 1.5f;
 
     if (m_pitch > 89.0f)
         m_pitch = 89.0f;
@@ -71,4 +71,22 @@ void Freecam::Tick(float32 dt)
 void Freecam::UploadCamera()
 {
     WEngine::CoreSystems::GetRenderHandler()->UpdateCamera(m_trans);
+}
+
+void Freecam::RenderNotif()
+{
+    uint32 windowFlags = 0;
+    windowFlags |= ImGuiWindowFlags_NoTitleBar;
+    windowFlags |= ImGuiWindowFlags_NoMove;
+    windowFlags |= ImGuiWindowFlags_NoResize;
+    windowFlags |= ImGuiWindowFlags_NoCollapse;
+    windowFlags |= ImGuiWindowFlags_NoNav;
+    ImGui::Begin("Freecam", nullptr, windowFlags);
+
+    ImGui::SetWindowPos({15, 60});
+    ImGui::SetWindowSize({300, 30});
+
+    ImGui::Text("Freecam is Active!");
+
+    ImGui::End();
 }

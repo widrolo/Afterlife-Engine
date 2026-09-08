@@ -8,8 +8,20 @@ input:
                 joy: lJoy
             keyboard:
                 keys: [A, D, W, S]
+        playMove:
+            name: playMove
+            inputType: Vector
+            controller:
+                joy: lJoy
+            keyboard:
+                keys: [A, D, W, S]
         camLook:
             name: camLook
+            inputType: Vector
+            controller:
+                joy: rJoy
+        playLook:
+            name: playLook
             inputType: Vector
             controller:
                 joy: rJoy
@@ -34,6 +46,18 @@ input:
                 button: LB
             keyboard:
                 key: lcontrol
+        sprint:
+            name: sprint
+            inputType: Action
+            controller:
+                button: LB
+            keyboard:
+                key: lcontrol
+        toggleFreecam:
+            name: toggleFreecam
+            inputType: Action
+            keyboard:
+                key: Backspace
         playSound:
             name: playSound
             inputType: Action

@@ -38,7 +38,7 @@ input:
                 # Addressable keys:
                 # All of the alphabet
                 # Space, lShift, rShift, lControl, rControl, lAlt, rAlt, 
-                # Tab, Enter, Back, CapsLock, ESC
+                # Tab, Enter, Backspace, CapsLock, ESC
                 # Number Row
                 # F keys in the format Debug{num} eg. Debug4 for F4.
                 key: A
