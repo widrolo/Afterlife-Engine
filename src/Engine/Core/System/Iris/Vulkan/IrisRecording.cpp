@@ -26,6 +26,7 @@ namespace Iris
         entry.commandBuffers.resize(frameCount);
         entry.fences.resize(frameCount);
         entry.signalSems.resize(frameCount);
+        entry.submitted.resize(frameCount, 0);
         for (uint32 i = 0; i < frameCount; ++i)
         {
             allocInfo.commandPool = framePools[i].pool[(uint8)queue];
@@ -151,7 +152,7 @@ namespace Iris
         }
 
         const uint32 slot = commandBufferFrameIndex % (uint32)framePools.size();
-        const Vulkan_CmdBuff& cmdBuff = loadedCommandBuffers[cmd - 1];
+        Vulkan_CmdBuff& cmdBuff = loadedCommandBuffers[cmd - 1];
 
         const VkSemaphore waitSemaphore = (lastSubmittedSignalSem == VK_NULL_HANDLE)
             ? displayTarget.imageAvailableSems[screen.currentFrame]
@@ -169,8 +170,10 @@ namespace Iris
         submit.commandBufferCount   = 1;
         submit.pCommandBuffers      = &cmdBuff.commandBuffers[slot];
 
+        vkResetFences(vcore.gpuDevice, 1, &cmdBuff.fences[slot]);
         vkQueueSubmit(cmdBuff.queue, 1, &submit, cmdBuff.fences[slot]);
 
+        cmdBuff.submitted[slot] = 1;
         lastSubmittedSignalSem = renderFinished;
     }
 

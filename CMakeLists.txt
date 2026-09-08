@@ -380,6 +380,9 @@ add_executable(Afterlife_Engine
         src/Engine/Core/RenderPasses/Storage/GTAOSettings.h
         src/Engine/Core/RenderPasses/AOBlurPass.cpp
         src/Engine/Core/RenderPasses/AOBlurPass.h
+        src/Engine/Core/RenderPasses/Storage/SSAOSettings.h
+        src/Engine/Core/RenderPasses/SSAOPass.cpp
+        src/Engine/Core/RenderPasses/SSAOPass.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

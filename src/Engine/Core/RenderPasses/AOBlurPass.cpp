@@ -61,8 +61,17 @@ void AOBlurPass::Render()
     Iris::BindGraphicsPipeline(m_cmd, m_regPipe);
     Iris::BindVertexBuffers(m_cmd, 0, vertBuffs, vertOffs);
 
-    const auto gtaoFb = Passes::gtao->GetFb();
-    Iris::BindFramebuffer(m_cmd, m_regPipe, 0, gtaoFb, Iris::FramebufferBindKind::Color);
+    Iris::FramebufferHandle aoFb;
+    switch (GraphicsSettings::aoMethod)
+    {
+        case GraphicsSettings::SSAO:
+            aoFb = Passes::ssao->GetFb();
+            break;
+        case GraphicsSettings::GTAO:
+            aoFb = Passes::gtao->GetFb();
+            break;
+    }
+    Iris::BindFramebuffer(m_cmd, m_regPipe, 0, aoFb, Iris::FramebufferBindKind::Color);
 
     Iris::Draw(m_cmd, 4, 1, 0, 0);
 

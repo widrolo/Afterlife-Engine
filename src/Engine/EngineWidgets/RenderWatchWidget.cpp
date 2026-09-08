@@ -28,9 +28,19 @@ void RenderWatchWidget::RenderInternal()
             RenderDisplay();
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Graphics"))
+        {
+            ShowGraphicsSettings();
+            ImGui::EndTabItem();
+        }
         if (ImGui::BeginTabItem("GTAO"))
         {
             ShowGTAOPassSettings();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("SSAO"))
+        {
+            ShowSSAOPassSettings();
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -249,6 +259,18 @@ void RenderWatchWidget::RenderDisplayBindings() const
     }
 }
 
+void RenderWatchWidget::ShowGraphicsSettings()
+{
+    ImGui::Text("Graphics Settings");
+    int32 aoInt = GraphicsSettings::aoMethod;
+    ImGui::Text("Ambient Occlusion:");
+    ImGui::SameLine();
+    ImGui::RadioButton("SSAO", &aoInt, 0);
+    ImGui::SameLine();
+    ImGui::RadioButton("GTAO", &aoInt, 1);
+    GraphicsSettings::aoMethod = (GraphicsSettings::AO)aoInt;
+}
+
 void RenderWatchWidget::ShowGTAOPassSettings()
 {
     ImGui::Text("Ground Truth Ambient Occlusion Render Pass Settings");
@@ -261,5 +283,17 @@ void RenderWatchWidget::ShowGTAOPassSettings()
     ImGui::DragFloat("Horizon Bias", &settings.horizonBias, 0.01, 0, 1);
     ImGui::DragInt("Slice Count", &settings.sliceCount, 1, 1, 16);
     ImGui::DragInt("Step Count", &settings.stepCount, 1, 1, 32);
+}
+
+void RenderWatchWidget::ShowSSAOPassSettings()
+{
+    ImGui::Text("Screen Space Ambient Occlusion Render Pass Settings");
+    auto& settings = Rendering::Passes::ssao->GetSSAOSettings();
+    ImGui::DragFloat("Radius", &settings.radius, 0.01, 0, 1);
+    ImGui::DragFloat("Bias", &settings.bias, 0.01, 0, 1);
+    ImGui::DragFloat("Strength", &settings.strength, 0.01, 0, 1);
+    ImGui::DragFloat("Power", &settings.power, 0.01, 1, 3);
+    ImGui::DragFloat("Falloff start", &settings.falloffStart, 0.01, 0, 0.99f);
+    ImGui::DragInt("Sample Count", &settings.sampleCount, 1, 1, 64);
 }
 

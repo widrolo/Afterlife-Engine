@@ -8,13 +8,13 @@ namespace WEngine::Rendering
     struct alignas(16) GTAOSettings
     {
         /** Occlusion radius in world units. Zero disables AO. */
-        float32 radius = 0.14f;
+        float32 radius = 0.38f;
         /** Fraction of radius where distance attenuation begins, clamped to [0, 0.99]. */
-        float32 falloffStart = 0.16f;
+        float32 falloffStart = 0.24f;
         /** Occlusion multiplier. Zero disables AO; one is the unmodified result. */
         float32 strength = 1.0f;
         /** Visibility exponent. Values above one darken AO; one is neutral. */
-        float32 power = 2.35f;
+        float32 power = 1.2f;
         /** Number of bidirectional horizon slices, clamped to [1, 16]. */
         int32 sliceCount = 6;
         /** Depth samples per side of each slice, clamped to [1, 32]. */

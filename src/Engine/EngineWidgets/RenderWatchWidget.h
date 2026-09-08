@@ -30,7 +30,9 @@ namespace WEngine
         void RenderDisplayDrawcall() const;
         void RenderDisplayBindings() const;
 
-        // GTAO settings
+        // render settings
+        void ShowGraphicsSettings();
         void ShowGTAOPassSettings();
+        void ShowSSAOPassSettings();
     };
 }

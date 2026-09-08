@@ -74,6 +74,11 @@ struct Vulkan_CmdBuff
     wtl::vector<VkCommandBuffer> commandBuffers;
     wtl::vector<VkFence> fences;
     wtl::vector<VkSemaphore> signalSems;
+    // Per in-flight slot: whether the command buffer was submitted since the last
+    // BeginFrame visit of that slot. Optional passes that skip frames never submit,
+    // so BeginFrame must not wait on their fences. The fence is reset right before
+    // each submit, so skipping the wait never leaves it unsignaled and stuck.
+    wtl::vector<uint8> submitted;
     VkQueue queue = VK_NULL_HANDLE;
 };
 

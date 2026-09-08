@@ -44,7 +44,7 @@ struct EngineSettings
 	 * Caps the frame rate.
 	 * @note this should never be higher than 5000. Otherwise, semaphores bug out on Vulkan.
 	 */
-	_GLOBAL_CEX_ float64 maxFrameRate = 120.0f;
+	_GLOBAL_CEX_ float64 maxFrameRate = 165.0f;
 	/**
 	 *	If true, it will enable rounded corners on Windows 11. This does not work on Linux,
 	 *	any Windows version older than Windows 11, or Windows 11 with the basic Microsoft
@@ -132,6 +132,16 @@ struct TimeSettings
 	_GLOBAL_CEX_ uint32 startMinute = 0;
 	_GLOBAL_CEX_ uint32 startSecond = 0;
 	_GLOBAL_CEX_ uint32 gameSecondPerRealSecond = 600 * 10;
+};
+
+struct GraphicsSettings
+{
+	// syntax of doom and despair.
+	_GLOBAL_ enum AO
+	{
+		SSAO,
+		GTAO,
+	} aoMethod = GTAO;
 };
 
 #ifndef GPU_BACKEND

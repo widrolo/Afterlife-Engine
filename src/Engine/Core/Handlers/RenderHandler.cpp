@@ -21,6 +21,7 @@
 #include "Engine/Core/RenderPasses/Storage/Passes.h"
 #include "Engine/Core/System/Haptic.h"
 #include "Engine/imgui/ImGuizmo.h"
+#include "Engine/Stores/Steam/SteamStore.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Util/TimeAnalysis.h"
 #include "glm/gtc/quaternion.hpp"
@@ -41,6 +42,8 @@ RenderHandler::RenderHandler()
 		WLog::ConsoleLog("FATAL ERROR! GPU failed to initialize, aborting!");
 		abort();
 	}
+	if (CoreSystems::GetSteamStore()->IsSteamDeck())
+		GraphicsSettings::aoMethod = GraphicsSettings::SSAO;
 	InitImGui();
 	Iris::ConfigureImGui();
 	CreateBasics();
@@ -99,7 +102,15 @@ void RenderHandler::RenderFrame()
 
 	Rendering::Passes::forward->Render();
 	Rendering::Passes::normal->Render();
-	Rendering::Passes::gtao->Render();
+	switch (GraphicsSettings::aoMethod)
+	{
+		case GraphicsSettings::SSAO:
+			Rendering::Passes::ssao->Render();
+			break;
+		case GraphicsSettings::GTAO:
+			Rendering::Passes::gtao->Render();
+			break;
+	}
 	Rendering::Passes::aoBlur->Render();
 	Rendering::Passes::screen->Render();
 
@@ -299,12 +310,14 @@ void RenderHandler::CreatePasses()
 	Rendering::Passes::forward = WAllocator::Construct<Rendering::ForwardPass>();
 	Rendering::Passes::normal = WAllocator::Construct<Rendering::NormalPass>();
 	Rendering::Passes::gtao = WAllocator::Construct<Rendering::GTAOPass>();
+	Rendering::Passes::ssao = WAllocator::Construct<Rendering::SSAOPass>();
 	Rendering::Passes::aoBlur = WAllocator::Construct<Rendering::AOBlurPass>();
 	Rendering::Passes::screen = WAllocator::Construct<Rendering::ScreenPass>();
 
 	Rendering::Passes::forward->SetupPass();
 	Rendering::Passes::normal->SetupPass();
 	Rendering::Passes::gtao->SetupPass();
+	Rendering::Passes::ssao->SetupPass();
 	Rendering::Passes::aoBlur->SetupPass();
 	Rendering::Passes::screen->SetupPass();
 }

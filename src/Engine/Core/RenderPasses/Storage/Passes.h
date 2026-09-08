@@ -4,6 +4,7 @@
 #include "Engine/Core/RenderPasses/GTAOPass.h"
 #include "Engine/Core/RenderPasses/NormalPass.h"
 #include "Engine/Core/RenderPasses/ScreenPass.h"
+#include "Engine/Core/RenderPasses/SSAOPass.h"
 #include "Engine/Types/CommonTypes.h"
 
 namespace WEngine::Rendering
@@ -13,6 +14,7 @@ namespace WEngine::Rendering
         _GLOBAL_ ForwardPass* forward;
         _GLOBAL_ NormalPass* normal;
         _GLOBAL_ GTAOPass* gtao;
+        _GLOBAL_ SSAOPass* ssao;
         _GLOBAL_ AOBlurPass* aoBlur;
         _GLOBAL_ ScreenPass* screen;
     };

@@ -30,10 +30,13 @@ namespace Iris
         const uint32 slot = commandBufferFrameIndex % (uint32)framePools.size();
         Vulkan_FramePools& fp = framePools[slot];
 
-        for (const Vulkan_CmdBuff& cmd : loadedCommandBuffers)
+        for (Vulkan_CmdBuff& cmd : loadedCommandBuffers)
+        {
+            if (!cmd.submitted[slot])
+                continue;
             vkWaitForFences(vcore.gpuDevice, 1, &cmd.fences[slot], VK_TRUE, UINT64_MAX);
-        for (const Vulkan_CmdBuff& cmd : loadedCommandBuffers)
-            vkResetFences(vcore.gpuDevice, 1, &cmd.fences[slot]);
+            cmd.submitted[slot] = 0;
+        }
 
         lastSubmittedSignalSem = displayTarget.imageAvailableSems[screen.currentFrame];
 
