@@ -18,13 +18,9 @@ namespace WEngine::Rendering
         void UpdateSettings();
 
     private:
-        Iris::ResourceTableLayoutHandle m_renSettingsLayout;
-        Iris::ResourceTableHandle m_renSettings;
-        Iris::ResourceTableLayoutHandle m_settingsLayout;
-        Iris::ResourceTableHandle m_settings;
-        Iris::BufferHandle m_renSettingsUniformBuffer;
-        Iris::BufferHandle m_settingsUniformBuffer;
-        RenderSettings m_settingsData;
+        RenderPassSettings m_renderSettings;
+        RenderPassSettings m_gtaoSettings;
+        RenderSettings m_renderData;
         GTAOSettings m_gtaoData;
         float32 m_renderScale = 1.0f;
     };

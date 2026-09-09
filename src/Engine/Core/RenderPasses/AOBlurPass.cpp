@@ -17,43 +17,18 @@ void AOBlurPass::SetupPass()
 
     Passes::aoBlur = this;
     m_cmd = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
-    auto vert = GetShader("screen", Iris::ShaderStage::Vertex);
-    auto frag = GetShader("aoBlur", Iris::ShaderStage::Fragment);
 
-    Iris::VertexLayoutDesc layout;
-    AddScreenAttributes(layout);
+    m_regPipe = CreateBasicScreenPipe("aoBlur", {
+        Basics::singleTexLayout,
+    }, "AO Blur");
 
-    Iris::DepthStencilDesc depthDesc{};
-
-    Iris::GraphicsPipelineDesc pipeDesc{};
-    pipeDesc.debugName = "AO Blur Pipeline";
-    pipeDesc.vertexShader = vert;
-    pipeDesc.fragmentShader = frag;
-    pipeDesc.vertexLayout = layout;
-    pipeDesc.rasterizer = Iris::RasterizerDesc{};
-    pipeDesc.topology = Iris::TopologyType::Triangle_Strip;
-    pipeDesc.depthStencil = depthDesc;
-    pipeDesc.blend = Iris::BlendDesc{};
-
-    pipeDesc.tableLayouts[0] = Basics::singleTexLayout;
-    pipeDesc.tableAttachmentCount = 1;
-
-    m_regPipe = Iris::CreateGraphicsPipeline(pipeDesc);
-
-    Iris::FramebufferDesc fbDesc{};
-    fbDesc.hasDepth = false;
-    fbDesc.width = EngineSettings::resolution.x * m_renderScale;
-    fbDesc.height = EngineSettings::resolution.y * m_renderScale;
-    fbDesc.debugName = "AO Blur FB";
-    fbDesc.resourceTableLayout = Basics::singleTexLayout;
-    fbDesc.sampler = Basics::sampler;
-    m_fb = Iris::CreateFramebuffer(fbDesc);
+    m_fb = CreateBasicFramebuffer("AO Blur", m_renderScale, false);
 }
 
 void AOBlurPass::Render()
 {
     TimeSample sample("AOBlurPass::Render");
-    BeginRendering(Color::White, EngineSettings::resolution * m_renderScale);
+    BeginRendering(Color::Black, EngineSettings::resolution * m_renderScale);
 
     wtl::vector<Iris::BufferHandle> vertBuffs{Basics::screenMesh};
     wtl::vector<sizeT> vertOffs{0};

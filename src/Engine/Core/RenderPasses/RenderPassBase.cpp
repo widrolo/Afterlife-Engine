@@ -1,9 +1,12 @@
 #include "RenderPassBase.h"
 
+#include "Engine/EngineDefines.h"
 #include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Core/System/Iris.h"
 #include "Engine/Math/Matrices/CommonMatracies.h"
 #include "Engine/Types/CoreSystems.h"
+#include "Storage/Basics.h"
+#include "Storage/ShaderStore.h"
 
 using namespace WEngine::Rendering;
 
@@ -118,5 +121,41 @@ void RenderPassBase::AddInstancingAttributes(Iris::VertexLayoutDesc &storage)
     storage.attributes.push_back(attribute);
     attribute.location = attrStart + 3;
     storage.attributes.push_back(attribute);
+}
+
+Iris::FramebufferHandle RenderPassBase::CreateBasicFramebuffer(const std::string &passName, float32 renderScale, bool hasDepth)
+{
+    Iris::FramebufferDesc fbDesc{};
+    fbDesc.hasDepth = hasDepth;
+    fbDesc.width = EngineSettings::resolution.x * renderScale;
+    fbDesc.height = EngineSettings::resolution.y * renderScale;
+    fbDesc.debugName = std::format("{} FB", passName);
+    fbDesc.resourceTableLayout = Basics::singleTexLayout;
+    fbDesc.sampler = Basics::sampler;
+    return Iris::CreateFramebuffer(fbDesc);
+}
+
+Iris::GraphicsPipelineHandle RenderPassBase::CreateBasicScreenPipe(const std::string &fragShader,
+    const wtl::vector<Iris::ResourceTableLayoutHandle> &layouts, const std::string &passName)
+{
+    Iris::VertexLayoutDesc layout;
+    AddScreenAttributes(layout);
+
+    Iris::GraphicsPipelineDesc desc{};
+    desc.debugName = std::format("{} Pipeline", passName);
+    desc.vertexShader = GetShader("screen", Iris::ShaderStage::Vertex);
+    desc.fragmentShader = GetShader(fragShader, Iris::ShaderStage::Fragment);
+    desc.vertexLayout = layout;
+    desc.rasterizer = Iris::RasterizerDesc{};
+    desc.topology = Iris::TopologyType::Triangle_Strip;
+    desc.depthStencil = Iris::DepthStencilDesc{};
+    desc.blend = Iris::BlendDesc{};
+
+    desc.tableAttachmentCount = layouts.size();
+
+    for (sizeT i = 0; i < layouts.size(); ++i)
+        desc.tableLayouts[i] = layouts[i];
+
+    return Iris::CreateGraphicsPipeline(desc);
 }
 

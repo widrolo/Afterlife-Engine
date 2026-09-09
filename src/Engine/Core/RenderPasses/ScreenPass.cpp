@@ -13,8 +13,6 @@ void ScreenPass::SetupPass()
 {
     Passes::screen = this;
     m_cmd = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
-    auto vert = GetShader("screen", Iris::ShaderStage::Vertex);
-    auto frag = GetShader("screen", Iris::ShaderStage::Fragment);
 
     Iris::VertexLayoutDesc layout;
     AddScreenAttributes(layout);
@@ -25,8 +23,8 @@ void ScreenPass::SetupPass()
 
     Iris::GraphicsPipelineDesc pipeDesc{};
     pipeDesc.debugName = "Screen Pipeline";
-    pipeDesc.vertexShader = vert;
-    pipeDesc.fragmentShader = frag;
+    pipeDesc.vertexShader = GetShader("screen", Iris::ShaderStage::Vertex);
+    pipeDesc.fragmentShader = GetShader("screen", Iris::ShaderStage::Fragment);
     pipeDesc.vertexLayout = layout;
     pipeDesc.rasterizer = Iris::RasterizerDesc{};
     pipeDesc.topology = Iris::TopologyType::Triangle_Strip;

@@ -14,9 +14,6 @@ void ForwardPass::SetupPass()
 {
     Passes::forward = this;
     m_cmd = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
-    auto vert = GetShader("basic", Iris::ShaderStage::Vertex);
-    auto vertInst = GetShader("basicInst", Iris::ShaderStage::Vertex);
-    auto frag = GetShader("basic", Iris::ShaderStage::Fragment);
 
     Iris::VertexLayoutDesc layout;
     AddASMFAttributes(layout);
@@ -28,8 +25,8 @@ void ForwardPass::SetupPass()
 
     Iris::GraphicsPipelineDesc desc{};
     desc.debugName = "Main Pipeline";
-    desc.vertexShader = vert;
-    desc.fragmentShader = frag;
+    desc.vertexShader = GetShader("basic", Iris::ShaderStage::Vertex);
+    desc.fragmentShader = GetShader("basic", Iris::ShaderStage::Fragment);
     desc.vertexLayout = layout;
     desc.rasterizer = Iris::RasterizerDesc{};
     desc.depthStencil = depthDesc;
@@ -45,18 +42,11 @@ void ForwardPass::SetupPass()
     AddInstancingAttributes(layout);
 
     desc.vertexLayout = layout;
-    desc.vertexShader = vertInst;
+    desc.vertexShader = GetShader("basicInst", Iris::ShaderStage::Vertex);
 
     m_statPipe = Iris::CreateGraphicsPipeline(desc);
 
-    Iris::FramebufferDesc fbDesc{};
-    fbDesc.hasDepth = true;
-    fbDesc.width = EngineSettings::resolution.x;
-    fbDesc.height = EngineSettings::resolution.y;
-    fbDesc.debugName = "Primary Framebuffer";
-    fbDesc.resourceTableLayout = Basics::singleTexLayout;
-    fbDesc.sampler = Basics::sampler;
-    m_fb = Iris::CreateFramebuffer(fbDesc);
+    m_fb = CreateBasicFramebuffer("Forward", 1.0f, true);
 }
 
 void ForwardPass::Render()

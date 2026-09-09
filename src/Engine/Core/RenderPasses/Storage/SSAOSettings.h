@@ -8,9 +8,9 @@ namespace WEngine::Rendering
     struct alignas(16) SSAOSettings
     {
         /** Hemisphere radius in world units. Zero disables AO. */
-        float32 radius = 0.58f;
+        float32 radius = 0.18f;
         /** Depth and surface-normal bias in world units, clamped to at least zero. */
-        float32 bias = 0.002f;
+        float32 bias = 0.001f;
         /** Occlusion multiplier. Zero disables AO; one is the unmodified result. */
         float32 strength = 1.0f;
         /** Visibility exponent. Values above one darken AO; zero disables AO. */
@@ -18,7 +18,7 @@ namespace WEngine::Rendering
         /** Number of hemisphere depth samples, clamped to [1, 64]. */
         int32 sampleCount = 32;
         /** Fraction of radius where distance attenuation begins, clamped to [0, 0.99]. */
-        float32 falloffStart = 0.0f;
+        float32 falloffStart = 0.29f;
         /** Matches the shader's trailing vec2; not a setting. */
         float32 padding[2] = {};
     };
