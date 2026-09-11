@@ -26,8 +26,9 @@ namespace WEngine
 		struct ASMFHeader
 		{
 			char identifier[4];
-			uint64 vertCount;
-			uint64 indCount;
+			uint32 flags;
+			uint32 vertCount;
+			uint32 indCount;
 		};
 		enum class StreamingProgress
 		{

@@ -141,12 +141,14 @@ Iris::GraphicsPipelineHandle RenderPassBase::CreateBasicScreenPipe(const std::st
     Iris::VertexLayoutDesc layout;
     AddScreenAttributes(layout);
 
+    Iris::RasterizerDesc renDesc{};
+    renDesc.cullMode = Iris::CullMode::None;
     Iris::GraphicsPipelineDesc desc{};
     desc.debugName = std::format("{} Pipeline", passName);
     desc.vertexShader = GetShader("screen", Iris::ShaderStage::Vertex);
     desc.fragmentShader = GetShader(fragShader, Iris::ShaderStage::Fragment);
     desc.vertexLayout = layout;
-    desc.rasterizer = Iris::RasterizerDesc{};
+    desc.rasterizer = renDesc;
     desc.topology = Iris::TopologyType::Triangle_Strip;
     desc.depthStencil = Iris::DepthStencilDesc{};
     desc.blend = Iris::BlendDesc{};

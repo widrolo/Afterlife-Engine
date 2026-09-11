@@ -11,22 +11,22 @@ BeginAssets:
           Data:
             d0:
               SubName: MissMesh
-              Type: 1
+              Type: 0
               Asset: Meshes/Engine/Missing.blend
               Info: Pyramid
             d1:
               SubName: MissTex
-              Type: 2
+              Type: 1
               Asset: Images/Engine/Missing.png
               Info: ""
             d2:
               SubName: MissSnd
-              Type: 3
+              Type: 2
               Asset: Sound/error.wav
               Info: ""
             d3:
               SubName: MissMus
-              Type: 4
+              Type: 3
               Asset: Music/error.ogg
               Info: ""
     c1:
@@ -38,12 +38,12 @@ BeginAssets:
           Data:
             d0:
               SubName: Mesh
-              Type: 1
+              Type: 0
               Asset: Meshes/Proto/Plane.blend
               Info: Plane
             d1:
               SubName: Texture
-              Type: 2
+              Type: 1
               Asset: Images/Testing/DirtGround.png
               Info: ""
         c1:
@@ -51,12 +51,12 @@ BeginAssets:
           Data:
             d0:
               SubName: Mesh
-              Type: 1
+              Type: 0
               Asset: Meshes/Proto/Cube.blend
               Info: Cube
             d1:
               SubName: Texture
-              Type: 2
+              Type: 1
               Asset: Images/Testing/Wood.png
               Info: ""
         c2:
@@ -64,12 +64,12 @@ BeginAssets:
           Data:
             d0:
               SubName: Mesh
-              Type: 1
+              Type: 0
               Asset: Meshes/Testing/Bread.blend
               Info: Bread
             d1:
               SubName: Texture
-              Type: 2
+              Type: 1
               Asset: Images/Testing/Bread.png
               Info: ""
         c3:
@@ -77,12 +77,12 @@ BeginAssets:
           Data:
             d0:
               SubName: Mesh
-              Type: 1
+              Type: 0
               Asset: Meshes/Testing/Monkey.blend
               Info: Suzanne
             d1:
               SubName: Texture
-              Type: 2
+              Type: 1
               Asset: Images/Testing/Concrete.png
               Info: ""
         c4:
@@ -90,12 +90,12 @@ BeginAssets:
           Data:
             d0:
               SubName: Texture
-              Type: 2
+              Type: 1
               Asset: Images/sun.png
               Info: ""
             d1:
               SubName: Cube
-              Type: 1
+              Type: 0
               Asset: Meshes/Proto/Cube.blend
               Info: Cube
         c5:
@@ -103,12 +103,12 @@ BeginAssets:
           Data:
             d0:
               SubName: 512Test
-              Type: 2
+              Type: 1
               Asset: Images/Dirt_04.png
               Info: ""
             d1:
               SubName: Cube
-              Type: 1
+              Type: 0
               Asset: Meshes/Proto/Cube.blend
               Info: Cube
         c6:
@@ -116,12 +116,12 @@ BeginAssets:
           Data:
             d0:
               SubName: Cube
-              Type: 1
+              Type: 0
               Asset: Meshes/Proto/Cube.blend
               Info: Cube
             d1:
               SubName: Texture
-              Type: 2
+              Type: 1
               Asset: Images/Brick 24 - 256x256.png
               Info: ""
         c7:
@@ -129,11 +129,11 @@ BeginAssets:
           Data:
             d0:
               SubName: Mesh
-              Type: 1
+              Type: 0
               Asset: Meshes/Testing/UtahPot.blend
               Info: Utah Teapot
             d1:
               SubName: Tex
-              Type: 2
+              Type: 1
               Asset: Images/Proto/ProtoTexture.png
               Info: ""

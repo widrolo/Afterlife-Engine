@@ -21,12 +21,14 @@ void ScreenPass::SetupPass()
     Iris::DepthStencilDesc depthDesc{};
     depthDesc.depthWriteEnable = true;
 
+    Iris::RasterizerDesc renDesc{};
+    renDesc.cullMode = Iris::CullMode::None;
     Iris::GraphicsPipelineDesc pipeDesc{};
     pipeDesc.debugName = "Screen Pipeline";
     pipeDesc.vertexShader = GetShader("screen", Iris::ShaderStage::Vertex);
     pipeDesc.fragmentShader = GetShader("screen", Iris::ShaderStage::Fragment);
     pipeDesc.vertexLayout = layout;
-    pipeDesc.rasterizer = Iris::RasterizerDesc{};
+    pipeDesc.rasterizer = renDesc;
     pipeDesc.topology = Iris::TopologyType::Triangle_Strip;
     pipeDesc.depthStencil = depthDesc;
     pipeDesc.blend = Iris::BlendDesc{};

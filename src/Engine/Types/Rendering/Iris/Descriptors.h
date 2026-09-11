@@ -82,7 +82,7 @@ namespace Iris
     struct RasterizerDesc
     {
         CullMode cullMode = CullMode::Front;
-        FrontFace frontFace = FrontFace::CounterClockwise;
+        FrontFace frontFace = FrontFace::Clockwise;
         FillMode fillMode = FillMode::Solid;
         float32 lineWidth = 1.0f;
         bool depthClampEnable = false;

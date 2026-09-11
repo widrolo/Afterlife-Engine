@@ -26,18 +26,10 @@
   validation sequence from the spec.
 
   Format (little endian):
-    Header : "ASMF" (4 bytes) | vertex count u64 (8) | index count u64 (8)
+    Header : "ASMF" (4) | config flags u32 (4) | vertex count u32 (4) | index count u32 (4)
     Vertex : position xyz f32 (12) | normal xyz f32 (12) | uv xy f32 (8)
-    Index  : u32 (4 bytes) per index
-
-  Normals: each triangle's 3 corners are unique vertices (no cross-triangle
-  welding -- indices are just 0,1,2,3,... in emission order), and all 3
-  corners of a triangle are written with the SAME flat face normal, computed
-  from the actual (baked) triangle geometry rather than Blender's
-  smoothed/split shading normal. This makes the normal safe to read with a
-  `flat` interpolation qualifier in the fragment shader: every fragment in
-  the triangle gets the exact geometric face normal, with no dependence on
-  screen-space derivatives, pixel-quad alignment, or camera angle.
+    Index  : u32 (4 bytes) per index, clockwise winding
+    Space  : +Y up, OpenGL UV convention
 ============================================================================]]
 
 local projPath, outPath, assetPath, meshName, blenderPath =
@@ -48,7 +40,7 @@ local projPath, outPath, assetPath, meshName, blenderPath =
 -------------------------------------------------------------------------------
 
 local HEADER_IDENTIFIER = "ASMF"
-local HEADER_SIZE       = 4 + 8 + 8     -- identifier + 2 x u64 = 20 bytes
+local HEADER_SIZE       = 4 + 4 + 4 + 4 -- identifier + flags + counts = 16 bytes
 local VERTEX_SIZE       = 12 + 12 + 8   -- pos + normal + uv     = 32 bytes
 local INDEX_SIZE        = 4             -- u32 indices
 local FLOATS_PER_VERTEX = 8             -- x y z nx ny nz u v
@@ -71,13 +63,6 @@ local function packU32(v)
     )
 end
 
-local function packU64(v)
-    if string.pack then
-        return string.pack("<I8", v)
-    end
-    return packU32(v % 4294967296) .. packU32(math.floor(v / 4294967296))
-end
-
 local function packFloat32(f)
     if string.pack then
         return string.pack("<f", f)
@@ -96,6 +81,7 @@ local function packFloat32(f)
         mantissa = math.floor((2 * m - 1) * 0x800000 + 0.5)
         if mantissa >= 0x800000 then mantissa = 0; biased = biased + 1 end
     else
+        biased = 0
         mantissa = math.floor(f * 2^149 + 0.5)         -- subnormal
         if mantissa >= 0x800000 then mantissa = 0; biased = 1 end
     end
@@ -104,12 +90,6 @@ end
 
 local function unpackU32(b1, b2, b3, b4)
     return b1 + b2 * 256 + b3 * 65536 + b4 * 16777216
-end
-
-local function unpackU64(s)
-    local lo = unpackU32(s:byte(1), s:byte(2), s:byte(3), s:byte(4))
-    local hi = unpackU32(s:byte(5), s:byte(6), s:byte(7), s:byte(8))
-    return lo + hi * 4294967296
 end
 
 local function unpackFloat32(b1, b2, b3, b4)
@@ -287,13 +267,8 @@ def main():
         if mesh.uv_layers.active is not None:
             uv_layer = mesh.uv_layers.active.data
 
-        # Bake the object's world transform into the mesh (static mesh = final
-        # positions). Normals get the rotation only, so non-uniform scale does
-        # not skew them.
-        #
-        # Afterlife wants +Z as the up axis. Source meshes come out with the up
-        # axis along -Y, so rotate the baked transform by (x, y, z) -> (x, z, -y)
-        # to bring the up axis onto +Z.
+        # Bake world space, then rotate Blender's +Z up to ASMF's +Y up:
+        # (x, y, z) -> (x, z, -y). Blender UVs already use OpenGL convention.
         UP_CONV = Matrix((
             (1.0, 0.0, 0.0, 0.0),
             (0.0, 0.0, 1.0, 0.0),
@@ -301,51 +276,30 @@ def main():
             (0.0, 0.0, 0.0, 1.0),
         ))
         mat = UP_CONV @ obj.matrix_world
-        rot = mat.to_quaternion().to_matrix()
+        linear = mat.to_3x3()
+        normal_mat = linear.inverted().transposed()
+        # Blender faces are CCW; a mirrored world transform already flips them.
+        reverse_winding = linear.determinant() > 0.0
+        corner_normals = getattr(mesh, "corner_normals", None)
 
         out_verts = []
         out_idx = []
 
         for tri in tris:
-            # Baked (world-space) corner positions for this triangle.
-            tri_pos = []
-            for loop_index in tri.loops:
+            base = len(out_verts) // 8
+            for loop_index in getattr(tri, "loops", tri):
                 loop = loops[loop_index]
                 v = verts[loop.vertex_index]
-                tri_pos.append(mat @ v.co)
 
-            # True flat face normal, computed directly from the transformed
-            # triangle edges. This is correct even under non-uniform scale:
-            # cross(M*e1, M*e2) == det(M) * M^-T * cross(e1, e2), i.e. taking
-            # the cross product AFTER transforming the positions already
-            # gives the properly-transformed (inverse-transpose) normal, with
-            # no separate normal matrix needed -- unlike transforming a
-            # stored per-vertex normal directly.
-            e1 = tri_pos[1] - tri_pos[0]
-            e2 = tri_pos[2] - tri_pos[0]
-            face_n = e1.cross(e2)
+                pos = mat @ v.co
 
-            # Reference direction to resolve winding/mirroring ambiguity
-            # (e.g. from a negative-scaled object): use the mesh's own
-            # shading normal at the triangle's first corner.
-            first_loop_index = tri.loops[0]
-            first_loop = loops[first_loop_index]
-            if has_split:
-                ref_n = rot @ first_loop.normal
-            else:
-                ref_n = rot @ verts[first_loop.vertex_index].normal
-
-            if face_n.length_squared < 1e-12:
-                # Degenerate (zero-area) triangle: fall back to the shading
-                # normal so we don't normalize a zero vector into NaNs.
-                face_n = ref_n
-            elif face_n.dot(ref_n) < 0.0:
-                face_n = -face_n
-
-            face_n.normalize()
-
-            for corner, loop_index in enumerate(tri.loops):
-                pos = tri_pos[corner]
+                if has_split:
+                    nrm = normal_mat @ loop.normal
+                elif corner_normals is not None:
+                    nrm = normal_mat @ corner_normals[loop_index].vector
+                else:
+                    nrm = normal_mat @ v.normal
+                nrm.normalize()
 
                 if uv_layer is not None:
                     uv = uv_layer[loop_index].uv
@@ -353,10 +307,9 @@ def main():
                 else:
                     u, vt = 0.0, 0.0
 
-                # Same face_n written to all 3 corners -> genuinely flat,
-                # independent of which corner ends up the provoking vertex.
-                out_verts += [pos[0], pos[1], pos[2], face_n[0], face_n[1], face_n[2], u, vt]
-                out_idx.append(len(out_idx))
+                out_verts += [pos[0], pos[1], pos[2], nrm[0], nrm[1], nrm[2], u, vt]
+            out_idx.extend((base, base + 2, base + 1) if reverse_winding
+                           else (base, base + 1, base + 2))
 
         if not out_verts:
             fail("mesh '" + mesh_name + "' has no extractable geometry")
@@ -536,8 +489,9 @@ local function writeAsmf(path, v, idx)
     local indexCount  = #idx
 
     local chunks = { HEADER_IDENTIFIER }
-    chunks[#chunks + 1] = packU64(vertexCount)
-    chunks[#chunks + 1] = packU64(indexCount)
+    chunks[#chunks + 1] = packU32(0) -- config flags are currently unused
+    chunks[#chunks + 1] = packU32(vertexCount)
+    chunks[#chunks + 1] = packU32(indexCount)
 
     for i = 1, #v, FLOATS_PER_VERTEX do
         for j = i, i + FLOATS_PER_VERTEX - 1 do
@@ -556,9 +510,12 @@ local function writeAsmf(path, v, idx)
         error("Cannot open output file for writing: " .. path .. " (" .. tostring(err) .. ")")
     end
     local ok, werr = f:write(blob)
-    f:close()   -- file MUST be closed before validation
+    local closed, cerr = f:close()   -- file MUST be closed before validation
     if not ok then
         error("Failed writing output file: " .. path .. " (" .. tostring(werr) .. ")")
+    end
+    if not closed then
+        error("Failed closing output file: " .. path .. " (" .. tostring(cerr) .. ")")
     end
 end
 
@@ -573,71 +530,79 @@ local function validateFile(path, vertexCount, indexCount)
     if not f then
         local e = tostring(err):lower()
         if e:find("no such file") or e:find("not found") or e:find("cannot find") then
-            error("Validation [1/9] failed: file does not exist: " .. path)
+            error("Validation [1/10] failed: file does not exist: " .. path)
         end
-        error("Validation [2/9] failed: file exists but is not accessible: " .. path
+        error("Validation [2/10] failed: file is not accessible: " .. path
             .. " (" .. tostring(err) .. ")")
     end
 
     -- 3. Exact byte size: header + vertex region + index region ---------------
     local size = f:seek("end")
+    f:close()
     local expected = HEADER_SIZE + vertexCount * VERTEX_SIZE + indexCount * INDEX_SIZE
     if size ~= expected then
-        f:close()
-        error(string.format("Validation [3/9] failed: file is %d bytes, expected %d bytes", size, expected))
+        error(string.format("Validation [3/10] failed: file size is %s, expected %d bytes", tostring(size), expected))
     end
 
-    -- Read the counts back from the header and validate against the file ------
-    f:seek("set", 0)
-    local header = f:read(HEADER_SIZE)
-    local fileVertexCount = unpackU64(header:sub(5, 12))
-    local fileIndexCount  = unpackU64(header:sub(13, 20))
-
-    -- 4. Vertex count must not be zero -----------------------------------------
-    if fileVertexCount == 0 then
-        f:close()
-        error("Validation [4/9] failed: vertex count is zero")
+    local data, rerr = readFileBinary(path)
+    if not data or #data ~= expected or #data < HEADER_SIZE then
+        error("Validation failed: could not read complete file: " .. path .. " (" .. tostring(rerr) .. ")")
     end
 
-    -- 5. Index count must not be zero ------------------------------------------
+    -- 4. Identifier -----------------------------------------------------------
+    if data:sub(1, 4) ~= HEADER_IDENTIFIER then
+        error("Validation [4/10] failed: invalid ASMF identifier")
+    end
+    local fileVertexCount = unpackU32(data:byte(9, 12))
+    local fileIndexCount  = unpackU32(data:byte(13, 16))
+
+    -- 5. At least three vertices ----------------------------------------------
+    if fileVertexCount < 3 then
+        error("Validation [5/10] failed: vertex count is less than 3")
+    end
+
+    -- 6. Index count must not be zero ------------------------------------------
     if fileIndexCount == 0 then
-        f:close()
-        error("Validation [5/9] failed: index count is zero")
+        error("Validation [6/10] failed: index count is zero")
     end
 
-    -- 6. Index count must be a multiple of 3 -----------------------------------
+    -- 7. Index count must be a multiple of 3 -----------------------------------
     if fileIndexCount % 3 ~= 0 then
-        f:close()
-        error("Validation [6/9] failed: index count " .. fileIndexCount .. " is not a multiple of 3")
+        error("Validation [7/10] failed: index count " .. fileIndexCount .. " is not a multiple of 3")
+    end
+    if fileVertexCount ~= vertexCount or fileIndexCount ~= indexCount then
+        error("Validation failed: header counts do not match the exported geometry")
     end
 
-    -- 7. No index may be numerically higher than (vertex count - 1) ------------
-    f:seek("set", HEADER_SIZE + fileVertexCount * VERTEX_SIZE)
-    local ib = f:read(fileIndexCount * INDEX_SIZE)
-    f:close()
-    if not ib or #ib ~= fileIndexCount * INDEX_SIZE then
-        error("Validation [7/9] failed: could not read index data from: " .. path)
-    end
+    -- 8. Every vertex must be referenced --------------------------------------
+    local indexStart = HEADER_SIZE + fileVertexCount * VERTEX_SIZE + 1
+    local referenced = {}
     for i = 1, fileIndexCount do
-        local o = (i - 1) * 4
-        local index = unpackU32(ib:byte(o + 1), ib:byte(o + 2), ib:byte(o + 3), ib:byte(o + 4))
-        if index > fileVertexCount - 1 then
-            error("Validation [7/9] failed: index " .. index .. " (position " .. (i - 1)
-                .. ") exceeds (vertex count - 1) = " .. (fileVertexCount - 1))
+        local pos = indexStart + (i - 1) * INDEX_SIZE
+        referenced[unpackU32(data:byte(pos, pos + 3))] = true
+    end
+    for i = 0, fileVertexCount - 1 do
+        if not referenced[i] then
+            error("Validation [8/10] failed: vertex " .. i .. " is not referenced by any index")
         end
     end
 
-    -- 8. Vertex region size / vertex size must not be fractional ---------------
-    -- 9. ... and the quotient must equal the vertex count ----------------------
-    local vertexBytes = size - HEADER_SIZE - fileIndexCount * INDEX_SIZE
-    if vertexBytes % VERTEX_SIZE ~= 0 then
-        error("Validation [8/9] failed: vertex byte region " .. vertexBytes
-            .. " is not a multiple of vertex size " .. VERTEX_SIZE)
+    -- 9. Positions, normals and UVs must all be finite -------------------------
+    for pos = HEADER_SIZE + 1, indexStart - 1, 4 do
+        local value = unpackFloat32At(data, pos)
+        if value ~= value or value == math.huge or value == -math.huge then
+            error("Validation [9/10] failed: non-finite float at byte offset " .. (pos - 1))
+        end
     end
-    local implied = vertexBytes / VERTEX_SIZE
-    if implied ~= fileVertexCount then
-        error("Validation [9/9] failed: vertex region implies " .. implied
-            .. " vertices, header says " .. fileVertexCount)
+
+    -- 10. All indices must be in range ----------------------------------------
+    for i = 1, fileIndexCount do
+        local pos = indexStart + (i - 1) * INDEX_SIZE
+        local index = unpackU32(data:byte(pos, pos + 3))
+        if index >= fileVertexCount then
+            error("Validation [10/10] failed: index " .. index .. " (position " .. (i - 1)
+                .. ") exceeds (vertex count - 1) = " .. (fileVertexCount - 1))
+        end
     end
 end
 
@@ -670,10 +635,10 @@ local function main(projPath, outPath, assetPath, meshName, blenderPath)
 
         vertexCount = #vertices / FLOATS_PER_VERTEX
         indexCount  = #indices
-        if vertexCount % 1 ~= 0 or vertexCount == 0 then
+        if vertexCount % 1 ~= 0 or vertexCount < 3 or vertexCount > 0xffffffff then
             error("Extracted vertex count is invalid: " .. #vertices)
         end
-        if indexCount == 0 or indexCount % 3 ~= 0 then
+        if indexCount == 0 or indexCount % 3 ~= 0 or indexCount > 0xffffffff then
             error("Extracted index count is invalid: " .. indexCount)
         end
 

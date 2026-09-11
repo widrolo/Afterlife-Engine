@@ -338,7 +338,7 @@ void AssetRepo::LoadAssetTable()
 			AssetRef ref;
 			ref.name = data["Name"].as<std::string>();
 			// -1 Because Afterlife Browser defines a "None" type which shifts it all over by one.
-			ref.type = (AssetType)(data["Type"].as<sizeT>() - 1);
+			ref.type = (AssetType)(data["Type"].as<sizeT>());
 			ref.uid = data["UID"].as<sizeT>();
 			assets.push_back(ref);
 		}
@@ -710,8 +710,9 @@ AssetRepo::ASMFHeader AssetRepo::ReadASMFHeader(const byte *data)
 {
 	ASMFHeader h{};
 	std::memcpy(h.identifier, data + 0, 4);
-	std::memcpy(&h.vertCount, data + 4, 8);
-	std::memcpy(&h.indCount,  data + 12, 8);
+	std::memcpy(&h.flags, data + 4, 4);
+	std::memcpy(&h.vertCount, data + 8, 4);
+	std::memcpy(&h.indCount,  data + 12, 4);
 	return h;
 }
 
@@ -720,7 +721,7 @@ void AssetRepo::ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles)
 	wtl::vector<ASMFHeader> meshFileHeaders;
 	meshFileHeaders.reserve(meshFiles.size());
 
-	const sizeT headerSize = 20;
+	const sizeT headerSize = sizeof(ASMFHeader);
 	const sizeT vertSize = 32;
 	const sizeT indexSize = 4;
 	sizeT totalVertCount = 0;

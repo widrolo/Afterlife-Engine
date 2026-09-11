@@ -28,7 +28,7 @@ void AOBlurPass::SetupPass()
 void AOBlurPass::Render()
 {
     TimeSample sample("AOBlurPass::Render");
-    BeginRendering(Color::Black, EngineSettings::resolution * m_renderScale);
+    BeginRendering(Color::White, EngineSettings::resolution * m_renderScale);
 
     wtl::vector<Iris::BufferHandle> vertBuffs{Basics::screenMesh};
     wtl::vector<sizeT> vertOffs{0};
