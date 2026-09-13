@@ -149,6 +149,7 @@ void Engine::InitHandlers()
 	Echo::InitDesc desc{};
 	Echo::Init(desc);
 
+	CoreSystems::assetRepo->LoadPhysicsAssets();
 	CoreSystems::assetRepo->RegisterAllTextures();
 	Input::LoadInputMap();
 	m_game = new Game();

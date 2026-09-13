@@ -22,7 +22,7 @@ void ScreenPass::SetupPass()
     depthDesc.depthWriteEnable = true;
 
     Iris::RasterizerDesc renDesc{};
-    renDesc.cullMode = Iris::CullMode::None;
+    renDesc.cullMode = Iris::CullMode::Back;
     Iris::GraphicsPipelineDesc pipeDesc{};
     pipeDesc.debugName = "Screen Pipeline";
     pipeDesc.vertexShader = GetShader("screen", Iris::ShaderStage::Vertex);

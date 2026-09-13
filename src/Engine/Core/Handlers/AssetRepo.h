@@ -48,6 +48,7 @@ namespace WEngine
 		 * @note This can only be called once.
 		 */
 		void LoadAllGPUAssets();
+		void LoadPhysicsAssets();
 		wtl::vector<Sector> LoadAllSectors();
 		wtl::vector<WEditor::EditorSector> LoadAllEditorSectors();
 		/**
@@ -119,12 +120,14 @@ namespace WEngine
 		// ----- GPU Preloading -----
 		void LoadAssetTable();
 		void PrepareTransferBuffers();
-		bool CheckForPackages();
+		bool CheckForGPUPackages();
+		bool CheckForPhysicsPackages();
 		void ParsePackageTable(wtl::vector<std::pair<sizeT, sizeT>>& container, const std::string& tableName);
 		void ExtractPackage(const wtl::vector<std::pair<sizeT, sizeT>>& locations, wtl::vector<byte*>& files,
 			const std::string& package);
 		ASMFHeader ReadASMFHeader(const byte* data);
 		void ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles);
+		void ParsePhysicsMeshes(const wtl::vector<byte*>& meshFiles);
 		void ParseTextures(const wtl::vector<byte*>& texFiles);
 		void FillCopyBuffers(Iris::BufferHandle* handles, sizeT handleCount, sizeT textureWidth);
 		void FinalizeTextureCopy();
@@ -145,6 +148,7 @@ namespace WEngine
 
 		Iris::CopyBufferHandle m_copyCmdBuffer;
 		wtl::vector<std::pair<TextureInfoDDS, Iris::TextureHandle>> m_textures;
+		wtl::vector<b3MeshData*> m_physicsMeshes;
 		wtl::vector<MeshInfo> m_meshes;
 
 		// keep this as the bottom so it doesnt pollute the offsets of the rest

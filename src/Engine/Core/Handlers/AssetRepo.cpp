@@ -25,6 +25,8 @@
 
 #include <Engine/Core/World/Sector.h>
 
+#include "PhysicsHandler.h"
+#include <box3d/box3d.h>
 #include "Engine/Util/TimeAnalysis.h"
 #include "glm/gtc/quaternion.hpp"
 
@@ -246,8 +248,8 @@ void AssetRepo::LoadSpirVFromGlsl(SpirVAssetMission &mission)
 		return;
 	}
 	auto t1 = std::chrono::high_resolution_clock::now();
-	WLog::ConsoleLog(std::format("Shader Compilation time: {}ms.",
-		std::chrono::duration_cast<std::chrono::milliseconds>(t1-t0).count()));
+	//WLog::ConsoleLog(std::format("Shader Compilation time: {}ms.",
+	//	std::chrono::duration_cast<std::chrono::milliseconds>(t1-t0).count()));
 
 	sizeT wordCount = res.cend() - res.cbegin();
 	mission.shaderCode = wNewArr(uint32, wordCount);
@@ -354,7 +356,7 @@ void AssetRepo::LoadAllGPUAssets()
 		return;
 	everRan = true;
 
-	if (!CheckForPackages())
+	if (!CheckForGPUPackages())
 		return;
 
 	PrepareTransferBuffers();
@@ -373,6 +375,24 @@ void AssetRepo::LoadAllGPUAssets()
 	ExtractPackage(textureTable, texFiles, "Textures.pkg");
 	ParseAndUploadMeshes(meshFiles);
 	ParseTextures(texFiles);
+}
+
+void AssetRepo::LoadPhysicsAssets()
+{
+	static bool everRan = false;
+	if (everRan)
+		return;
+	everRan = true;
+
+	if (!CheckForPhysicsPackages())
+		return;
+
+	wtl::vector<std::pair<sizeT, sizeT>> meshTable;
+	ParsePackageTable(meshTable, "PhysicsMeshes.yaml");
+
+	wtl::vector<byte*> meshFiles;
+	ExtractPackage(meshTable, meshFiles, "PhysicsMeshes.pkg");
+	ParsePhysicsMeshes(meshFiles);
 }
 
 wtl::vector<Sector> AssetRepo::LoadAllSectors()
@@ -465,7 +485,6 @@ void AssetRepo::TickTextureUpload()
 	}
 
 	Iris::BeginCopyPass(m_copyCmdBuffer);
-	WLog::ConsoleLog(" ---- Begin Texture Stream Pass -----");
 
 	FillCopyBuffers(m_copyBuffers_XS.data(), m_copyBuffers_XS.size(), 128);
 	FillCopyBuffers(m_copyBuffers_S.data(), m_copyBuffers_S.size(), 256);
@@ -606,7 +625,7 @@ void AssetRepo::PrepareTransferBuffers()
 
 }
 
-bool AssetRepo::CheckForPackages()
+bool AssetRepo::CheckForGPUPackages()
 {
 	std::string packPath = GetDataPath() + "/Packages/";
 	std::string texPack = packPath + "Textures.pkg";
@@ -639,10 +658,31 @@ bool AssetRepo::CheckForPackages()
 		WLog::ConsoleLog("Mesh table not found");
 		return false;
 	}
-	if (!std::filesystem::exists(meshPackTable))
+	if (!std::filesystem::exists(assetTable))
 	{
 		WLog::SetConsoleWarning();
-		WLog::ConsoleLog("Mesh table not found");
+		WLog::ConsoleLog("Asset table not found");
+		return false;
+	}
+	return true;
+}
+
+bool AssetRepo::CheckForPhysicsPackages()
+{
+	std::string packPath = GetDataPath() + "/Packages/";
+	std::string phyPack = packPath + "PhysicsMeshes.pkg";
+	std::string phyPackTable = packPath + "PhysicsMeshes.yaml";
+
+	if (!std::filesystem::exists(phyPack))
+	{
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog("Physics mesh package not found");
+		return false;
+	}
+	if (!std::filesystem::exists(phyPackTable))
+	{
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog("Physics mesh table not found");
 		return false;
 	}
 	return true;
@@ -777,6 +817,26 @@ void AssetRepo::ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles)
 	wFree(indexPayload);
 }
 
+void AssetRepo::ParsePhysicsMeshes(const wtl::vector<byte*>& meshFiles)
+{
+	m_physicsMeshes.reserve(meshFiles.size() + 1);
+	m_physicsMeshes.push_back({}); // dummy for uid 0
+
+	const sizeT headerSize = sizeof(ASMFHeader);
+	const sizeT vertSize = 12;
+	for (const auto* mesh : meshFiles)
+	{
+		ASMFHeader header = ReadASMFHeader(mesh); // APMF and ASMF use the same header
+		const byte* vert = mesh + headerSize;
+		const byte* ind = mesh + headerSize + header.vertCount * vertSize;
+		auto boxMesh = CoreSystems::GetPhysicsHandler()->CreateMesh(vert, ind, header.vertCount, header.indCount);
+		m_physicsMeshes.push_back(boxMesh);
+	}
+
+	for (auto* mesh : meshFiles)
+		wFree(mesh);
+}
+
 void AssetRepo::ParseTextures(const wtl::vector<byte*>& texFiles)
 {
 	m_textures.reserve(texFiles.size());
@@ -824,8 +884,6 @@ void AssetRepo::FillCopyBuffers(Iris::BufferHandle* handles, sizeT handleCount, 
 
 			Iris::CopyBufferToTexture(m_copyCmdBuffer, handles[handleCursor], 0, m_textures[i].second);
 
-			WLog::SetConsoleInfo();
-			WLog::ConsoleLog(std::format("Submitted a {} texture for copy.", textureWidth));
 
 			m_texturesDone[i] = StreamingProgress::Progress;
 			handleCursor++;

@@ -4,6 +4,7 @@
 
 #include <box3d/box3d.h>
 
+#include "AssetRepo.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Util/Log.h"
 #include "Engine/Util/TimeAnalysis.h"
@@ -14,6 +15,7 @@ using namespace WEngine;
 PhysicsHandler::PhysicsHandler()
 {
 	Setup();
+
 }
 
 void PhysicsHandler::Tick()
@@ -105,6 +107,20 @@ void PhysicsHandler::AttachMesh(PhysicsBodyHandle body, const MeshInfo &mesh)
 
 
 
+}
+
+b3MeshData* PhysicsHandler::CreateMesh(const byte* vertices, const byte* indices, sizeT vertCount, sizeT indCount)
+{
+	b3MeshDef meshDef{};
+	meshDef.vertices = (b3Vec3*)vertices;
+	meshDef.indices = (int32*)indices;
+	meshDef.vertexCount = (int32)vertCount;
+	meshDef.triangleCount = (int32)indCount / 3; // watch this break
+	meshDef.weldVertices = true;
+	meshDef.weldTolerance = 0.01f;
+	meshDef.identifyEdges = true;
+
+	return b3CreateMesh(&meshDef, NULL, 0);
 }
 
 

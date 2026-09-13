@@ -142,7 +142,7 @@ Iris::GraphicsPipelineHandle RenderPassBase::CreateBasicScreenPipe(const std::st
     AddScreenAttributes(layout);
 
     Iris::RasterizerDesc renDesc{};
-    renDesc.cullMode = Iris::CullMode::None;
+    renDesc.cullMode = Iris::CullMode::Back;
     Iris::GraphicsPipelineDesc desc{};
     desc.debugName = std::format("{} Pipeline", passName);
     desc.vertexShader = GetShader("screen", Iris::ShaderStage::Vertex);

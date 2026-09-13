@@ -30,6 +30,8 @@ namespace WEngine
 		void AttachBox(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset);
 		void AttachMesh(PhysicsBodyHandle body, const MeshInfo& mesh);
 
+		b3MeshData* CreateMesh(const byte* vertices, const byte* indices, sizeT vertCount, sizeT indCount);
+
 	private:
 		void Setup();
 		void Visualize();
