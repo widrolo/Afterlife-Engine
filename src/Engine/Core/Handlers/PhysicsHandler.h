@@ -25,6 +25,7 @@ namespace WEngine
 		void Tick();
 
 		PhysicsBodyHandle CreateBody(PhysicsBodyType type, Transform *entity);
+		SectorPhysicsBodyHandle CreateSectorBody(Transform& transform, b3MeshData* meshData);
 		void ChangeBodyPosition(PhysicsBodyHandle body, const Vector3& position);
 		void ChangeBodyRotation(PhysicsBodyHandle body, const Quaternion& rotation);
 		void AttachBox(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset);
@@ -41,6 +42,7 @@ namespace WEngine
 	private:
 		b3WorldId m_worldID;
 		wtl::vector<PhysicsBody> m_bodies;
+		wtl::vector<b3BodyId> m_secBodies;
 	};
 }
 

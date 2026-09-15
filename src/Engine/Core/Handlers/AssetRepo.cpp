@@ -819,8 +819,8 @@ void AssetRepo::ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles)
 
 void AssetRepo::ParsePhysicsMeshes(const wtl::vector<byte*>& meshFiles)
 {
-	m_physicsMeshes.reserve(meshFiles.size() + 1);
-	m_physicsMeshes.push_back({}); // dummy for uid 0
+	m_physicsMeshData.reserve(meshFiles.size() + 1);
+	m_physicsMeshData.push_back({}); // dummy for uid 0
 
 	const sizeT headerSize = sizeof(ASMFHeader);
 	const sizeT vertSize = 12;
@@ -830,7 +830,7 @@ void AssetRepo::ParsePhysicsMeshes(const wtl::vector<byte*>& meshFiles)
 		const byte* vert = mesh + headerSize;
 		const byte* ind = mesh + headerSize + header.vertCount * vertSize;
 		auto boxMesh = CoreSystems::GetPhysicsHandler()->CreateMesh(vert, ind, header.vertCount, header.indCount);
-		m_physicsMeshes.push_back(boxMesh);
+		m_physicsMeshData.push_back(boxMesh);
 	}
 
 	for (auto* mesh : meshFiles)
@@ -937,7 +937,7 @@ void AssetRepo::LoadSingleSector(Sector& storage)
 		std::string assetPath = entryDef["asset"].as<std::string>();
 		uint32 mesh = GetFirstAssetInDirOfType(assetPath, AssetType::StaticMesh);
 		uint32 tex = GetFirstAssetInDirOfType(assetPath, AssetType::Texture);
-		//uint32 col = GetFirstAssetInDirOfType(assetPath, );
+		uint32 col = GetFirstAssetInDirOfType(assetPath, AssetType::PhysicsMesh);
 
 		const YAML::Node& pos = entryDef["position"];
 		const YAML::Node& rot = entryDef["rotation"];
@@ -948,10 +948,14 @@ void AssetRepo::LoadSingleSector(Sector& storage)
 		t.rotation = { rot[0].as<float32>(), rot[1].as<float32>(), rot[2].as<float32>(), rot[3].as<float32>() };
 		t.size = { size[0].as<float32>(), size[1].as<float32>(), size[2].as<float32>() };
 
-		SectorEntry newEntry = SectorEntry(mesh, tex, 0, t);
+		SectorPhysicsBodyHandle bodyHandle = 0;
+
+		if (col != 0)
+			bodyHandle = CoreSystems::GetPhysicsHandler()->CreateSectorBody(t, m_physicsMeshData[col]);
+
+		SectorEntry newEntry = SectorEntry(mesh, tex, bodyHandle, t);
 		storage.m_entries.push_back(newEntry);
 	}
-
 }
 
 void AssetRepo::LoadSingleEditorSector(WEditor::EditorSector &storage)

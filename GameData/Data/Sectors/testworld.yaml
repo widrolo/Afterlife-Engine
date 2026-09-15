@@ -10,7 +10,7 @@ sector:
     asset: /Testing/Monkey
     position: [1.3937594, -1.0932287, -0.8494272]
     rotation: [-0.18661018, -0.5240623, -0.2787551, 0.7828352]
-    size: [0.99999994, 1, 1]
+    size: [1, 1, 1]
   2:
     name: Bread
     asset: /Testing/Bread

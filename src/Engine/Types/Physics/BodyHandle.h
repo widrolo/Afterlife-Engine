@@ -2,16 +2,10 @@
 
 #include <Engine/Types/CommonTypes.h>
 
+#include "Engine/Util/Handles.h"
+
 namespace WEngine
 {
-    /**
-     * Handle for a physics body.
-     */
-    struct PhysicsBodyHandle
-    {
-        PhysicsBodyHandle() : handle(0) {};
-        PhysicsBodyHandle(uint64 handle) : handle(handle) {}
-        operator uint64() const { return handle; }
-        uint64 handle;
-    };
+    DEFINE_OPAQUE_HANDLE(PhysicsBodyHandle)
+    DEFINE_OPAQUE_HANDLE(SectorPhysicsBodyHandle)
 }

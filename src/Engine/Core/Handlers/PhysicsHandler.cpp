@@ -50,6 +50,25 @@ PhysicsBodyHandle PhysicsHandler::CreateBody(PhysicsBodyType type, Transform *en
 	return m_bodies.size();
 }
 
+SectorPhysicsBodyHandle PhysicsHandler::CreateSectorBody(Transform &transform, b3MeshData *meshData)
+{
+	b3BodyDef bodyDef = b3DefaultBodyDef();
+	bodyDef.position = reinterpret_cast<b3Pos&&>(transform.position);
+	bodyDef.rotation = reinterpret_cast<b3Quat&&>(transform.rotation);
+
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+	shapeDef.density = 1.0f;
+	shapeDef.baseMaterial.friction = 1.0f;
+
+	b3Vec3 scale = reinterpret_cast<b3Vec3&&>(transform.size);
+
+	b3BodyId groundId = b3CreateBody(m_worldID, &bodyDef);
+	b3CreateMeshShape(groundId, &shapeDef, meshData, scale);
+
+	m_secBodies.push_back(groundId);
+	return m_secBodies.size();
+}
+
 void PhysicsHandler::ChangeBodyPosition(PhysicsBodyHandle body, const Vector3 &position)
 {
 	TimeSample sample("PhysicsHandler::ChangeBodyPosition");

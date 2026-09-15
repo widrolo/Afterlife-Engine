@@ -11,7 +11,8 @@ namespace WEngine
         StaticMesh,
         Texture,
         Sound,
-        Music
+        Music,
+        PhysicsMesh
     };
 
     struct AssetRef

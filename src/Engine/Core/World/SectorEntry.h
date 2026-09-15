@@ -11,12 +11,12 @@ namespace WEngine
     class SectorEntry
     {
     public:
-        SectorEntry(uint64 meshUID, uint64 textureUID, uint64 colMeshUID, const Transform& transform)
+        SectorEntry(uint64 meshUID, uint64 textureUID, uint32 colMeshUID, const Transform& transform)
             : m_mesh(meshUID), m_texture(textureUID), m_colMesh(colMeshUID), m_transform(transform) {}
         SectorEntry(const std::string& assetName);
 
         [[nodiscard]] bool HasVisuals() const { return m_mesh != 0 && m_texture != 0; }
-        [[nodiscard]] bool HasCollision() const { return m_colMesh != 0; }
+        [[nodiscard]] bool HasCollision() const { return m_colMesh != 0; } // im guessing, hopefully index1 determines something?
 
         [[nodiscard]] uint32 GetMesh() const { return m_mesh; }
         [[nodiscard]] uint32 GetTexture() const { return m_texture; }

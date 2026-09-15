@@ -136,10 +136,11 @@ void StartHandlerSingle(T** container, const std::string& name)
 
 void Engine::InitHandlers()
 {
+	StartHandlerSingle<PhysicsHandler>(&CoreSystems::physicsHandler, "Physics Handler");
 	StartHandlerSingle<RNGHandler>(&CoreSystems::rngHandler, "RNG Handler");
 	StartHandlerSingle<AssetRepo>(&CoreSystems::assetRepo, "Asset Repo");
+	CoreSystems::assetRepo->LoadPhysicsAssets();
 	StartHandlerSingle<RenderHandler>(&CoreSystems::renderHandler, "Render Handler");
-	StartHandlerSingle<PhysicsHandler>(&CoreSystems::physicsHandler, "Physics Handler");
 	StartHandlerSingle<SectorHandler>(&CoreSystems::sectorHanlder, "Sector Handler");
 	StartHandlerSingle<AudioHandler>(&CoreSystems::audioHandler, "Audio Handler");
 	StartHandlerSingle<WidgetHandler>(&CoreSystems::widgetHandler, "Widget Handler");
@@ -149,7 +150,6 @@ void Engine::InitHandlers()
 	Echo::InitDesc desc{};
 	Echo::Init(desc);
 
-	CoreSystems::assetRepo->LoadPhysicsAssets();
 	CoreSystems::assetRepo->RegisterAllTextures();
 	Input::LoadInputMap();
 	m_game = new Game();

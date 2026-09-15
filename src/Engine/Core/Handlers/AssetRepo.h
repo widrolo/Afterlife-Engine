@@ -148,7 +148,7 @@ namespace WEngine
 
 		Iris::CopyBufferHandle m_copyCmdBuffer;
 		wtl::vector<std::pair<TextureInfoDDS, Iris::TextureHandle>> m_textures;
-		wtl::vector<b3MeshData*> m_physicsMeshes;
+		wtl::vector<b3MeshData*> m_physicsMeshData;
 		wtl::vector<MeshInfo> m_meshes;
 
 		// keep this as the bottom so it doesnt pollute the offsets of the rest

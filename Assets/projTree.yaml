@@ -46,6 +46,11 @@ BeginAssets:
               Type: 1
               Asset: Images/Testing/DirtGround.png
               Info: ""
+            d2:
+              SubName: Collider
+              Type: 4
+              Asset: ""
+              Info: Plane
         c1:
           Name: Cube
           Data:
