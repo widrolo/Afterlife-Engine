@@ -38,6 +38,8 @@ void Game::GameLoopTick()
 {
     WEngine::TimeSample sample("Game::GameLoopTick");
 
+    m_physicsTest.Tick((float32)m_dt);
+
     if (Input::GetAction("toggleFreecam", PressType::Press))
     {
         FreecamState::active = !FreecamState::active;
@@ -108,6 +110,7 @@ void Game::GameLoopDraw()
     WEngine::TimeSample sample("Game::GameLoopDraw");
     if (FreecamState::active)
         m_freecam.RenderNotif();
+    m_physicsTest.Draw();
 }
 
 void Game::GameLoopDrawLate()

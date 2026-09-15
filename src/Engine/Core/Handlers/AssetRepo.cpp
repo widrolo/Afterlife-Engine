@@ -144,6 +144,11 @@ bool AssetRepo::IsTextureDoneLoading(uint64 uid) const
 	return m_texturesDone[uid] == StreamingProgress::Loaded;
 }
 
+b3MeshData* AssetRepo::GetMeshData(uint64 uid)
+{
+	return m_physicsMeshData[uid];
+}
+
 AudioClip* AssetRepo::LoadAudioWAV(const std::string& name)
 {
 	AudioClip clip{};

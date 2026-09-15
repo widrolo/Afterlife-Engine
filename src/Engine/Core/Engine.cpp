@@ -276,8 +276,8 @@ void Engine::Loop_Physics()
 	{
 		m_physicsTickTimer -= PhysicsSettings::physicsTickRate;
 		m_game->GameLoopPhysics();
-		CoreSystems::physicsHandler->Tick();
 		m_physicsTickCounterLastFrame++;
+		CoreSystems::physicsHandler->Tick();
 	}
 	skipPhysics:
 	m_game->GameLoopPhysicsLate();

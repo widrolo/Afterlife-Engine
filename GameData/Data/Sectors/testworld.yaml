@@ -20,7 +20,7 @@ sector:
   3:
     name: Wooden Cube
     asset: /Testing/Cube
-    position: [0, -1.1, 0]
+    position: [0, -1.1, -0.71039253]
     rotation: [0, 0, 0, 1]
     size: [1, 1, 1]
   4:

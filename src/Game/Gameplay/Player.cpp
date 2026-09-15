@@ -6,6 +6,7 @@ Player::Player()
 {
     auto plWatch = std::make_shared<PlayerWatchWidget>();
     WEngine::CoreSystems::GetWidgetHandler()->AddGameWidget(plWatch);
+    m_trans.position.z = 10;
 }
 
 void Player::Tick(float32 dt)

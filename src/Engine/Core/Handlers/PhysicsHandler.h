@@ -29,6 +29,7 @@ namespace WEngine
 		void ChangeBodyPosition(PhysicsBodyHandle body, const Vector3& position);
 		void ChangeBodyRotation(PhysicsBodyHandle body, const Quaternion& rotation);
 		void AttachBox(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset);
+		void AttachMesh(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset, uint32 meshUID);
 		void AttachMesh(PhysicsBodyHandle body, const MeshInfo& mesh);
 
 		b3MeshData* CreateMesh(const byte* vertices, const byte* indices, sizeT vertCount, sizeT indCount);

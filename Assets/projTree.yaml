@@ -29,6 +29,11 @@ BeginAssets:
               Type: 3
               Asset: Music/error.ogg
               Info: ""
+            d4:
+              SubName: Missing_COL
+              Type: 4
+              Asset: Meshes/Engine/Missing.blend
+              Info: Pyramid_COL
     c1:
       Name: Testing
       Data: ~
@@ -49,8 +54,8 @@ BeginAssets:
             d2:
               SubName: Collider
               Type: 4
-              Asset: ""
-              Info: Plane
+              Asset: Meshes/Proto/Plane.blend
+              Info: Plane_COL
         c1:
           Name: Cube
           Data:
@@ -64,6 +69,11 @@ BeginAssets:
               Type: 1
               Asset: Images/Testing/Wood.png
               Info: ""
+            d2:
+              SubName: Collider
+              Type: 4
+              Asset: Meshes/Proto/Cube.blend
+              Info: Cube
         c2:
           Name: Bread
           Data:
@@ -77,6 +87,11 @@ BeginAssets:
               Type: 1
               Asset: Images/Testing/Bread.png
               Info: ""
+            d2:
+              SubName: Coll
+              Type: 4
+              Asset: Meshes/Testing/Bread.blend
+              Info: Bread_COL
         c3:
           Name: Monkey
           Data:
@@ -90,6 +105,11 @@ BeginAssets:
               Type: 1
               Asset: Images/Testing/Concrete.png
               Info: ""
+            d2:
+              SubName: Collider
+              Type: 4
+              Asset: Meshes/Testing/Monkey.blend
+              Info: Suzanne_COL
         c4:
           Name: Sun
           Data:
@@ -101,6 +121,11 @@ BeginAssets:
             d1:
               SubName: Cube
               Type: 0
+              Asset: Meshes/Proto/Cube.blend
+              Info: Cube
+            d2:
+              SubName: Coll
+              Type: 4
               Asset: Meshes/Proto/Cube.blend
               Info: Cube
         c5:
@@ -116,6 +141,11 @@ BeginAssets:
               Type: 0
               Asset: Meshes/Proto/Cube.blend
               Info: Cube
+            d2:
+              SubName: Coll
+              Type: 4
+              Asset: Meshes/Proto/Cube.blend
+              Info: Cube
         c6:
           Name: Brick
           Data:
@@ -129,6 +159,11 @@ BeginAssets:
               Type: 1
               Asset: Images/Brick 24 - 256x256.png
               Info: ""
+            d2:
+              SubName: Coll
+              Type: 4
+              Asset: Meshes/Proto/Cube.blend
+              Info: Cube
         c7:
           Name: UtahPot
           Data:

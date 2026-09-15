@@ -29,17 +29,12 @@ void PhysicsHandler::Tick()
 PhysicsBodyHandle PhysicsHandler::CreateBody(PhysicsBodyType type, Transform *entity)
 {
 	TimeSample sample("PhysicsHandler::CreateBody");
-	b3BodyDef groundBodyDef = b3DefaultBodyDef();
+	b3BodyDef bodyDef = b3DefaultBodyDef();
 	if (type == PhysicsBodyType::Dynamic)
-		groundBodyDef.type = b3_dynamicBody;
-	b3BodyId bodyId = b3CreateBody(m_worldID, &groundBodyDef);;
-
-	b3BoxHull hull = b3MakeCubeHull(0.1f);
-
-	b3ShapeDef shapeDef = b3DefaultShapeDef();
-	shapeDef.density = 1.0f;
-	shapeDef.baseMaterial.friction = 1.0f;
-	b3CreateHullShape(bodyId, &shapeDef, &hull.base);
+		bodyDef.type = b3_dynamicBody;
+	bodyDef.position = reinterpret_cast<b3Pos&&>(entity->position);
+	//bodyDef.rotation = reinterpret_cast<b3Quat&&>(entity->rotation);
+	b3BodyId bodyId = b3CreateBody(m_worldID, &bodyDef);;
 
 	PhysicsBody body{};
 	body.bodyId = bodyId;
@@ -116,6 +111,25 @@ void PhysicsHandler::AttachBox(PhysicsBodyHandle body, const Vector3 &size, cons
 	b3CreateHullShape(physicsBody.bodyId, &shapeDef, &hull.base);
 }
 
+void PhysicsHandler::AttachMesh(PhysicsBodyHandle body, const Vector3 &size, const Vector3 &offset, uint32 meshUID)
+{
+	TimeSample sample("PhysicsHandler::AttachBox");
+	if (body == 0 || body > m_bodies.size())
+		return;
+
+	PhysicsBody& physicsBody = m_bodies[body - 1];
+
+	auto mesh = CoreSystems::GetAssetRepo()->GetMeshData(meshUID);
+
+	const float32 factor = 0.5f;
+	Vector3 newSize = size * factor;
+
+	b3ShapeDef shapeDef = b3DefaultShapeDef();
+	shapeDef.density = 1.0f;
+	shapeDef.baseMaterial.friction = 0.3f;
+	b3CreateMeshShape(physicsBody.bodyId, &shapeDef, mesh, Vector3::VecToB3D(size));
+}
+
 void PhysicsHandler::AttachMesh(PhysicsBodyHandle body, const MeshInfo &mesh)
 {
 	TimeSample sample("PhysicsHandler::AttachMesh");
@@ -142,14 +156,12 @@ b3MeshData* PhysicsHandler::CreateMesh(const byte* vertices, const byte* indices
 	return b3CreateMesh(&meshDef, NULL, 0);
 }
 
-
 void PhysicsHandler::Setup()
 {
 	auto def = b3DefaultWorldDef();
-	def.gravity = {0.0f, -20.0f, 0.0f};
+	def.gravity = {0.0f, -9.81f, 0.0f};
 	m_worldID = b3CreateWorld(&def);
 }
-
 
 void PhysicsHandler::Visualize()
 {
@@ -170,4 +182,5 @@ void PhysicsHandler::UpdateAttachedEntity(PhysicsBody& body)
 	tra->position = Vector3::B3DtoVec(pos);
 	tra->rotation = Quaternion::B3DToQuat(rot);
 
+	return;
 }

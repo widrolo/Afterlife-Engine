@@ -388,6 +388,8 @@ add_executable(Afterlife_Engine
         src/Game/Widgets/PlayerWatchWidget.cpp
         src/Game/Widgets/PlayerWatchWidget.h
         src/Game/Types/GameState.h
+        src/Game/Gameplay/PhysicsTest.cpp
+        src/Game/Gameplay/PhysicsTest.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

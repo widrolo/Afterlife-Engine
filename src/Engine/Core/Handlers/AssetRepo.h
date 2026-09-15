@@ -110,6 +110,8 @@ namespace WEngine
 
 		bool IsTextureDoneLoading(uint64 uid) const;
 
+		b3MeshData* GetMeshData(uint64 uid);
+
 	private:
 		AudioClip* LoadAudioWAV(const std::string& name);
 		std::string LoadTextFile(const std::string& path);

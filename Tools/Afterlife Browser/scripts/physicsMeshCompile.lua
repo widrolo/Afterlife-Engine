@@ -11,7 +11,7 @@ end
 
 local function argument(name, value)
     assert(type(value) == "string" and value ~= "" and not value:find("\0", 1, true),
-        "Missing or invalid " .. name)
+        "Missing or invalid " .. name .. "val: (" .. value .. ")\n Issue Occured for: " .. meshName)
     return value
 end
 
