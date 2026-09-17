@@ -72,4 +72,10 @@ namespace WEngine
 		MeshInfo model;
 	};
 
+	struct PhyMeshAssetMission : public AssetMissionBase
+	{
+		uint64 uid = 0;
+		MeshInfo model;
+	};
+
 }

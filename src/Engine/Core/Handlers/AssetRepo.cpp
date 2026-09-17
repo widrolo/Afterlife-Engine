@@ -27,6 +27,7 @@
 
 #include "PhysicsHandler.h"
 #include <box3d/box3d.h>
+
 #include "Engine/Util/TimeAnalysis.h"
 #include "glm/gtc/quaternion.hpp"
 
@@ -68,15 +69,31 @@ void AssetRepo::GetAsset<MeshAssetMission>(MeshAssetMission& mission)
 {
 	// we dont do this because this gets called all the damn time and i dont want a high res clock call here
 	//TimeSample sample("AssetRepo::GetAsset<MeshAssetMission>");
-	if (mission.uid == 0 || mission.uid >= m_meshes.size())
+	if (mission.uid == 0 || mission.uid >= m_statMeshes.table.size())
 	{
 		WLog::SetConsoleWarning();
 		WLog::ConsoleLog("Gave invalid uid.");
 		return;
 	}
 
-	mission.model = m_meshes[mission.uid];
+	mission.model = m_statMeshes.table[mission.uid];
 }
+
+template<>
+void AssetRepo::GetAsset<PhyMeshAssetMission>(PhyMeshAssetMission& mission)
+{
+	// we dont do this because this gets called all the damn time and i dont want a high res clock call here
+	//TimeSample sample("AssetRepo::GetAsset<MeshAssetMission>");
+	if (mission.uid == 0 || mission.uid >= m_phyMeshes.table.size())
+	{
+		WLog::SetConsoleWarning();
+		WLog::ConsoleLog("Gave invalid uid.");
+		return;
+	}
+
+	mission.model = m_phyMeshes.table[mission.uid];
+}
+
 
 template<>
 void AssetRepo::GetAsset<AudioClipAssetMission>(AudioClipAssetMission& mission)
@@ -378,7 +395,8 @@ void AssetRepo::LoadAllGPUAssets()
 
 	ExtractPackage(meshTable, meshFiles, "Meshes.pkg");
 	ExtractPackage(textureTable, texFiles, "Textures.pkg");
-	ParseAndUploadMeshes(meshFiles);
+	ParseAndUploadMeshes(meshFiles, m_statMeshes);
+	ParseAndUploadMeshes(m_phyMeshFiles, m_phyMeshes);
 	ParseTextures(texFiles);
 }
 
@@ -395,9 +413,8 @@ void AssetRepo::LoadPhysicsAssets()
 	wtl::vector<std::pair<sizeT, sizeT>> meshTable;
 	ParsePackageTable(meshTable, "PhysicsMeshes.yaml");
 
-	wtl::vector<byte*> meshFiles;
-	ExtractPackage(meshTable, meshFiles, "PhysicsMeshes.pkg");
-	ParsePhysicsMeshes(meshFiles);
+	ExtractPackage(meshTable, m_phyMeshFiles, "PhysicsMeshes.pkg");
+	ParsePhysicsMeshes(m_phyMeshFiles);
 }
 
 wtl::vector<Sector> AssetRepo::LoadAllSectors()
@@ -761,19 +778,37 @@ AssetRepo::ASMFHeader AssetRepo::ReadASMFHeader(const byte *data)
 	return h;
 }
 
-void AssetRepo::ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles)
+void AssetRepo::ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles, MeshStorage& container)
 {
+	enum class MeshKind
+	{
+		Static,
+		Physics
+	} meshKind = MeshKind::Static;
+
 	wtl::vector<ASMFHeader> meshFileHeaders;
 	meshFileHeaders.reserve(meshFiles.size());
 
 	const sizeT headerSize = sizeof(ASMFHeader);
-	const sizeT vertSize = 32;
+	sizeT vertSize = 32;
 	const sizeT indexSize = 4;
 	sizeT totalVertCount = 0;
 	sizeT totalIndCount = 0;
 	for (const auto* mesh : meshFiles)
 	{
 		ASMFHeader header = ReadASMFHeader(mesh);
+
+		if (header.identifier[1] == 'S')
+		{
+			meshKind = MeshKind::Static;
+			vertSize = 32;
+		}
+		if (header.identifier[1] == 'P')
+		{
+			meshKind = MeshKind::Physics;
+			vertSize = 12;
+		}
+
 		meshFileHeaders.push_back(header);
 		totalVertCount += header.vertCount;
 		totalIndCount += header.indCount;
@@ -785,8 +820,8 @@ void AssetRepo::ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles)
 	sizeT vertHead = 0;
 	sizeT indHead = 0;
 
-	MeshInfo dummy{};
-	m_meshes.push_back(dummy);
+
+	container.table.push_back({});
 
 	for (sizeT i = 0; i < meshFiles.size(); i++)
 	{
@@ -802,7 +837,7 @@ void AssetRepo::ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles)
 		location.vertexSize = vertHead;
 		location.indexSize = indHead;
 
-		m_meshes.push_back(location);
+		container.table.push_back(location);
 	}
 
 	for (auto* mesh : meshFiles)
@@ -812,11 +847,12 @@ void AssetRepo::ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles)
 	desc.debugName = "Mesh Vertex Payload";
 	desc.size = vertHead;
 	desc.usage = Iris::BufferUsage::Vertex;
-	m_vertexBuffer = Iris::CreateBuffer(desc, vertexPayload, vertHead);
+	container.vertexBuffer = Iris::CreateBuffer(desc, vertexPayload, vertHead);
 	desc.debugName = "Mesh Index Payload";
 	desc.size = indHead;
 	desc.usage = Iris::BufferUsage::Index;
-	m_indexBuffer = Iris::CreateBuffer(desc, indexPayload, indHead);
+	container.indexBuffer = Iris::CreateBuffer(desc, indexPayload, indHead);
+
 
 	wFree(vertexPayload);
 	wFree(indexPayload);
@@ -837,9 +873,6 @@ void AssetRepo::ParsePhysicsMeshes(const wtl::vector<byte*>& meshFiles)
 		auto boxMesh = CoreSystems::GetPhysicsHandler()->CreateMesh(vert, ind, header.vertCount, header.indCount);
 		m_physicsMeshData.push_back(boxMesh);
 	}
-
-	for (auto* mesh : meshFiles)
-		wFree(mesh);
 }
 
 void AssetRepo::ParseTextures(const wtl::vector<byte*>& texFiles)
@@ -953,12 +986,10 @@ void AssetRepo::LoadSingleSector(Sector& storage)
 		t.rotation = { rot[0].as<float32>(), rot[1].as<float32>(), rot[2].as<float32>(), rot[3].as<float32>() };
 		t.size = { size[0].as<float32>(), size[1].as<float32>(), size[2].as<float32>() };
 
-		SectorPhysicsBodyHandle bodyHandle = 0;
-
 		if (col != 0)
-			bodyHandle = CoreSystems::GetPhysicsHandler()->CreateSectorBody(t, m_physicsMeshData[col]);
+			CoreSystems::GetPhysicsHandler()->CreateSectorBody(t, m_physicsMeshData[col]);
 
-		SectorEntry newEntry = SectorEntry(mesh, tex, bodyHandle, t);
+		SectorEntry newEntry = SectorEntry(mesh, tex, col, t);
 		storage.m_entries.push_back(newEntry);
 	}
 }
@@ -1007,7 +1038,9 @@ void AssetRepo::SortSectorForRender(wtl::vector<SectorEntry>& entries)
 		{
 			if (a.GetTexture() != b.GetTexture())
 				return a.GetTexture() < b.GetTexture();
-			return a.GetMesh() < b.GetMesh();
+			if (a.GetMesh() != b.GetMesh())
+				return a.GetMesh() < b.GetMesh();
+			return a.GetCollisionMesh() < b.GetCollisionMesh();
 		});
 }
 
@@ -1035,12 +1068,14 @@ void AssetRepo::CreateRenderPlanForSector(Sector& storage, const wtl::vector<Sec
 	// we need to load it with stuff so it can start going.
 	part.meshUID = renderables[0].GetMesh();
 	part.textureUID = renderables[0].GetTexture();
+	part.phyMeshUID = renderables[0].GetCollisionMesh();
 	part.count = 0;
 
 	sizeT offsetCounter = 0; // technically not supposed to be sizeT, as RenderPlan doesnt use 64 bits for offset.
 	for (const auto& entry : renderables)
 	{
-		if (entry.GetTexture() == part.textureUID && entry.GetMesh() == part.meshUID)
+		if (entry.GetTexture() == part.textureUID && entry.GetMesh() == part.meshUID &&
+			entry.GetCollisionMesh() == part.phyMeshUID)
 		{
 			part.count++;
 			offsetCounter++;
@@ -1053,6 +1088,7 @@ void AssetRepo::CreateRenderPlanForSector(Sector& storage, const wtl::vector<Sec
 		part.count = 1;
 		part.meshUID = entry.GetMesh();
 		part.textureUID = entry.GetTexture();
+		part.phyMeshUID = entry.GetCollisionMesh();
 
 		offsetCounter++;
 	}

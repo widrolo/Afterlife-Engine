@@ -34,6 +34,7 @@ namespace WEngine::Rendering
         void EndRendering();
         void RenderFullScene(bool noTex = false);
         void AddASMFAttributes(Iris::VertexLayoutDesc& storage);
+        void AddAPMFAttributes(Iris::VertexLayoutDesc& storage);
         void AddScreenAttributes(Iris::VertexLayoutDesc& storage);
         void AddInstancingAttributes(Iris::VertexLayoutDesc& storage);
         Iris::FramebufferHandle CreateBasicFramebuffer(const std::string& passName = "Pass", float32 renderScale = 1.0f,

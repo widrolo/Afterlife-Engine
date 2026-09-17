@@ -9,7 +9,8 @@ PhysicsTest::PhysicsTest()
 
     m_mesh = WEngine::CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType("/Testing/Cubes/Cube", WEngine::AssetType::StaticMesh);
     m_texture = WEngine::CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType("/Testing/Cubes/Cube", WEngine::AssetType::Texture);
-    //m_collider = WEngine::CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType("/Testing/Monkey", WEngine::AssetType::PhysicsMesh);
+    // not for physics but rather for the rendering.
+    m_collider = WEngine::CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType("/Testing/Cubes/Cube", WEngine::AssetType::PhysicsMesh);
 
     m_testBodies.reserve(BodiesCount);
 }
@@ -43,6 +44,7 @@ void PhysicsTest::Draw()
     WEngine::RenderMission mission;
     mission.meshUID = m_mesh;
     mission.textureUID = m_texture;
+    mission.phyMeshUID = m_collider;
 
     for (const auto& body : m_testBodies)
     {

@@ -1,4 +1,0 @@
-shader:
-    isPP: true
-    shaderName: PP_Outline
-    fragmentCode: PostProcessing/ppOutline

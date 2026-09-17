@@ -34,6 +34,7 @@ namespace WEngine
 		 * @param viewportResolution Resolution of the viewport.
 		 */
 		void EnableEditorMode(const Vector2& viewportResolution);
+		bool& GetPhysicsDebugSwitch() { return m_isPhysicsDebug; }
 
 		/**
 		 * Gets the framebuffer that is meant to be used by the viewport.
@@ -110,6 +111,7 @@ namespace WEngine
 		glm::mat4 m_viewMatrix;
 
 		bool m_isEditor = false;
+		bool m_isPhysicsDebug = false;
 		Vector2 m_viewportResolution{};
 	};
 }

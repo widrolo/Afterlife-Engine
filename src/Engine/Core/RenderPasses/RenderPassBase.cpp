@@ -76,6 +76,30 @@ void RenderPassBase::AddASMFAttributes(Iris::VertexLayoutDesc &storage)
     storage.attributes.push_back(attribute);
 }
 
+void RenderPassBase::AddAPMFAttributes(Iris::VertexLayoutDesc &storage)
+{
+    uint32 bindStart = storage.bindings.size();
+    uint32 attrStart = storage.attributes.size();
+
+    // the apmf file thats loaded in is laid out like this:
+    // |     Name     |  Size  |
+    // |--------------|--------|
+    // |Position      |12 bytes|
+
+    Iris::VertexBindingDesc binding{};
+    binding.binding = bindStart;
+    binding.perInstance = false;
+    binding.stride = 12;
+    storage.bindings.push_back(binding);
+
+    Iris::VertexAttributeDesc attribute{};
+    attribute.binding = bindStart;
+    attribute.location = attrStart;
+    attribute.format = Iris::VertFormat::Float3;
+
+    storage.attributes.push_back(attribute);
+}
+
 void RenderPassBase::AddScreenAttributes(Iris::VertexLayoutDesc &storage)
 {
     uint32 bindStart = storage.bindings.size();

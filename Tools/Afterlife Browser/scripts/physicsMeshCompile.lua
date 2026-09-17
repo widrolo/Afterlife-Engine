@@ -32,7 +32,10 @@ try:
     mesh.calc_loop_triangles()
     world = evaluated.matrix_world
     # The (x, z, -y) rotation preserves handedness. Mirrors already flip CCW.
-    reverse_winding = world.to_3x3().determinant() > 0.0
+    determinant = world.to_3x3().determinant()
+    if determinant == 0.0:
+        raise RuntimeError("Mesh object {!r} has a singular world transform; its triangles have no winding".format(mesh_name))
+    reverse_winding = determinant < 0.0
     remap = {}
     vertices = []
     indices = []

@@ -126,18 +126,31 @@ void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm:
 	Iris::CommandBufferHandle cmdBuff, Iris::GraphicsPipelineHandle singlePipe, bool noTex)
 {
 	TimeSample sample("RenderHandler::RenderSingleMission");
-	if (!CoreSystems::GetAssetRepo()->IsTextureDoneLoading(mission.textureUID))
+	if (!noTex && !CoreSystems::GetAssetRepo()->IsTextureDoneLoading(mission.textureUID))
 		return;
-	MeshAssetMission meshMission{};
-	meshMission.uid = mission.meshUID;
-	CoreSystems::GetAssetRepo()->GetAsset(meshMission);
+	MeshInfo mesh;
+	if (m_isPhysicsDebug)
+	{
+		PhyMeshAssetMission meshMission{};
+		meshMission.uid = mission.phyMeshUID;
+		CoreSystems::GetAssetRepo()->GetAsset(meshMission);
+		mesh = meshMission.model;
+	}
+	else
+	{
+		MeshAssetMission meshMission{};
+		meshMission.uid = mission.meshUID;
+		CoreSystems::GetAssetRepo()->GetAsset(meshMission);
+		mesh = meshMission.model;
+	}
 
 	sizeT indexSize = sizeof(uint32);
-	sizeT vertexSize = sizeof(float32) * 3 + sizeof(float32) * 3 + sizeof(float32) * 2;
+	sizeT vertexSize = m_isPhysicsDebug ? sizeof(float32) * 3 :
+		sizeof(float32) * 3 + sizeof(float32) * 3 + sizeof(float32) * 2;
 
-	sizeT indexCount = (meshMission.model.indexSize - meshMission.model.indexOffset) / indexSize;
-	sizeT indexOffset = meshMission.model.indexOffset / indexSize;
-	sizeT vertOffset = meshMission.model.vertexOffset / vertexSize;
+	sizeT indexCount = (mesh.indexSize - mesh.indexOffset) / indexSize;
+	sizeT indexOffset = mesh.indexOffset / indexSize;
+	sizeT vertOffset = mesh.vertexOffset / vertexSize;
 
 	Mat4x4 mvp = Glm4x4ToMat4x4(vp * CalcModelMatrixGLM(mission.transform));
 	Mat4x4 model = CalcModelMatrix(mission.transform);
@@ -164,18 +177,33 @@ void RenderHandler::RenderSinglePlan(const RenderPlan &plan, const Mat4x4 &vp,  
 	Iris::BindVertexBuffers(cmdBuff, 1, {plan.statBuffer}, {0});
 	for (const auto& part : plan.parts)
 	{
-		if (!CoreSystems::GetAssetRepo()->IsTextureDoneLoading(part.textureUID))
+		if (!noTex && !CoreSystems::GetAssetRepo()->IsTextureDoneLoading(part.textureUID))
 			continue;
-		MeshAssetMission meshMission{};
-		meshMission.uid = part.meshUID;
-		CoreSystems::GetAssetRepo()->GetAsset(meshMission);
+		if (m_isPhysicsDebug && part.phyMeshUID == 0)
+			continue;
+		MeshInfo mesh;
+		if (m_isPhysicsDebug)
+		{
+			PhyMeshAssetMission meshMission{};
+			meshMission.uid = part.phyMeshUID;
+			CoreSystems::GetAssetRepo()->GetAsset(meshMission);
+			mesh = meshMission.model;
+		}
+		else
+		{
+			MeshAssetMission meshMission{};
+			meshMission.uid = part.meshUID;
+			CoreSystems::GetAssetRepo()->GetAsset(meshMission);
+			mesh = meshMission.model;
+		}
 
 		sizeT indexSize = sizeof(uint32);
-		sizeT vertexSize = sizeof(float32) * 3 + sizeof(float32) * 3 + sizeof(float32) * 2;
+		sizeT vertexSize = m_isPhysicsDebug ? sizeof(float32) * 3 :
+			sizeof(float32) * 3 + sizeof(float32) * 3 + sizeof(float32) * 2;
 
-		sizeT indexCount = (meshMission.model.indexSize - meshMission.model.indexOffset) / indexSize;
-		sizeT indexOffset = meshMission.model.indexOffset / indexSize;
-		sizeT vertOffset = meshMission.model.vertexOffset / vertexSize;
+		sizeT indexCount = (mesh.indexSize - mesh.indexOffset) / indexSize;
+		sizeT indexOffset = mesh.indexOffset / indexSize;
+		sizeT vertOffset = mesh.vertexOffset / vertexSize;
 
 		if (part.textureUID != m_currentBoundTexture && !noTex)
 			Iris::BindResourceTable(cmdBuff, statPipe, 0, m_textureTables[part.textureUID]);
@@ -209,8 +237,17 @@ const Transform & RenderHandler::GetCamera() const
 
 void RenderHandler::AddToRenderQueue(RenderMission& mission)
 {
-	if (mission.meshUID == 0 || mission.textureUID == 0)
-		return;
+	if (!m_isPhysicsDebug)
+	{
+		if (mission.meshUID == 0 || mission.textureUID == 0)
+			return;
+	}
+	else
+	{
+		if (mission.phyMeshUID == 0)
+			return;
+	}
+
 	m_renderQueue.push_back(mission);
 }
 
@@ -246,15 +283,25 @@ void RenderHandler::RenderScene(Iris::CommandBufferHandle cmdBuff, Iris::Graphic
 {
 	auto vpGLM = m_projection * m_viewMatrix;
 
-	wtl::vector<Iris::BufferHandle> vertBuffs{CoreSystems::GetAssetRepo()->GetVertexBuffer()};
+	wtl::vector<Iris::BufferHandle> vertBuffs(1);
+	if (!m_isPhysicsDebug)
+		vertBuffs[0] = CoreSystems::GetAssetRepo()->GetStaticMeshes().vertexBuffer;
+	else
+		vertBuffs[0] = CoreSystems::GetAssetRepo()->GetPhysicsMeshes().vertexBuffer;
 	wtl::vector<sizeT> vertOffs{0};
 
 	Mat4x4 vp = Glm4x4ToMat4x4(vpGLM);
 
+	Iris::BufferHandle indBuff;
+	if (!m_isPhysicsDebug)
+		indBuff = CoreSystems::GetAssetRepo()->GetStaticMeshes().indexBuffer;
+	else
+		indBuff = CoreSystems::GetAssetRepo()->GetPhysicsMeshes().indexBuffer;
+
 	// plans are instanced batches, they need the instanced pipeline.
 	Iris::BindGraphicsPipeline(cmdBuff, statPipe);
 	Iris::BindVertexBuffers(cmdBuff, 0, vertBuffs, vertOffs);
-	Iris::BindIndexBuffer(cmdBuff, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
+	Iris::BindIndexBuffer(cmdBuff, indBuff, 0);
 
 	for (const auto& plan : m_renderPlanQueue)
 		RenderSinglePlan(plan, vp, cmdBuff, statPipe, noTex);
@@ -262,7 +309,7 @@ void RenderHandler::RenderScene(Iris::CommandBufferHandle cmdBuff, Iris::Graphic
 	// missions are singular objects, they take the model matrix as a push constant.
 	Iris::BindGraphicsPipeline(cmdBuff, singlePipe);
 	Iris::BindVertexBuffers(cmdBuff, 0, vertBuffs, vertOffs);
-	Iris::BindIndexBuffer(cmdBuff, CoreSystems::GetAssetRepo()->GetIndexBuffer(), 0);
+	Iris::BindIndexBuffer(cmdBuff, indBuff, 0);
 
 	for (const auto& mission : m_renderQueue)
 		RenderSingleMission(mission, vpGLM, cmdBuff, singlePipe, noTex);

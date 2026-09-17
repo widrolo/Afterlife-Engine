@@ -24,6 +24,7 @@ namespace WEngine
 	{
 		uint64 textureUID;
 		uint64 meshUID;
+		uint64 phyMeshUID = 0; // not really an obligation but pls put it in there as well for the sake of debugging
 		Transform transform;
 	};
 
@@ -33,6 +34,7 @@ namespace WEngine
 		// to have more than 4 billion meshes anyway.
 		uint32 textureUID;
 		uint32 meshUID;
+		uint32 phyMeshUID = 0;
 		uint16 offset; // in number of items, not bytes
 		uint16 count;  // in number of items, not bytes
 	};

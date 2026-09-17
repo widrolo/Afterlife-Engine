@@ -18,6 +18,14 @@ namespace WEngine
 {
 	class Sector;
 	struct TextureInfo;
+
+	struct MeshStorage
+	{
+		Iris::BufferHandle vertexBuffer;
+		Iris::BufferHandle indexBuffer;
+		wtl::vector<MeshInfo> table;
+	};
+
 	/**
 	 * AssetRepo handles the loading and unloading of game assets such as sprites, shaders, YAML files, atlas info, audio clips, and UI sheets.
 	 */
@@ -30,6 +38,8 @@ namespace WEngine
 			uint32 vertCount;
 			uint32 indCount;
 		};
+
+
 		enum class StreamingProgress
 		{
 			Unloaded,
@@ -105,8 +115,8 @@ namespace WEngine
 		 */
 		uint64 GetAssetInDirByName(const std::string& dirName, const std::string& assetName);
 
-		Iris::BufferHandle GetVertexBuffer() const { return m_vertexBuffer; }
-		Iris::BufferHandle GetIndexBuffer() const { return m_indexBuffer; }
+		const MeshStorage& GetStaticMeshes() const { return m_statMeshes; }
+		const MeshStorage& GetPhysicsMeshes() const { return m_phyMeshes; }
 
 		bool IsTextureDoneLoading(uint64 uid) const;
 
@@ -128,7 +138,7 @@ namespace WEngine
 		void ExtractPackage(const wtl::vector<std::pair<sizeT, sizeT>>& locations, wtl::vector<byte*>& files,
 			const std::string& package);
 		ASMFHeader ReadASMFHeader(const byte* data);
-		void ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles);
+		void ParseAndUploadMeshes(const wtl::vector<byte*>& meshFiles, MeshStorage& container);
 		void ParsePhysicsMeshes(const wtl::vector<byte*>& meshFiles);
 		void ParseTextures(const wtl::vector<byte*>& texFiles);
 		void FillCopyBuffers(Iris::BufferHandle* handles, sizeT handleCount, sizeT textureWidth);
@@ -145,13 +155,16 @@ namespace WEngine
 		std::unordered_map<std::string, AudioClip> m_audioRepo;
 		std::unordered_map<std::string, wtl::vector<AssetRef>> m_assets;
 
-		Iris::BufferHandle m_vertexBuffer;
-		Iris::BufferHandle m_indexBuffer;
+		MeshStorage m_statMeshes;
+		MeshStorage m_phyMeshes;
+
 
 		Iris::CopyBufferHandle m_copyCmdBuffer;
 		wtl::vector<std::pair<TextureInfoDDS, Iris::TextureHandle>> m_textures;
 		wtl::vector<b3MeshData*> m_physicsMeshData;
-		wtl::vector<MeshInfo> m_meshes;
+
+		wtl::vector<byte*> m_phyMeshFiles;
+
 
 		// keep this as the bottom so it doesnt pollute the offsets of the rest
 		// These should be fine-tuned in the final optimization pass of the game long after the content lock.

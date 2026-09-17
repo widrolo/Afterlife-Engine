@@ -4,6 +4,7 @@
 #include <Engine/Core/Engine.h>
 
 #include "Engine/Core/Handlers/PhysicsHandler.h"
+#include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Types/CoreSystems.h"
 
 using namespace WEngine;
@@ -27,5 +28,7 @@ void PhysicsWatchWidget::RenderInternal()
     ImGui::Text("%s", tickCount.c_str());
     ImGui::Separator();
     ImGui::Text("Body count: %i", (uint32)ph->m_bodies.size());
+
+    ImGui::Checkbox("Debug Rendering", &CoreSystems::GetRenderHandler()->GetPhysicsDebugSwitch());
 }
 
