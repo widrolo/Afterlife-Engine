@@ -37,7 +37,7 @@ void ForwardPass::SetupPass()
     desc.tableLayouts[0] = Basics::singleTexLayout;
     desc.tableAttachmentCount = 1;
 
-    desc.pushConstantsSize = sizeof(Mat4x4) * 2;
+    desc.vertPushConstantsSize = sizeof(Mat4x4) * 2;
 
     m_regPipe = Iris::CreateGraphicsPipeline(desc);
 
@@ -48,7 +48,7 @@ void ForwardPass::SetupPass()
 
     m_statPipe = Iris::CreateGraphicsPipeline(desc);
 
-    CreatePhysicsPipes();
+    CreatePhysicsStuff();
 
     m_fb = CreateBasicFramebuffer("Forward", 1.0f, true);
 }
@@ -66,7 +66,7 @@ void ForwardPass::Render()
     EndRendering();
 }
 
-void ForwardPass::CreatePhysicsPipes()
+void ForwardPass::CreatePhysicsStuff()
 {
     Iris::VertexLayoutDesc layout;
     AddAPMFAttributes(layout);
@@ -88,7 +88,7 @@ void ForwardPass::CreatePhysicsPipes()
     desc.depthStencil = depthDesc;
     desc.blend = Iris::BlendDesc{};
 
-    desc.pushConstantsSize = sizeof(Mat4x4) * 2;
+    desc.vertPushConstantsSize = sizeof(Mat4x4) * 2;
 
     m_phyDbgReg = Iris::CreateGraphicsPipeline(desc);
 

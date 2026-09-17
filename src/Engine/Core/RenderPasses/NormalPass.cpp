@@ -34,7 +34,7 @@ void NormalPass::SetupPass()
     desc.depthStencil = depthDesc;
     desc.blend = Iris::BlendDesc{};
 
-    desc.pushConstantsSize = sizeof(Mat4x4) * 2;
+    desc.vertPushConstantsSize = sizeof(Mat4x4) * 2;
 
     m_regPipe = Iris::CreateGraphicsPipeline(desc);
 
@@ -84,7 +84,7 @@ void NormalPass::CreatePhysicsPipes()
     desc.rasterizer = raster;
     desc.depthStencil = depthDesc;
     desc.blend = Iris::BlendDesc{};
-    desc.pushConstantsSize = sizeof(Mat4x4) * 2;
+    desc.vertPushConstantsSize = sizeof(Mat4x4) * 2;
 
     m_phyDbgReg = Iris::CreateGraphicsPipeline(desc);
 

@@ -7,10 +7,12 @@ layout(push_constant) uniform PushConstants {
     mat4 model;
 } pc;
 
-layout(location = 1) out vec3 outWorldPos;
+layout(location = 0) out vec3 outWorldPos;
+layout(location = 1) out vec3 outColor;
 
 void main()
 {
+    outColor = vec3(0.0, 1.0, 0.0);
     outWorldPos = vec3(pc.model * vec4(inPosition, 1.0));
     gl_Position = pc.mvp * vec4(inPosition, 1.0);
 }

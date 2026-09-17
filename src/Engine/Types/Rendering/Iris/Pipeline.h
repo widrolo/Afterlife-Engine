@@ -21,8 +21,8 @@ namespace Iris
         std::array<ResourceTableLayoutHandle, 8> tableLayouts;
         uint32 tableAttachmentCount = 0;
 
-        uint32 pushConstantsSize = 0;
-        ShaderStage pushConstantsStage = ShaderStage::Vertex;
+        uint32 vertPushConstantsSize = 0;
+        uint32 fragPushConstantsSize = 0;
 
         ImgFormat colorAttachmentFormat = ImgFormat::BGRA8_UNorm;
         ImgFormat depthStencilFormat = ImgFormat::D32_SFloat_S8_UInt;

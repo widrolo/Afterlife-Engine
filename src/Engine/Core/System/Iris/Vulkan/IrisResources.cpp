@@ -383,20 +383,26 @@ namespace Iris
 
 
 
-        std::array<VkPushConstantRange, 1> pushConstants;
+        wtl::vector<VkPushConstantRange> pushConstants;
+        VkPushConstantRange pushConstantsEntry;
 
-        pushConstants[0].stageFlags = IrisShaderStageToVulkan(desc.pushConstantsStage);
-        pushConstants[0].offset = 0;
-        pushConstants[0].size = desc.pushConstantsSize;
-        pip.pushStageFlags = pushConstants[0].stageFlags;
+        pushConstantsEntry.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        pushConstantsEntry.offset = 0;
+        pushConstantsEntry.size = desc.vertPushConstantsSize;
+        if (pushConstantsEntry.size != 0)
+            pushConstants.push_back(pushConstantsEntry);
+
+
+        pushConstantsEntry.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        pushConstantsEntry.offset = 0;
+        pushConstantsEntry.size = desc.fragPushConstantsSize;
+        if (pushConstantsEntry.size != 0)
+            pushConstants.push_back(pushConstantsEntry);
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        if (desc.pushConstantsSize != 0)
-        {
-            pipelineLayoutInfo.pushConstantRangeCount = pushConstants.size();
-            pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
-        }
+        pipelineLayoutInfo.pushConstantRangeCount = pushConstants.size();
+        pipelineLayoutInfo.pPushConstantRanges = pushConstants.data();
 
         wtl::vector<VkDescriptorSetLayout> descriptorSetLayouts(desc.tableAttachmentCount);
 

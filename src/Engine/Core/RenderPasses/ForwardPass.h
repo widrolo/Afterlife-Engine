@@ -11,7 +11,7 @@ namespace WEngine::Rendering
         void Render() override;
 
     private:
-        void CreatePhysicsPipes();
+        void CreatePhysicsStuff();
 
     private:
         Iris::GraphicsPipelineHandle m_phyDbgReg;

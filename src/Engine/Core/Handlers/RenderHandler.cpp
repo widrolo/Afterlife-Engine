@@ -166,7 +166,7 @@ void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm:
 	if (mission.textureUID != m_currentBoundTexture && !noTex)
 		Iris::BindResourceTable(cmdBuff, singlePipe, 0, m_textureTables[mission.textureUID]);
 	m_currentBoundTexture = mission.textureUID;
-	Iris::SetPushConstants(cmdBuff, singlePipe, (byte*)&pushConstants, sizeof(pushConstants));
+	Iris::SetPushConstants(cmdBuff, singlePipe, (byte*)&pushConstants, sizeof(pushConstants), Iris::ShaderStage::Vertex);
 	Iris::DrawIndexed(cmdBuff, indexCount, 1, indexOffset, vertOffset, 0);
 }
 
@@ -208,7 +208,7 @@ void RenderHandler::RenderSinglePlan(const RenderPlan &plan, const Mat4x4 &vp,  
 		if (part.textureUID != m_currentBoundTexture && !noTex)
 			Iris::BindResourceTable(cmdBuff, statPipe, 0, m_textureTables[part.textureUID]);
 		m_currentBoundTexture = part.textureUID;
-		Iris::SetPushConstants(cmdBuff, statPipe, (byte*)&vp, sizeof(vp));
+		Iris::SetPushConstants(cmdBuff, statPipe, (byte*)&vp, sizeof(vp), Iris::ShaderStage::Vertex);
 		Iris::DrawIndexed(cmdBuff, indexCount, part.count, indexOffset, vertOffset, part.offset);
 	}
 }

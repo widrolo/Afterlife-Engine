@@ -101,7 +101,8 @@ namespace Iris
         stats.bindStats.tableBinds++;
     }
 
-    void SetPushConstants(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, const byte* data, sizeT size)
+    void SetPushConstants(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, const byte* data, sizeT size,
+        ShaderStage stage)
     {
         if (cmd == 0 || cmd > loadedCommandBuffers.size())
         {
@@ -129,7 +130,7 @@ namespace Iris
         }
         // we will later have a push constants function just for compute. Also, 0 offset is okay because we pass all info once.
         vkCmdPushConstants(GetCurrentCmdBuff(cmd), loadedPipelines[pipeline - 1].layout,
-            loadedPipelines[pipeline - 1].pushStageFlags, 0, size, data);
+            IrisShaderStageToVulkan(stage), 0, size, data);
     }
 
     void BindVertexBuffers(CommandBufferHandle cmd, uint32 firstBinding, const wtl::vector<BufferHandle>& buffers,

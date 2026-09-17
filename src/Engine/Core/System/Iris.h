@@ -86,7 +86,8 @@ namespace Iris
     void BindResourceTable(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, uint32 slot, ResourceTableHandle table);
     void BindFramebuffer(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, uint32 slot, FramebufferHandle fb,
         FramebufferBindKind bindKind);
-    void SetPushConstants(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, const byte* data, sizeT size);
+    void SetPushConstants(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, const byte* data, sizeT size,
+        ShaderStage stage);
     void BindVertexBuffers(CommandBufferHandle cmd, uint32 firstBinding, const wtl::vector<BufferHandle>& buffers,
         const wtl::vector<sizeT>& offsets);
     void BindIndexBuffer(CommandBufferHandle cmd, BufferHandle buffer, sizeT offset);
