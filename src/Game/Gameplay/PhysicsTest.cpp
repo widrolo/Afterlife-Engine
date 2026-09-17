@@ -1,35 +1,40 @@
 #include "PhysicsTest.h"
 
+constexpr sizeT BodiesCount = 10;
+constexpr float32 SpawnRate = 0.01f;
+
 PhysicsTest::PhysicsTest()
 {
     WEngine::CoreSystems::GetPhysicsHandler();
 
-    m_mesh = WEngine::CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType("/Testing/Cube", WEngine::AssetType::StaticMesh);
-    m_texture = WEngine::CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType("/Testing/Cube", WEngine::AssetType::Texture);
+    m_mesh = WEngine::CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType("/Testing/Cubes/Cube", WEngine::AssetType::StaticMesh);
+    m_texture = WEngine::CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType("/Testing/Cubes/Cube", WEngine::AssetType::Texture);
     //m_collider = WEngine::CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType("/Testing/Monkey", WEngine::AssetType::PhysicsMesh);
 
-    m_testBodies.reserve(500);
+    m_testBodies.reserve(BodiesCount);
 }
 
 void PhysicsTest::Tick(float32 dt)
 {
     static float32 timer;
     timer += dt;
-    if (timer < 1.0f)
+    if (timer < SpawnRate)
         return;
     timer = 0.0f;
-
-    WEngine::WLog::ConsoleLog("Spawn");
+    if (m_testBodies.size() >= BodiesCount)
+        return;
 
     PhysicsTestBody phBody0;
     m_testBodies.push_back(phBody0);
     PhysicsTestBody& phBody = m_testBodies.back();
 
+    auto rngPos = WEngine::CoreSystems::GetRNGHandler()->GetRandomVector2(5);
     phBody.transform = WEngine::Transform::Zero;
+    phBody.transform.position.x = rngPos.x;
     phBody.transform.position.y = 10;
+    phBody.transform.position.z = rngPos.y;
 
     phBody.body = WEngine::CoreSystems::GetPhysicsHandler()->CreateBody(WEngine::PhysicsBodyType::Dynamic, &phBody.transform);
-    WEngine::CoreSystems::GetPhysicsHandler()->AttachBox(phBody.body, phBody.transform.size, WEngine::Vector3::Zero);
     WEngine::CoreSystems::GetPhysicsHandler()->AttachBox(phBody.body, phBody.transform.size, WEngine::Vector3::Zero);
 }
 

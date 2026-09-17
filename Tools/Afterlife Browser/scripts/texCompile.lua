@@ -7,16 +7,8 @@ if out_dir then
     os.execute('mkdir -p "' .. out_dir .. '"')
 end
 
-local probe = "/tmp/nvcompress_path.txt"
-os.execute('command -v nvcompress > "' .. probe .. '" 2>/dev/null')
-local nv_path = ""
-local f = io.open(probe, "r")
-if f then
-    nv_path = f:read("*a")
-    f:close()
-    os.remove(probe)
-end
-if nv_path == "" then
+local nvcompress_available = os.execute("command -v nvcompress > /dev/null 2>&1")
+if not nvcompress_available then
     io.stderr:write("nvcompress not found on your PATH.\n")
     io.stderr:write("Install with:  sudo apt install nvidia-texture-tools\n")
     os.exit(1)

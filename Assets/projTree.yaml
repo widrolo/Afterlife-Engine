@@ -55,26 +55,8 @@ BeginAssets:
               SubName: Collider
               Type: 4
               Asset: Meshes/Proto/Plane.blend
-              Info: Plane_COL
+              Info: Bucket_COL
         c1:
-          Name: Cube
-          Data:
-            d0:
-              SubName: Mesh
-              Type: 0
-              Asset: Meshes/Proto/Cube.blend
-              Info: Cube
-            d1:
-              SubName: Texture
-              Type: 1
-              Asset: Images/Testing/Wood.png
-              Info: ""
-            d2:
-              SubName: Collider
-              Type: 4
-              Asset: Meshes/Proto/Cube.blend
-              Info: Cube
-        c2:
           Name: Bread
           Data:
             d0:
@@ -92,7 +74,7 @@ BeginAssets:
               Type: 4
               Asset: Meshes/Testing/Bread.blend
               Info: Bread_COL
-        c3:
+        c2:
           Name: Monkey
           Data:
             d0:
@@ -110,61 +92,7 @@ BeginAssets:
               Type: 4
               Asset: Meshes/Testing/Monkey.blend
               Info: Suzanne_COL
-        c4:
-          Name: Sun
-          Data:
-            d0:
-              SubName: Texture
-              Type: 1
-              Asset: Images/sun.png
-              Info: ""
-            d1:
-              SubName: Cube
-              Type: 0
-              Asset: Meshes/Proto/Cube.blend
-              Info: Cube
-            d2:
-              SubName: Coll
-              Type: 4
-              Asset: Meshes/Proto/Cube.blend
-              Info: Cube
-        c5:
-          Name: Dirt
-          Data:
-            d0:
-              SubName: 512Test
-              Type: 1
-              Asset: Images/Dirt_04.png
-              Info: ""
-            d1:
-              SubName: Cube
-              Type: 0
-              Asset: Meshes/Proto/Cube.blend
-              Info: Cube
-            d2:
-              SubName: Coll
-              Type: 4
-              Asset: Meshes/Proto/Cube.blend
-              Info: Cube
-        c6:
-          Name: Brick
-          Data:
-            d0:
-              SubName: Cube
-              Type: 0
-              Asset: Meshes/Proto/Cube.blend
-              Info: Cube
-            d1:
-              SubName: Texture
-              Type: 1
-              Asset: Images/Brick 24 - 256x256.png
-              Info: ""
-            d2:
-              SubName: Coll
-              Type: 4
-              Asset: Meshes/Proto/Cube.blend
-              Info: Cube
-        c7:
+        c3:
           Name: UtahPot
           Data:
             d0:
@@ -177,3 +105,84 @@ BeginAssets:
               Type: 1
               Asset: Images/Proto/ProtoTexture.png
               Info: ""
+            d2:
+              SubName: Collider
+              Type: 4
+              Asset: Meshes/Testing/UtahPot.blend
+              Info: Utah Teapot_COL
+        c4:
+          Name: Cubes
+          Data: ~
+          Children:
+            c0:
+              Name: Cube
+              Data:
+                d0:
+                  SubName: Mesh
+                  Type: 0
+                  Asset: Meshes/Proto/Cube.blend
+                  Info: Cube
+                d1:
+                  SubName: Texture
+                  Type: 1
+                  Asset: Images/Testing/Wood.png
+                  Info: ""
+                d2:
+                  SubName: Collider
+                  Type: 4
+                  Asset: Meshes/Proto/Cube.blend
+                  Info: Cube
+            c1:
+              Name: Sun
+              Data:
+                d0:
+                  SubName: Cube
+                  Type: 0
+                  Asset: Meshes/Proto/Cube.blend
+                  Info: Cube
+                d1:
+                  SubName: Texture
+                  Type: 1
+                  Asset: Images/sun.png
+                  Info: ""
+                d2:
+                  SubName: Coll
+                  Type: 4
+                  Asset: Meshes/Proto/Cube.blend
+                  Info: Cube
+            c2:
+              Name: Dirt
+              Data:
+                d0:
+                  SubName: Cube
+                  Type: 0
+                  Asset: Meshes/Proto/Cube.blend
+                  Info: Cube
+                d1:
+                  SubName: 512Test
+                  Type: 1
+                  Asset: Images/Dirt_04.png
+                  Info: ""
+                d2:
+                  SubName: Coll
+                  Type: 4
+                  Asset: Meshes/Proto/Cube.blend
+                  Info: Cube
+            c3:
+              Name: Brick
+              Data:
+                d0:
+                  SubName: Cube
+                  Type: 0
+                  Asset: Meshes/Proto/Cube.blend
+                  Info: Cube
+                d1:
+                  SubName: Texture
+                  Type: 1
+                  Asset: Images/Brick 24 - 256x256.png
+                  Info: ""
+                d2:
+                  SubName: Coll
+                  Type: 4
+                  Asset: Meshes/Proto/Cube.blend
+                  Info: Cube

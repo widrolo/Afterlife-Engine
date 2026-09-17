@@ -11,7 +11,7 @@ end
 
 local function argument(name, value)
     assert(type(value) == "string" and value ~= "" and not value:find("\0", 1, true),
-        "Missing or invalid " .. name .. "val: (" .. value .. ")\n Issue Occured for: " .. meshName)
+        "Missing or invalid " .. name)
     return value
 end
 
@@ -139,9 +139,10 @@ local ok, err = pcall(function()
     end
     local success, how, status = os.execute(quote(blenderPath)
         .. " --background --factory-startup --disable-autoexec --python-exit-code 1 --python "
-        .. quote(pythonPath) .. " -- " .. quote(source) .. " " .. quote(meshName) .. " " .. quote(outputPath))
+        .. quote(pythonPath) .. " -- " .. quote(source) .. " " .. quote(meshName) .. " " .. quote(outputPath)
+        .. " > /dev/null 2>&1")
     assert(success and how == "exit" and status == 0,
-        "Blender export failed (" .. tostring(how) .. " " .. tostring(status) .. "); see Blender output above")
+        "Blender export failed (" .. tostring(how) .. " " .. tostring(status) .. ")")
 
     local vertexCount, indexCount = validate(outputPath)
     print(string.format("[physicsMeshCompile] Compiled '%s' (mesh '%s') -> %s (%d vertices, %d indices, %d triangles)",
