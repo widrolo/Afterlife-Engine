@@ -1,7 +1,6 @@
 #pragma once
 #include "RenderPassBase.h"
 #include "Storage/GTAOSettings.h"
-#include "Storage/RenderSettings.h"
 
 namespace WEngine::Rendering
 {

@@ -3,7 +3,6 @@
 #include "Engine/EngineDefines.h"
 #include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Core/RenderPasses/ForwardPass.h"
-#include "Engine/Core/RenderPasses/Storage/RenderSettings.h"
 #include "Engine/Core/RenderPasses/Storage/Passes.h"
 #include "Engine/Core/System/Iris.h"
 

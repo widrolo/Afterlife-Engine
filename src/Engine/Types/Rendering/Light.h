@@ -2,7 +2,7 @@
 #include <Engine/Types/CommonTypes.h>
 #include <Engine/Math/Vector.h>
 
-#include <cstddef>
+#include <glm/glm.hpp>
 
 #include "Color.h"
 
@@ -50,5 +50,13 @@ namespace WEngine
         float32 ambientIntensity;
         uint32 numLights;
         LightSource sources[MaxLights];
+    };
+
+    struct RenderSettings
+    {
+        alignas(16) Vector3 camPos;
+        alignas(16) glm::mat4 invProj;
+        alignas(16) glm::mat4 invView;
+        alignas(16) Vector2 viewSize;
     };
 }

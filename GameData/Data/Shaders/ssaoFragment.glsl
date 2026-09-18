@@ -4,7 +4,7 @@ layout(location = 0) in vec2 inUV;
 
 layout(set = 0, binding = 0) uniform sampler2D depth;
 layout(set = 1, binding = 0) uniform sampler2D normals;
-layout(set = 2, binding = 0) uniform RenderSettings
+layout(set = 2, binding = 1) uniform RenderSettings
 {
     vec3 camPos;
     mat4 invProj;

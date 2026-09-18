@@ -1,6 +1,7 @@
 #include "SSAOPass.h"
 
 #include "Engine/EngineDefines.h"
+#include "Engine/Core/Handlers/LightTimeHandler.h"
 #include "Engine/Core/System/Iris.h"
 #include "Engine/Stores/Steam/SteamStore.h"
 #include "Engine/Types/CoreSystems.h"
@@ -25,36 +26,22 @@ void SSAOPass::SetupPass()
     Passes::ssao = this;
     m_cmd = Iris::CreateCommandBuffer(Iris::QueueType::Graphics);
 
-    m_renderSettings = CreateSettings(m_renderData, Iris::ShaderStage::Fragment, "Render");
     m_ssaoSettings = CreateSettings(m_ssaoData, Iris::ShaderStage::Fragment, "SSAO");
 
     m_regPipe = CreateBasicScreenPipe("ssao", {
         Basics::singleTexLayout,
         Basics::singleTexLayout,
-        m_renderSettings.layout,
+        CoreSystems::GetTimeHandler()->GetLightLayoutHandle(),
         m_ssaoSettings.layout
     }, "SSAO");
 
     m_fb = CreateBasicFramebuffer("SSAO", m_renderScale, false);
 }
 
-void SSAOPass::UpdateSettings()
-{
-    auto* rh = CoreSystems::GetRenderHandler();
-
-    m_renderData.invProj = glm::inverse(rh->GetProjectionMatrix());
-    m_renderData.invView = glm::inverse(rh->GetViewMatrix());
-    m_renderData.viewSize = EngineSettings::resolution * m_renderScale;
-    m_renderData.camPos = rh->GetCamera().position;
-}
-
 void SSAOPass::Render()
 {
     TimeSample sample("SSAOPass::Render");
 
-    UpdateSettings();
-
-    Iris::UpdateBuffer(m_renderSettings.buffer, 0, (byte*)&m_renderData, sizeof(RenderSettings));
     Iris::UpdateBuffer(m_ssaoSettings.buffer, 0, (byte*)&m_ssaoData, sizeof(SSAOSettings));
 
     BeginRendering(Color::White, EngineSettings::resolution  * m_renderScale);
@@ -70,7 +57,7 @@ void SSAOPass::Render()
 
     Iris::BindFramebuffer(m_cmd, m_regPipe, 0, forwardFb, Iris::FramebufferBindKind::Depth);
     Iris::BindFramebuffer(m_cmd, m_regPipe, 1, normalsFb, Iris::FramebufferBindKind::Color);
-    Iris::BindResourceTable(m_cmd, m_regPipe, 2, m_renderSettings.table);
+    Iris::BindResourceTable(m_cmd, m_regPipe, 2, CoreSystems::GetTimeHandler()->GetLightHandle());
     Iris::BindResourceTable(m_cmd, m_regPipe, 3, m_ssaoSettings.table);
     Iris::Draw(m_cmd, 4, 1, 0, 0);
 

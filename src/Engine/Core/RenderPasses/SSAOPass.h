@@ -1,6 +1,5 @@
 #pragma once
 #include "RenderPassBase.h"
-#include "Storage/RenderSettings.h"
 #include "Storage/SSAOSettings.h"
 
 namespace WEngine::Rendering
@@ -15,13 +14,9 @@ namespace WEngine::Rendering
         SSAOSettings& GetSSAOSettings();
 
     private:
-        void UpdateSettings();
-
-    private:
         RenderPassSettings m_renderSettings;
         RenderPassSettings m_ssaoSettings;
 
-        RenderSettings m_renderData;
         SSAOSettings m_ssaoData;
         float32 m_renderScale = 1.0f;
     };

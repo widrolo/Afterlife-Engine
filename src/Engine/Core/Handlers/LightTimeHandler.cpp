@@ -43,6 +43,13 @@ void LightTimeHandler::SetupLighting()
 
     layoutDesc.entries.push_back(lightEntry);
 
+    lightEntry.binding = 1;
+    lightEntry.stages = Iris::ShaderStage::Fragment;
+    lightEntry.type = Iris::ResourceTableEntryType::UniformBuffer;
+    lightEntry.count = 1;
+
+    layoutDesc.entries.push_back(lightEntry);
+
     m_layoutHandle = Iris::CreateResourceTableLayout(layoutDesc);
     m_lightHandle = Iris::CreateResourceTable(m_layoutHandle);
 
@@ -51,12 +58,21 @@ void LightTimeHandler::SetupLighting()
     buffDesc.usage = Iris::BufferUsage::Uniform;
     buffDesc.size = sizeof(WorldLighting);
     m_lightBuffer = Iris::CreateBuffer(buffDesc, (byte*)m_worldLighting, sizeof(WorldLighting));
+    buffDesc.debugName = "Render Settings Buffer";
+    buffDesc.usage = Iris::BufferUsage::Uniform;
+    buffDesc.size = sizeof(RenderSettings);
+    m_renderSettBuffer = Iris::CreateBuffer(buffDesc, (byte*)&m_renderSettings, sizeof(RenderSettings));
 
     Iris::ResourceTableUpdateDesc updateDesc{};
-    Iris::ResourceTableWrite updateWrite{};
 
+    Iris::ResourceTableWrite updateWrite{};
     updateWrite.buffer = m_lightBuffer;
     updateDesc.writes.push_back(updateWrite);
+
+    updateWrite.binding = 1;
+    updateWrite.buffer = m_renderSettBuffer;
+    updateDesc.writes.push_back(updateWrite);
+
     Iris::UpdateResourceTable(m_lightHandle, updateDesc);
 }
 
@@ -70,8 +86,6 @@ void LightTimeHandler::Update(float32 dt)
     m_date.AddDays(days);
 
     UpdateRenderTime();
-
-    UploadLighting();
 }
 
 void LightTimeHandler::SetDate(const Date &date)
@@ -144,6 +158,7 @@ Vector3 LightTimeHandler::CalcSunDir(float32 timeFactor)
 void LightTimeHandler::UploadLighting()
 {
     Iris::UpdateBuffer(m_lightBuffer, 0, (byte*)m_worldLighting, sizeof(WorldLighting));
+    Iris::UpdateBuffer(m_renderSettBuffer, 0, (byte*)&m_renderSettings, sizeof(RenderSettings));
 }
 
 void LightTimeHandler::SetLightDefaults()
@@ -152,6 +167,4 @@ void LightTimeHandler::SetLightDefaults()
     m_worldLighting->sun.direction = Vector3(0.0f, 1.0f, 0.0f);
     m_worldLighting->sun.intensity = 100.0f;
     m_worldLighting->ambient = Color::White;
-
-    m_worldLighting->sources[14].data.color = Color::Blue;
 }

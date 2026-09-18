@@ -102,6 +102,14 @@ void RenderHandler::RenderFrame()
 {
 	TimeSample sample("RenderHandler::RenderFrame");
 
+	auto& settings = CoreSystems::GetTimeHandler()->GetRenderSettings();
+	settings.camPos = m_camera.position;
+	settings.viewSize = EngineSettings::resolution;
+	settings.invView = glm::inverse(m_viewMatrix);
+	settings.invProj = glm::inverse(m_projection);
+
+	CoreSystems::GetTimeHandler()->UploadLighting();
+
 	Rendering::Passes::forward->Render();
 	Rendering::Passes::normal->Render();
 	switch (GraphicsSettings::aoMethod)

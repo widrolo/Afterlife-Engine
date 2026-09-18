@@ -235,7 +235,6 @@ add_executable(Afterlife_Engine
         src/Engine/Util/TextureSwizzler.h
         src/Engine/Types/Rendering/Iris/IrisAssetComms.h
         src/Game/Types/GameSystems.h
-        src/Engine/Types/Rendering/LightingInfo.h
         src/Engine/Core/Handlers/LightTimeHandler.cpp
         src/Engine/Core/Handlers/LightTimeHandler.h
         src/Engine/Types/Time/Date.h
@@ -360,7 +359,6 @@ add_executable(Afterlife_Engine
         src/Engine/imgui/GraphEditor.cpp
         src/Engine/Core/RenderPasses/GTAOPass.cpp
         src/Engine/Core/RenderPasses/GTAOPass.h
-        src/Engine/Core/RenderPasses/Storage/RenderSettings.h
         src/Engine/Types/Audio/Echo/Handles.h
         src/Engine/Core/System/Echo.h
         src/Engine/Types/Audio/Echo/Init.h

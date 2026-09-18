@@ -16,6 +16,7 @@ namespace WEngine
     public:
         void SetupLighting();
         void Update(float32 dt);
+        void UploadLighting();
 
         void SetDate(const Date& date);
         void SetTime(const Time& time);
@@ -30,10 +31,11 @@ namespace WEngine
         Colorf& GetAmbientColor() { return m_worldLighting->ambient; }
         float32& GetAmbientIntensity() { return m_worldLighting->ambientIntensity; }
 
+        RenderSettings& GetRenderSettings() { return m_renderSettings; }
+
     private:
         void UpdateRenderTime();
         Vector3 CalcSunDir(float32 timeFactor);
-        void UploadLighting();
 
         void SetLightDefaults();
 
@@ -42,8 +44,10 @@ namespace WEngine
         Time m_time;
         float32 m_accumulator;
         WorldLighting* m_worldLighting;
+        RenderSettings m_renderSettings;
         Iris::ResourceTableLayoutHandle m_layoutHandle;
         Iris::ResourceTableHandle m_lightHandle;
         Iris::BufferHandle m_lightBuffer;
+        Iris::BufferHandle m_renderSettBuffer;
     };
 }

@@ -7,7 +7,6 @@
 
 #include "Engine/Math/Vector.h"
 #include "Engine/Types/Rendering/InstanceData.h"
-#include "Engine/Types/Rendering/LightingInfo.h"
 #include "Engine/Types/Rendering/RenderMission.h"
 #include "Engine/Types/Rendering/Iris/Handles.h"
 #include "Engine/WTL/deque.h"
