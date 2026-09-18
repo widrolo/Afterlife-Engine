@@ -119,13 +119,15 @@ void LightTimeHandler::UpdateRenderTime()
 
     float32 timeFactor = (float32)secs / (float32)secondsInDay;
 
-    m_worldLighting->timeFactor = timeFactor;
     m_worldLighting->sun.direction = CalcSunDir(timeFactor);
-    m_worldLighting->sun.intensity = std::fmaxf(-std::pow(timeFactor - 0.533, 4) * 110 + 1, 0.0);
+    m_worldLighting->sun.intensity = std::fmaxf(-std::pow(timeFactor - 0.65, 4) * 110 + 1, 0.0);
 
-    // pls keep this identical to the shader
+
+    // yes, they are intentionally out of phase.
     float32 timeFacAmb = tanh(2*sin((timeFactor - 2*std::numbers::pi) * 2*std::numbers::pi)) / 2.1 + (0.524);
-    m_worldLighting->ambientIntensity = -timeFacAmb / 10.0f + 0.2f;
+    float32 timeFacSky = tanh(2*sin((timeFactor - 3*std::numbers::pi) * 2*std::numbers::pi)) / 2.1 + (0.524);
+    m_worldLighting->ambientIntensity = -timeFacAmb / 10.0f + 0.3f;
+    m_worldLighting->dayFactor = timeFacSky;
 }
 
 Vector3 LightTimeHandler::CalcSunDir(float32 timeFactor)
@@ -135,7 +137,7 @@ Vector3 LightTimeHandler::CalcSunDir(float32 timeFactor)
 
     const Vector3 start = Vector3(0.0f, 0.0f, 1.0f);
 
-    const float32 phaseOffset = std::numbers::pi * 0.5f;
+    const float32 phaseOffset = 1.25*std::numbers::pi;
     const float32 theta = timeFactor * 2.0f * std::numbers::pi + phaseOffset;
     const float32 cosT  = cosf(theta);
     const float32 sinT  = sinf(theta);

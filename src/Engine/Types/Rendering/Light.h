@@ -48,7 +48,7 @@ namespace WEngine
         alignas(16) SunLightInfo sun;
         alignas(16) Colorf ambient;
         float32 ambientIntensity;
-        float32 timeFactor;
+        float32 dayFactor;
         uint32 numLights;
         LightSource sources[MaxLights];
     };

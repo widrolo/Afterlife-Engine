@@ -13,6 +13,9 @@ void TimeWatchWidget::Setup()
 
 void TimeWatchWidget::RenderInternal()
 {
+    static bool timeOverride = false;
+    static Time timeChanger{};
+
     SetSize({300, 200});
 
     Date date = CoreSystems::GetTimeHandler()->GetDate();
@@ -23,4 +26,18 @@ void TimeWatchWidget::RenderInternal()
 
     ImGui::Text("%s", dateStr.c_str());
     ImGui::Text("%s", timeStr.c_str());
+
+    ImGui::Checkbox("Override Time", &timeOverride);
+
+    if (timeOverride)
+    {
+        int32 hour = timeChanger.GetHours();
+        ImGui::DragInt("Hour", &hour, 0.1, 0, 23);
+        timeChanger.SetHour(hour);
+        CoreSystems::GetTimeHandler()->SetTime(timeChanger);
+    }
+    else
+    {
+        timeChanger = time;
+    }
 }

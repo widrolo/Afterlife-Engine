@@ -28,34 +28,39 @@ vec3 CalcTimedVoidColor(float fac)
 	return mix(voidColorNight, voidColorDay, fac);
 }
 
-float CalcVoidBias(float fac)
+// dither cause 24bit color aint even good enough nowadays....
+float CalcOrderedDither(vec2 pixel)
 {
-	float timeFac = (-fac / 4) + 0.55;
+	const float pattern[64] = float[64](
+		 0.0, 32.0,  8.0, 40.0,  2.0, 34.0, 10.0, 42.0,
+		48.0, 16.0, 56.0, 24.0, 50.0, 18.0, 58.0, 26.0,
+		12.0, 44.0,  4.0, 36.0, 14.0, 46.0,  6.0, 38.0,
+		60.0, 28.0, 52.0, 20.0, 62.0, 30.0, 54.0, 22.0,
+		 3.0, 35.0, 11.0, 43.0,  1.0, 33.0,  9.0, 41.0,
+		51.0, 19.0, 59.0, 27.0, 49.0, 17.0, 57.0, 25.0,
+		15.0, 47.0,  7.0, 39.0, 13.0, 45.0,  5.0, 37.0,
+		63.0, 31.0, 55.0, 23.0, 61.0, 29.0, 53.0, 21.0);
 
-	return -inFragPos.y / radius + timeFac;
+	int x = int(mod(pixel.x, 8.0));
+	int y = int(mod(pixel.y, 8.0));
+
+	return pattern[y * 8 + x] / 64.0 - 0.5;
 }
 
 void main()
 {
 	float yPos = inFragPos.y;
 
-	float timeFac = tanh(2*sin((world.lighting.timeFactor - 2*PI) * 2*PI)) / 2.1 + (0.524);
+	float timeFac = world.lighting.dayFactor;
 
 	vec3 realSky = CalcTimedSkyColor(timeFac);
 	vec3 realVoid = CalcTimedVoidColor(timeFac);
 
-	float bias = yPos / radius + 0.5;
-	float biasVoid = CalcVoidBias(timeFac);
 
-	vec3 topColor = realSky * bias;
-	topColor.x = max(min(topColor.x, realSky.x), 0.0);
-	topColor.y = max(min(topColor.y, realSky.y), 0.0);
-	topColor.z = max(min(topColor.z, realSky.z), 0.0);
+	float t = clamp(yPos / radius * 0.5 + 0.5, 0.0, 1.0);
+	vec3 col = mix(realVoid, realSky, smoothstep(0.0, 1.0, t));
 
-	vec3 bottomColor = realVoid * biasVoid;
-	bottomColor.x = max(min(bottomColor.x, realVoid.x), 0.0);
-	bottomColor.y = max(min(bottomColor.y, realVoid.y), 0.0);
-	bottomColor.z = max(min(bottomColor.z, realVoid.z), 0.0);
+	col += CalcOrderedDither(gl_FragCoord.xy) / 255.0;
 
-	outColor = vec4(bottomColor + topColor, 1.0);
+	outColor = vec4(col, 1.0);
 }

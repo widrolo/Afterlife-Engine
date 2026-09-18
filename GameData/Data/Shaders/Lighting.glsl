@@ -32,7 +32,7 @@ struct WorldLighting
     SunLightInfo sun;
     vec4 ambient;
     float ambIntensity;
-    float timeFactor;
+    float dayFactor;
     uint numLights;
     LightSource sources[MAX_LIGHTS];
 };

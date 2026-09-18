@@ -34,7 +34,7 @@ void main()
 
     vec3 lightDir = normalize(world.lighting.sun.direction);
 
-    vec3 diffuse = min(CalcDiffuse(n, lightDir), 1.0);
+    vec3 diffuse = min(CalcDiffuse(n, lightDir), 1.0) * world.lighting.sun.intensity;
     vec3 ambient = world.lighting.ambient.xyz * world.lighting.ambIntensity;
 
     vec3 lightCalc = ambient + diffuse;
