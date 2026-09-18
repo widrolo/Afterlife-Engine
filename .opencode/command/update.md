@@ -29,7 +29,7 @@ The argument names the section to update. Resolve it to its header(s):
 | `WidgetHandler` | Widget Handler | `src/Engine/Core/Handlers/WidgetHandler.h` |
 | `RNGHandler` | RNG Handler | `src/Engine/Core/Handlers/RNGHandler.h` |
 | `PhysicsHandler` | Physics Handler | `src/Engine/Core/Handlers/PhysicsHandler.h` |
-| `TimeHandler` | Time Handler | `src/Engine/Core/Handlers/TimeHandler.h` |
+| `LightTimeHandler` / `TimeHandler` | Light Time Handler | `src/Engine/Core/Handlers/LightTimeHandler.h` |
 | `JobHandler` | Job Handler | `src/Engine/Core/Handlers/JobHandler.h` |
 | `AssetRepo` | Asset Repo | `src/Engine/Core/Handlers/AssetRepo.h` |
 | `all` / empty | Everything | All of the above |

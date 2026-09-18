@@ -4,6 +4,7 @@
 #include "Engine/Math/Matrices/CommonMatracies.h"
 #include "./Storage/ShaderStore.h"
 #include "Engine/EngineDefines.h"
+#include "Engine/Core/Handlers/LightTimeHandler.h"
 #include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Util/TimeAnalysis.h"
@@ -35,7 +36,8 @@ void ForwardPass::SetupPass()
     desc.blend = Iris::BlendDesc{};
 
     desc.tableLayouts[0] = Basics::singleTexLayout;
-    desc.tableAttachmentCount = 1;
+    desc.tableLayouts[1] = CoreSystems::GetTimeHandler()->GetLightLayoutHandle();
+    desc.tableAttachmentCount = 2;
 
     desc.vertPushConstantsSize = sizeof(Mat4x4) * 2;
 
@@ -57,6 +59,8 @@ void ForwardPass::Render()
 {
     TimeSample sample("ForwardPass::Render");
     BeginRendering(Color(168, 233, 242), EngineSettings::resolution);
+
+    Iris::BindResourceTable(m_cmd, m_regPipe, 1, CoreSystems::GetTimeHandler()->GetLightHandle());
 
     if (!CoreSystems::GetRenderHandler()->GetPhysicsDebugSwitch())
         CoreSystems::GetRenderHandler()->RenderScene(m_cmd, m_regPipe, m_statPipe, false);

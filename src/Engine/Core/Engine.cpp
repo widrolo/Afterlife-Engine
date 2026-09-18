@@ -15,7 +15,7 @@
 #include <Engine/Core/Handlers/AudioHandler.h>
 #include <Engine/Core/Handlers/WidgetHandler.h>
 #include <Engine/Core/Handlers/JobHandler.h>
-#include <Engine/Core/Handlers/TimeHandler.h>
+#include <Engine/Core/Handlers/LightTimeHandler.h>
 #include <Engine/Core/Handlers/SectorHandler.h>
 
 #include <Engine/Stores/Steam/SteamStore.h>
@@ -140,12 +140,12 @@ void Engine::InitHandlers()
 	StartHandlerSingle<RNGHandler>(&CoreSystems::rngHandler, "RNG Handler");
 	StartHandlerSingle<AssetRepo>(&CoreSystems::assetRepo, "Asset Repo");
 	CoreSystems::assetRepo->LoadPhysicsAssets();
+	StartHandlerSingle<LightTimeHandler>(&CoreSystems::timeHandler, "Time Handler");
 	StartHandlerSingle<RenderHandler>(&CoreSystems::renderHandler, "Render Handler");
 	StartHandlerSingle<SectorHandler>(&CoreSystems::sectorHanlder, "Sector Handler");
 	StartHandlerSingle<AudioHandler>(&CoreSystems::audioHandler, "Audio Handler");
 	StartHandlerSingle<WidgetHandler>(&CoreSystems::widgetHandler, "Widget Handler");
 	StartHandlerSingle<JobHandler>(&CoreSystems::jobHandler, "Job Handler");
-	StartHandlerSingle<TimeHandler>(&CoreSystems::timeHandler, "Time Handler");
 
 	Echo::InitDesc desc{};
 	Echo::Init(desc);

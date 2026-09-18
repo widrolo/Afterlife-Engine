@@ -68,7 +68,7 @@ Also stored globally in `CoreSystems`, but closer to gameplay. They may touch Sy
 - **Widget Handler**: Manages engine and game widgets that use ImGui.
 - **RNG Handler**: Rolls RNG. Soon to be deprecated.
 - **Physics Handler**: Simulates physics using Box3D. Box3D is still in alpha, but expected to reach relative maturity as development continues.
-- **Time Handler**: Manages in-game time and date. Has settings for time speed and is used for lighting.
+- **Light Time Handler**: Manages in-game time and date. Has settings for time speed and is used for lighting.
 
 ### Render Passes
 

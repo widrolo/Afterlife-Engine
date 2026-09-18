@@ -16,7 +16,7 @@ namespace WEngine
 	class AudioHandler;
 	class WidgetHandler;
 	class JobHandler;
-	class TimeHandler;
+	class LightTimeHandler;
 	class SectorHandler;
 
 	class SteamStore;
@@ -42,7 +42,7 @@ namespace WEngine
 		_GLOBAL_ AudioHandler* audioHandler;
 		_GLOBAL_ WidgetHandler* widgetHandler;
 		_GLOBAL_ JobHandler* jobHandler;
-		_GLOBAL_ TimeHandler* timeHandler;
+		_GLOBAL_ LightTimeHandler* timeHandler;
 		_GLOBAL_ SectorHandler* sectorHanlder;
 
 		_GLOBAL_ bool isGameRunning; // Setting this to false will stop the game
@@ -57,7 +57,7 @@ namespace WEngine
 		static AudioHandler* GetAudioHandler() { return audioHandler; }
 		static WidgetHandler* GetWidgetHandler() { return widgetHandler; }
 		static JobHandler* GetJobHandler() { return jobHandler; }
-		static TimeHandler* GetTimeHandler() { return timeHandler; }
+		static LightTimeHandler* GetTimeHandler() { return timeHandler; }
 		static SectorHandler* GetSectorHandler() { return sectorHanlder; }
 
 		static SteamStore* GetSteamStore() { return steamStore; }

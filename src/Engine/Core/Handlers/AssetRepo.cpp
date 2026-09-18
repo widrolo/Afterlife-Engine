@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <memory>
 
 #include <stb_image.h>
 #include <chrono>
@@ -208,6 +209,63 @@ std::string AssetRepo::LoadTextFile(const std::string& path)
 	return buffer.str();
 }
 
+namespace
+{
+	class ShaderIncluder : public shaderc::CompileOptions::IncluderInterface
+	{
+	public:
+		explicit ShaderIncluder(std::string searchPath)
+			: m_searchPath(std::move(searchPath)) {}
+
+		shaderc_include_result* GetInclude(const char* requestedSource, shaderc_include_type type,
+			const char* requestingSource, size_t includeDepth) override
+		{
+			(void)type;
+			(void)requestingSource;
+			(void)includeDepth;
+
+			auto* storage = new IncludeStorage();
+			std::string fullPath = m_searchPath + requestedSource;
+
+			std::ifstream file(fullPath);
+			if (file.is_open())
+			{
+				std::stringstream buffer;
+				buffer << file.rdbuf();
+				storage->sourceName = fullPath;
+				storage->content = buffer.str();
+			}
+			else
+			{
+				storage->content = std::format("Could not open include: {}", fullPath);
+			}
+
+			auto* result = new shaderc_include_result();
+			result->source_name = storage->sourceName.c_str();
+			result->source_name_length = storage->sourceName.size();
+			result->content = storage->content.c_str();
+			result->content_length = storage->content.size();
+			result->user_data = storage;
+			return result;
+		}
+
+		void ReleaseInclude(shaderc_include_result* data) override
+		{
+			delete static_cast<IncludeStorage*>(data->user_data);
+			delete data;
+		}
+
+	private:
+		struct IncludeStorage
+		{
+			std::string sourceName;
+			std::string content;
+		};
+
+		std::string m_searchPath;
+	};
+}
+
 void AssetRepo::LoadSpirVFromGlsl(SpirVAssetMission &mission)
 {
 	std::string path = GetDataPath() + EngineSettings::shaderPath + mission.name;
@@ -249,6 +307,8 @@ void AssetRepo::LoadSpirVFromGlsl(SpirVAssetMission &mission)
 	shaderc::CompileOptions options;
 
 	options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_2);
+
+	options.SetIncluder(std::make_unique<ShaderIncluder>(GetDataPath() + EngineSettings::shaderPath));
 
 #ifdef DEBUG
 	options.SetOptimizationLevel(shaderc_optimization_level_zero);

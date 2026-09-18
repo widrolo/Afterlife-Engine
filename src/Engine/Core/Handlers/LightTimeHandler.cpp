@@ -1,24 +1,66 @@
-#include "TimeHandler.h"
+#include "LightTimeHandler.h"
 
 #include <cmath>
 #include <numbers>
 
 #include "RenderHandler.h"
 #include "Engine/EngineDefines.h"
+#include "Engine/Core/System/Iris.h"
 #include "Engine/Types/CoreSystems.h"
+#include "Engine/Types/Rendering/Iris/Resource.h"
 #include "Engine/Util/Log.h"
 #include "Engine/Util/TimeAnalysis.h"
 
 using namespace WEngine;
 
-TimeHandler::TimeHandler()
+LightTimeHandler::LightTimeHandler()
 {
     m_date = Date(TimeSettings::startYear, TimeSettings::startMonth, TimeSettings::startDay);
     m_time = Time(TimeSettings::startHour, TimeSettings::startMinute, TimeSettings::startSecond);
     m_accumulator = 0.0f;
+
+    m_worldLighting = wNewArr(WorldLighting, 1)
+    memset(m_worldLighting, 0, sizeof(WorldLighting));
+    SetLightDefaults();
+
 }
 
-void TimeHandler::Update(float32 dt)
+void LightTimeHandler::SetupLighting()
+{
+    static bool everRan = false;
+    if (everRan)
+        return;
+    everRan = true;
+
+    Iris::ResourceTableLayoutDesc layoutDesc{};
+    layoutDesc.debugName = "World Lighting Layout";
+
+    Iris::ResourceTableLayoutEntry lightEntry{};
+    lightEntry.binding = 0;
+    lightEntry.stages = Iris::ShaderStage::Fragment;
+    lightEntry.type = Iris::ResourceTableEntryType::UniformBuffer;
+    lightEntry.count = 1;
+
+    layoutDesc.entries.push_back(lightEntry);
+
+    m_layoutHandle = Iris::CreateResourceTableLayout(layoutDesc);
+    m_lightHandle = Iris::CreateResourceTable(m_layoutHandle);
+
+    Iris::BufferDesc buffDesc{};
+    buffDesc.debugName = "World Lighting Buffer";
+    buffDesc.usage = Iris::BufferUsage::Uniform;
+    buffDesc.size = sizeof(WorldLighting);
+    m_lightBuffer = Iris::CreateBuffer(buffDesc, (byte*)m_worldLighting, sizeof(WorldLighting));
+
+    Iris::ResourceTableUpdateDesc updateDesc{};
+    Iris::ResourceTableWrite updateWrite{};
+
+    updateWrite.buffer = m_lightBuffer;
+    updateDesc.writes.push_back(updateWrite);
+    Iris::UpdateResourceTable(m_lightHandle, updateDesc);
+}
+
+void LightTimeHandler::Update(float32 dt)
 {
     TimeSample sample("TimeHandler::Update");
     m_accumulator += dt * TimeSettings::gameSecondPerRealSecond;
@@ -26,30 +68,33 @@ void TimeHandler::Update(float32 dt)
     m_accumulator -= (float32)secs;
     uint32 days = m_time.AddSeconds(secs);
     m_date.AddDays(days);
+
     UpdateRenderTime();
+
+    UploadLighting();
 }
 
-void TimeHandler::SetDate(const Date &date)
+void LightTimeHandler::SetDate(const Date &date)
 {
     m_date = date;
 }
 
-void TimeHandler::SetTime(const Time &time)
+void LightTimeHandler::SetTime(const Time &time)
 {
     m_time = time;
 }
 
-Date TimeHandler::GetDate() const
+Date LightTimeHandler::GetDate() const
 {
     return m_date;
 }
 
-Time TimeHandler::GetTime() const
+Time LightTimeHandler::GetTime() const
 {
     return m_time;
 }
 
-void TimeHandler::UpdateRenderTime()
+void LightTimeHandler::UpdateRenderTime()
 {
     TimeSample sample("TimeHandler::UpdateRenderTime");
     constexpr uint32 secondsInDay = 60 * 60 * 24;
@@ -78,7 +123,7 @@ void TimeHandler::UpdateRenderTime()
     //CoreSystems::GetRenderHandler()->SetAmbientLight(amb);
 }
 
-Vector3 TimeHandler::CalcSunDir(float32 timeFactor)
+Vector3 LightTimeHandler::CalcSunDir(float32 timeFactor)
 {
     constexpr float32 axialTilt = 23.5f * (std::numbers::pi / 180.0f);
     const Vector3 axis = Vector3(cosf(axialTilt), sinf(axialTilt), 0.0f);
@@ -94,4 +139,19 @@ Vector3 TimeHandler::CalcSunDir(float32 timeFactor)
     const Vector3 cross = VecMath::Cross(axis, start);
 
     return start * cosT + cross * sinT + axis * dot * (1.0f - cosT);
+}
+
+void LightTimeHandler::UploadLighting()
+{
+    Iris::UpdateBuffer(m_lightBuffer, 0, (byte*)m_worldLighting, sizeof(WorldLighting));
+}
+
+void LightTimeHandler::SetLightDefaults()
+{
+    m_worldLighting->sun.color = Color::White;
+    m_worldLighting->sun.direction = Vector3(0.0f, 1.0f, 0.0f);
+    m_worldLighting->sun.intensity = 100.0f;
+    m_worldLighting->ambient = Color::White;
+
+    m_worldLighting->sources[14].data.color = Color::Blue;
 }

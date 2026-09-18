@@ -236,8 +236,8 @@ add_executable(Afterlife_Engine
         src/Engine/Types/Rendering/Iris/IrisAssetComms.h
         src/Game/Types/GameSystems.h
         src/Engine/Types/Rendering/LightingInfo.h
-        src/Engine/Core/Handlers/TimeHandler.cpp
-        src/Engine/Core/Handlers/TimeHandler.h
+        src/Engine/Core/Handlers/LightTimeHandler.cpp
+        src/Engine/Core/Handlers/LightTimeHandler.h
         src/Engine/Types/Time/Date.h
         src/Engine/Types/Time/Month.h
         src/Engine/Types/Time/Time.h
@@ -390,6 +390,7 @@ add_executable(Afterlife_Engine
         src/Game/Types/GameState.h
         src/Game/Gameplay/PhysicsTest.cpp
         src/Game/Gameplay/PhysicsTest.h
+        src/Engine/Types/Rendering/Light.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

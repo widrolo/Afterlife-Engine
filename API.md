@@ -69,7 +69,7 @@ Namespace `Iris`. The low-level, explicitly recorded command API for rendering. 
 
 | Function | Description |
 | --- | --- |
-| `CommandBufferHandle CreateCommandBuffer(QueueType queue)` | Creates a command buffer on the given queue (defaults to Graphics). |
+| `CommandBufferHandle CreateCommandBuffer(QueueType queue = QueueType::Graphics)` | Creates a command buffer on the given queue (defaults to Graphics). |
 | `CopyBufferHandle CreateCopyBuffer()` | Creates a copy command buffer for async transfers. |
 | `void BeginCommandBuffer(CommandBufferHandle cmd)` | Starts recording commands into the buffer. |
 | `void EndCommandBuffer(CommandBufferHandle cmd)` | Stops recording. |
@@ -95,7 +95,7 @@ Namespace `Iris`. The low-level, explicitly recorded command API for rendering. 
 | `void BindComputePipeline(CommandBufferHandle cmd, ComputePipelineHandle pipeline)` | Binds a compute pipeline. |
 | `void BindResourceTable(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, uint32 slot, ResourceTableHandle table)` | Binds a resource table to the given pipeline slot. |
 | `void BindFramebuffer(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, uint32 slot, FramebufferHandle fb, FramebufferBindKind bindKind)` | Binds a framebuffer's descriptor set into the given pipeline slot; `bindKind` picks the color or depth attachment. |
-| `void SetPushConstants(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, const byte* data, sizeT size)` | Pushes constant data to the pipeline. |
+| `void SetPushConstants(CommandBufferHandle cmd, GraphicsPipelineHandle pipeline, const byte* data, sizeT size, ShaderStage stage)` | Pushes constant data to the pipeline for the given shader stage. |
 | `void BindVertexBuffers(CommandBufferHandle cmd, uint32 firstBinding, const wtl::vector<BufferHandle>& buffers, const wtl::vector<sizeT>& offsets)` | Binds vertex buffers, each with an offset. |
 | `void BindIndexBuffer(CommandBufferHandle cmd, BufferHandle buffer, sizeT offset)` | Binds an index buffer. |
 | `void SetViewport(CommandBufferHandle cmd, const Viewport& viewport)` | Sets the viewport transform. |
@@ -190,6 +190,10 @@ Namespace `Echo`. The audio System Abstraction: sounds and streams as resources,
 | `AudioSoundHandle CreateSound(const SoundDesc& desc)` | Creates a sound from an in-memory audio buffer. The buffer is copied to an internal one (vorbis only); sample rate and channel layout come from the desc. |
 | `AudioStreamHandle CreateStream(const StreamDesc& desc)` | Creates a stream that plays audio from the file at the desc's filepath. |
 | `AudioBusHandle CreateBus(const BusDesc& desc)` | Creates a bus with the given volume and pitch; handle 0 is the master bus. |
+| `bool IsSoundLoaded(AudioSoundHandle handle)` | Whether a sound with the given handle is loaded. |
+| `bool IsSoundLoaded(const std::string& name)` | Whether a sound with the given name is loaded. |
+| `bool IsStreamLoaded(AudioStreamHandle handle)` | Whether a stream with the given handle is loaded. |
+| `bool IsStreamLoaded(const std::string& name)` | Whether a stream with the given name is loaded. |
 
 #### Resource Deletion
 
@@ -206,10 +210,10 @@ Namespace `Echo`. The audio System Abstraction: sounds and streams as resources,
 | `VirtualAudioHandle CreateAudio(AudioStreamHandle stream)` | Creates a virtual audio instance that points to a stream. |
 | `VirtualAudioHandle SwapAudio(VirtualAudioHandle audio, AudioSoundHandle sound)` | Swaps the virtual audio's source to a different sound. |
 | `VirtualAudioHandle SwapAudio(VirtualAudioHandle audio, AudioStreamHandle stream)` | Swaps the virtual audio's source to a different stream. |
-| `void ConnectAudio(VirtualAudioHandle audio, AudioBusHandle bus)` | Routes the virtual audio to a bus. |
+| `void ConnectAudio(VirtualAudioHandle audio, AudioBusHandle busHandle)` | Routes the virtual audio to a bus. |
 | `void SetAudioLoop(VirtualAudioHandle audio, bool loop)` | Sets whether the virtual audio loops. |
-| `void SetAudioVolume(VirtualAudioHandle audio, bool volume)` | Sets the volume of the virtual audio. |
-| `void SetAudioPitch(VirtualAudioHandle audio, bool pitch)` | Sets the pitch of the virtual audio. |
+| `void SetAudioVolume(VirtualAudioHandle audio, float32 volume)` | Sets the volume of the virtual audio. |
+| `void SetAudioPitch(VirtualAudioHandle audio, float32 pitch)` | Sets the pitch of the virtual audio. |
 
 #### Playback
 
@@ -294,7 +298,8 @@ Class `WEngine::RenderHandler`. Middle man between the world and Iris. Records r
 | --- | --- |
 | `RenderHandler()` | Constructor. |
 | `void EnableEditorMode(const Vector2& viewportResolution)` | Changes behavior to account for the editor (ATK), using the given viewport resolution. |
-| `Framebuffer EditorGetViewportFramebuffer()` | The framebuffer meant for the editor viewport. Only called by ATK. |
+| `bool& GetPhysicsDebugSwitch()` | Reference to the physics debug switch; when true, physics debug geometry is drawn. |
+| `Iris::FramebufferHandle EditorGetViewportFramebuffer()` | The framebuffer meant for the editor viewport. Only called by ATK. |
 | `void BeginFrame()` | Starts the frame: begins Iris's frame, acquires the swapchain image, starts ImGui/ImGuizmo, and derives the view matrix from the current camera. Game loop only. |
 | `void RenderFrame()` | Runs the render passes (forward, normal, GTAO, AO blur, screen) and presents; the queued missions/plans render through the passes. Clears the frame's queues at the end. Game loop only. |
 | `void UpdateCamera(const Transform& trans)` | Sets the camera transform used to render the frame. |
@@ -333,7 +338,7 @@ Class `WEngine::SectorHandler`. Owns every sector in the game. Loads them all at
 
 | Function | Description |
 | --- | --- |
-| `SectorEntry(uint64 meshUID, uint64 textureUID, uint64 colMeshUID, const Transform& transform)` | Constructs an entry from asset UIDs and a transform. |
+| `SectorEntry(uint64 meshUID, uint64 textureUID, uint32 colMeshUID, const Transform& transform)` | Constructs an entry from asset UIDs and a transform. |
 | `SectorEntry(const std::string& assetName)` | Constructs an entry by looking up the first static mesh and texture in the asset directory named `assetName`. |
 | `bool HasVisuals() const` | Whether the entry has both a mesh and a texture. |
 | `bool HasCollision() const` | Whether the entry has a collision mesh. |
@@ -390,14 +395,17 @@ Class `WEngine::PhysicsHandler`. Simulates physics using Box3D.
 | --- | --- |
 | `void Tick()` | Advances the physics simulation one step. |
 | `PhysicsBodyHandle CreateBody(PhysicsBodyType type, Transform* entity)` | Creates a physics body of the given type tied to a transform. |
+| `SectorPhysicsBodyHandle CreateSectorBody(Transform& transform, b3MeshData* meshData)` | Creates a static body for a sector from mesh data. |
 | `void ChangeBodyPosition(PhysicsBodyHandle body, const Vector3& position)` | Moves a body to the given position. |
 | `void ChangeBodyRotation(PhysicsBodyHandle body, const Quaternion& rotation)` | Rotates a body to the given rotation. |
 | `void AttachBox(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset)` | Attaches a box collider to the body. |
+| `void AttachMesh(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset, uint32 meshUID)` | Attaches a mesh collider (by UID) to the body. |
 | `void AttachMesh(PhysicsBodyHandle body, const MeshInfo& mesh)` | Attaches a mesh collider to the body. |
+| `b3MeshData* CreateMesh(const byte* vertices, const byte* indices, sizeT vertCount, sizeT indCount)` | Builds Box3D mesh data from raw vertex and index bytes. |
 
-### Time Handler (`src/Engine/Core/Handlers/TimeHandler.h`)
+### Light Time Handler (`src/Engine/Core/Handlers/LightTimeHandler.h`)
 
-Class `WEngine::TimeHandler`. Manages in-game time and date, used for lighting.
+Class `WEngine::LightTimeHandler`. Manages in-game time and date, used for lighting.
 
 | Function | Description |
 | --- | --- |
@@ -428,16 +436,21 @@ Class `WEngine::AssetRepo`. Primary location for getting all kinds of files. Han
 | Function | Description |
 | --- | --- |
 | `void LoadAllGPUAssets()` | Loads all graphical assets up front. Can only be called once. |
+| `void LoadPhysicsAssets()` | Loads all physics mesh assets up front. |
 | `wtl::vector<Sector> LoadAllSectors()` | Loads every sector in the sector data path into fresh `Sector` objects (skips `$Sample`). |
 | `wtl::vector<WEditor::EditorSector> LoadAllEditorSectors()` | Loads every sector in the sector data path into fresh editor sectors (skips `$Sample`); does the parsing only, no GPU work. Used by ATK. |
 | `void TickTextureUpload()` | Uploads textures to VRAM in chunks over time. Call at the beginning of every frame; turns itself off when done. |
 | `void RegisterAllTextures()` | Registers all loaded textures with the Render Handler. Can only be called once. |
+| `void PreloadSounds()` | Preloads all audio clips up front. |
 | `template<class T = AssetMissionBase> void GetAsset(T& mission)` | Fills out the given asset mission (e.g. `ShaderAssetMission`, `SpirVAssetMission`, `YamlAssetMission`, `AudioClipAssetMission`, `UISheetAssetMission`, `MeshAssetMission`) by name. Return type is void; results go into the mission. |
 | `std::string GetDataPath() const` | The data path where assets are stored. |
 | `const wtl::vector<AssetRef>& GetAllAssetsInDir(const std::string& dirName)` | All assets in a directory (empty if the directory is empty or doesn't exist). |
 | `wtl::vector<AssetRef> GetAllAssetsInDirOfType(const std::string& dirName, AssetType type)` | All assets of a given type in a directory. |
 | `uint64 GetFirstAssetInDirOfType(const std::string& dirName, AssetType type)` | UID of the first asset of a type in a directory; 0 if not found. |
 | `uint64 GetAssetInDirByName(const std::string& dirName, const std::string& assetName)` | UID of the first asset with the given name (sub name, not project-file name) in a directory; 0 if not found. |
-| `Iris::BufferHandle GetVertexBuffer() const` | The shared vertex buffer all meshes are loaded into. |
-| `Iris::BufferHandle GetIndexBuffer() const` | The shared index buffer all meshes are loaded into. |
+| `const MeshStorage& GetStaticMeshes() const` | The shared storage for static meshes. |
+| `const MeshStorage& GetPhysicsMeshes() const` | The shared storage for physics meshes. |
 | `bool IsTextureDoneLoading(uint64 uid) const` | Whether the texture with the given UID has finished uploading to VRAM; assumes the UID is valid. |
+| `b3MeshData* GetMeshData(uint64 uid)` | The Box3D mesh data for the physics mesh with the given UID. |
+
+`MeshStorage` bundles the shared vertex and index buffers with a `wtl::vector<MeshInfo>` table.

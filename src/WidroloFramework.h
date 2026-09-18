@@ -20,7 +20,7 @@
 #include <Engine/Core/Handlers/PhysicsHandler.h>
 #include <Engine/Core/Handlers/RNGHandler.h>
 #include <Engine/Core/Handlers/WidgetHandler.h>
-#include <Engine/Core/Handlers/TimeHandler.h>
+#include <Engine/Core/Handlers/LightTimeHandler.h>
 
 // Engine etc.
 #include <Engine/Stores/Steam/SteamStore.h>

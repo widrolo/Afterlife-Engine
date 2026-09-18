@@ -15,6 +15,7 @@
 #include "Engine/Types/DebugFlags.h"
 
 #include "Input.h"
+#include "LightTimeHandler.h"
 #include "Engine/EngineDefines.h"
 #include "Engine/Core/Engine.h"
 #include "Engine/Core/RenderPasses/Storage/Basics.h"
@@ -46,6 +47,7 @@ RenderHandler::RenderHandler()
 		GraphicsSettings::aoMethod = GraphicsSettings::SSAO;
 	InitImGui();
 	Iris::ConfigureImGui();
+	CoreSystems::GetTimeHandler()->SetupLighting();
 	CreateBasics();
 	CreatePasses();
 	m_textureTables.push_back({}); // dummy because UIDs are 1 ordered

@@ -1,7 +1,7 @@
 #include "PhysicsTest.h"
 
-constexpr sizeT BodiesCount = 10;
-constexpr float32 SpawnRate = 0.01f;
+constexpr sizeT BodiesCount = 35;
+constexpr float32 SpawnRate = 0.05f;
 
 PhysicsTest::PhysicsTest()
 {

@@ -1,6 +1,6 @@
 #include "TimeWatchWidget.h"
 
-#include "Engine/Core/Handlers/TimeHandler.h"
+#include "Engine/Core/Handlers/LightTimeHandler.h"
 #include "Engine/Types/CoreSystems.h"
 #include "Engine/Types/Time/Date.h"
 
