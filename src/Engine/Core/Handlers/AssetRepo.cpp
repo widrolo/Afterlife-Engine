@@ -319,14 +319,14 @@ void AssetRepo::LoadSpirVFromGlsl(SpirVAssetMission &mission)
 	auto res = compiler.CompileGlslToSpv(
 		shaderCode,
 		kind,
-		"what.txt",
+		path.c_str(),
 		options
 	);
 
 	if (res.GetCompilationStatus() != shaderc_compilation_status_success)
 	{
 		WLog::SetConsoleError();
-		WLog::ConsoleLog(std::format("Failed to compile shader from GLSL to Spir-V:\n\t{}\n\t{}", path, res.GetErrorMessage()));
+		WLog::ConsoleLog(std::format("Failed to compile shader from GLSL to Spir-V:\n\t{}", res.GetErrorMessage()));
 		return;
 	}
 	auto t1 = std::chrono::high_resolution_clock::now();

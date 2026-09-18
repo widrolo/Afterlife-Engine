@@ -4,14 +4,11 @@ layout(location = 4) in vec3 inFragPos;
 
 layout(location = 0) out vec4 outColor;
 
-layout(set = 0, binding = 0) uniform RawLighting
+#include "Lighting.glsl"
+
+layout(set = 0, binding = 0, std140) uniform WorldLightingBlock
 {
-    vec3 sunDir;
-    vec3 sunCol;
-	float ambIntensity;
-	vec3 ambCol;
-    vec3 camPos;
-	float time;
+	WorldLighting lighting;
 } world;
 
 const float radius = 400.0;
@@ -35,20 +32,19 @@ float CalcVoidBias(float fac)
 {
 	float timeFac = (-fac / 4) + 0.55;
 
-	return inFragPos.y / radius + timeFac;
+	return -inFragPos.y / radius + timeFac;
 }
 
 void main()
 {
 	float yPos = inFragPos.y;
-	
 
-	float timeFac = tanh(2*sin((world.time - 2*PI) * 2*PI)) / 2.1 + (0.524);
+	float timeFac = tanh(2*sin((world.lighting.timeFactor - 2*PI) * 2*PI)) / 2.1 + (0.524);
 
 	vec3 realSky = CalcTimedSkyColor(timeFac);
 	vec3 realVoid = CalcTimedVoidColor(timeFac);
 
-	float bias = -yPos / radius + 0.5;
+	float bias = yPos / radius + 0.5;
 	float biasVoid = CalcVoidBias(timeFac);
 
 	vec3 topColor = realSky * bias;

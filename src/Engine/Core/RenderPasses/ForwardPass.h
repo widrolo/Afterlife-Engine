@@ -12,9 +12,11 @@ namespace WEngine::Rendering
 
     private:
         void CreatePhysicsStuff();
+        void CreateSkyPipeline();
 
     private:
         Iris::GraphicsPipelineHandle m_phyDbgReg;
         Iris::GraphicsPipelineHandle m_phyDbgStat;
+        Iris::GraphicsPipelineHandle m_skyPipe;
     };
 }

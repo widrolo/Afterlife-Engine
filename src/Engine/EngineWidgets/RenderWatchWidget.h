@@ -31,6 +31,7 @@ namespace WEngine
         void RenderDisplayBindings() const;
 
         // render settings
+        void ShowLightSettings();
         void ShowGraphicsSettings();
         void ShowGTAOPassSettings();
         void ShowSSAOPassSettings();

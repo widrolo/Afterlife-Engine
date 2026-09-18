@@ -29,8 +29,8 @@ CONFIG_PACKAGING = "Packaging"
 HOST = platform.system()
 
 DATA_DIRS = ["Input", "Sectors", "Shaders"]
-PACKAGE_YAMLS = ["Assets", "Textures", "Meshes", "Sounds", "Music"]
-PACKAGE_SELECTABLE = ["Meshes", "Textures", "Sounds", "Music"]
+PACKAGE_YAMLS = ["Assets", "Textures", "Meshes", "PhysicsMeshes", "Sounds", "Music"]
+PACKAGE_SELECTABLE = ["Meshes", "PhysicsMeshes", "Textures", "Sounds", "Music"]
 
 SUPPORTED_TARGETS = ["Linux", "Windows"]
 STUB_TARGETS = [

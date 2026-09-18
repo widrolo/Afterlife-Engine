@@ -4,6 +4,7 @@
 #include "Engine/Math/Matrices/CommonMatracies.h"
 #include "./Storage/ShaderStore.h"
 #include "Engine/EngineDefines.h"
+#include "Engine/Core/Handlers/AssetRepo.h"
 #include "Engine/Core/Handlers/LightTimeHandler.h"
 #include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Types/CoreSystems.h"
@@ -51,6 +52,7 @@ void ForwardPass::SetupPass()
     m_statPipe = Iris::CreateGraphicsPipeline(desc);
 
     CreatePhysicsStuff();
+    CreateSkyPipeline();
 
     m_fb = CreateBasicFramebuffer("Forward", 1.0f, true);
 }
@@ -59,6 +61,9 @@ void ForwardPass::Render()
 {
     TimeSample sample("ForwardPass::Render");
     BeginRendering(Color(168, 233, 242), EngineSettings::resolution);
+
+    if (!CoreSystems::GetRenderHandler()->GetPhysicsDebugSwitch())
+        CoreSystems::GetRenderHandler()->RenderSkySphere(m_cmd, m_skyPipe);
 
     Iris::BindResourceTable(m_cmd, m_regPipe, 1, CoreSystems::GetTimeHandler()->GetLightHandle());
 
@@ -102,4 +107,34 @@ void ForwardPass::CreatePhysicsStuff()
     desc.vertexShader = GetShader("phyInst", Iris::ShaderStage::Vertex);
 
     m_phyDbgStat = Iris::CreateGraphicsPipeline(desc);
+}
+
+void ForwardPass::CreateSkyPipeline()
+{
+    Iris::VertexLayoutDesc layout;
+    AddASMFAttributes(layout);
+
+    Iris::RasterizerDesc rasterDesc{};
+    rasterDesc.cullMode = Iris::CullMode::None;
+
+    Iris::DepthStencilDesc depthDesc{};
+    depthDesc.depthTestEnable = false;
+    depthDesc.depthWriteEnable = true;
+    depthDesc.depthCompareOp = Iris::CompareOp::Less;
+
+    Iris::GraphicsPipelineDesc desc{};
+    desc.debugName = "Sky Pipeline";
+    desc.vertexShader = GetShader("basic", Iris::ShaderStage::Vertex);
+    desc.fragmentShader = GetShader("sky", Iris::ShaderStage::Fragment);
+    desc.vertexLayout = layout;
+    desc.rasterizer = rasterDesc;
+    desc.depthStencil = depthDesc;
+    desc.blend = Iris::BlendDesc{};
+
+    desc.tableLayouts[0] = CoreSystems::GetTimeHandler()->GetLightLayoutHandle();
+    desc.tableAttachmentCount = 1;
+
+    desc.vertPushConstantsSize = sizeof(Mat4x4) * 2;
+
+    m_skyPipe = Iris::CreateGraphicsPipeline(desc);
 }

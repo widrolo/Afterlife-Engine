@@ -58,8 +58,10 @@ RenderHandler::RenderHandler()
 		glm::radians(60.0f),
 		m_windowResolution.x / m_windowResolution.y,
 		0.01f,
-		1000.0f
+		3000.0f
 		);
+
+	m_skyMeshUID = CoreSystems::GetAssetRepo()->GetFirstAssetInDirOfType("/World/Sky", AssetType::StaticMesh);
 }
 
 void RenderHandler::EnableEditorMode(const Vector2& viewportResolution)
@@ -410,6 +412,50 @@ glm::mat4 RenderHandler::CalcModelMatrixGLM(const Transform &transform)
 
 	modelMatrix[3] = glm::vec4(transform.position.x, -transform.position.y, transform.position.z, 1.0f);
 	return modelMatrix;
+}
+
+void RenderHandler::RenderSkySphere(Iris::CommandBufferHandle cmdBuff, Iris::GraphicsPipelineHandle pipe)
+{
+	Iris::BindGraphicsPipeline(cmdBuff, pipe);
+	Iris::BindResourceTable(cmdBuff, pipe, 0, CoreSystems::GetTimeHandler()->GetLightHandle());
+
+	wtl::vector<Iris::BufferHandle> vertBuffs(1);
+	vertBuffs[0] = CoreSystems::GetAssetRepo()->GetStaticMeshes().vertexBuffer;
+	wtl::vector<sizeT> vertOffs{0};
+	Iris::BufferHandle indBuff = CoreSystems::GetAssetRepo()->GetStaticMeshes().indexBuffer;;
+
+	Iris::BindVertexBuffers(cmdBuff, 0, vertBuffs, vertOffs);
+	Iris::BindIndexBuffer(cmdBuff, indBuff, 0);
+
+	Mat4x4 vp = Glm4x4ToMat4x4(m_projection * m_viewMatrix);
+
+	Transform skyTrans = Transform::Zero;
+	skyTrans.position = m_camera.position;
+
+	Mat4x4 model = CalcModelMatrix(skyTrans);
+
+	struct PushConstants
+	{
+		Mat4x4 mvp;
+		Mat4x4 model;
+	} pushConstants{};
+	pushConstants.mvp = vp;
+	pushConstants.model = model;
+
+	sizeT indexSize = sizeof(uint32);
+	sizeT vertexSize = sizeof(float32) * 3 + sizeof(float32) * 3 + sizeof(float32) * 2;
+
+	MeshAssetMission meshMission{};
+	meshMission.uid = m_skyMeshUID;
+	CoreSystems::GetAssetRepo()->GetAsset(meshMission);
+	MeshInfo mesh = meshMission.model;
+
+	sizeT indexCount = (mesh.indexSize - mesh.indexOffset) / indexSize;
+	sizeT indexOffset = mesh.indexOffset / indexSize;
+	sizeT vertOffset = mesh.vertexOffset / vertexSize;
+
+    Iris::SetPushConstants(cmdBuff, pipe, (byte*)&pushConstants, sizeof(PushConstants), Iris::ShaderStage::Vertex);
+    Iris::DrawIndexed(cmdBuff, indexCount, 1, indexOffset, vertOffset, 0);
 }
 
 // just so i can close this part of code.

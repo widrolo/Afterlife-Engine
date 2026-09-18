@@ -11,7 +11,8 @@ layout(set = 1, binding = 0, std140) uniform WorldLightingBlock
 {
     WorldLighting lighting;
 } world;
-layout(set = 2, binding = 1) uniform RenderSettings
+
+layout(set = 1, binding = 1) uniform RenderSettings
 {
     vec3 camPos;
     mat4 invProj;
@@ -29,9 +30,7 @@ vec3 CalcDiffuse(vec3 normal, vec3 lightDir)
 
 void main()
 {
-    vec3 n = inNormal;
-    n.y = -n.y;
-    n = n * 0.5 + 0.5;
+    vec3 n = normalize(inNormal);
 
     vec3 lightDir = normalize(world.lighting.sun.direction);
 

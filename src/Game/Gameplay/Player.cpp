@@ -18,10 +18,12 @@ void Player::Tick(float32 dt)
     if (Input::GetAction("sprint", PressType::Hold))
         speed *= 2.0f;
 
-    WEngine::Vector3 moveForward = m_trans.Forward();
+    WEngine::Quaternion yawRotation = WEngine::Quaternion::EulerToQuaternion({0.0f, glm::radians(m_yaw), 0.0f});
+    WEngine::Vector3 moveForward = WEngine::Quaternion::Rotate(yawRotation, {0.0f, 0.0f, -1.0f});
+    WEngine::Vector3 moveRight = WEngine::Quaternion::Rotate(yawRotation, {1.0f, 0.0f, 0.0f});
 
     float32 preY = m_trans.position.y;
-    m_trans.position = m_trans.position + moveForward * move.y * speed + m_trans.Right() * move.x * speed;
+    m_trans.position = m_trans.position + moveForward * move.y * speed + moveRight * move.x * speed;
     m_trans.position.y = preY;
 
     m_yaw += (look.x * dt * m_lookSpeed);

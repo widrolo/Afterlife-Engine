@@ -75,6 +75,7 @@ namespace WEngine
 		const glm::mat4& GetViewMatrix() const;
 		const Transform& GetRenderedCameraTransform() const;
 		static glm::mat4 CalcModelMatrixGLM(const Transform& transform);
+		void RenderSkySphere(Iris::CommandBufferHandle cmdBuff, Iris::GraphicsPipelineHandle pipe);
 
 	private:
 		void CreateBasics();
@@ -91,7 +92,6 @@ namespace WEngine
 
 
 	private:
-
 		wtl::vector<Iris::ResourceTableHandle> m_textureTables;
 		uint64 m_currentBoundTexture = 0;
 
@@ -109,6 +109,7 @@ namespace WEngine
 		glm::mat4 m_projection;
 		glm::mat4 m_viewMatrix;
 
+		uint32 m_skyMeshUID = 0;
 		bool m_isEditor = false;
 		bool m_isPhysicsDebug = false;
 		Vector2 m_viewportResolution{};

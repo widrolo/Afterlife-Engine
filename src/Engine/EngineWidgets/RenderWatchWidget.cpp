@@ -1,10 +1,12 @@
 #include "RenderWatchWidget.h"
 
 #include "Engine/EngineDefines.h"
+#include "Engine/Core/Handlers/LightTimeHandler.h"
 #include "Engine/Core/Handlers/RenderHandler.h"
 #include "Engine/Core/RenderPasses/ForwardPass.h"
 #include "Engine/Core/RenderPasses/Storage/Passes.h"
 #include "Engine/Core/System/Iris.h"
+#include "Engine/Types/CoreSystems.h"
 
 using namespace WEngine;
 
@@ -25,6 +27,11 @@ void RenderWatchWidget::RenderInternal()
             VramDisplay();
             ImGui::SeparatorText("Rendering Statistics");
             RenderDisplay();
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Lighting"))
+        {
+            ShowLightSettings();
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("Graphics"))
@@ -256,6 +263,14 @@ void RenderWatchWidget::RenderDisplayBindings() const
 
         ImGui::EndTable();
     }
+}
+
+void RenderWatchWidget::ShowLightSettings()
+{
+    auto& sun = CoreSystems::GetTimeHandler()->GetSunLightInfo();
+    auto& ambientColor = CoreSystems::GetTimeHandler()->GetAmbientColor();
+    ImGui::ColorEdit3("Sun Color", (float32*)&sun.color);
+    ImGui::ColorEdit3("Ambient Color", (float32*)&ambientColor);
 }
 
 void RenderWatchWidget::ShowGraphicsSettings()

@@ -186,3 +186,15 @@ BeginAssets:
                   Type: 4
                   Asset: Meshes/Proto/Cube.blend
                   Info: Cube
+    c2:
+      Name: World
+      Data: ~
+      Children:
+        c0:
+          Name: Sky
+          Data:
+            d0:
+              SubName: SkySphere
+              Type: 0
+              Asset: Meshes/Skysphere.blend
+              Info: Sphere
