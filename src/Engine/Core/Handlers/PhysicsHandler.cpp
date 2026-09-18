@@ -12,6 +12,30 @@
 
 using namespace WEngine;
 
+struct MoverPlaneContext
+{
+	b3CollisionPlane* planes;
+	int32 capacity;
+	int32 count;
+};
+
+bool CollectMoverPlanes(b3ShapeId shapeId, const b3PlaneResult* plane, int planeCount, void* context)
+{
+	(void)shapeId;
+	auto* ctx = static_cast<MoverPlaneContext*>(context);
+
+	for (int32 i = 0; i < planeCount && ctx->count < ctx->capacity; i++)
+	{
+		b3CollisionPlane& out = ctx->planes[ctx->count++];
+		out.plane = plane[i].plane;
+		out.pushLimit = max_float32;
+		out.push = 0.0f;
+		out.clipVelocity = true;
+	}
+
+	return true;
+}
+
 PhysicsHandler::PhysicsHandler()
 {
 	Setup();
@@ -43,6 +67,14 @@ PhysicsBodyHandle PhysicsHandler::CreateBody(PhysicsBodyType type, Transform *en
 	m_bodies.push_back(body);
 
 	return m_bodies.size();
+}
+
+CharacterBodyHandle PhysicsHandler::CreateCharacter(const b3Capsule& mover)
+{
+	CharacterBody character{};
+	character.mover = mover;
+	m_characterBodies.push_back(character);
+	return m_characterBodies.size();
 }
 
 SectorPhysicsBodyHandle PhysicsHandler::CreateSectorBody(Transform &transform, b3MeshData *meshData)
@@ -140,6 +172,43 @@ void PhysicsHandler::AttachMesh(PhysicsBodyHandle body, const MeshInfo &mesh)
 
 
 
+}
+
+void PhysicsHandler::MoveCharacter(CharacterBodyHandle character, const Vector3 &translation)
+{
+	if (character == 0 || character > m_characterBodies.size())
+		return;
+
+	b3Capsule& mover = m_characterBodies[character - 1].mover;
+
+	b3Pos origin = b3Pos_zero;
+	b3Vec3 transl = Vector3::VecToB3D(translation);
+
+	b3QueryFilter filter = b3DefaultQueryFilter();
+
+	float32 fraction = b3World_CastMover(m_worldID, origin, &mover, transl, filter, nullptr, nullptr);
+	b3Vec3 safeDelta = b3MulSV(fraction, transl);
+
+	mover.center1 = b3Add(mover.center1, safeDelta);
+	mover.center2 = b3Add(mover.center2, safeDelta);
+
+	constexpr sizeT MaxPlanes = 16;
+	b3CollisionPlane collisionPlanes[MaxPlanes];
+	MoverPlaneContext planeContext{ collisionPlanes, (int32)MaxPlanes, 0 };
+
+	b3World_CollideMover(m_worldID, origin, &mover, filter, CollectMoverPlanes, &planeContext);
+	b3PlaneSolverResult result = b3SolvePlanes(b3Vec3_zero, collisionPlanes, planeContext.count);
+	mover.center1 = b3Add(mover.center1, result.delta);
+	mover.center2 = b3Add(mover.center2, result.delta);
+}
+
+Vector3 PhysicsHandler::GetCharacterPosition(CharacterBodyHandle character)
+{
+	if (character == 0 || character > m_characterBodies.size())
+		return {};
+
+	b3Capsule& mover = m_characterBodies[character - 1].mover;
+	return *(Vector3*)&mover.center1;
 }
 
 b3MeshData* PhysicsHandler::CreateMesh(const byte* vertices, const byte* indices, sizeT vertCount, sizeT indCount)

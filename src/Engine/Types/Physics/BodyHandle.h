@@ -7,5 +7,6 @@
 namespace WEngine
 {
     DEFINE_OPAQUE_HANDLE(PhysicsBodyHandle)
+    DEFINE_OPAQUE_HANDLE(CharacterBodyHandle)
     DEFINE_OPAQUE_HANDLE(SectorPhysicsBodyHandle)
 }

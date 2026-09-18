@@ -6,6 +6,7 @@ namespace WEngine
 {
 	class AssetRepo;
 	class RenderHandler;
+	class LightTimeHandler;
 }
 namespace WEditor
 {
@@ -21,6 +22,7 @@ namespace WEditor
 	private:
 		_GLOBAL_ WEngine::RenderHandler* renderHandler;
 		_GLOBAL_ WEngine::AssetRepo* assetRepo;
+		_GLOBAL_ WEngine::LightTimeHandler* timeHandler;
 		_GLOBAL_ EditorUIHandler* editorUIHandler;
 		_GLOBAL_ EditorSectorHandler* editorSectorHandler;
 		_GLOBAL_ MenubarHandler* menubarHandler;
@@ -32,6 +34,7 @@ namespace WEditor
 	public:
 		static WEngine::RenderHandler* GetRenderHandler() { return renderHandler; }
 		static WEngine::AssetRepo* GetAssetRepo() { return assetRepo; }
+		static WEngine::LightTimeHandler* GetTimeHandler() { return timeHandler; }
 		static EditorUIHandler* GetEditorUIHandler() { return editorUIHandler; }
 		static EditorSectorHandler* GetEditorSectorHandler() { return editorSectorHandler; }
 		static MenubarHandler* GetMenubarHandler() { return menubarHandler; }

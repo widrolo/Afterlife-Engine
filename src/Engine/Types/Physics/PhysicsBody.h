@@ -10,4 +10,10 @@ namespace WEngine
         Transform* transform;
         PhysicsBodyType type;
     };
+    struct CharacterBody
+    {
+        b3BodyId bodyId;
+        b3Capsule mover;
+        
+    };
 }

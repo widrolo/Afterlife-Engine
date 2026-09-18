@@ -90,8 +90,9 @@ void StartHandlerSingleEditor(T** container, std::string name)
 void Editor::InitHandlers()
 {
     StartHandlerSingle<WEngine::AssetRepo>(&EditorSystems::assetRepo, &WEngine::CoreSystems::assetRepo, "Asset Repo");
-    StartHandlerSingle<WEngine::RenderHandler>(&EditorSystems::renderHandler, &WEngine::CoreSystems::renderHandler, "Render Handler");
-
+	EditorSystems::assetRepo->LoadPhysicsAssets();
+	StartHandlerSingle<WEngine::LightTimeHandler>(&EditorSystems::timeHandler, &WEngine::CoreSystems::timeHandler, "Time Handler");
+	StartHandlerSingle<WEngine::RenderHandler>(&EditorSystems::renderHandler, &WEngine::CoreSystems::renderHandler, "Render Handler");
 	ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	ImGui::GetStyle().WindowBorderSize = 1;
     StartHandlerSingleEditor<EditorUIHandler>(&EditorSystems::editorUIHandler, "Editor UI Handler");

@@ -25,12 +25,15 @@ namespace WEngine
 		void Tick();
 
 		PhysicsBodyHandle CreateBody(PhysicsBodyType type, Transform *entity);
+		CharacterBodyHandle CreateCharacter(const b3Capsule& mover);
 		SectorPhysicsBodyHandle CreateSectorBody(Transform& transform, b3MeshData* meshData);
 		void ChangeBodyPosition(PhysicsBodyHandle body, const Vector3& position);
 		void ChangeBodyRotation(PhysicsBodyHandle body, const Quaternion& rotation);
 		void AttachBox(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset);
 		void AttachMesh(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset, uint32 meshUID);
 		void AttachMesh(PhysicsBodyHandle body, const MeshInfo& mesh);
+		void MoveCharacter(CharacterBodyHandle character, const Vector3& translation);
+		Vector3 GetCharacterPosition(CharacterBodyHandle character);
 
 		b3MeshData* CreateMesh(const byte* vertices, const byte* indices, sizeT vertCount, sizeT indCount);
 
@@ -43,6 +46,7 @@ namespace WEngine
 	private:
 		b3WorldId m_worldID;
 		wtl::vector<PhysicsBody> m_bodies;
+		wtl::vector<CharacterBody> m_characterBodies;
 		wtl::vector<b3BodyId> m_secBodies;
 	};
 }

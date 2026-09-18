@@ -2,11 +2,19 @@
 
 #include "Game/Widgets/PlayerWatchWidget.h"
 
+
 Player::Player()
 {
     auto plWatch = std::make_shared<PlayerWatchWidget>();
+    plWatch->PassPlayer(this);
     WEngine::CoreSystems::GetWidgetHandler()->AddGameWidget(plWatch);
-    m_trans.position.z = 10;
+
+    b3Capsule mover;
+    mover.center1 = (b3Vec3){ 0.0f, 0.0f, 4.0f };  // bottom sphere center
+    mover.center2 = (b3Vec3){ 0.0f, 1.85f, 4.0f };  // top sphere center
+    mover.radius  = 0.35f;
+
+    m_body = WEngine::CoreSystems::GetPhysicsHandler()->CreateCharacter(mover);
 }
 
 void Player::Tick(float32 dt)
@@ -22,12 +30,22 @@ void Player::Tick(float32 dt)
     WEngine::Vector3 moveForward = WEngine::Quaternion::Rotate(yawRotation, {0.0f, 0.0f, -1.0f});
     WEngine::Vector3 moveRight = WEngine::Quaternion::Rotate(yawRotation, {1.0f, 0.0f, 0.0f});
 
+    WEngine::Vector3 position = m_trans.position;
     float32 preY = m_trans.position.y;
-    m_trans.position = m_trans.position + moveForward * move.y * speed + moveRight * move.x * speed;
-    m_trans.position.y = preY;
+    position = m_trans.position + moveForward * move.y * speed + moveRight * move.x * speed;
+    position.y = preY;
+
+    WEngine::CoreSystems::GetPhysicsHandler()->MoveCharacter(m_body, position - m_trans.position);
+    m_trans.position = WEngine::CoreSystems::GetPhysicsHandler()->GetCharacterPosition(m_body);
+
+    position = m_trans.position;
+    position.y -= 5.0f * dt; // fools gravity
+    WEngine::CoreSystems::GetPhysicsHandler()->MoveCharacter(m_body, position - m_trans.position);
+    m_trans.position = WEngine::CoreSystems::GetPhysicsHandler()->GetCharacterPosition(m_body);
 
     m_yaw += (look.x * dt * m_lookSpeed);
     m_pitch -=  (look.y * dt * m_lookSpeed) / 1.5f;
+
 
     if (m_pitch > 89.0f)
         m_pitch = 89.0f;
@@ -39,7 +57,9 @@ void Player::Tick(float32 dt)
 
 void Player::UploadCamera()
 {
-    WEngine::CoreSystems::GetRenderHandler()->UpdateCamera(m_trans);
+    WEngine::Transform camTrans = m_trans;
+    camTrans.position.y += m_camHeight;
+    WEngine::CoreSystems::GetRenderHandler()->UpdateCamera(camTrans);
 }
 
 void Player::UpdateFreecam(Freecam& freecam)
