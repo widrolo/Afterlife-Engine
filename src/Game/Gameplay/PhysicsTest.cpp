@@ -45,10 +45,14 @@ void PhysicsTest::Draw()
     mission.meshUID = m_mesh;
     mission.textureUID = m_texture;
     mission.phyMeshUID = m_collider;
+    mission.flags = WEngine::RenderMissionFlags::PhysicsDynamic;
 
     for (const auto& body : m_testBodies)
     {
         mission.transform = body.transform;
+        mission.flags = WEngine::RenderMissionFlags::PhysicsDynamic;
+        if (WEngine::CoreSystems::GetPhysicsHandler()->IsBodySleeping(body.body))
+            mission.flags = WEngine::RenderMissionFlags::PhysicsSleeping;
         WEngine::CoreSystems::GetRenderHandler()->AddToRenderQueue(mission);
     }
 }

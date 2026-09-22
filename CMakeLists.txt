@@ -389,6 +389,11 @@ add_executable(Afterlife_Engine
         src/Game/Gameplay/PhysicsTest.cpp
         src/Game/Gameplay/PhysicsTest.h
         src/Engine/Types/Rendering/Light.h
+        src/Editor/Core/RenderPasses/ObjIDPass.cpp
+        src/Editor/Core/RenderPasses/ObjIDPass.h
+        src/Editor/Core/Handlers/VPPickHandler.cpp
+        src/Editor/Core/Handlers/VPPickHandler.h
+        src/Engine/Core/RenderPasses/Storage/PhysicsDebug.h
 )
 
 target_include_directories(Afterlife_Engine PRIVATE

@@ -112,6 +112,7 @@ namespace WEngine
 		uint32 m_skyMeshUID = 0;
 		bool m_isEditor = false;
 		bool m_isPhysicsDebug = false;
+
 		Vector2 m_viewportResolution{};
 	};
 }

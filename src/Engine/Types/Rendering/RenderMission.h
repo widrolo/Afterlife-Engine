@@ -6,19 +6,17 @@
 
 #include "ShaderSettings.h"
 #include "Engine/Math/Transform.h"
+#include "Engine/Util/BitwiseMacros.h"
 #include "Iris/Handles.h"
 
 namespace WEngine
 {
-	/**
-	 * Determines the order in which the layers will be rendered.
-	 */
-	enum class RenderLayer : uint8
+	enum class RenderMissionFlags
 	{
-		None = 0, ///< Not rendered.
-		Default = 1, ///< Default.
-		UI = 255, ///< UI, should be the top most in gameplay.
+		PhysicsDynamic = BIT(0), // Makes the object the dynamic color in render debug view
+		PhysicsSleeping = BIT(1), // Makes the object the sleep color in render debug view; takes priority over dynamic
 	};
+	DEFINE_ENUM_BITWISE(RenderMissionFlags)
 
 	struct RenderMission
 	{
@@ -26,6 +24,7 @@ namespace WEngine
 		uint64 meshUID;
 		uint64 phyMeshUID = 0; // not really an obligation but pls put it in there as well for the sake of debugging
 		Transform transform;
+		RenderMissionFlags flags;
 	};
 
 	struct RenderPlanPart

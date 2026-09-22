@@ -135,9 +135,14 @@ bool SetupDevice()
     dynaRendering.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
     dynaRendering.dynamicRendering = VK_TRUE;
 
+    VkPhysicalDeviceVulkan11Features vulkan11{};
+    vulkan11.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES;
+    vulkan11.pNext = &dynaRendering;
+    vulkan11.shaderDrawParameters = VK_TRUE;
+
     VkDeviceCreateInfo info{};
     info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    info.pNext = &dynaRendering;
+    info.pNext = &vulkan11;
     info.queueCreateInfoCount = queues.size();
     info.pQueueCreateInfos = queues.data();
     info.enabledExtensionCount = extensions.size();

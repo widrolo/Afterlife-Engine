@@ -11,6 +11,7 @@
 #include "Engine/Util/TimeAnalysis.h"
 #include "Storage/Basics.h"
 #include "Storage/Passes.h"
+#include "Storage/PhysicsDebug.h"
 
 using namespace WEngine::Rendering;
 
@@ -28,7 +29,7 @@ void ForwardPass::SetupPass()
     depthDesc.depthCompareOp = Iris::CompareOp::Less;
 
     Iris::GraphicsPipelineDesc desc{};
-    desc.debugName = "Main Pipeline";
+    desc.debugName = "Forward Pipeline";
     desc.vertexShader = GetShader("basic", Iris::ShaderStage::Vertex);
     desc.fragmentShader = GetShader("basic", Iris::ShaderStage::Fragment);
     desc.vertexLayout = layout;
@@ -65,18 +66,28 @@ void ForwardPass::Render()
     if (!CoreSystems::GetRenderHandler()->GetPhysicsDebugSwitch())
         CoreSystems::GetRenderHandler()->RenderSkySphere(m_cmd, m_skyPipe);
 
-    Iris::BindResourceTable(m_cmd, m_regPipe, 1, CoreSystems::GetTimeHandler()->GetLightHandle());
 
     if (!CoreSystems::GetRenderHandler()->GetPhysicsDebugSwitch())
+    {
+        Iris::BindResourceTable(m_cmd, m_regPipe, 1, CoreSystems::GetTimeHandler()->GetLightHandle());
         CoreSystems::GetRenderHandler()->RenderScene(m_cmd, m_regPipe, m_statPipe, false);
+    }
     else
+    {
+        Iris::BindResourceTable(m_cmd, m_phyDbgReg, 0, m_physicsColors.table);
         CoreSystems::GetRenderHandler()->RenderScene(m_cmd, m_phyDbgReg, m_phyDbgStat, true);
+    }
 
     EndRendering();
 }
 
 void ForwardPass::CreatePhysicsStuff()
 {
+    m_physicsColorsData.colors[(int)PhysicsDebugColors::Static] = Color(255, 255, 255);
+    m_physicsColorsData.colors[(int)PhysicsDebugColors::Dynamic] = Color(0, 255, 0);
+    m_physicsColorsData.colors[(int)PhysicsDebugColors::Sleeping] = Color(252, 168, 5);
+    m_physicsColors = CreateSettings(m_physicsColorsData, Iris::ShaderStage::Fragment, "Physics Debug Pass");
+
     Iris::VertexLayoutDesc layout;
     AddAPMFAttributes(layout);
 
@@ -89,7 +100,7 @@ void ForwardPass::CreatePhysicsStuff()
     raster.frontFace = Iris::FrontFace::CounterClockwise;
 
     Iris::GraphicsPipelineDesc desc{};
-    desc.debugName = "Main Pipeline";
+    desc.debugName = "Physics Debug Pipeline";
     desc.vertexShader = GetShader("phy", Iris::ShaderStage::Vertex);
     desc.fragmentShader = GetShader("phy", Iris::ShaderStage::Fragment);
     desc.vertexLayout = layout;
@@ -98,6 +109,9 @@ void ForwardPass::CreatePhysicsStuff()
     desc.blend = Iris::BlendDesc{};
 
     desc.vertPushConstantsSize = sizeof(Mat4x4) * 2;
+
+    desc.tableLayouts[0] = m_physicsColors.layout;
+    desc.tableAttachmentCount = 1;
 
     m_phyDbgReg = Iris::CreateGraphicsPipeline(desc);
 

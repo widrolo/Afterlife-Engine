@@ -179,7 +179,18 @@ void RenderHandler::RenderSingleMission(const RenderMission& mission, const glm:
 		Iris::BindResourceTable(cmdBuff, singlePipe, 0, m_textureTables[mission.textureUID]);
 	m_currentBoundTexture = mission.textureUID;
 	Iris::SetPushConstants(cmdBuff, singlePipe, (byte*)&pushConstants, sizeof(pushConstants), Iris::ShaderStage::Vertex);
-	Iris::DrawIndexed(cmdBuff, indexCount, 1, indexOffset, vertOffset, 0);
+
+	uint32 physicsDebugCol = 0;
+	if ((uint64)mission.flags & (uint64)RenderMissionFlags::PhysicsDynamic)
+		physicsDebugCol = 1;
+	if ((uint64)mission.flags & (uint64)RenderMissionFlags::PhysicsSleeping)
+		physicsDebugCol = 2;
+
+
+	if (m_isPhysicsDebug)
+		Iris::DrawIndexed(cmdBuff, indexCount, 1, indexOffset, vertOffset, physicsDebugCol);
+	else
+		Iris::DrawIndexed(cmdBuff, indexCount, 1, indexOffset, vertOffset, 0);
 }
 
 void RenderHandler::RenderSinglePlan(const RenderPlan &plan, const Mat4x4 &vp,  Iris::CommandBufferHandle cmdBuff,

@@ -56,6 +56,7 @@ namespace WEngine
 
 	struct Colorf
 	{
+		Colorf() : red(0), green(0), blue(0), alpha(1) {}
 		Colorf(Color color) :
 			red((float32)color.red / 255.0f),
 			green((float32)color.green / 255.0f),

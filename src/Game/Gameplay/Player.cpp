@@ -10,8 +10,8 @@ Player::Player()
     WEngine::CoreSystems::GetWidgetHandler()->AddGameWidget(plWatch);
 
     b3Capsule mover;
-    mover.center1 = (b3Vec3){ 0.0f, 0.0f, 4.0f };  // bottom sphere center
-    mover.center2 = (b3Vec3){ 0.0f, 1.85f, 4.0f };  // top sphere center
+    mover.center1 = (b3Vec3){ 0.0f, 0.0f, 6.0f };  // bottom sphere center
+    mover.center2 = (b3Vec3){ 0.0f, 1.85f, 6.0f };  // top sphere center
     mover.radius  = 0.35f;
 
     m_body = WEngine::CoreSystems::GetPhysicsHandler()->CreateCharacter(mover);

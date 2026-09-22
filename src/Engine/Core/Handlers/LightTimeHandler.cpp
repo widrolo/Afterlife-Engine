@@ -108,6 +108,13 @@ Time LightTimeHandler::GetTime() const
     return m_time;
 }
 
+void LightTimeHandler::SetLightDefaultsEditor()
+{
+    m_worldLighting->ambient = Color::White;
+    m_worldLighting->ambientIntensity = 1.0f;
+    m_worldLighting->sun.intensity = 0.0f;
+}
+
 void LightTimeHandler::UpdateRenderTime()
 {
     TimeSample sample("TimeHandler::UpdateRenderTime");

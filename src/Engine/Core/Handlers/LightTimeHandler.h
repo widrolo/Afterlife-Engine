@@ -32,6 +32,7 @@ namespace WEngine
         float32& GetAmbientIntensity() { return m_worldLighting->ambientIntensity; }
 
         RenderSettings& GetRenderSettings() { return m_renderSettings; }
+        void SetLightDefaultsEditor();
 
     private:
         void UpdateRenderTime();

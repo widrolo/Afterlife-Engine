@@ -8,6 +8,7 @@
 #include "Engine/Types/Physics/BodyType.h"
 #include "Engine/Types/Physics/PhysicsBody.h"
 #include "Engine/Types/Rendering/MeshInfo.h"
+#include "Engine/Types/Rendering/Iris/Handles.h"
 #include "Engine/WTL/vector.h"
 
 namespace WEngine
@@ -31,11 +32,12 @@ namespace WEngine
 		void ChangeBodyRotation(PhysicsBodyHandle body, const Quaternion& rotation);
 		void AttachBox(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset);
 		void AttachMesh(PhysicsBodyHandle body, const Vector3& size, const Vector3& offset, uint32 meshUID);
-		void AttachMesh(PhysicsBodyHandle body, const MeshInfo& mesh);
 		void MoveCharacter(CharacterBodyHandle character, const Vector3& translation);
 		Vector3 GetCharacterPosition(CharacterBodyHandle character);
 
 		b3MeshData* CreateMesh(const byte* vertices, const byte* indices, sizeT vertCount, sizeT indCount);
+
+		bool IsBodySleeping(PhysicsBodyHandle body);
 
 	private:
 		void Setup();

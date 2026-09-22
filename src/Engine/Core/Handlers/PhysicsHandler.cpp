@@ -162,18 +162,6 @@ void PhysicsHandler::AttachMesh(PhysicsBodyHandle body, const Vector3 &size, con
 	b3CreateMeshShape(physicsBody.bodyId, &shapeDef, mesh, Vector3::VecToB3D(size));
 }
 
-void PhysicsHandler::AttachMesh(PhysicsBodyHandle body, const MeshInfo &mesh)
-{
-	TimeSample sample("PhysicsHandler::AttachMesh");
-	if (body == 0 || body > m_bodies.size())
-		return;
-
-	PhysicsBody& physicsBody = m_bodies[body - 1];
-
-
-
-}
-
 void PhysicsHandler::MoveCharacter(CharacterBodyHandle character, const Vector3 &translation)
 {
 	if (character == 0 || character > m_characterBodies.size())
@@ -223,6 +211,17 @@ b3MeshData* PhysicsHandler::CreateMesh(const byte* vertices, const byte* indices
 	meshDef.identifyEdges = true;
 
 	return b3CreateMesh(&meshDef, NULL, 0);
+}
+
+bool PhysicsHandler::IsBodySleeping(PhysicsBodyHandle body)
+{
+	//TimeSample sample("PhysicsHandler::AttachBox");
+	if (body == 0 || body > m_bodies.size())
+		return false;
+
+	PhysicsBody& physicsBody = m_bodies[body - 1];
+
+	return !b3Body_IsAwake(physicsBody.bodyId);
 }
 
 void PhysicsHandler::Setup()

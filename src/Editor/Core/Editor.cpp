@@ -100,6 +100,7 @@ void Editor::InitHandlers()
     StartHandlerSingleEditor<EditorSectorHandler>(&EditorSystems::editorSectorHandler, "Editor Sector Handler");
 
     WEngine::CoreSystems::assetRepo->RegisterAllTextures();
+	WEngine::CoreSystems::timeHandler->SetLightDefaultsEditor();
 	Haptic::EnableEditorMode();
 	Input::LoadInputMap();
 }
