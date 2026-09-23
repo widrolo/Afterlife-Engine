@@ -6,6 +6,16 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(miniaudio)
 
+if(TARGET miniaudio)
+    target_compile_definitions(miniaudio PRIVATE
+            MA_NO_DECODING
+            MA_NO_ENCODING
+            MA_NO_GENERATION
+            MA_NO_NODE_GRAPH
+            MA_NO_ENGINE
+    )
+endif()
+
 if(NOT TARGET miniaudio::miniaudio)
     add_library(miniaudio::miniaudio ALIAS miniaudio)
 endif()

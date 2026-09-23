@@ -62,10 +62,12 @@ void WidgetHandler::InitSystemWidgets()
     auto* sys =     m_systemWidgets[(sizeT)SysWidgetTypes::System];
     auto* gameSys = m_systemWidgets[(sizeT)SysWidgetTypes::GameSystem];
 
+#ifndef PACKAGE
     if (stat != nullptr)    stat->m_open = true;
     if (control != nullptr) control->m_open = true;
     if (sys != nullptr)     sys->m_open = true;
     if (gameSys != nullptr) gameSys->m_open = true;
+#endif
 }
 
 void WidgetHandler::DrawWidgets()

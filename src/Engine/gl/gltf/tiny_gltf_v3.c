@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #ifndef TINYGLTF3_SOURCE_INCLUDED_FROM_HEADER
 #include "tiny_gltf_v3.h"
 #endif
@@ -3276,3 +3277,5 @@ TINYGLTF3_API void tg3_writer_destroy(tg3_writer *w) {
     tg3json_value_free(&w->root);
     free(w);
 }
+
+#endif

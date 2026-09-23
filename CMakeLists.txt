@@ -401,6 +401,13 @@ target_include_directories(Afterlife_Engine PRIVATE
         ${STEAMWORKS_PATH}/include
 )
 
+if(NOT MSVC)
+    add_compile_options($<$<CONFIG:Packaging>:-ffunction-sections>)
+    add_compile_options($<$<CONFIG:Packaging>:-fdata-sections>)
+    add_link_options($<$<CONFIG:Packaging>:-Wl,--gc-sections>)
+    add_link_options($<$<CONFIG:Packaging>:-s>)
+endif()
+
 include(cmake/Defines.cmake)
 include(cmake/Thirdparty.cmake)
 include(cmake/CompileOptions.cmake)

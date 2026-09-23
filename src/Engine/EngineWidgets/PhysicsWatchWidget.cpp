@@ -12,7 +12,6 @@ using namespace WEngine;
 void PhysicsWatchWidget::Setup()
 {
     m_widgetName = "Physics Watch";
-    CoreSystems::GetRenderHandler()->GetPhysicsDebugSwitch() = true;
 }
 
 void PhysicsWatchWidget::RenderInternal()
