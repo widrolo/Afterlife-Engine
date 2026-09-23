@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "EntryList.h"
 
 #include "Editor/Types/EditorState.h"
@@ -47,3 +48,4 @@ void EntryList::RenderInternal()
     }
 
 }
+#endif

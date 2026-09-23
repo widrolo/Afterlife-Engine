@@ -12,9 +12,10 @@
 #include <chrono>
 #include <filesystem>
 #include <yaml-cpp/yaml.h>
-#include <tinyxml2.h>
-
+#ifndef PACKAGE
 #include <shaderc/shaderc.hpp>
+#endif
+
 
 #include "RenderHandler.h"
 #include "RNGHandler.h"
@@ -107,35 +108,35 @@ void AssetRepo::GetAsset<AudioClipAssetMission>(AudioClipAssetMission& mission)
 }
 
 // deprecated???
-template<>
-void AssetRepo::GetAsset<UISheetAssetMission>(UISheetAssetMission& mission)
-{
-	TimeSample sample("AssetRepo::GetAsset<UISheetAssetMission>");
-	const std::string file = LoadTextFile(GetDataPath() + EngineSettings::uiSheetPath + mission.name + ".yaml");
-	auto descriptor = YAML::Load(file);
-
-	if (!descriptor["uisheet"])
-	{
-		WLog::SetConsoleError();
-		WLog::ConsoleLog(std::format("{} descriptor does not contain Node \"uisheet\"", mission.name));
-	}
-
-	auto sheet = descriptor["uisheet"];
-
-	if (!sheet["document"])
-	{
-		WLog::SetConsoleError();
-		WLog::ConsoleLog(std::format("{} descriptor does not contain Node \"document\"", mission.name));
-	}
-
-	std::string docPath = GetDataPath() + EngineSettings::uiSheetPath + "Documents/" + sheet["document"].as<std::string>() + ".uidoc";
-	mission.document.LoadFile(docPath.c_str());
-	if (mission.document.ErrorID() != 0)
-	{
-		WLog::SetConsoleError();
-		WLog::ConsoleLog(std::format("Error while reading UI Sheet document, Line {}:\n{}", mission.document.ErrorLineNum(), mission.document.ErrorStr()));
-	}
-}
+//template<>
+//void AssetRepo::GetAsset<UISheetAssetMission>(UISheetAssetMission& mission)
+//{
+//	TimeSample sample("AssetRepo::GetAsset<UISheetAssetMission>");
+//	const std::string file = LoadTextFile(GetDataPath() + EngineSettings::uiSheetPath + mission.name + ".yaml");
+//	auto descriptor = YAML::Load(file);
+//
+//	if (!descriptor["uisheet"])
+//	{
+//		WLog::SetConsoleError();
+//		WLog::ConsoleLog(std::format("{} descriptor does not contain Node \"uisheet\"", mission.name));
+//	}
+//
+//	auto sheet = descriptor["uisheet"];
+//
+//	if (!sheet["document"])
+//	{
+//		WLog::SetConsoleError();
+//		WLog::ConsoleLog(std::format("{} descriptor does not contain Node \"document\"", mission.name));
+//	}
+//
+//	std::string docPath = GetDataPath() + EngineSettings::uiSheetPath + "Documents/" + sheet["document"].as<std::string>() + ".uidoc";
+//	mission.document.LoadFile(docPath.c_str());
+//	if (mission.document.ErrorID() != 0)
+//	{
+//		WLog::SetConsoleError();
+//		WLog::ConsoleLog(std::format("Error while reading UI Sheet document, Line {}:\n{}", mission.document.ErrorLineNum(), mission.document.ErrorStr()));
+//	}
+//}
 
 template<>
 void AssetRepo::GetAsset<SpirVAssetMission>(SpirVAssetMission& mission)
@@ -143,8 +144,8 @@ void AssetRepo::GetAsset<SpirVAssetMission>(SpirVAssetMission& mission)
 	TimeSample sample("AssetRepo::GetAsset<SpirVAssetMission>");
 #ifdef PACKAGE
 	// we will reenable it later. For now it will remain like this.
-	//LoadSpirVFromSpv(mission);
-	LoadSpirVFromGlsl(mission);
+	LoadSpirVFromSpv(mission);
+	//LoadSpirVFromGlsl(mission);
 #else
 	LoadSpirVFromGlsl(mission);
 #endif
@@ -209,6 +210,7 @@ std::string AssetRepo::LoadTextFile(const std::string& path)
 	return buffer.str();
 }
 
+#ifndef PACKAGE
 namespace
 {
 	class ShaderIncluder : public shaderc::CompileOptions::IncluderInterface
@@ -265,9 +267,12 @@ namespace
 		std::string m_searchPath;
 	};
 }
+#endif
+
 
 void AssetRepo::LoadSpirVFromGlsl(SpirVAssetMission &mission)
 {
+#ifndef PACKAGE
 	std::string path = GetDataPath() + EngineSettings::shaderPath + mission.name;
 	shaderc_shader_kind kind = shaderc_glsl_infer_from_source; // just to shut up the compiler.
 	switch (mission.shaderType)
@@ -337,6 +342,7 @@ void AssetRepo::LoadSpirVFromGlsl(SpirVAssetMission &mission)
 	mission.shaderCode = wNewArr(uint32, wordCount);
 	std::copy(res.cbegin(), res.cend(), mission.shaderCode);
 	mission.shaderSize = wordCount * sizeof(uint32);
+#endif
 }
 
 void AssetRepo::LoadSpirVFromSpv(SpirVAssetMission &mission)

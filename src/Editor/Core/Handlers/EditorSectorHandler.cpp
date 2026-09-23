@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "EditorSectorHandler.h"
 
 #include "Editor/Types/EditorSystems.h"
@@ -112,3 +113,5 @@ YAML::Node EditorSectorHandler::SaveSingleEntry(const EditorSectorEntry& entry)
 
     return YAML::Clone(root);
 }
+
+#endif

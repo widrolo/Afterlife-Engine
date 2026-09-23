@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "Menubar_RunTest.h"
 
 #include "Engine/Core/System/OS.h"
@@ -15,3 +16,4 @@ void Menubar_RunTest::OnClick()
     wtl::vector<std::string> args {exec, "--game", "-texless"};
     OS::CreateNewProcess(exec, args);
 }
+#endif

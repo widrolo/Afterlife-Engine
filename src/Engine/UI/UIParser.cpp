@@ -11,6 +11,8 @@
 #include "Elements/Dropdowns/Dropdown.h"
 #include "Engine/Util/Log.h"
 
+#ifdef begone
+
 using namespace WEngine;
 
 // I dont think these even need to be in enum class order for it to work.
@@ -160,3 +162,4 @@ void UIParser::ParseElement_Dropdown(const tinyxml2::XMLNode *node, UIWidget *el
     auto container = (UIDropdown*)element;
 }
 
+#endif

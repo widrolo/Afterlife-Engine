@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 // MIT License
 
 // Copyright (c) 2023 Evan Pezent
@@ -2496,3 +2497,5 @@ void ImPlot::ShowDemoWindow(bool* p_open) {}
 #endif
 
 #endif // #ifndef IMGUI_DISABLE
+
+#endif

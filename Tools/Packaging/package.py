@@ -28,9 +28,20 @@ CONFIG_PACKAGING = "Packaging"
 
 HOST = platform.system()
 
-DATA_DIRS = ["Input", "Sectors", "Shaders"]
+DATA_DIRS = ["Input", "Sectors"]
 PACKAGE_YAMLS = ["Assets", "Textures", "Meshes", "PhysicsMeshes", "Sounds", "Music"]
 PACKAGE_SELECTABLE = ["Meshes", "PhysicsMeshes", "Textures", "Sounds", "Music"]
+
+# Shader stage suffixes, mapped from the filename suffix the engine expects
+# (e.g. "basicVertex.glsl") to the glslc / glslangValidator stage names.
+SHADER_STAGES = {
+    "Vertex": ("vertex", "vert"),
+    "Fragment": ("fragment", "frag"),
+    "Compute": ("compute", "comp"),
+    "Geometry": ("geometry", "geom"),
+    "TessControl": ("tesscontrol", "tesc"),
+    "TessEval": ("tesseval", "tese"),
+}
 
 SUPPORTED_TARGETS = ["Linux", "Windows"]
 STUB_TARGETS = [
@@ -136,6 +147,30 @@ def find_cmake():
 
 
 CMAKE = find_cmake()
+
+
+# ----------------------------------------------------------------------------
+# GLSL compiler detection (shaders are shipped as compiled SPIR-V, so the
+# packaging tool needs glslc or glslangValidator from the Vulkan SDK)
+# ----------------------------------------------------------------------------
+
+def find_shader_compiler():
+    override = os.environ.get("GLSLC")
+    if override:
+        p = Path(override)
+        if p.exists():
+            return str(p)
+        warn(f"GLSLC env var points to a missing binary: {override}")
+
+    for name in ("glslc", "glslangValidator"):
+        found = shutil.which(name)
+        if found:
+            return found
+
+    return None
+
+
+SHADER_COMPILER = find_shader_compiler()
 
 
 # ----------------------------------------------------------------------------
@@ -377,6 +412,7 @@ def copy_data(packed):
             info(f"Copied Data/{name}")
         else:
             warn(f"Missing GameData/Data/{name}, skipping.")
+    copy_shaders(packed)
     copy_packages_full(data)
 
 
@@ -437,15 +473,72 @@ def copy_sectors(packed):
         warn("Missing GameData/Data/Sectors, skipping.")
 
 
+def shader_stage(filename):
+    stem = filename[:-len(".glsl")]
+    for suffix in SHADER_STAGES:
+        if stem.endswith(suffix):
+            return suffix
+    return None
+
+
+def compile_shader(shader, dst_dir, suffix):
+    dst = dst_dir / (shader.stem + ".spv")
+    compiler_name = Path(SHADER_COMPILER).name
+    if "glslang" in compiler_name:
+        stage = SHADER_STAGES[suffix][1]
+        args = [
+            SHADER_COMPILER, "-V", "-S", stage,
+            "--target-env", "vulkan1.2", "-I", str(shader.parent),
+            "-o", str(dst), str(shader),
+        ]
+    else:
+        stage = SHADER_STAGES[suffix][0]
+        args = [
+            SHADER_COMPILER, f"-fshader-stage={stage}",
+            "--target-env=vulkan1.2", "-I", str(shader.parent),
+            "-O", "-o", str(dst), str(shader),
+        ]
+
+    result = subprocess.run(args, capture_output=True, text=True)
+    if result.returncode != 0:
+        err(f"Failed to compile {shader.name}:")
+        out = (result.stdout + result.stderr).strip()
+        if out:
+            print(out)
+        return False
+    return True
+
+
 def copy_shaders(packed):
     src = GAME_DATA / "Data" / "Shaders"
     dst = packed / "Data" / "Shaders"
-    if src.exists():
-        dst.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(src, dst, dirs_exist_ok=True)
-        info("Copied Data/Shaders")
-    else:
+    if not src.exists():
         warn("Missing GameData/Data/Shaders, skipping.")
+        return
+
+    if SHADER_COMPILER is None:
+        err("No GLSL compiler found. Install the Vulkan SDK (glslc) or set the GLSLC env var.")
+        return
+
+    shaders = [f for f in sorted(src.glob("*.glsl")) if shader_stage(f.name) is not None]
+    if not shaders:
+        warn("No compilable shaders found in GameData/Data/Shaders, skipping.")
+        return
+
+    dst.mkdir(parents=True, exist_ok=True)
+    failed = []
+    for shader in shaders:
+        if compile_shader(shader, dst, shader_stage(shader.name)):
+            info(f"Compiled {shader.name} -> {shader.stem}.spv")
+        else:
+            failed.append(shader.name)
+
+    if failed:
+        err(f"{len(failed)} shader(s) failed to compile:")
+        for name in failed:
+            err(f"  - {name}")
+    else:
+        info(f"Compiled {len(shaders)} shaders to Spir-V")
 
 
 def copy_binary(packed, target):
@@ -561,7 +654,7 @@ def op_shader_update():
         return
 
     copy_shaders(packed_dir(target))
-    ok("Shaders updated.")
+    ok("Shaders compiled and updated.")
 
 
 def op_package_update():

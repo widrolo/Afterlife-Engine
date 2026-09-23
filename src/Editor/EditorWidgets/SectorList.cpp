@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "SectorList.h"
 
 #include "Editor/Core/Handlers/EditorSectorHandler.h"
@@ -51,3 +52,5 @@ void SectorList::RenderInternal()
     }
 
 }
+
+#endif

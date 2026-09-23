@@ -1,6 +1,7 @@
 #version 450
 
 layout(location = 0) in vec3 inWorldPos;
+layout(location = 1) flat in int inColorIdx;
 
 layout(location = 0) out vec4 outColor;
 

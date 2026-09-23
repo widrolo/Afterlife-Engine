@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 
 #include "Menubar_About.h"
 
@@ -17,3 +18,5 @@ void Menubar_About::OnClick()
 {
     EditorSystems::GetEditorUIHandler()->AddEditorWidget(WAllocator::Construct<AboutWidget>(), true);
 }
+
+#endif

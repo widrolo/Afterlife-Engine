@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "AboutWidget.h"
 
 #include <Engine/Util/Log.h>
@@ -15,3 +16,5 @@ void AboutWidget::RenderInternal()
 
     ImGui::Text("[A]fterlife [T]ool[K]it");
 }
+
+#endif

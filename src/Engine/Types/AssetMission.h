@@ -3,7 +3,6 @@
 #include <string>
 #include <Engine/Types/CommonTypes.h>
 #include <yaml-cpp/yaml.h>
-#include <tinyxml2.h>
 #include <Engine/Types/Audio.h>
 
 #include "Rendering/MeshInfo.h"
@@ -55,14 +54,6 @@ namespace WEngine
 	struct AudioClipAssetMission : public AssetMissionBase
 	{
 		AudioClip* clip;
-	};
-
-	/**
-	 * Represents a mission to load a UI sheet asset.
-	 */
-	struct UISheetAssetMission : public AssetMissionBase
-	{
-		tinyxml2::XMLDocument document;
 	};
 
 	struct MeshAssetMission : public AssetMissionBase

@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 // MIT License
 
 // Copyright (c) 2023 Evan Pezent
@@ -2850,3 +2851,5 @@ void PlotDummy(const char* label_id, ImPlotDummyFlags flags) {
 } // namespace ImPlot
 
 #endif // #ifndef IMGUI_DISABLE
+
+#endif

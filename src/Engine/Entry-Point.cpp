@@ -96,19 +96,8 @@ extern int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, 
         std::cout << a << std::endl;
     }
 
+    auto* engine = WAllocator::Construct<WEngine::Engine>(argc, argv.data());
 
-
-    bool launchEditor = false;
-    for (sizeT i = 1; i < argc; ++i)
-    {
-        if (std::string(argv[i]) == "--wedge")
-            launchEditor = true;
-    }
-
-    if (launchEditor)
-        auto* editor = WAllocator::Construct<WEditor::Editor>(argc, argv.data());
-    else
-        auto* engine = WAllocator::Construct<WEngine::Engine>(argc, argv.data());
     return 0;
 }
 
@@ -117,18 +106,8 @@ extern int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, 
 int main(int argc, char* argv[])
 {
     WAllocator::BootAllocator();
-    bool launchEditor = false;
-    for (sizeT i = 1; i < argc; ++i)
-    {
-        if (std::string(argv[i]) == "--wedge")
-            launchEditor = true;
-    }
 
-    if (launchEditor)
-        auto* editor = WAllocator::Construct<WEditor::Editor>(argc, argv);
-    else
-        auto* engine = WAllocator::Construct<WEngine::Engine>(argc, argv);
-    return 0;
+    auto* engine = WAllocator::Construct<WEngine::Engine>(argc, argv);
 }
 
 #endif

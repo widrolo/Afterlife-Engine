@@ -545,7 +545,9 @@ namespace WEngine
 	{
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
+#ifndef PACKAGE
 		ImPlot::CreateContext();
+#endif
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 		io.IniFilename = nullptr;
@@ -563,11 +565,14 @@ namespace WEngine
 		style.WindowRounding = 0;
 		style.WindowTitleAlign = { 0.5f, 0.5f };
 
+#ifndef PACKAGE
 		ImPlotStyle& ipStyle = ImPlot::GetStyle();
 
 		ipStyle.PlotDefaultSize = {200, 200};
 
 		ImPlot::StyleColorsDark();
+#endif
+
 		auto colors = style.Colors;
 
 		colors[ImGuiCol_Border] = ImVec4(0.50f, 0.43f, 0.43f, 0.50f);

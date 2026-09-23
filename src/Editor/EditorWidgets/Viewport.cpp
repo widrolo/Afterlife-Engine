@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "Viewport.h"
 
 #include "Editor/Types/EditorState.h"
@@ -97,3 +98,5 @@ void Viewport::RenderInternal()
         }
     }
 }
+
+#endif

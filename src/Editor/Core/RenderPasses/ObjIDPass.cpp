@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "ObjIDPass.h"
 
 using namespace WEditor::Rendering;
@@ -11,3 +12,5 @@ void ObjIDPass::Render()
 {
 
 }
+
+#endif

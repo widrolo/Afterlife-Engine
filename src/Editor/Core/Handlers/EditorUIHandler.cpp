@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "EditorUIHandler.h"
 
 #include <algorithm>
@@ -82,3 +83,5 @@ void EditorUIHandler::RemoveEditorWidget(const WEngine::Widget *widget)
     m_uiWidgets.erase(std::find(m_uiWidgets.begin(), m_uiWidgets.end(), widget));
 }
 
+
+#endif

@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "AssetBrowser.h"
 
 using namespace WEditor;
@@ -13,3 +14,5 @@ void AssetBrowser::RenderInternal()
 
 }
 
+
+#endif

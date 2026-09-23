@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "Menubar_Exit.h"
 
 using namespace WEditor;
@@ -12,3 +13,5 @@ void Menubar_Exit::OnClick()
     std::exit(EXIT_SUCCESS);
 }
 
+
+#endif

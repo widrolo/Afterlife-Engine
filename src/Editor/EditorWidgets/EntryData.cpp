@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "EntryData.h"
 
 #include "Editor/Types/EditorState.h"
@@ -87,3 +88,4 @@ void EntryData::RenderInternal()
 		EditorState::SelectedEntry->asset = m_assetBuffer;
 	}
 }
+#endif

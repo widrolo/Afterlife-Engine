@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "Editor.h"
 
 #include <chrono>
@@ -207,3 +208,5 @@ void Editor::Dock()
 
 	ImGui::End();
 }
+
+#endif

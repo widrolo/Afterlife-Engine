@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 #include "MenubarHandler.h"
 
 #include <Editor/MenubarItems/File/Menubar_RunGame.h>
@@ -66,3 +67,5 @@ void MenubarHandler::Init()
     AddNewMenubarItem<Menubar_About>(MenubarItemCategories::Help);
 }
 
+
+#endif

@@ -1,3 +1,4 @@
+#ifndef PACKAGE
 // MIT License
 
 // Copyright (c) 2023 Evan Pezent
@@ -1302,3 +1303,5 @@ IMPLOT_DEPRECATED( IMPLOT_API bool BeginPlot(const char* title_id,
 
 #endif // #ifndef IMPLOT_DISABLE_OBSOLETE_FUNCTIONS
 #endif // #ifndef IMGUI_DISABLE
+
+#endif
